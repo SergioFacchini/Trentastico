@@ -31,7 +31,7 @@ import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
 import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
 import trentastico.geridea.com.trentastico.activities.utils.CalendarUtils;
 
-public class CourseTimesCalendar extends WeekView implements DateTimeInterpreter, MonthLoader.MonthChangeListener {
+public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, MonthLoader.MonthChangeListener {
 
     /**
      * Dispatched when the loading of events has been completed and the calendar can be made

@@ -18,8 +18,6 @@ import butterknife.ButterKnife;
 import trentastico.geridea.com.trentastico.R;
 import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
 
-import static android.view.View.GONE;
-
 
 public class CalendarActivity extends AppCompatActivity {
 
@@ -44,7 +42,7 @@ public class CalendarActivity extends AppCompatActivity {
         calendar.onLoadingOperationFinished.connect(new Listener0() {
             @Override
             public void apply() {
-                loader.setVisibility(GONE);
+                loader.setVisibility(View.GONE);
             }
         });
 
