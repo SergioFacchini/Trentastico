@@ -147,8 +147,23 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         }
     }
 
+    public static class CalendarLoadingOperation {
+        private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM", Locale.ITALIAN);
 
-    public class CalendarLoadingOperation {
+        private Calendar from, to;
 
+        public CalendarLoadingOperation(Calendar from, Calendar to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "Sto caricando gli orari dal %s al %s...",
+                    DATE_FORMAT.format(from.getTime()),
+                    DATE_FORMAT.format(to.getTime())
+            );
+        }
     }
 }

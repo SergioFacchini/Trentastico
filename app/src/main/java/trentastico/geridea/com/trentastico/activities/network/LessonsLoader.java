@@ -44,7 +44,7 @@ public class LessonsLoader {
     private List<CalendarInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<CalendarInterval>());
 
     public void loadAndAddLessons(final Calendar loadFrom, final Calendar loadTo, StudyCourse studyCourse) {
-        onLoadingOperationStarted.dispatch(null);
+        onLoadingOperationStarted.dispatch(new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo));
         addLoadingInterval(loadFrom, loadTo);
 
         Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
@@ -110,6 +110,9 @@ public class LessonsLoader {
                 loadTo.add(Calendar.WEEK_OF_YEAR, +2);
             }
 
+            //Solves a bug when displaying the date to which the times are being loaded
+            loadTo.add(Calendar.SECOND, -1);
+
             loadAndAddLessons(loadFrom, loadTo, AppPreferences.getStudyCourse());
         }
     }
@@ -120,6 +123,9 @@ public class LessonsLoader {
 
         Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
         twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, + 2+1);
+
+        //Solves a bug when displaying the date to which the times are being loaded
+        twoWeeksFromNow.add(Calendar.SECOND, -1);
 
         loadAndAddLessons(twoWeeksAgo, twoWeeksFromNow, AppPreferences.getStudyCourse());
     }
