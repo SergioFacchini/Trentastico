@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ProgressBar;
+
+import com.threerings.signals.Listener0;
+import com.threerings.signals.Listener1;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -17,10 +19,12 @@ import trentastico.geridea.com.trentastico.R;
 import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
 
 
-public class CalendarActivity extends AppCompatActivity  {
+public class CalendarActivity extends AppCompatActivity {
 
-    @BindView(R.id.calendar)     CourseTimesCalendar calendar;
-    @BindView(R.id.progress_bar) ProgressBar loader;
+    @BindView(R.id.calendar)
+    CourseTimesCalendar calendar;
+    @BindView(R.id.loading_bar)
+    View loader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,17 +32,19 @@ public class CalendarActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_calendar);
         ButterKnife.bind(this);
 
-        showCalendar(true);
+        //Binding calendar
+        calendar.onLoadingOperationStarted.connect(new Listener1<CourseTimesCalendar.CalendarLoadingOperation>() {
+            @Override
+            public void apply(CourseTimesCalendar.CalendarLoadingOperation operation) {
+
+            }
+        });
+        calendar.onLoadingOperationFinished.connect(new Listener1<Boolean>() {
+            @Override
+            public void apply(Boolean hasOtherOperationsChained) {
+
+            }
+        });
     }
-
-    /**
-     * Shows the calendar and hides the loader. Note that making the calendar visible makes it
-     */
-    private void showCalendar(boolean show) {
-        calendar.setVisibility(show ? View.VISIBLE : View.GONE);
-        loader  .setVisibility(show ? View.GONE    : View.VISIBLE);
-    }
-
-
 
 }
