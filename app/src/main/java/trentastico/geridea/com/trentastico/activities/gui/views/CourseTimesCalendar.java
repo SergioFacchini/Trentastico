@@ -10,8 +10,6 @@ import android.util.AttributeSet;
 import android.widget.Toast;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
-import com.alamkanak.weekview.MonthLoader;
-import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
 import com.threerings.signals.Signal0;
@@ -31,7 +29,7 @@ import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
 import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
 import trentastico.geridea.com.trentastico.activities.utils.CalendarUtils;
 
-public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, MonthLoader.MonthChangeListener {
+public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter {
 
     /**
      * Dispatched when the loading of events has been completed and the calendar can be made
@@ -46,11 +44,6 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
-
-    /**
-     * True if the next call to onMonthChange will have to load the current events in the calendar.
-     */
-    private boolean reloadNeeded = true;
 
     private final LessonsSet currentlyShownLessonsSet = new LessonsSet();
 
@@ -71,7 +64,6 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     private void initCalendar() {
         setDateTimeInterpreter(this);
-        setMonthChangeListener(this);
     }
 
     public void loadNearEvents() {
@@ -91,8 +83,9 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
                 setLeftBoundDisabledDay(from);
                 setRightBoundDisabledDay(to);
 
-                notifyDatasetChanged();
                 onLoadingOperationFinished.dispatch();
+
+                addEventsFromLessonsSet(lessons);
             }
 
             @Override
@@ -107,10 +100,8 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         });
     }
 
-    @Override
-    public void notifyDatasetChanged() {
-        reloadNeeded = true;
-        super.notifyDatasetChanged();
+    private void addEventsFromLessonsSet(LessonsSet lessons) {
+        addEvents(makeEventsFromLessonsSet(lessons));
     }
 
     @Override
@@ -123,19 +114,9 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         return hour+":00";
     }
 
-    @Override
-    public List<? extends WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-        if (reloadNeeded) {
-            reloadNeeded = false;
-            return makeEventsFromLessonsSet();
-        } else {
-            return new ArrayList<WeekViewEvent>();
-        }
-    }
-
-    private List<? extends WeekViewEvent> makeEventsFromLessonsSet() {
+    private List<? extends WeekViewEvent> makeEventsFromLessonsSet(LessonsSet lessonsSet) {
         ArrayList<LessonToEventAdapter> events = new ArrayList<>();
-        for (LessonSchedule lessonSchedule : currentlyShownLessonsSet.getScheduledLessons()) {
+        for (LessonSchedule lessonSchedule : lessonsSet.getScheduledLessons()) {
             events.add(new LessonToEventAdapter(lessonSchedule));
         }
 
