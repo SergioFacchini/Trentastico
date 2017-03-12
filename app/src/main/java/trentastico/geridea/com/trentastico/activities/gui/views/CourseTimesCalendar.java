@@ -12,44 +12,32 @@ import android.widget.Toast;
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
+import com.threerings.signals.Listener1;
+import com.threerings.signals.Listener3;
 import com.threerings.signals.Signal0;
 import com.threerings.signals.Signal1;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import trentastico.geridea.com.trentastico.activities.gui.network.LessonsFetchedListener;
-import trentastico.geridea.com.trentastico.activities.gui.network.Networker;
 import trentastico.geridea.com.trentastico.activities.model.LessonSchedule;
 import trentastico.geridea.com.trentastico.activities.model.LessonsSet;
-import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
-import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
-import trentastico.geridea.com.trentastico.activities.utils.CalendarInterval;
-import trentastico.geridea.com.trentastico.activities.utils.CalendarUtils;
+import trentastico.geridea.com.trentastico.activities.network.LessonsLoader;
 
 public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, CustomWeekView.ScrollListener {
 
-    /**
-     * Dispatched when the loading of events has been completed and the calendar can be made
-     * visible.
-     */
-    public final Signal0 onLoadingOperationFinished = new Signal0();
-
-    /**
-     * Dispatched when the calendar starts loading something from internet. The argument is that
-     * "something".
-     */
-    public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
-
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
 
-    private final LessonsSet currentlyShownLessonsSet = new LessonsSet();
+    //Signals
+    public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
+    public final Signal0 onLoadingOperationFinished = new Signal0();
 
-    private List<CalendarInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<CalendarInterval>());
+    //Data
+    private final LessonsSet currentlyShownLessonsSet = new LessonsSet();
+    private LessonsLoader loader;
 
     public CourseTimesCalendar(Context context) {
         super(context);
@@ -67,64 +55,48 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     }
 
     private void initCalendar() {
+        prepareLoader();
+
         setDateTimeInterpreter(this);
         setScrollListener(this);
     }
 
-    public void loadNearEvents() {
-        Calendar twoWeeksAgo = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksAgo.add(Calendar.WEEK_OF_YEAR, -1);
-
-        Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, + 2+1);
-
-        loadAndAddLessons(twoWeeksAgo, twoWeeksFromNow, AppPreferences.getStudyCourse());
-    }
-
-    private void loadAndAddLessons(final Calendar loadFrom, final Calendar loadTo, StudyCourse studyCourse) {
-        onLoadingOperationStarted.dispatch(null);
-        addLoadingInterval(loadFrom, loadTo);
-
-        Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
+    private void prepareLoader() {
+        loader = new LessonsLoader();
+        loader.onLoadingOperationStarted.connect(new Listener1<CalendarLoadingOperation>() {
             @Override
-            public void onLessonsLoaded(LessonsSet lessons, Calendar from, Calendar to) {
+            public void apply(CalendarLoadingOperation operation) {
+                onLoadingOperationStarted.dispatch(operation);
+            }
+        });
+        loader.onLoadingOperationFinished.connect(new Listener3<LessonsSet, Calendar, Calendar>() {
+            @Override
+            public void apply(LessonsSet lessons, Calendar from, Calendar to) {
                 currentlyShownLessonsSet.mergeWith(lessons);
                 extendLeftBoundDisabledDay(from);
                 extendRightBoundDisabledDay(to);
 
-                removeLoadingInterval(loadFrom, loadTo);
+                addEventsFromLessonsSet(lessons);
 
                 onLoadingOperationFinished.dispatch();
-
-                addEventsFromLessonsSet(lessons);
             }
-
+        });
+        loader.onLoadingErrorHappened.connect(new Listener1<VolleyError>() {
             @Override
-            public void onErrorHappened(VolleyError error) {
+            public void apply(VolleyError error) {
                 Toast.makeText(getContext(), "Error happened",Toast.LENGTH_SHORT).show();
             }
-
+        });
+        loader.onParsingErrorHappened.connect(new Listener1<Exception>() {
             @Override
-            public void onParsingErrorHappened(Exception e) {
+            public void apply(Exception e) {
                 Toast.makeText(getContext(), "Parsing error happened",Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void addLoadingInterval(Calendar loadFrom, Calendar loadTo) {
-        loadingIntervals.add(new CalendarInterval(loadFrom, loadTo));
-    }
-
-    private void removeLoadingInterval(Calendar loadFrom, Calendar loadTo) {
-        CalendarInterval intervalToDelete = null;
-        for (CalendarInterval loadingInterval : loadingIntervals) {
-            if(loadingInterval.matches(loadFrom, loadTo)) {
-                intervalToDelete = loadingInterval;
-                break;
-            }
-        }
-
-        loadingIntervals.remove(intervalToDelete);
+    public void loadNearEvents() {
+        loader.loadNearEvents();
     }
 
     private void addEventsFromLessonsSet(LessonsSet lessons) {
@@ -152,35 +124,9 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     @Override
     public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
-        if(isADisabledDay(newFirstVisibleDay) && !isDayAlreadyBeingLoaded(newFirstVisibleDay)){
-            Calendar loadFrom, loadTo;
-            if(newFirstVisibleDay.before(oldFirstVisibleDay)){
-                //We scrolled backwards
-                loadTo = CalendarUtils.calculateFirstDayOfWeek(oldFirstVisibleDay);
-                loadTo.add(Calendar.DAY_OF_MONTH, -1);
-
-                loadFrom = (Calendar) loadTo.clone();
-                loadFrom.add(Calendar.WEEK_OF_YEAR, -2);
-            } else {
-                //We scrolled forward
-                loadFrom = CalendarUtils.calculateFirstDayOfWeek(newFirstVisibleDay);
-
-                loadTo = (Calendar) loadFrom.clone();
-                loadTo.add(Calendar.WEEK_OF_YEAR, +2);
-            }
-
-            loadAndAddLessons(loadFrom, loadTo, AppPreferences.getStudyCourse());
+        if(isADisabledDay(newFirstVisibleDay)){
+            loader.loadDayOnDayChangeIfNeeded(newFirstVisibleDay, oldFirstVisibleDay);
         }
-
-    }
-
-    private boolean isDayAlreadyBeingLoaded(Calendar day) {
-        for (CalendarInterval loadingInterval : loadingIntervals) {
-            if (loadingInterval.isInInterval(day)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static class LessonToEventAdapter extends WeekViewEvent {
@@ -200,6 +146,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
             return lesson;
         }
     }
+
 
     public class CalendarLoadingOperation {
 

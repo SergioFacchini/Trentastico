@@ -1,4 +1,4 @@
-package trentastico.geridea.com.trentastico.activities.gui.network;
+package trentastico.geridea.com.trentastico.activities.network;
 
 import java.util.Calendar;
 

@@ -1,9 +1,8 @@
 package trentastico.geridea.com.trentastico;
 
 import android.app.Application;
-import android.view.View;
 
-import trentastico.geridea.com.trentastico.activities.gui.network.Networker;
+import trentastico.geridea.com.trentastico.activities.network.Networker;
 import trentastico.geridea.com.trentastico.activities.providers.DepartmentsProvider;
 import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
 
