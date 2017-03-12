@@ -45,7 +45,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
      */
     public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM yyyy", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
 
     /**
      * True if the next call to onMonthChange will have to load the current events in the calendar.
