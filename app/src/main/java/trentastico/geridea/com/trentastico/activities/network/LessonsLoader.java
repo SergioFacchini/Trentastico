@@ -44,10 +44,14 @@ public class LessonsLoader {
     private List<CalendarInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<CalendarInterval>());
 
     public void loadAndAddLessons(final Calendar loadFrom, final Calendar loadTo, StudyCourse studyCourse) {
-        onLoadingOperationStarted.dispatch(new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo));
         addLoadingInterval(loadFrom, loadTo);
 
         Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
+            @Override
+            public void onLoadingAboutToStart(Calendar from, Calendar to) {
+                onLoadingOperationStarted.dispatch(new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo));
+            }
+
             @Override
             public void onLessonsLoaded(LessonsSet lessons, Calendar from, Calendar to) {
                 removeLoadingInterval(loadFrom, loadTo);

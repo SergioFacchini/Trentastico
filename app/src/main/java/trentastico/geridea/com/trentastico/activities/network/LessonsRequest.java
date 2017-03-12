@@ -4,6 +4,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.threerings.signals.Listener0;
 import com.threerings.signals.Signal0;
 import com.threerings.signals.Signal1;
 
@@ -58,6 +59,13 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
         this.listener = listener;
 
         setRetryPolicy(retryPolicy);
+
+        inRequestAboutToBeSent.connect(new Listener0() {
+            @Override
+            public void apply() {
+                listener.onLoadingAboutToStart(LessonsRequest.this.fromWhen, LessonsRequest.this.toWhen);
+            }
+        });
     }
 
     protected void deliverResponse(String response) {

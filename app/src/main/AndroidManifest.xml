@@ -24,8 +24,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.gui.activities.CalendarActivity"/>
         <activity android:name=".activities.gui.activities.WelcomeActivity"/>
+
+        <activity android:name=".activities.gui.activities.CalendarActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
 
     </application>
 

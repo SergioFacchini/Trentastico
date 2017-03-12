@@ -32,7 +32,16 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
 
     //Signals
+    /**
+     * Dispatched when the calendar is about to perform a loading from the network.<br>
+     * WARNING: may be called on a not-UI thread!
+     */
     public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
+
+    /**
+     * Dispatched when the calendar has finished loading something from the network.<br>
+     * WARNING: may be called on a not-UI thread!
+     */
     public final Signal0 onLoadingOperationFinished = new Signal0();
 
     //Data
@@ -130,7 +139,6 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     }
 
     public static class LessonToEventAdapter extends WeekViewEvent {
-
         private static int PROGRESSIVE_ID = 1;
 
         private LessonSchedule lesson;

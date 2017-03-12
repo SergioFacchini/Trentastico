@@ -38,10 +38,16 @@ public class CalendarActivity extends AppCompatActivity {
         //Binding calendar
         calendar.onLoadingOperationStarted.connect(new Listener1<CourseTimesCalendar.CalendarLoadingOperation>() {
             @Override
-            public void apply(CourseTimesCalendar.CalendarLoadingOperation operation) {
-                loadingText.setText(operation.toString());
+            public void apply(final CourseTimesCalendar.CalendarLoadingOperation operation) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadingText.setText(operation.toString());
 
-                loader.setVisibility(View.VISIBLE);
+                        loader.setVisibility(View.VISIBLE);
+                    }
+                });
+
             }
         });
 
