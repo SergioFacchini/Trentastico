@@ -14,7 +14,15 @@ public class CalendarUtils {
      */
     @NonNull
     public static Calendar calculateFirstDayOfWeek() {
-        Calendar firstDayOfWeek = Calendar.getInstance();
+        return calculateFirstDayOfWeek(Calendar.getInstance());
+    }
+
+    /**
+     * @return the first day of the week containing the specified date, at 00:00:00.
+     */
+    @NonNull
+    public static Calendar calculateFirstDayOfWeek(Calendar date) {
+        Calendar firstDayOfWeek = (Calendar) date.clone();
         firstDayOfWeek.set(Calendar.HOUR_OF_DAY, 0);
         firstDayOfWeek.clear(Calendar.MINUTE);
         firstDayOfWeek.clear(Calendar.SECOND);

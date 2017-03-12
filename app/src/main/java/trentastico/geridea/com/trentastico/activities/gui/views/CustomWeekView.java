@@ -735,7 +735,7 @@ public class CustomWeekView extends View {
 
     }
 
-    private boolean isADisabledDay(Calendar day) {
+    public boolean isADisabledDay(Calendar day) {
         return day.before(mLeftBoundDisabledDay) || day.after(mRightBoundDisabledDay) || day.equals(mRightBoundDisabledDay);
     }
 
@@ -1227,19 +1227,22 @@ public class CustomWeekView extends View {
     }
 
     /**
-     * Sets the last disabled day. All the days on the calendar that are preceded by this day are
-     * treated as disabled.
+     * Decreases the last disabled day to the specified date.
      */
-    public void setLeftBoundDisabledDay(Calendar mLeftBoundDisabledDay) {
-        this.mLeftBoundDisabledDay = mLeftBoundDisabledDay;
+    public void extendLeftBoundDisabledDay(Calendar newDay) {
+        if (newDay.before( this.mLeftBoundDisabledDay)) {
+            this.mLeftBoundDisabledDay = newDay;
+        }
     }
 
     /**
      * Sets the first disabled day. All the days on the calendar after this day are
      * treated as disabled.
      */
-    public void setRightBoundDisabledDay(Calendar mRightBoundDisabledDay) {
-        this.mRightBoundDisabledDay = mRightBoundDisabledDay;
+    public void extendRightBoundDisabledDay(Calendar newDay) {
+        if (newDay.after(this.mRightBoundDisabledDay)) {
+            this.mRightBoundDisabledDay = newDay;
+        }
     }
 
     /////////////////////////////////////////////////////////////////
