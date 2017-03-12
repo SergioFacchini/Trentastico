@@ -76,10 +76,10 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     public void loadNearEvents() {
         Calendar twoWeeksAgo = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksAgo.add(Calendar.WEEK_OF_YEAR, -2);
+        twoWeeksAgo.add(Calendar.WEEK_OF_YEAR, -1);
 
         Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, +2);
+        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, + 2+1);
 
         StudyCourse studyCourse = AppPreferences.getStudyCourse();
 
