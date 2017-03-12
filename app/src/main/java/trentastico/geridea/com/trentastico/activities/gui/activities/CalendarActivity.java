@@ -18,33 +18,37 @@ import butterknife.ButterKnife;
 import trentastico.geridea.com.trentastico.R;
 import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
 
+import static android.view.View.GONE;
+
 
 public class CalendarActivity extends AppCompatActivity {
 
-    @BindView(R.id.calendar)
-    CourseTimesCalendar calendar;
-    @BindView(R.id.loading_bar)
-    View loader;
+    @BindView(R.id.calendar)    CourseTimesCalendar calendar;
+    @BindView(R.id.loading_bar) View loader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
         ButterKnife.bind(this);
 
         //Binding calendar
         calendar.onLoadingOperationStarted.connect(new Listener1<CourseTimesCalendar.CalendarLoadingOperation>() {
             @Override
             public void apply(CourseTimesCalendar.CalendarLoadingOperation operation) {
-
+                loader.setVisibility(View.VISIBLE);
             }
         });
-        calendar.onLoadingOperationFinished.connect(new Listener1<Boolean>() {
+
+        calendar.onLoadingOperationFinished.connect(new Listener0() {
             @Override
-            public void apply(Boolean hasOtherOperationsChained) {
-
+            public void apply() {
+                loader.setVisibility(GONE);
             }
         });
+
+        calendar.loadNearEvents();
     }
 
 }

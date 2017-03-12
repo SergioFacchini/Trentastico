@@ -12,7 +12,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:background="@color/backgroundMain"
-        android:padding="15dp">
+        android:padding="15dp"
+        android:visibility="gone">
 
         <ProgressBar
             style="?android:attr/progressBarStyleSmall"
@@ -34,11 +35,11 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:layout_above="@id/loading_bar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
 
         <trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar
             android:id="@+id/calendar"
