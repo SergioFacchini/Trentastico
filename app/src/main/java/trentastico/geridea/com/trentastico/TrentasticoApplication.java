@@ -1,4 +1,4 @@
-package trentastico.geridea.com.trentastico.activities;
+package trentastico.geridea.com.trentastico;
 
 import android.app.Application;
 import android.view.View;

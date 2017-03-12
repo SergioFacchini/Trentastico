@@ -17,10 +17,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class CourseTimesCalendar extends WeekView implements DateTimeInterpreter, MonthLoader.MonthChangeListener {
 
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM yyyy");
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM yyyy", Locale.ITALIAN);
 
     public CourseTimesCalendar(Context context) {
         super(context);

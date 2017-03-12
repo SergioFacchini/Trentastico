@@ -13,7 +13,7 @@
     android:paddingTop="@dimen/activity_vertical_margin">
 
     <trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar
-        android:id="@+id/week_view"
+        android:id="@+id/calendar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"

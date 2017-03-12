@@ -2,13 +2,14 @@ package trentastico.geridea.com.trentastico.activities.gui.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 
 import com.alexvasilkov.android.commons.utils.Views;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnItemSelected;
 import trentastico.geridea.com.trentastico.R;
 import trentastico.geridea.com.trentastico.activities.gui.adapters.CoursesAdapter;
 import trentastico.geridea.com.trentastico.activities.gui.adapters.DepartmentsAdapter;
@@ -22,36 +23,29 @@ import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
 
 public class CourseSelectorView extends FrameLayout {
 
-    private final Spinner departmentsSpinner;
-    private final Spinner coursesSpinner;
-    private final Spinner yearsSpinner;
+    @BindView(R.id.departements_spinner) Spinner departmentsSpinner;
+    @BindView(R.id.courses_spinner)      Spinner coursesSpinner;
+    @BindView(R.id.year_spinner)         Spinner yearsSpinner;
 
     public CourseSelectorView(final Context context, AttributeSet attrs) {
         super(context, attrs);
 
         Views.inflateAndAttach(this, R.layout.view_course_selector);
+        ButterKnife.bind(this, this);
 
-        departmentsSpinner = Views.find(this, R.id.departements_spinner);
         departmentsSpinner.setAdapter(new DepartmentsAdapter(context));
-        departmentsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                Department selectedDepartment = (Department) adapterView.getItemAtPosition(pos);
-                coursesSpinner.setAdapter(new CoursesAdapter(context, selectedDepartment));
-            }
+        Department selectedDepartment = (Department) departmentsSpinner.getSelectedItem();
+        coursesSpinner.setAdapter(new CoursesAdapter(context, selectedDepartment));
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) { }
-        });
-
-        coursesSpinner = Views.find(this, R.id.courses_spinner);
-        coursesSpinner.setAdapter(new CoursesAdapter(context, (Department) departmentsSpinner.getSelectedItem()));
-
-        yearsSpinner = Views.find(this, R.id.year_spinner);
         yearsSpinner.setAdapter(new YearsAdapter(context));
     }
 
+    @OnItemSelected(R.id.departements_spinner)
+    void onDepartmentSelected(int selectedPosition){
+        Department selectedDepartment = (Department) departmentsSpinner.getItemAtPosition(selectedPosition);
+        coursesSpinner.setAdapter(new CoursesAdapter(getContext(), selectedDepartment));
+    }
 
     public StudyCourse getSelectedStudyCourse(){
         return new StudyCourse(
