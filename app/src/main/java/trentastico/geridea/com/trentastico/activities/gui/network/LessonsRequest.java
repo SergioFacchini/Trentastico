@@ -97,7 +97,7 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
             }
 
             onRequestSuccessful.dispatch(lessonsSet);
-            listener.onLessonsLoaded(lessonsSet);
+            listener.onLessonsLoaded(lessonsSet, fromWhen, toWhen);
         } catch (Exception e) {
             e.printStackTrace();
             listener.onParsingErrorHappened(e);

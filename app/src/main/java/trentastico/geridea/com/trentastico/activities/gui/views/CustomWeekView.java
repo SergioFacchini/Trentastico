@@ -58,11 +58,15 @@ public class CustomWeekView extends View {
     /**
      * Introduced settings:
      */
-    private int mStartingHour = 7;
-    private int mEndingHour = 20;
-    private int mNumHoursToDisplay = mEndingHour - mStartingHour +1;
+    private final int mStartingHour = 7;
+    private final int mEndingHour = 20;
+    private final int mNumHoursToDisplay = mEndingHour - mStartingHour +1;
 
-    private int mHoursTextColor = Color.BLACK;
+    private final int mHoursTextColor = Color.BLACK;
+    private final int mDisabledBackgroundColor = 0xFF888888;
+    private final int mPastDayBackgroundColor = 0xFFD5D5D5;
+
+    private Calendar mLeftBoundDisabledDay, mRightBoundDisabledDay;
 
     private enum Direction {
         NONE, LEFT, RIGHT, VERTICAL
@@ -85,6 +89,8 @@ public class CustomWeekView extends View {
     private Paint mHeaderBackgroundPaint;
     private float mWidthPerDay;
     private Paint mDayBackgroundPaint;
+    private Paint mPastDayBackgroundPaint;
+    private Paint mDisabledBackgroundPaint;
     private Paint mHourSeparatorPaint;
     private float mHeaderMarginBottom;
     private Paint mTodayBackgroundPaint;
@@ -403,6 +409,13 @@ public class CustomWeekView extends View {
         // Prepare day background color paint.
         mDayBackgroundPaint = new Paint();
         mDayBackgroundPaint.setColor(mDayBackgroundColor);
+
+        mPastDayBackgroundPaint = new Paint();
+        mPastDayBackgroundPaint.setColor(mPastDayBackgroundColor);
+
+        mDisabledBackgroundPaint = new Paint();
+        mDisabledBackgroundPaint.setColor(mDisabledBackgroundColor);
+
         mFutureBackgroundPaint = new Paint();
         mFutureBackgroundPaint.setColor(mFutureBackgroundColor);
         mPastBackgroundPaint = new Paint();
@@ -471,6 +484,11 @@ public class CustomWeekView extends View {
                 return true;
             }
         });
+
+        //Other settings
+        //By default, everything is disabled
+        mLeftBoundDisabledDay  = Calendar.getInstance();
+        mRightBoundDisabledDay = Calendar.getInstance();
     }
 
     // fix rotation changes
@@ -623,7 +641,7 @@ public class CustomWeekView extends View {
             mLastVisibleDay = (Calendar) day.clone();
             day.add(Calendar.DATE, dayNumber - 1);
             mLastVisibleDay.add(Calendar.DATE, dayNumber - 2);
-            boolean sameDay = isSameDay(day, today);
+            boolean isToday = isSameDay(day, today);
 
             // Get more events if necessary. We want to store the events 3 months beforehand. Get
             // events only when it is the first iteration of the loop.
@@ -643,7 +661,7 @@ public class CustomWeekView extends View {
                     Paint futurePaint = isWeekend && mShowDistinctWeekendColor ? mFutureWeekendBackgroundPaint : mFutureBackgroundPaint;
                     float startY = mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight/2 + mHeaderMarginBottom + mCurrentOrigin.y;
 
-                    if (sameDay){
+                    if (isToday){
                         Calendar now = Calendar.getInstance();
                         float beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE)/60.0f) * mHourHeight;
                         canvas.drawRect(start, startY, startPixel + mWidthPerDay, startY+beforeNow, pastPaint);
@@ -657,7 +675,18 @@ public class CustomWeekView extends View {
                     }
                 }
                 else {
-                    canvas.drawRect(start, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, startPixel + mWidthPerDay, getHeight(), sameDay ? mTodayBackgroundPaint : mDayBackgroundPaint);
+                    Paint paintToUseForThisDay;
+                    if(isADisabledDay(day)) {
+                        paintToUseForThisDay = mDisabledBackgroundPaint;
+                    } else if (day.before(today)) {
+                        paintToUseForThisDay = mPastDayBackgroundPaint;
+                    } else if (isToday) {
+                        paintToUseForThisDay = mTodayBackgroundPaint;
+                    } else {
+                        paintToUseForThisDay = mDayBackgroundPaint;
+                    }
+
+                    canvas.drawRect(start, mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight / 2 + mHeaderMarginBottom, startPixel + mWidthPerDay, getHeight(), paintToUseForThisDay);
                 }
             }
 
@@ -681,7 +710,7 @@ public class CustomWeekView extends View {
             drawEvents(day, startPixel, canvas);
 
             // Draw the line at the current time.
-            if (mShowNowLine && sameDay){
+            if (mShowNowLine && isToday){
                 float startY = mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight/2 + mHeaderMarginBottom + mCurrentOrigin.y;
                 Calendar now = Calendar.getInstance();
                 float beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE)/60.0f) * mHourHeight;
@@ -715,6 +744,10 @@ public class CustomWeekView extends View {
             startPixel += mWidthPerDay + mColumnGap;
         }
 
+    }
+
+    private boolean isADisabledDay(Calendar day) {
+        return day.before(mLeftBoundDisabledDay) || day.after(mRightBoundDisabledDay) || day.equals(mRightBoundDisabledDay);
     }
 
     /**
@@ -1733,6 +1766,22 @@ public class CustomWeekView extends View {
      */
     public void setVerticalFlingEnabled(boolean enabled) {
         mVerticalFlingEnabled = enabled;
+    }
+
+    /**
+     * Sets the last disabled day. All the days on the calendar that are preceded by this day are
+     * treated as disabled.
+     */
+    public void setLeftBoundDisabledDay(Calendar mLeftBoundDisabledDay) {
+        this.mLeftBoundDisabledDay = mLeftBoundDisabledDay;
+    }
+
+    /**
+     * Sets the first disabled day. All the days on the calendar after this day are
+     * treated as disabled.
+     */
+    public void setRightBoundDisabledDay(Calendar mRightBoundDisabledDay) {
+        this.mRightBoundDisabledDay = mRightBoundDisabledDay;
     }
 
     /////////////////////////////////////////////////////////////////

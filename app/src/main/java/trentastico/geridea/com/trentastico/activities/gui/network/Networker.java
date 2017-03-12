@@ -33,7 +33,7 @@ public class Networker {
 
         LessonsSet lessons = Cacher.getLessonsInCacheIfAvailable(fromWhen, toWhen, studyCourse);
         if (lessons != null) {
-            listener.onLessonsLoaded(lessons);
+            listener.onLessonsLoaded(lessons, fromWhen, toWhen);
         } else {
             performLoadingRequest(fromWhen, toWhen, studyCourse, listener);
         }

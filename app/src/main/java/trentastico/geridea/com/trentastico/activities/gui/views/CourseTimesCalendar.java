@@ -86,8 +86,10 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         onLoadingOperationStarted.dispatch(null);
         Networker.loadLessonsOfCourse(twoWeeksAgo, twoWeeksFromNow, studyCourse, new LessonsFetchedListener() {
             @Override
-            public void onLessonsLoaded(LessonsSet lessons) {
+            public void onLessonsLoaded(LessonsSet lessons, Calendar from, Calendar to) {
                 currentlyShownLessonsSet.mergeWith(lessons);
+                setLeftBoundDisabledDay(from);
+                setRightBoundDisabledDay(to);
 
                 notifyDatasetChanged();
                 onLoadingOperationFinished.dispatch();
