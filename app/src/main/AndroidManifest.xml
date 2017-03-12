@@ -10,13 +10,19 @@
         android:theme="@style/AppTheme"
         android:name=".activities.TrentasticoApplication">
 
-        <activity android:name=".activities.gui.activities.SettingsActivity">
+        <activity android:name=".activities.gui.activities.FirstActivityChooserActivity"
+            android:screenOrientation="portrait"
+            android:noHistory="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activities.gui.activities.CalendarActivity"/>
+        <activity android:name=".activities.gui.activities.WelcomeActivity"/>
+
     </application>
 
 </manifest>
