@@ -62,6 +62,8 @@ public class CustomWeekView extends View {
     private int mEndingHour = 20;
     private int mNumHoursToDisplay = mEndingHour - mStartingHour +1;
 
+    private int mHoursTextColor = Color.BLACK;
+
     private enum Direction {
         NONE, LEFT, RIGHT, VERTICAL
     }
@@ -378,7 +380,7 @@ public class CustomWeekView extends View {
         mTimeTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTimeTextPaint.setTextAlign(Paint.Align.RIGHT);
         mTimeTextPaint.setTextSize(mTextSize);
-        mTimeTextPaint.setColor(mHeaderColumnTextColor);
+        mTimeTextPaint.setColor(mHoursTextColor);
         Rect rect = new Rect();
         mTimeTextPaint.getTextBounds("00 PM", 0, "00 PM".length(), rect);
         mTimeTextHeight = rect.height();
