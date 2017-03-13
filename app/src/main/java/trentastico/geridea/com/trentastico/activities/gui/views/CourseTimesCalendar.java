@@ -167,10 +167,16 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
         @Override
         public String toString() {
+            //Usually we're loading data that is exactly one or two weeks longs, considering the day
+            //starting at 00:00:00. We don't want to show that day as loaded, so we back by a second
+            //to the previous day.
+            Calendar adjustedTo = (Calendar) to.clone();
+            adjustedTo.add(Calendar.SECOND, -1);
+
             return String.format(
                     "Sto caricando gli orari dal %s al %s...",
                     DATE_FORMAT.format(from.getTime()),
-                    DATE_FORMAT.format(to.getTime())
+                    DATE_FORMAT.format(adjustedTo.getTime())
             );
         }
     }

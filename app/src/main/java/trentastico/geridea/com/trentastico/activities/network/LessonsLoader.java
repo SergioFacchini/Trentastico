@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
 import trentastico.geridea.com.trentastico.activities.model.LessonsSet;
@@ -49,7 +51,9 @@ public class LessonsLoader {
         Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
             @Override
             public void onLoadingAboutToStart(Calendar from, Calendar to) {
-                onLoadingOperationStarted.dispatch(new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo));
+                CourseTimesCalendar.CalendarLoadingOperation operation = new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo);
+                Logger.getAnonymousLogger().log(Level.SEVERE, operation.toString());
+                onLoadingOperationStarted.dispatch(operation);
             }
 
             @Override
@@ -101,8 +105,11 @@ public class LessonsLoader {
             Calendar loadFrom, loadTo;
             if(newFirstVisibleDay.before(oldFirstVisibleDay)){
                 //We scrolled backwards
-                loadTo = CalendarUtils.calculateFirstDayOfWeek(oldFirstVisibleDay);
-                loadTo.add(Calendar.DAY_OF_MONTH, -1);
+                loadTo = (Calendar) oldFirstVisibleDay.clone();
+                loadTo.clear(Calendar.MILLISECOND);
+                loadTo.clear(Calendar.SECOND);
+                loadTo.clear(Calendar.MINUTE);
+                loadTo.clear(Calendar.HOUR);
 
                 loadFrom = (Calendar) loadTo.clone();
                 loadFrom.add(Calendar.WEEK_OF_YEAR, -2);
@@ -114,9 +121,6 @@ public class LessonsLoader {
                 loadTo.add(Calendar.WEEK_OF_YEAR, +2);
             }
 
-            //Solves a bug when displaying the date to which the times are being loaded
-            loadTo.add(Calendar.SECOND, -1);
-
             loadAndAddLessons(loadFrom, loadTo, AppPreferences.getStudyCourse());
         }
     }
@@ -127,9 +131,6 @@ public class LessonsLoader {
 
         Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
         twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, + 2+1);
-
-        //Solves a bug when displaying the date to which the times are being loaded
-        twoWeeksFromNow.add(Calendar.SECOND, -1);
 
         loadAndAddLessons(twoWeeksAgo, twoWeeksFromNow, AppPreferences.getStudyCourse());
     }

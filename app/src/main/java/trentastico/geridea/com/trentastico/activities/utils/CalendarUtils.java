@@ -2,12 +2,16 @@ package trentastico.geridea.com.trentastico.activities.utils;
 
 import android.support.annotation.NonNull;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 /*
  * Created with ♥ by Slava on 12/03/2017.
  */
 public class CalendarUtils {
+
+    private final static SimpleDateFormat formatDDMMYY = new SimpleDateFormat("dd MM yyyy", Locale.ITALIAN);
 
     /**
      * @return the first day of the current week, at 00:00:00.
@@ -29,5 +33,9 @@ public class CalendarUtils {
         firstDayOfWeek.clear(Calendar.MILLISECOND);
         firstDayOfWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         return firstDayOfWeek;
+    }
+
+    public static String formatDDMMYY(Calendar calendar) {
+        return formatDDMMYY.format(calendar.getTime());
     }
 }
