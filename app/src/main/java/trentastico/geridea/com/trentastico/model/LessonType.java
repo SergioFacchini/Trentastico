@@ -3,6 +3,8 @@ package trentastico.geridea.com.trentastico.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import trentastico.geridea.com.trentastico.model.cache.CachedLessonType;
+
 public class LessonType {
 
     private int id;
@@ -11,17 +13,26 @@ public class LessonType {
 
     private boolean isVisible;
 
-    public static LessonType fromJson(JSONObject jsonObject) throws JSONException {
-        LessonType activity = new LessonType();
-        activity.setActivityId(jsonObject.getInt("IdADfisica"));
-        activity.setName(jsonObject.getString("DescrizioneAD"));
-
-        String cssName = jsonObject.getString("Css");
-        activity.setColor(getColorFromCSSStyle(cssName));
-        return activity;
+    public LessonType() {
     }
 
-    private void setActivityId(int id) {
+    public LessonType(CachedLessonType cachedLessonType) {
+        this.id    = cachedLessonType.getLesson_type_id();
+        this.name  = cachedLessonType.getName();
+        this.color = cachedLessonType.getColor();
+    }
+
+    public static LessonType fromJson(JSONObject jsonObject) throws JSONException {
+        LessonType lessonType = new LessonType();
+        lessonType.setId(jsonObject.getInt("IdADfisica"));
+        lessonType.setName(jsonObject.getString("DescrizioneAD"));
+
+        String cssName = jsonObject.getString("Css");
+        lessonType.setColor(getColorFromCSSStyle(cssName));
+        return lessonType;
+    }
+
+    private void setId(int id) {
         this.id = id;
     }
 

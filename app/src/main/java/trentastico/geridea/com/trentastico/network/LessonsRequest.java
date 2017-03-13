@@ -74,6 +74,27 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
         });
     }
 
+    public StudyCourse getStudyCourse() {
+        return studyCourse;
+    }
+
+    public Calendar getFromWhen() {
+        return fromWhen;
+    }
+
+    public long getFromWhenMs() {
+        return getFromWhen().getTimeInMillis();
+    }
+
+    public Calendar getToWhen() {
+        return toWhen;
+    }
+
+    public long getToWhenMs() {
+        return getToWhen().getTimeInMillis();
+    }
+
+
     //We cannot provide the listeners to the constructor, so we use this workaround do still manage
     //the listeners.
     protected void deliverResponse(String response) {
@@ -92,7 +113,7 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
         return String.format(
                 Locale.CANADA,
                 "http://webapps.unitn.it/Orari/it/Web/AjaxEventi/c/%d-%d/agendaWeek?start=%d&end=%d",
-                studyCourse.getCourse(),
+                studyCourse.getCourseId(),
                 studyCourse.getYear(),
                 from.getTimeInMillis() / 1000,
                 to.getTimeInMillis() / 1000

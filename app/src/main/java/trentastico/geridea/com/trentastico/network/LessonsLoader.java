@@ -127,7 +127,7 @@ public class LessonsLoader {
         twoWeeksAgo.add(Calendar.WEEK_OF_YEAR, -1);
 
         Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, + 2+1);
+        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, +2);
 
         loadAndAddLessons(twoWeeksAgo, twoWeeksFromNow, AppPreferences.getStudyCourse());
     }

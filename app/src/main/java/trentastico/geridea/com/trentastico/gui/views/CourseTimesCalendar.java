@@ -101,6 +101,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         loader.onParsingErrorHappened.connect(new Listener1<Exception>() {
             @Override
             public void apply(Exception e) {
+                e.printStackTrace();
                 onLoadingOperationResult.dispatch(new ParsingErrorOperation());
             }
         });

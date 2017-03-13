@@ -12,11 +12,11 @@ public class StudyCourse {
         this.year = year;
     }
 
-    public long getDepartment() {
+    public long getDepartmentId() {
         return department;
     }
 
-    public long getCourse() {
+    public long getCourseId() {
         return course;
     }
 

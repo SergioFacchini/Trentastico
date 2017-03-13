@@ -14,5 +14,7 @@ public final class Config {
      */
     public static final int WAITING_TIME_AFTER_A_REQUEST_FAILED = 5000;
 
-
+    //Database
+    public static final String DATABASE_NAME = "data.db";
+    public static final int DATABASE_VERSION = 1;
 }

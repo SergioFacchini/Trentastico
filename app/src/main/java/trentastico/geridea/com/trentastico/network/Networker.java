@@ -18,8 +18,10 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import trentastico.geridea.com.trentastico.Config;
+import trentastico.geridea.com.trentastico.database.Cacher;
 import trentastico.geridea.com.trentastico.model.LessonsSet;
 import trentastico.geridea.com.trentastico.model.StudyCourse;
+import trentastico.geridea.com.trentastico.model.cache.CachedLessonsSet;
 
 public class Networker {
 
@@ -34,7 +36,7 @@ public class Networker {
     public static void loadLessonsOfCourse(
             Calendar fromWhen, Calendar toWhen, StudyCourse studyCourse, LessonsFetchedListener listener) {
 
-        LessonsSet lessons = Cacher.getLessonsInCacheIfAvailable(fromWhen, toWhen, studyCourse);
+        CachedLessonsSet lessons = Cacher.getLessonsInCacheIfAvailable(fromWhen, toWhen, studyCourse);
         if (lessons != null) {
             listener.onLessonsLoaded(lessons, fromWhen, toWhen);
         } else {

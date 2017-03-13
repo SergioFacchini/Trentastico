@@ -3,13 +3,15 @@ package trentastico.geridea.com.trentastico.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import trentastico.geridea.com.trentastico.model.cache.CachedLesson;
+
 /*
  * Created with ♥ by Slava on 12/03/2017.
  */
 public class LessonsSet {
 
-    private final List<LessonType>     lessonTypes;
-    private final List<LessonSchedule> scheduledLessons;
+    protected final List<LessonType>     lessonTypes;
+    protected final List<LessonSchedule> scheduledLessons;
 
     public LessonsSet() {
         lessonTypes      = new ArrayList<>();
@@ -36,5 +38,19 @@ public class LessonsSet {
         //TODO: should check for double lessons and lesson types
         this.scheduledLessons.addAll(lessons.scheduledLessons);
         this.lessonTypes.addAll(lessons.lessonTypes);
+    }
+
+    /**
+     * @return the first lesson having a given lesson type.
+     */
+    public LessonSchedule getALessonHavingType(LessonType lessonType) {
+        for (LessonSchedule scheduledLesson : scheduledLessons) {
+            if(scheduledLesson.hasLessonType(lessonType)){
+                return scheduledLesson;
+            }
+        }
+
+        //Technically, should never happen
+        return null;
     }
 }

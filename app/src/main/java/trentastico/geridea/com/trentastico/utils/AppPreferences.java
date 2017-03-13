@@ -38,8 +38,8 @@ public class AppPreferences {
 
     public static void setStudyCourse(StudyCourse course) {
         SharedPreferences.Editor editor = get().edit();
-        editor.putLong("STUDY_DEPARTMENT", course.getDepartment());
-        editor.putLong("STUDY_COURSE",     course.getCourse());
+        editor.putLong("STUDY_DEPARTMENT", course.getDepartmentId());
+        editor.putLong("STUDY_COURSE",     course.getCourseId());
         editor.putLong("STUDY_YEAR",       course.getYear());
         editor.apply();
     }

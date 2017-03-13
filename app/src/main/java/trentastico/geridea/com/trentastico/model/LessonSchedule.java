@@ -9,16 +9,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LessonSchedule {
-    private final int id; //Seems to be an unique identifier
+    private final long id; //Seems to be an unique identifier
     private final String room;
     private final String subject;
     private final long startsAt;
     private final long finishesAt;
     private final String fullDescription;
     private final int color;
-    private final int teachingId;
+    private final long lessonTypeId;
 
-    public LessonSchedule(int id, String room, String subject, long startsAt, long finishesAt, String fullDescription, int color, int teachingId) {
+    public LessonSchedule(long id, String room, String subject, long startsAt, long finishesAt, String fullDescription, int color, long lessonTypeId) {
         this.id = id;
         this.room = room;
         this.subject = subject;
@@ -26,10 +26,10 @@ public class LessonSchedule {
         this.finishesAt = finishesAt;
         this.fullDescription = fullDescription;
         this.color = color;
-        this.teachingId = teachingId;
+        this.lessonTypeId = lessonTypeId;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -57,8 +57,8 @@ public class LessonSchedule {
         return color;
     }
 
-    public int getTeachingId() {
-        return teachingId;
+    public long getLessonTypeId() {
+        return lessonTypeId;
     }
 
     public Calendar getStartCal() {
@@ -87,7 +87,7 @@ public class LessonSchedule {
     public static LessonSchedule fromJson(JSONObject json) throws JSONException {
         String titleToParse = json.getString("title");
 
-        int id = Integer.valueOf(json.getString("url").substring(1)); //url: "#123453"
+        long id = Long.valueOf(json.getString("url").substring(1)); //url: "#123453"
 
         String room    = getRoomFromTitle(titleToParse);
         String subject = getSubjectFromTitle(titleToParse);
@@ -95,7 +95,7 @@ public class LessonSchedule {
         long start = json.getLong("start")*1000;
         long end   = json.getLong("end")*1000;
 
-        int teachingId = json.getInt("id");
+        long teachingId = json.getInt("id");
 
         int color = LessonType.getColorFromCSSStyle(json.getString("className"));
 
@@ -119,4 +119,7 @@ public class LessonSchedule {
         }
     }
 
+    public boolean hasLessonType(LessonType lessonType) {
+        return getLessonTypeId() == lessonType.getId();
+    }
 }
