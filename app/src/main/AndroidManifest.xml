@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme"
         android:name=".TrentasticoApplication">
 
-        <activity android:name=".activities.gui.activities.FirstActivityChooserActivity"
+        <activity android:name=".gui.activities.FirstActivityChooserActivity"
             android:screenOrientation="portrait"
             android:noHistory="true">
 
@@ -24,9 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.gui.activities.WelcomeActivity"/>
+        <activity android:name=".gui.activities.WelcomeActivity"/>
 
-        <activity android:name=".activities.gui.activities.CalendarActivity"
+        <activity android:name=".gui.activities.CalendarActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"/>
 
     </application>

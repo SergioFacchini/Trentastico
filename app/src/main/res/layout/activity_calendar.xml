@@ -41,7 +41,7 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
-        <trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar
+        <trentastico.geridea.com.trentastico.gui.views.CourseTimesCalendar
             android:id="@+id/calendar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

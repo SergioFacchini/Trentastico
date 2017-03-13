@@ -2,9 +2,9 @@ package trentastico.geridea.com.trentastico;
 
 import android.app.Application;
 
-import trentastico.geridea.com.trentastico.activities.network.Networker;
-import trentastico.geridea.com.trentastico.activities.providers.DepartmentsProvider;
-import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
+import trentastico.geridea.com.trentastico.network.Networker;
+import trentastico.geridea.com.trentastico.providers.DepartmentsProvider;
+import trentastico.geridea.com.trentastico.utils.AppPreferences;
 
 /*
  * Created with ♥ by Slava on 03/03/2017.
