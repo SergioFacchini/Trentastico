@@ -141,12 +141,10 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     }
 
     public static class LessonToEventAdapter extends WeekViewEvent {
-        private static int PROGRESSIVE_ID = 1;
-
         private LessonSchedule lesson;
 
         public LessonToEventAdapter(LessonSchedule lesson) {
-            super(PROGRESSIVE_ID++, lesson.getFullDescription(), lesson.getStartCal(), lesson.getEndCal());
+            super(lesson.getId(), lesson.getFullDescription(), lesson.getStartCal(), lesson.getEndCal());
             setColor(lesson.getColor());
 
             this.lesson = lesson;

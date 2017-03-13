@@ -9,15 +9,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LessonSchedule {
-    private String room;
-    private String subject;
-    private long startsAt;
-    private long finishesAt;
-    private String fullDescription;
-    private int color;
-    private int teachingId;
+    private final int id; //Seems to be an unique identifier
+    private final String room;
+    private final String subject;
+    private final long startsAt;
+    private final long finishesAt;
+    private final String fullDescription;
+    private final int color;
+    private final int teachingId;
 
-    public LessonSchedule(String room, String subject, long startsAt, long finishesAt, String fullDescription, int color, int teachingId) {
+    public LessonSchedule(int id, String room, String subject, long startsAt, long finishesAt, String fullDescription, int color, int teachingId) {
+        this.id = id;
         this.room = room;
         this.subject = subject;
         this.startsAt = startsAt;
@@ -27,36 +29,24 @@ public class LessonSchedule {
         this.teachingId = teachingId;
     }
 
-    public String getRoom() {
-        return room;
+    public int getId() {
+        return id;
     }
 
-    public void setRoom(String room) {
-        this.room = room;
+    public String getRoom() {
+        return room;
     }
 
     public String getSubject() {
         return subject;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
     public long getStartsAt() {
         return startsAt;
     }
 
-    public void setStartsAt(long startsAt) {
-        this.startsAt = startsAt;
-    }
-
     public long getFinishesAt() {
         return finishesAt;
-    }
-
-    public void setFinishesAt(long finishesAt) {
-        this.finishesAt = finishesAt;
     }
 
     public String getFullDescription() {
@@ -97,6 +87,8 @@ public class LessonSchedule {
     public static LessonSchedule fromJson(JSONObject json) throws JSONException {
         String titleToParse = json.getString("title");
 
+        int id = Integer.valueOf(json.getString("url").substring(1)); //url: "#123453"
+
         String room    = getRoomFromTitle(titleToParse);
         String subject = getSubjectFromTitle(titleToParse);
 
@@ -107,7 +99,7 @@ public class LessonSchedule {
 
         int color = LessonType.getColorFromCSSStyle(json.getString("className"));
 
-        return new LessonSchedule(room, subject, start, end, titleToParse, color, teachingId);
+        return new LessonSchedule(id, room, subject, start, end, titleToParse, color, teachingId);
     }
 
     private static String getSubjectFromTitle(String titleToParse) {

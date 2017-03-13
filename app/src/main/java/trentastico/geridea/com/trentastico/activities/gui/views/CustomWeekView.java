@@ -40,8 +40,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * Created by Raquib-ul-Alam Kanak on 7/21/2014.
@@ -106,7 +108,6 @@ public class CustomWeekView extends View {
     private Paint mEventBackgroundPaint;
     private float mHeaderColumnWidth;
     private List<CustomWeekView.EventRect> mEventRects = new ArrayList<>();
-    private List<? extends WeekViewEvent> mCurrentEvents;
     private TextPaint mEventTextPaint;
     private Paint mHeaderColumnBackgroundPaint;
     private CustomWeekView.Direction mCurrentFlingDirection = CustomWeekView.Direction.NONE;
@@ -940,17 +941,24 @@ public class CustomWeekView extends View {
      * Cache the event for smooth scrolling functionality.
      * @param event The event to cache.
      */
-    private void cacheEvent(WeekViewEvent event) {
+    private void cacheEvent(final WeekViewEvent event) {
         if(event.getStartTime().compareTo(event.getEndTime()) >= 0)
             return;
-        if (!isSameDay(event.getStartTime(), event.getEndTime())) {
+
+        deleteRectsHavingEventWithSameId(event);
+
+        if (isSameDay(event.getStartTime(), event.getEndTime())) {
+            mEventRects.add(new EventRect(event, event, null));
+        } else {
+            //Our event spans multiple days:
+
             // Add first day.
             Calendar endTime = (Calendar) event.getStartTime().clone();
             endTime.set(Calendar.HOUR_OF_DAY, 23);
             endTime.set(Calendar.MINUTE, 59);
             WeekViewEvent event1 = new WeekViewEvent(event.getId(), event.getName(), event.getLocation(), event.getStartTime(), endTime);
             event1.setColor(event.getColor());
-            mEventRects.add(new CustomWeekView.EventRect(event1, event, null));
+            mEventRects.add(new EventRect(event1, event, null));
 
             // Add other days.
             Calendar otherDay = (Calendar) event.getStartTime().clone();
@@ -964,7 +972,7 @@ public class CustomWeekView extends View {
                 endOfOverDay.set(Calendar.MINUTE, 59);
                 WeekViewEvent eventMore = new WeekViewEvent(event.getId(), event.getName(), overDay, endOfOverDay);
                 eventMore.setColor(event.getColor());
-                mEventRects.add(new CustomWeekView.EventRect(eventMore, event, null));
+                mEventRects.add(new EventRect(eventMore, event, null));
 
                 // Add next day.
                 otherDay.add(Calendar.DATE, 1);
@@ -976,10 +984,17 @@ public class CustomWeekView extends View {
             startTime.set(Calendar.MINUTE, 0);
             WeekViewEvent event2 = new WeekViewEvent(event.getId(), event.getName(), event.getLocation(), startTime, event.getEndTime());
             event2.setColor(event.getColor());
-            mEventRects.add(new CustomWeekView.EventRect(event2, event, null));
+            mEventRects.add(new EventRect(event2, event, null));
         }
-        else {
-            mEventRects.add(new CustomWeekView.EventRect(event, event, null));
+    }
+
+    private void deleteRectsHavingEventWithSameId(WeekViewEvent eventToSearchFor) {
+        Iterator<EventRect> rectsIterator = mEventRects.iterator();
+        while (rectsIterator.hasNext()){
+            EventRect currentRect = rectsIterator.next();
+            if (currentRect.originalEvent.getId() == eventToSearchFor.getId()) {
+                rectsIterator.remove();
+            }
         }
     }
 
