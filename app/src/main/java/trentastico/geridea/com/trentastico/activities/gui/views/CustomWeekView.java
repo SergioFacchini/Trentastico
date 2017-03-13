@@ -112,8 +112,7 @@ public class CustomWeekView extends View {
     private CustomWeekView.Direction mCurrentFlingDirection = CustomWeekView.Direction.NONE;
     private ScaleGestureDetector mScaleDetector;
     private boolean mIsZooming;
-    private Calendar mFirstVisibleDay;
-    private Calendar mLastVisibleDay;
+    private Calendar mFirstVisibleDay = Calendar.getInstance();
     private int mDefaultEventColor;
     private int mMinimumFlingVelocity = 0;
     private int mScaledTouchSlop = 0;
@@ -624,21 +623,22 @@ public class CustomWeekView extends View {
         canvas.clipRect(mHeaderColumnWidth, mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2, getWidth(), getHeight(), Region.Op.REPLACE);
 
         // Iterate through each day.
-        Calendar oldFirstVisibleDay = mFirstVisibleDay;
-        mFirstVisibleDay = (Calendar) today.clone();
+        long oldMillis = mFirstVisibleDay.getTimeInMillis();
+        mFirstVisibleDay.setTimeInMillis(today.getTimeInMillis());
         mFirstVisibleDay.add(Calendar.DATE, -(Math.round(mCurrentOrigin.x / (mWidthPerDay + mColumnGap))));
-        if(!mFirstVisibleDay.equals(oldFirstVisibleDay) && mScrollListener != null){
+        if(!(mFirstVisibleDay.getTimeInMillis() == oldMillis) && mScrollListener != null){
+            Calendar oldFirstVisibleDay = (Calendar) today.clone();
+            oldFirstVisibleDay.setTimeInMillis(oldMillis);
             mScrollListener.onFirstVisibleDayChanged(mFirstVisibleDay, oldFirstVisibleDay);
         }
+
         for (int dayNumber = leftDaysWithGaps + 1;
              dayNumber <= leftDaysWithGaps + mNumberOfVisibleDays + 1;
              dayNumber++) {
 
             // Check if the day is today.
-            day = (Calendar) today.clone();
-            mLastVisibleDay = (Calendar) day.clone();
+            day.setTimeInMillis(today.getTimeInMillis());
             day.add(Calendar.DATE, dayNumber - 1);
-            mLastVisibleDay.add(Calendar.DATE, dayNumber - 2);
             boolean isToday = isSameDay(day, today);
 
             // Draw background color for each day.
@@ -721,7 +721,7 @@ public class CustomWeekView extends View {
         startPixel = startFromPixel;
         for (int dayNumber=leftDaysWithGaps+1; dayNumber <= leftDaysWithGaps + mNumberOfVisibleDays + 1; dayNumber++) {
             // Check if the day is today.
-            day = (Calendar) today.clone();
+            day.setTimeInMillis(today.getTimeInMillis());
             day.add(Calendar.DATE, dayNumber - 1);
             boolean sameDay = isSameDay(day, today);
 
