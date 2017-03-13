@@ -7,7 +7,6 @@ package trentastico.geridea.com.trentastico.activities.gui.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Toast;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
@@ -25,7 +24,10 @@ import java.util.Locale;
 
 import trentastico.geridea.com.trentastico.activities.model.LessonSchedule;
 import trentastico.geridea.com.trentastico.activities.model.LessonsSet;
+import trentastico.geridea.com.trentastico.activities.network.operations.ILoadingOperation;
 import trentastico.geridea.com.trentastico.activities.network.LessonsLoader;
+import trentastico.geridea.com.trentastico.activities.network.operations.ParsingErrorOperation;
+import trentastico.geridea.com.trentastico.activities.network.operations.ReadingErrorOperation;
 
 public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, CustomWeekView.ScrollListener {
 
@@ -36,7 +38,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
      * Dispatched when the calendar is about to perform a loading from the network.<br>
      * WARNING: may be called on a not-UI thread!
      */
-    public final Signal1<CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
+    public final Signal1<ILoadingOperation> onLoadingOperationResult = new Signal1<>();
 
     /**
      * Dispatched when the calendar has finished loading something from the network.<br>
@@ -72,13 +74,13 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     private void prepareLoader() {
         loader = new LessonsLoader();
-        loader.onLoadingOperationStarted.connect(new Listener1<CalendarLoadingOperation>() {
+        loader.onLoadingOperationStarted.connect(new Listener1<ILoadingOperation>() {
             @Override
-            public void apply(CalendarLoadingOperation operation) {
-                onLoadingOperationStarted.dispatch(operation);
+            public void apply(ILoadingOperation operation) {
+                onLoadingOperationResult.dispatch(operation);
             }
         });
-        loader.onLoadingOperationFinished.connect(new Listener3<LessonsSet, Calendar, Calendar>() {
+        loader.onLoadingOperationSuccessful.connect(new Listener3<LessonsSet, Calendar, Calendar>() {
             @Override
             public void apply(LessonsSet lessons, Calendar from, Calendar to) {
                 currentlyShownLessonsSet.mergeWith(lessons);
@@ -93,13 +95,13 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         loader.onLoadingErrorHappened.connect(new Listener1<VolleyError>() {
             @Override
             public void apply(VolleyError error) {
-                Toast.makeText(getContext(), "Error happened",Toast.LENGTH_SHORT).show();
+                onLoadingOperationResult.dispatch(new ReadingErrorOperation());
             }
         });
         loader.onParsingErrorHappened.connect(new Listener1<Exception>() {
             @Override
             public void apply(Exception e) {
-                Toast.makeText(getContext(), "Parsing error happened",Toast.LENGTH_SHORT).show();
+                onLoadingOperationResult.dispatch(new ParsingErrorOperation());
             }
         });
     }
@@ -155,29 +157,4 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         }
     }
 
-    public static class CalendarLoadingOperation {
-        private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM", Locale.ITALIAN);
-
-        private Calendar from, to;
-
-        public CalendarLoadingOperation(Calendar from, Calendar to) {
-            this.from = from;
-            this.to = to;
-        }
-
-        @Override
-        public String toString() {
-            //Usually we're loading data that is exactly one or two weeks longs, considering the day
-            //starting at 00:00:00. We don't want to show that day as loaded, so we back by a second
-            //to the previous day.
-            Calendar adjustedTo = (Calendar) to.clone();
-            adjustedTo.add(Calendar.SECOND, -1);
-
-            return String.format(
-                    "Sto caricando gli orari dal %s al %s...",
-                    DATE_FORMAT.format(from.getTime()),
-                    DATE_FORMAT.format(adjustedTo.getTime())
-            );
-        }
-    }
 }

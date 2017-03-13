@@ -8,13 +8,16 @@ package trentastico.geridea.com.trentastico.activities.network;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
 
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import trentastico.geridea.com.trentastico.Config;
 import trentastico.geridea.com.trentastico.activities.model.LessonsSet;
 import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
 
@@ -52,6 +55,8 @@ public class Networker {
 
     private static class RequestQueuer extends AsyncTask<Void, Void, Void> {
 
+        private Timer timeoutWaiter = new Timer();
+
         private boolean isWorking = false;
 
         /**
@@ -64,28 +69,52 @@ public class Networker {
             isWorking = true;
 
             if (!workingQueue.isEmpty()) {
-                final LessonsRequest request = workingQueue.poll();
-                request.onRequestTerminated.connect(new Listener0() {
-                    @Override
-                    public void apply() {
-                        doInBackground();
-                    }
-                });
-
-                request.inRequestAboutToBeSent.dispatch();
-                request.onRequestSuccessful.connect(new Listener1<LessonsSet>() {
-                    @Override
-                    public void apply(LessonsSet result) {
-                        Cacher.cacheLessonsSet(request, result);
-                    }
-                });
-
-                Volley.newRequestQueue(CONTEXT).add(request);
+                processRequest(workingQueue.poll(), false);
             } else {
                 isWorking = false;
             }
 
             return null;
+        }
+
+        private void processRequest(final LessonsRequest request, boolean isARetry) {
+            if (!isARetry) {
+                request.onRequestSuccessful.connect(new Listener1<LessonsSet>() {
+                    @Override
+                    public void apply(LessonsSet result) {
+                        Cacher.cacheLessonsSet(request, result);
+
+                        //Start managing the next request
+                        doInBackground();
+                    }
+                });
+
+                request.onNetworkErrorHappened.connect(new Listener1<VolleyError>() {
+                    @Override
+                    public void apply(VolleyError arg1) {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+
+                request.onParsingErrorHappened.connect(new Listener1<Exception>() {
+                    @Override
+                    public void apply(Exception arg1) {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+            }
+
+            request.inRequestAboutToBeSent.dispatch();
+            Volley.newRequestQueue(CONTEXT).add(request);
+        }
+
+        private void waitForTimeoutAndReprocessRequest(final LessonsRequest request) {
+            timeoutWaiter.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    processRequest(request, true);
+                }
+            }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED);
         }
 
         public void enqueueRequest(LessonsRequest request) {

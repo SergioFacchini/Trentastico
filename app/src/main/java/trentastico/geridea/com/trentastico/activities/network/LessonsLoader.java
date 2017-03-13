@@ -8,12 +8,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
 import trentastico.geridea.com.trentastico.activities.model.LessonsSet;
 import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
+import trentastico.geridea.com.trentastico.activities.network.operations.CalendarLoadingOperation;
+import trentastico.geridea.com.trentastico.activities.network.operations.ILoadingOperation;
 import trentastico.geridea.com.trentastico.activities.utils.AppPreferences;
 import trentastico.geridea.com.trentastico.activities.utils.CalendarInterval;
 import trentastico.geridea.com.trentastico.activities.utils.CalendarUtils;
@@ -24,13 +23,13 @@ public class LessonsLoader {
      * Dispatched when the loading of events has been completed and the calendar can be made
      * visible.
      */
-    public final Signal3<LessonsSet, Calendar, Calendar> onLoadingOperationFinished = new Signal3<>();
+    public final Signal3<LessonsSet, Calendar, Calendar> onLoadingOperationSuccessful = new Signal3<>();
 
     /**
      * Dispatched when the calendar starts loading something from internet. The argument is that
      * "something".
      */
-    public final Signal1<CourseTimesCalendar.CalendarLoadingOperation> onLoadingOperationStarted = new Signal1<>();
+    public final Signal1<ILoadingOperation> onLoadingOperationStarted = new Signal1<>();
 
     /**
      * Dispatched when an error happened when trying to fetch lessons.
@@ -51,16 +50,14 @@ public class LessonsLoader {
         Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
             @Override
             public void onLoadingAboutToStart(Calendar from, Calendar to) {
-                CourseTimesCalendar.CalendarLoadingOperation operation = new CourseTimesCalendar.CalendarLoadingOperation(loadFrom, loadTo);
-                Logger.getAnonymousLogger().log(Level.SEVERE, operation.toString());
-                onLoadingOperationStarted.dispatch(operation);
+                onLoadingOperationStarted.dispatch(new CalendarLoadingOperation(loadFrom, loadTo));
             }
 
             @Override
             public void onLessonsLoaded(LessonsSet lessons, Calendar from, Calendar to) {
                 removeLoadingInterval(loadFrom, loadTo);
 
-                onLoadingOperationFinished.dispatch(lessons, from, to);
+                onLoadingOperationSuccessful.dispatch(lessons, from, to);
             }
 
             @Override

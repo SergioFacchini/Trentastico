@@ -1,5 +1,7 @@
 package trentastico.geridea.com.trentastico.activities.network;
 
+import android.util.Log;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -22,7 +24,7 @@ import trentastico.geridea.com.trentastico.activities.model.StudyCourse;
 /*
  * Created with ♥ by Slava on 12/03/2017.
  */
-public class LessonsRequest extends StringRequest implements Response.Listener<String>, Response.ErrorListener {
+public class LessonsRequest extends StringRequest implements Response.Listener<String> {
 
     private static final DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(
         15000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -34,12 +36,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
     private final LessonsFetchedListener listener;
 
     /**
-     * Dispatched when the request has been fulfilled (either fetched some data or a network error
-     * happened).
-     */
-    public final Signal0 onRequestTerminated = new Signal0();
-
-    /**
      * Dispatched when the request has been successfully fulfilled.
      */
     public final Signal1<LessonsSet> onRequestSuccessful = new Signal1<>();
@@ -48,6 +44,16 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
      * Dispatched right before the request is about to be sent.
      */
     public final Signal0 inRequestAboutToBeSent = new Signal0();
+
+    /**
+     * Dispatched when the request has encountered an error while trying to parse the response.
+     */
+    public final Signal1<Exception> onParsingErrorHappened = new Signal1<>();
+
+    /**
+     * Dispatched when there is an error while trying to get lessons from internet.
+     */
+    public final Signal1<VolleyError> onNetworkErrorHappened = new Signal1<>();
 
 
     public LessonsRequest(Calendar fromWhen, Calendar toWhen, StudyCourse studyCourse, final LessonsFetchedListener listener) {
@@ -68,8 +74,18 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
         });
     }
 
+    //We cannot provide the listeners to the constructor, so we use this workaround do still manage
+    //the listeners.
     protected void deliverResponse(String response) {
         onResponse(response);
+    }
+
+    @Override
+    public void deliverError(VolleyError error) {
+        Log.wtf("deliverError", error);
+
+        listener.onErrorHappened(error);
+        onNetworkErrorHappened.dispatch(error);
     }
 
     private static String buildRequestURL(StudyCourse studyCourse, Calendar from, Calendar to) {
@@ -81,11 +97,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
                 from.getTimeInMillis() / 1000,
                 to.getTimeInMillis() / 1000
         );
-    }
-
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        listener.onErrorHappened(error);
     }
 
     @Override
@@ -104,13 +115,13 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
                 lessonsSet.addLessonSchedule(LessonSchedule.fromJson(eventsJson.getJSONObject(i)));
             }
 
-            onRequestSuccessful.dispatch(lessonsSet);
             listener.onLessonsLoaded(lessonsSet, fromWhen, toWhen);
+            onRequestSuccessful.dispatch(lessonsSet);
         } catch (Exception e) {
             e.printStackTrace();
             listener.onParsingErrorHappened(e);
-        } finally {
-            onRequestTerminated.dispatch();
+
+            onParsingErrorHappened.dispatch(e);
         }
     }
 }

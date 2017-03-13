@@ -14,13 +14,11 @@ import android.widget.TextView;
 import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
 
-import org.w3c.dom.Text;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import trentastico.geridea.com.trentastico.R;
 import trentastico.geridea.com.trentastico.activities.gui.views.CourseTimesCalendar;
-
+import trentastico.geridea.com.trentastico.activities.network.operations.ILoadingOperation;
 
 public class CalendarActivity extends AppCompatActivity {
 
@@ -36,18 +34,16 @@ public class CalendarActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         //Binding calendar
-        calendar.onLoadingOperationStarted.connect(new Listener1<CourseTimesCalendar.CalendarLoadingOperation>() {
+        calendar.onLoadingOperationResult.connect(new Listener1<ILoadingOperation>() {
             @Override
-            public void apply(final CourseTimesCalendar.CalendarLoadingOperation operation) {
+            public void apply(final ILoadingOperation operation) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        loadingText.setText(operation.toString());
-
+                        loadingText.setText(operation.describe());
                         loader.setVisibility(View.VISIBLE);
                     }
                 });
-
             }
         });
 
