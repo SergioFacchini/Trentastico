@@ -6,6 +6,7 @@ package trentastico.geridea.com.trentastico.gui.views;
  */
 
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
@@ -28,6 +29,7 @@ import trentastico.geridea.com.trentastico.network.operations.ILoadingOperation;
 import trentastico.geridea.com.trentastico.network.LessonsLoader;
 import trentastico.geridea.com.trentastico.network.operations.ParsingErrorOperation;
 import trentastico.geridea.com.trentastico.network.operations.ReadingErrorOperation;
+import trentastico.geridea.com.trentastico.utils.CalendarUtils;
 
 public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, CustomWeekView.ScrollListener {
 
@@ -117,7 +119,33 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     @Override
     public String interpretDate(Calendar date) {
+        Calendar today = Calendar.getInstance();
+        if (isSameDay(today, date)){
+            return "Oggi";
+        }
+
+        today.add(Calendar.DAY_OF_MONTH, +1);
+        if (isSameDay(today, date)){
+            return "Domani";
+        }
+
+        today.add(Calendar.DAY_OF_MONTH, +1);
+        if (isSameDay(today, date)){
+            return "Dopodomani";
+        }
+
+        today.add(Calendar.DAY_OF_MONTH, -3);
+        if (isSameDay(today, date)){
+            return "Ieri";
+        }
+
         return DATE_FORMAT.format(date.getTime());
+    }
+
+    private boolean isSameDay(Calendar date1, Calendar date2) {
+        return date1.get(Calendar.YEAR)         == date2.get(Calendar.YEAR) &&
+               date1.get(Calendar.MONTH)        == date2.get(Calendar.MONTH) &&
+               date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);
     }
 
     @Override
