@@ -45,7 +45,7 @@
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
-        <trentastico.geridea.com.trentastico.gui.views.CourseSelectorView
+        <com.geridea.trentastico.gui.views.CourseSelectorView
             android:id="@+id/course_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
