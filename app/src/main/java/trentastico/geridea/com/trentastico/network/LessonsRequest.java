@@ -103,8 +103,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
 
     @Override
     public void deliverError(VolleyError error) {
-        Log.wtf("deliverError", error);
-
         listener.onErrorHappened(error);
         onNetworkErrorHappened.dispatch(error);
     }
