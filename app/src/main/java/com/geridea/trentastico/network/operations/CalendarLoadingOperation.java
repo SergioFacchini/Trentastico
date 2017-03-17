@@ -1,5 +1,7 @@
 package com.geridea.trentastico.network.operations;
 
+import com.geridea.trentastico.utils.time.CalendarInterval;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -10,9 +12,9 @@ public class CalendarLoadingOperation implements ILoadingOperation {
 
     private Calendar from, to;
 
-    public CalendarLoadingOperation(Calendar from, Calendar to) {
-        this.from = from;
-        this.to = to;
+    public CalendarLoadingOperation(CalendarInterval interval) {
+        this.from = interval.getFrom();
+        this.to   = interval.getTo();
     }
 
     @Override

@@ -7,12 +7,15 @@ package com.geridea.trentastico.network;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.geridea.trentastico.utils.time.WeekInterval;
+import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener1;
 
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -33,25 +36,37 @@ public class Networker {
         CONTEXT = context;
     }
 
-    public static void loadLessonsOfCourse(
-            Calendar fromWhen, Calendar toWhen, StudyCourse studyCourse, LessonsFetchedListener listener) {
+    /**
+     * Loads the lessons in the given period. Fetches all the possible lesson from the fresh cache
+     * or dead cache and the remaining from internet.
+     * @return a list of intervals that will be fetched from the network
+     */
+    @Nullable
+    public static ArrayList<WeekInterval> loadLessons(WeekInterval intervalToLoad, LessonsFetchedListener listener) {
+        CachedLessonsSet cacheSet = Cacher.getLessonsInFreshOrDeadCache(intervalToLoad);
+        if (cacheSet.hasMissingIntervals()) {
+            if(cacheSet.wereSomeLessonsFoundInCache()){
+                listener.onPartiallyCachedResultsFetched(cacheSet);
+            }
 
-        CachedLessonsSet lessons = Cacher.getLessonsInCacheIfAvailable(fromWhen, toWhen, studyCourse);
-        if (lessons != null) {
-            listener.onLessonsLoaded(lessons, fromWhen, toWhen);
+            for (WeekInterval interval: cacheSet.getMissingIntervals()) {
+                performLoadingRequest(interval, listener);
+            }
         } else {
-            performLoadingRequest(fromWhen, toWhen, studyCourse, listener);
+            //We found everything we needed in cache
+            listener.onLessonsLoaded(cacheSet, intervalToLoad);
         }
+
+        return cacheSet.getMissingIntervals();
     }
 
-    private static void performLoadingRequest(
-            Calendar fromWhen, Calendar toWhen, StudyCourse studyCourse, LessonsFetchedListener listener) {
-
+    private static void performLoadingRequest(WeekInterval intervalToLoad, LessonsFetchedListener listener) {
         if (!queuer.isWorking()) {
             queuer = new RequestQueuer();
         }
 
-        queuer.enqueueRequest(new LessonsRequest(fromWhen, toWhen, studyCourse, listener));
+        StudyCourse studyCourse = AppPreferences.getStudyCourse();
+        queuer.enqueueRequest(new LessonsRequest(intervalToLoad, studyCourse, listener));
     }
 
 

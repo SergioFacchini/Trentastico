@@ -6,14 +6,24 @@ package com.geridea.trentastico.gui.views;
  */
 
 import android.content.Context;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
+import com.geridea.trentastico.Config;
+import com.geridea.trentastico.model.LessonSchedule;
+import com.geridea.trentastico.model.LessonsSet;
+import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.network.LessonsLoader;
+import com.geridea.trentastico.network.operations.ILoadingOperation;
+import com.geridea.trentastico.network.operations.ParsingErrorOperation;
+import com.geridea.trentastico.network.operations.ReadingErrorOperation;
+import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.WeekDayTime;
+import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
-import com.threerings.signals.Listener3;
+import com.threerings.signals.Listener2;
 import com.threerings.signals.Signal0;
 import com.threerings.signals.Signal1;
 
@@ -23,17 +33,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import com.geridea.trentastico.model.LessonSchedule;
-import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.network.operations.ILoadingOperation;
-import com.geridea.trentastico.network.LessonsLoader;
-import com.geridea.trentastico.network.operations.ParsingErrorOperation;
-import com.geridea.trentastico.network.operations.ReadingErrorOperation;
-import com.geridea.trentastico.utils.CalendarUtils;
-
 public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, CustomWeekView.ScrollListener {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_DEBUG = new SimpleDateFormat("(w) EEEE d MMMM", Locale.ITALIAN);
+
+    private final static SimpleDateFormat FORMAT_ONLY_DAY = new SimpleDateFormat("EEEE", Locale.ITALIAN);
 
     //Signals
     /**
@@ -82,18 +87,31 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
                 onLoadingOperationResult.dispatch(operation);
             }
         });
-        loader.onLoadingOperationSuccessful.connect(new Listener3<LessonsSet, Calendar, Calendar>() {
+        loader.onLoadingOperationSuccessful.connect(new Listener2<LessonsSet, CalendarInterval>() {
             @Override
-            public void apply(LessonsSet lessons, Calendar from, Calendar to) {
+            public void apply(LessonsSet lessons, CalendarInterval interval) {
                 currentlyShownLessonsSet.mergeWith(lessons);
-                extendLeftBoundDisabledDay(from);
-                extendRightBoundDisabledDay(to);
+
+                addEnabledInterval(interval);
 
                 addEventsFromLessonsSet(lessons);
 
                 onLoadingOperationFinished.dispatch();
             }
         });
+
+        loader.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
+            @Override
+            public void apply(CachedLessonsSet lessonsSet) {
+                currentlyShownLessonsSet.mergeWith(lessonsSet);
+
+                ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedIntervals();
+                addEnabledIntervals(cachedIntervals);
+
+                addEventsFromLessonsSet(lessonsSet);
+            }
+        });
+
         loader.onLoadingErrorHappened.connect(new Listener1<VolleyError>() {
             @Override
             public void apply(VolleyError error) {
@@ -109,6 +127,12 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         });
     }
 
+    private void addEnabledIntervals(ArrayList<WeekInterval> intervals) {
+        for (WeekInterval interval : intervals) {
+            addEnabledInterval(interval.toCalendarInterval());
+        }
+    }
+
     public void loadNearEvents() {
         loader.loadNearEvents();
     }
@@ -121,25 +145,25 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     public String interpretDate(Calendar date) {
         Calendar today = Calendar.getInstance();
         if (isSameDay(today, date)){
-            return "Oggi";
+            return "Oggi ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
         }
 
         today.add(Calendar.DAY_OF_MONTH, +1);
         if (isSameDay(today, date)){
-            return "Domani";
+            return "Domani ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
         }
 
         today.add(Calendar.DAY_OF_MONTH, +1);
         if (isSameDay(today, date)){
-            return "Dopodomani";
+            return "Dopodomani ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
         }
 
         today.add(Calendar.DAY_OF_MONTH, -3);
         if (isSameDay(today, date)){
-            return "Ieri";
+            return "Ieri ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
         }
 
-        return DATE_FORMAT.format(date.getTime());
+        return (Config.IS_IN_DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
     }
 
     private boolean isSameDay(Calendar date1, Calendar date2) {
@@ -165,7 +189,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     @Override
     public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
         if(isADisabledDay(newFirstVisibleDay)){
-            loader.loadDayOnDayChangeIfNeeded(newFirstVisibleDay, oldFirstVisibleDay);
+            loader.loadDayOnDayChangeIfNeeded(new WeekDayTime(newFirstVisibleDay), new WeekDayTime(oldFirstVisibleDay));
         }
     }
 

@@ -7,7 +7,9 @@ package com.geridea.trentastico.model.cache;
 
 import android.database.Cursor;
 
+import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.model.LessonSchedule;
+import com.geridea.trentastico.utils.time.WeekTime;
 
 public class CachedLesson {
 
@@ -16,10 +18,12 @@ public class CachedLesson {
     private long starts_at_ms;
     private long finishes_at_ms;
     private long teaching_id;
-
     private String subject;
+
     private String room;
     private String description;
+
+    private final WeekTime weekTime;
 
     public CachedLesson(long cached_period_id, long lesson_id, long starts_at_ms, long finishes_at_ms, long teaching_id, String subject, String room, String description) {
         this.lesson_id = lesson_id;
@@ -30,6 +34,8 @@ public class CachedLesson {
         this.subject = subject;
         this.room = room;
         this.description = description;
+
+        this.weekTime = new WeekTime(starts_at_ms);
     }
 
     public CachedLesson(long cachedPeriodId, LessonSchedule lesson) {
@@ -77,16 +83,20 @@ public class CachedLesson {
         return description;
     }
 
+    public WeekTime getWeekTime() {
+        return weekTime;
+    }
+
     public static CachedLesson fromCursor(Cursor cursor) {
         return new CachedLesson(
-                cursor.getLong(cursor.getColumnIndexOrThrow("cached_period_id")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("lesson_id")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("starts_at_ms")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("finishes_at_ms")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("teaching_id")),
-                cursor.getString(cursor.getColumnIndexOrThrow("subject")),
-                cursor.getString(cursor.getColumnIndexOrThrow("room")),
-                cursor.getString(cursor.getColumnIndexOrThrow("description"))
+            cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_CACHED_PERIOD_ID)),
+            cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_LESSON_ID)),
+            cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_STARTS_AT_MS)),
+            cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_FINISHES_AT_MS)),
+            cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_TEACHING_ID)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_SUBJECT)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_ROOM)),
+            cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_DESCRIPTION))
         );
 
     }

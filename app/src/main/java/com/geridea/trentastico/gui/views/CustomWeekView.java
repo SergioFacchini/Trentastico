@@ -34,6 +34,7 @@ import android.widget.OverScroller;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.geridea.trentastico.utils.time.CalendarInterval;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,12 +65,16 @@ public class CustomWeekView extends View {
     private final int mDisabledBackgroundColor = 0xFF888888;
     private final int mPastDayBackgroundColor = 0xFFD5D5D5;
 
-    private Calendar mLeftBoundDisabledDay, mRightBoundDisabledDay;
+    private final ArrayList<CalendarInterval> enabledIntervals = new ArrayList<>();
 
     protected void addEvents(List<? extends WeekViewEvent> weekViewEvents) {
         sortAndCacheEvents(weekViewEvents);
         recalculatePositionsOfEvents();
         notifyDatasetChanged();
+    }
+
+    protected void addEnabledInterval(CalendarInterval interval) {
+        enabledIntervals.add(interval);
     }
 
     private enum Direction {
@@ -481,11 +486,6 @@ public class CustomWeekView extends View {
                 return true;
             }
         });
-
-        //Other settings
-        //By default, everything is disabled
-        mLeftBoundDisabledDay  = Calendar.getInstance();
-        mRightBoundDisabledDay = Calendar.getInstance();
     }
 
     // fix rotation changes
@@ -732,11 +732,15 @@ public class CustomWeekView extends View {
             canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
             startPixel += mWidthPerDay + mColumnGap;
         }
-
     }
 
     public boolean isADisabledDay(Calendar day) {
-        return day.before(mLeftBoundDisabledDay) || day.after(mRightBoundDisabledDay) || day.equals(mRightBoundDisabledDay);
+        for (CalendarInterval enabledInterval : enabledIntervals) {
+            if (enabledInterval.contains(day)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1238,25 +1242,6 @@ public class CustomWeekView extends View {
 
         // Refresh time column width.
         initTextTimeWidth();
-    }
-
-    /**
-     * Decreases the last disabled day to the specified date.
-     */
-    public void extendLeftBoundDisabledDay(Calendar newDay) {
-        if (newDay.before( this.mLeftBoundDisabledDay)) {
-            this.mLeftBoundDisabledDay = newDay;
-        }
-    }
-
-    /**
-     * Sets the first disabled day. All the days on the calendar after this day are
-     * treated as disabled.
-     */
-    public void extendRightBoundDisabledDay(Calendar newDay) {
-        if (newDay.after(this.mRightBoundDisabledDay)) {
-            this.mRightBoundDisabledDay = newDay;
-        }
     }
 
     /////////////////////////////////////////////////////////////////

@@ -1,8 +1,6 @@
-package com.geridea.trentastico.utils;
+package com.geridea.trentastico.utils.time;
 
 import java.util.Calendar;
-
-import static com.geridea.trentastico.utils.CalendarUtils.formatDDMMYY;
 
 /*
  * Created with ♥ by Slava on 12/03/2017.
@@ -16,8 +14,8 @@ public class CalendarInterval {
         this.to = to;
     }
 
-    public boolean isInInterval(Calendar time) {
-        return from.equals(time) || to.equals(time) || (time.after(from) && time.before(to));
+    public boolean contains(Calendar time) {
+        return from.equals(time) || (time.after(from) && time.before(to));
     }
 
     public boolean matches(Calendar searchedFrom, Calendar searchedTo) {
@@ -26,7 +24,7 @@ public class CalendarInterval {
 
     @Override
     public String toString() {
-        return String.format("[%s-%s]", formatDDMMYY(from), formatDDMMYY(to));
+        return String.format("[%s-%s]", CalendarUtils.formatDDMMYY(from), CalendarUtils.formatDDMMYY(to));
     }
 
     public Calendar getFrom() {

@@ -5,67 +5,17 @@ package com.geridea.trentastico.model.cache;
  * Created with ♥ by Slava on 13/03/2017.
  */
 
-import java.util.ArrayList;
-import java.util.Calendar;
-
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.utils.time.WeekInterval;
 
-/**
- * Identifies a contiguous interval of cached events.
- */
+import java.util.ArrayList;
+
 public class CachedLessonsSet extends LessonsSet {
 
-    private StudyCourse course;
-    private Calendar from, to;
-    private Integer lessonType = null;
-
-    private Calendar whenWasCached;
-
-    public CachedLessonsSet() {
-
-    }
-
-    public CachedLessonsSet(StudyCourse course, Calendar from, Calendar to, Integer lessonType) {
-        this.course = course;
-        this.from = from;
-        this.to = to;
-        this.lessonType = lessonType;
-    }
-
-    public StudyCourse getCourse() {
-        return course;
-    }
-
-    public void setCourse(StudyCourse course) {
-        this.course = course;
-    }
-
-    public Calendar getFrom() {
-        return from;
-    }
-
-    public void setFrom(Calendar from) {
-        this.from = from;
-    }
-
-    public Calendar getTo() {
-        return to;
-    }
-
-    public void setTo(Calendar to) {
-        this.to = to;
-    }
-
-    public Integer getLessonType() {
-        return lessonType;
-    }
-
-    public void setLessonType(Integer lessonType) {
-        this.lessonType = lessonType;
-    }
+    private ArrayList<WeekInterval> missingIntervals = new ArrayList<>();
+    private ArrayList<CachedPeriod> cachedPeriods = new ArrayList<>();
 
     public void addLessonSchedules(ArrayList<LessonSchedule> lessons) {
         scheduledLessons.addAll(lessons);
@@ -75,5 +25,41 @@ public class CachedLessonsSet extends LessonsSet {
         for (CachedLessonType cachedLessonType : cachedLessonTypes) {
             addLessonType(new LessonType(cachedLessonType));
         }
+    }
+
+    public void addMissingIntervals(ArrayList<WeekInterval> missingIntervals) {
+        this.missingIntervals.addAll(missingIntervals);
+    }
+
+    public boolean hasMissingIntervals() {
+        return !missingIntervals.isEmpty();
+    }
+
+    public boolean wereSomeLessonsFoundInCache() {
+        return !scheduledLessons.isEmpty();
+    }
+
+    /**
+     * @return the intervals that we were unable to load from cache.
+     */
+    public ArrayList<WeekInterval> getMissingIntervals() {
+        return missingIntervals;
+    }
+
+    public void addCachedPeriod(CachedPeriod cachedPeriod) {
+        cachedPeriods.add(cachedPeriod);
+    }
+
+    public ArrayList<CachedPeriod> getCachedPeriods() {
+        return cachedPeriods;
+    }
+
+    public ArrayList<WeekInterval> getCachedIntervals() {
+        ArrayList<WeekInterval> cachedIntervals = new ArrayList<>();
+        for (CachedPeriod cachedPeriod : cachedPeriods) {
+            cachedIntervals.add(cachedPeriod.getPeriod());
+        }
+
+        return cachedIntervals;
     }
 }

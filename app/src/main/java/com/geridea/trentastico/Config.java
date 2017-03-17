@@ -7,8 +7,10 @@ package com.geridea.trentastico;
 
 public final class Config {
 
-    //Networking
+    //Debug
+    public static final boolean IS_IN_DEBUG_MODE = true;
 
+    //Networking
     /**
      * How much ms we should wait after a request has failed loading and the next retry?
      */

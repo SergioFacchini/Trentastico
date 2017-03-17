@@ -9,79 +9,42 @@ import android.database.Cursor;
 
 import java.util.Calendar;
 
-import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.LessonsRequest;
+import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.utils.time.WeekInterval;
+import com.geridea.trentastico.utils.time.WeekTime;
 
 public class CachedPeriod {
 
     private long id;
-    private long department_id;
-    private long course_id;
-    private long year;
-    private long from_ms;
-    private long to_ms;
     private long lesson_type = 0;
     private long cached_in_ms;
 
-    public CachedPeriod(long id, StudyCourse course, long from_ms, long to_ms, long lesson_type, long cached_in_ms) {
+    private WeekInterval period;
+
+    public CachedPeriod(long id, WeekInterval period, long lesson_type, long cached_in_ms) {
         this.id = id;
-        this.department_id = course.getDepartmentId();
-        this.course_id     = course.getCourseId();
-        this.year          = course.getYear();
-        this.from_ms = from_ms;
-        this.to_ms = to_ms;
+        this.period = period;
         this.lesson_type = lesson_type;
         this.cached_in_ms = cached_in_ms;
     }
 
-    public CachedPeriod(LessonsRequest request) {
+    public CachedPeriod(WeekInterval interval) {
         this.id = -1;
-
-        StudyCourse course = request.getStudyCourse();
-        this.department_id = course.getDepartmentId();
-        this.course_id     = course.getCourseId();
-        this.year          = course.getYear();
-        this.lesson_type = 0;
-
-        this.from_ms = request.getFromWhen().getTimeInMillis();
-        this.to_ms   = request.getToWhen().getTimeInMillis();
-
-        this.cached_in_ms = System.currentTimeMillis();
+        this.lesson_type   = 0;
+        this.period        = interval.copy();
+        this.cached_in_ms  = System.currentTimeMillis();
     }
 
-    public CachedPeriod(long id, long department_id, long course_id, long year, long from_ms, long to_ms, long lesson_type, long cached_in_ms) {
+    public CachedPeriod(long id, int startWeek, int startYear, int endWeek, int endYear, long lesson_type, long cached_in_ms) {
         this.id            = id;
-        this.department_id = department_id;
-        this.course_id     = course_id;
-        this.year          = year;
-        this.from_ms       = from_ms;
-        this.to_ms         = to_ms;
         this.lesson_type   = lesson_type;
         this.cached_in_ms  = cached_in_ms;
+
+        this.period = new WeekInterval(startWeek, startYear, endWeek, endYear);
     }
 
     public long getId() {
         return id;
-    }
-
-    public long getDepartment_id() {
-        return department_id;
-    }
-
-    public long getCourse_id() {
-        return course_id;
-    }
-
-    public long getYear() {
-        return year;
-    }
-
-    public long getFrom_ms() {
-        return from_ms;
-    }
-
-    public long getTo_ms() {
-        return to_ms;
     }
 
     public long getLesson_type() {
@@ -96,49 +59,36 @@ public class CachedPeriod {
         this.id = id;
     }
 
+    public WeekInterval getPeriod() {
+        return period;
+    }
 
     public static CachedPeriod fromCursor(Cursor cursor) {
         return new CachedPeriod(
-                cursor.getLong(cursor.getColumnIndexOrThrow("id")),
-
-                cursor.getLong(cursor.getColumnIndexOrThrow("department_id")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("course_id")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("year")),
-
-                cursor.getLong(cursor.getColumnIndexOrThrow("from_ms")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("to_ms")),
-
-                cursor.getLong(cursor.getColumnIndexOrThrow("lesson_type")),
-                cursor.getLong(cursor.getColumnIndexOrThrow("cached_in_ms"))
+            cursor.getLong(cursor.getColumnIndexOrThrow(Cacher.CP_ID)),
+            cursor.getInt( cursor.getColumnIndexOrThrow(Cacher.CP_START_WEEK)),
+            cursor.getInt( cursor.getColumnIndexOrThrow(Cacher.CP_START_YEAR)),
+            cursor.getInt( cursor.getColumnIndexOrThrow(Cacher.CP_END_WEEK)),
+            cursor.getInt( cursor.getColumnIndexOrThrow(Cacher.CP_END_YEAR)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(Cacher.CP_LESSON_TYPE)),
+            cursor.getLong(cursor.getColumnIndexOrThrow(Cacher.CP_CACHED_IN_MS))
         );
     }
 
-    /**
-     * Removes from the current period the part of the period that intersects with the
-     * give from-to interval.
-     */
-    public void cutFromPeriod(long cutFrom, long cutTo) {
-        if(cutFrom > from_ms && cutTo < to_ms){
-            throw new IllegalStateException("Cannot cut an interval in two pieces");
-        } else if(cutFrom == from_ms && cutTo == to_ms){
-            from_ms = to_ms; //Exact match: clear everything
-        } else if(from_ms <= cutFrom){
-            to_ms = cutFrom; //Trimming right side
-        } else {
-            from_ms = cutTo; //Trimming left side
-        }
+    public void setPeriod(WeekInterval period) {
+        this.period = period;
     }
 
-    public boolean isEmpty() {
-        return from_ms - to_ms == 0;
+    public CachedPeriod copy() {
+        return new CachedPeriod(-1, getPeriod(), lesson_type, cached_in_ms);
     }
 
-    /**
-     * @return true if the given interval is smaller or equal to the period and it's
-     * temporarily inside that period.
-     */
-    public boolean containsEntirely(Calendar fromWeek, Calendar toWeek) {
-        return fromWeek.getTimeInMillis() >= from_ms && toWeek.getTimeInMillis() <= to_ms;
+    public boolean contains(WeekTime timeToCheck) {
+        return period.contains(timeToCheck);
     }
 
+    @Override
+    public String toString() {
+        return "[id: "+id+" "+period+"]";
+    }
 }

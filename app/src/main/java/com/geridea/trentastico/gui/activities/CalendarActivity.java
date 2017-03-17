@@ -11,11 +11,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.geridea.trentastico.database.Cacher;
 import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.views.CourseTimesCalendar;
 import com.geridea.trentastico.network.operations.ILoadingOperation;

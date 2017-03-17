@@ -1,21 +1,20 @@
 package com.geridea.trentastico.network;
 
 import com.android.volley.VolleyError;
-import com.threerings.signals.Signal1;
-import com.threerings.signals.Signal3;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
-import com.geridea.trentastico.utils.AppPreferences;
-import com.geridea.trentastico.utils.CalendarInterval;
-import com.geridea.trentastico.utils.CalendarUtils;
+import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.WeekDayTime;
+import com.geridea.trentastico.utils.time.WeekInterval;
+import com.geridea.trentastico.utils.time.WeekTime;
+import com.threerings.signals.Signal1;
+import com.threerings.signals.Signal2;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class LessonsLoader {
 
@@ -23,7 +22,7 @@ public class LessonsLoader {
      * Dispatched when the loading of events has been completed and the calendar can be made
      * visible.
      */
-    public final Signal3<LessonsSet, Calendar, Calendar> onLoadingOperationSuccessful = new Signal3<>();
+    public final Signal2<LessonsSet, CalendarInterval> onLoadingOperationSuccessful = new Signal2<>();
 
     /**
      * Dispatched when the calendar starts loading something from internet. The argument is that
@@ -37,27 +36,31 @@ public class LessonsLoader {
     public final Signal1<VolleyError> onLoadingErrorHappened = new Signal1<>();
 
     /**
+     * Dispatched when some results were retrieved from the cache, however some results are still
+     * missing and will have to be loaded from network.
+     */
+    public final Signal1<CachedLessonsSet> onPartiallyCachedResultsFetched = new Signal1<>();
+
+    /**
      * Dispatched when the received response could not be parsed correctly.
      */
     public final Signal1<Exception> onParsingErrorHappened = new Signal1<>();
 
 
-    private List<CalendarInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<CalendarInterval>());
+    private List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
 
-    public void loadAndAddLessons(final Calendar loadFrom, final Calendar loadTo, StudyCourse studyCourse) {
-        addLoadingInterval(loadFrom, loadTo);
-
-        Networker.loadLessonsOfCourse(loadFrom, loadTo, studyCourse, new LessonsFetchedListener() {
+    public void loadAndAddLessons(final WeekInterval intervalToLoad) {
+        ArrayList<WeekInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad, new LessonsFetchedListener() {
             @Override
-            public void onLoadingAboutToStart(Calendar from, Calendar to) {
-                onLoadingOperationStarted.dispatch(new CalendarLoadingOperation(loadFrom, loadTo));
+            public void onLoadingAboutToStart(CalendarInterval interval) {
+                onLoadingOperationStarted.dispatch(new CalendarLoadingOperation(interval));
             }
 
             @Override
-            public void onLessonsLoaded(LessonsSet lessons, Calendar from, Calendar to) {
-                removeLoadingInterval(loadFrom, loadTo);
+            public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval) {
+                removeLoadingInterval(interval);
 
-                onLoadingOperationSuccessful.dispatch(lessons, from, to);
+                onLoadingOperationSuccessful.dispatch(lessons, interval.toCalendarInterval());
             }
 
             @Override
@@ -69,17 +72,32 @@ public class LessonsLoader {
             public void onParsingErrorHappened(Exception e) {
                 onParsingErrorHappened.dispatch(e);
             }
+
+            @Override
+            public void onPartiallyCachedResultsFetched(CachedLessonsSet cacheSet) {
+                onPartiallyCachedResultsFetched.dispatch(cacheSet);
+            }
         });
+
+        addLoadingIntervals(intervalsToLoad);
     }
 
-    private void addLoadingInterval(Calendar loadFrom, Calendar loadTo) {
-        loadingIntervals.add(new CalendarInterval(loadFrom, loadTo));
+    private void addLoadingIntervals(ArrayList<WeekInterval> intervalsToLoad) {
+        if (intervalsToLoad != null) {
+            for (WeekInterval interval : intervalsToLoad) {
+                addLoadingInterval(interval);
+            }
+        }
     }
 
-    private void removeLoadingInterval(Calendar loadFrom, Calendar loadTo) {
-        CalendarInterval intervalToDelete = null;
-        for (CalendarInterval loadingInterval : loadingIntervals) {
-            if(loadingInterval.matches(loadFrom, loadTo)) {
+    private void addLoadingInterval(WeekInterval intervalToLoad) {
+        loadingIntervals.add(intervalToLoad);
+    }
+
+    private void removeLoadingInterval(WeekInterval intervalToRemove) {
+        WeekInterval intervalToDelete = null;
+        for (WeekInterval loadingInterval : loadingIntervals) {
+            if(loadingInterval.equals(intervalToRemove)) {
                 intervalToDelete = loadingInterval;
                 break;
             }
@@ -88,47 +106,43 @@ public class LessonsLoader {
         loadingIntervals.remove(intervalToDelete);
     }
 
-    private boolean isDayAlreadyBeingLoaded(Calendar day) {
-        for (CalendarInterval loadingInterval : loadingIntervals) {
-            if (loadingInterval.isInInterval(day)) {
+    private boolean isDayAlreadyBeingLoaded(WeekDayTime day) {
+        for (WeekInterval loadingInterval : loadingIntervals) {
+            if (loadingInterval.contains(day)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void loadDayOnDayChangeIfNeeded(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
+    public void loadDayOnDayChangeIfNeeded(WeekDayTime newFirstVisibleDay, WeekDayTime oldFirstVisibleDay) {
         if (!isDayAlreadyBeingLoaded(newFirstVisibleDay)) {
-            Calendar loadFrom, loadTo;
+            WeekTime loadFrom, loadTo;
             if(newFirstVisibleDay.before(oldFirstVisibleDay)){
                 //We scrolled backwards
-                loadTo = (Calendar) oldFirstVisibleDay.clone();
-                loadTo.clear(Calendar.MILLISECOND);
-                loadTo.clear(Calendar.SECOND);
-                loadTo.clear(Calendar.MINUTE);
-                loadTo.clear(Calendar.HOUR);
+                loadFrom = new WeekTime(newFirstVisibleDay);
+                loadFrom.addWeeks(-1);
 
-                loadFrom = (Calendar) loadTo.clone();
-                loadFrom.add(Calendar.WEEK_OF_YEAR, -2);
+                loadTo = new WeekTime(oldFirstVisibleDay);
             } else {
                 //We scrolled forward
-                loadFrom = CalendarUtils.calculateFirstDayOfWeek(newFirstVisibleDay);
+                loadFrom = new WeekTime(newFirstVisibleDay);
 
-                loadTo = (Calendar) loadFrom.clone();
-                loadTo.add(Calendar.WEEK_OF_YEAR, +2);
+                loadTo = loadFrom.copy();
+                loadTo.addWeeks(+2);
             }
 
-            loadAndAddLessons(loadFrom, loadTo, AppPreferences.getStudyCourse());
+            loadAndAddLessons(new WeekInterval(loadFrom, loadTo));
         }
     }
 
     public void loadNearEvents() {
-        Calendar twoWeeksAgo = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksAgo.add(Calendar.WEEK_OF_YEAR, -1);
+        WeekTime fromWT = WeekTime.getCurrentInstance();
+        fromWT.addWeeks(-1);
 
-        Calendar twoWeeksFromNow = CalendarUtils.calculateFirstDayOfWeek();
-        twoWeeksFromNow.add(Calendar.WEEK_OF_YEAR, +2);
+        WeekTime toWT = WeekTime.getCurrentInstance();
+        toWT.addWeeks(+2);
 
-        loadAndAddLessons(twoWeeksAgo, twoWeeksFromNow, AppPreferences.getStudyCourse());
+        loadAndAddLessons(new WeekInterval(fromWT, toWT));
     }
 }

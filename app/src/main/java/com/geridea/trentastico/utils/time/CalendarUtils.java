@@ -1,4 +1,4 @@
-package com.geridea.trentastico.utils;
+package com.geridea.trentastico.utils.time;
 
 import android.support.annotation.NonNull;
 
@@ -12,6 +12,10 @@ import java.util.Locale;
 public class CalendarUtils {
 
     private final static SimpleDateFormat formatDDMMYY = new SimpleDateFormat("dd MM yyyy", Locale.ITALIAN);
+
+    public static final Calendar TODAY = Calendar.getInstance();
+
+    public static final Calendar DUMMY = Calendar.getInstance();
 
     /**
      * @return the first day of the current week, at 00:00:00.
@@ -38,4 +42,22 @@ public class CalendarUtils {
     public static String formatDDMMYY(Calendar calendar) {
         return formatDDMMYY.format(calendar.getTime());
     }
+
+    public static Calendar getPurgedCalendarInstance() {
+        Calendar instance = Calendar.getInstance();
+        instance.clear();
+
+        return instance;
+    }
+
+    public static Calendar getCachedToday() {
+        return TODAY;
+    }
+
+    public static Calendar getClearDummyCalendar(){
+        DUMMY.clear();
+        DUMMY.setFirstDayOfWeek(Calendar.MONDAY);
+        return DUMMY;
+    }
+
 }

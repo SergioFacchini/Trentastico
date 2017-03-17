@@ -1,5 +1,7 @@
 package com.geridea.trentastico.model;
 
+import com.geridea.trentastico.model.cache.CachedLesson;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +29,20 @@ public class LessonSchedule {
         this.fullDescription = fullDescription;
         this.color = color;
         this.lessonTypeId = lessonTypeId;
+    }
+
+    public LessonSchedule(CachedLesson cachedLesson, int color) {
+        this(
+            cachedLesson.getLesson_id(),
+            cachedLesson.getRoom(),
+            cachedLesson.getSubject(),
+            cachedLesson.getStarts_at_ms(),
+            cachedLesson.getFinishes_at_ms(),
+            cachedLesson.getDescription(),
+            color,
+            cachedLesson.getTeaching_id()
+        );
+
     }
 
     public long getId() {

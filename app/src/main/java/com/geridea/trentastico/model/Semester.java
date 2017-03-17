@@ -5,6 +5,8 @@ package com.geridea.trentastico.model;
  * Created with ♥ by Slava on 13/03/2017.
  */
 
+import com.geridea.trentastico.utils.time.CalendarUtils;
+
 import java.util.Calendar;
 
 public final class Semester {
@@ -15,14 +17,13 @@ public final class Semester {
     private static final int SEMESTER2_START = 2;
     private static final int SEMESTER2_END   = 8;
 
-    private static final Calendar TODAY = Calendar.getInstance();
-    private static final Semester CURRENT_SEMESTER = new Semester(TODAY);
+    private static final Semester CURRENT_SEMESTER = new Semester(CalendarUtils.TODAY);
 
     private int year;
     private int semesterNumber;
 
     public Semester (Calendar date) {
-        this(getSemesterNumber(date.get(Calendar.MONTH)), date.get(Calendar.YEAR));
+        this(date.get(Calendar.YEAR), getSemesterNumber(date.get(Calendar.MONTH)));
     }
 
     public Semester(int year, int semesterNumber) {
