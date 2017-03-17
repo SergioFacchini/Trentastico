@@ -10,7 +10,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -185,7 +184,7 @@ public class Cacher {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
         for (CachedPeriod period : loadCachePeriodsInInterval(interval, true)) {
-            WeekIntervalCutResult cutResult = period.getPeriod().cut(interval);
+            WeekIntervalCutResult cutResult = period.getPeriod().cutFromInterval(interval);
 
             if(!cutResult.hasAnyRemainingResult()){
                 deleteCachedPeriodWithId(period.getId());

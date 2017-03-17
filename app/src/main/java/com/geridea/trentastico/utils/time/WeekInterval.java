@@ -89,7 +89,7 @@ public class WeekInterval {
      * we're trying to cut divides in half this interval) or return the period remaining from
      * the cut.
      */
-    public WeekIntervalCutResult cut(WeekInterval toCut) {
+    public WeekIntervalCutResult cutFromInterval(WeekInterval toCut) {
         WeekIntervalCutResult cutResult;
 
         WeekTime intStart = start;
@@ -137,7 +137,7 @@ public class WeekInterval {
         } else if(contains(cutStart) && cutEnd.afterOrEqual(intEnd)){
             cutResult = new WeekIntervalCutResult(
                     new WeekInterval(cutStart, intEnd),
-                    new WeekInterval(intEnd, cutStart)
+                    new WeekInterval(intStart, cutStart)
             );
         } else {
             //Should never happen!
