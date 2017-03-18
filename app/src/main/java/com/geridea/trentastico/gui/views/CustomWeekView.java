@@ -35,6 +35,9 @@ import android.widget.OverScroller;
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.WeekDayTime;
+import com.geridea.trentastico.utils.time.WeekInterval;
+import com.geridea.trentastico.utils.time.WeekTime;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,7 +68,7 @@ public class CustomWeekView extends View {
     private final int mDisabledBackgroundColor = 0xFF888888;
     private final int mPastDayBackgroundColor = 0xFFD5D5D5;
 
-    private final ArrayList<CalendarInterval> enabledIntervals = new ArrayList<>();
+    private final ArrayList<WeekInterval> enabledIntervals = new ArrayList<>();
 
     protected void addEvents(List<? extends WeekViewEvent> weekViewEvents) {
         sortAndCacheEvents(weekViewEvents);
@@ -73,7 +76,7 @@ public class CustomWeekView extends View {
         notifyDatasetChanged();
     }
 
-    protected void addEnabledInterval(CalendarInterval interval) {
+    protected void addEnabledInterval(WeekInterval interval) {
         enabledIntervals.add(interval);
     }
 
@@ -735,8 +738,9 @@ public class CustomWeekView extends View {
     }
 
     public boolean isADisabledDay(Calendar day) {
-        for (CalendarInterval enabledInterval : enabledIntervals) {
-            if (enabledInterval.contains(day)) {
+        WeekTime weekTimeToCheck = new WeekTime(day);
+        for (WeekInterval enabledInterval : enabledIntervals) {
+            if (enabledInterval.contains(weekTimeToCheck)) {
                 return false;
             }
         }
@@ -780,10 +784,11 @@ public class CustomWeekView extends View {
      * @param canvas The canvas to draw upon.
      */
     private void drawEvents(Calendar date, float startFromPixel, Canvas canvas) {
+        WeekDayTime todayWDT = new WeekDayTime(date);
+
         if (mEventRects != null && mEventRects.size() > 0) {
             for (int i = 0; i < mEventRects.size(); i++) {
-                if (isSameDay(mEventRects.get(i).event.getStartTime(), date)) {
-
+                if (mEventRects.get(i).getWeekDayTime().equals(todayWDT)) {
                     // Calculate top.
                     float top = mHourHeight * 24 * mEventRects.get(i).top / 1440 + mCurrentOrigin.y + mHeaderTextHeight + mHeaderRowPadding * 2 + mHeaderMarginBottom + mTimeTextHeight/2 + mEventMarginVertical;
 
@@ -884,14 +889,21 @@ public class CustomWeekView extends View {
      * stored in "originalEvent". But the event that corresponds to rectangle the rectangle
      * instance will be stored in "event".
      */
-    private class EventRect {
-        public WeekViewEvent event;
-        public WeekViewEvent originalEvent;
+    private final class EventRect {
+        public final WeekViewEvent event;
+        public final WeekViewEvent originalEvent;
+
         public RectF rectF;
         public float left;
         public float width;
         public float top;
         public float bottom;
+
+        /**
+         * This reference is hold here as a cache in order to prevent to make calculations on the
+         * calendar, which is very slow.
+         */
+        private final WeekDayTime weekDayTime;
 
         /**
          * Create a new instance of event rect. An EventRect is actually the rectangle that is drawn
@@ -908,6 +920,12 @@ public class CustomWeekView extends View {
             this.event = event;
             this.rectF = rectF;
             this.originalEvent = originalEvent;
+
+            this.weekDayTime = new WeekDayTime(event.getStartTime());
+        }
+
+        public final WeekDayTime getWeekDayTime() {
+            return weekDayTime;
         }
     }
 
@@ -1483,7 +1501,8 @@ public class CustomWeekView extends View {
      * @return Whether the times are on the same day.
      */
     private boolean isSameDay(Calendar dayOne, Calendar dayTwo) {
-        return dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
+        return dayOne.get(Calendar.YEAR)        == dayTwo.get(Calendar.YEAR) &&
+               dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
     }
 
     /**

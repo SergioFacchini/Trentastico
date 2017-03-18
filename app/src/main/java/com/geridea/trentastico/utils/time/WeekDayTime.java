@@ -38,6 +38,18 @@ public class WeekDayTime {
         this.weekNumber = weekNumber;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof WeekDayTime) {
+            WeekDayTime anotherTime = (WeekDayTime) obj;
+            return this.year       == anotherTime.year &&
+                   this.weekNumber == anotherTime.weekNumber &&
+                   this.weekDay    == anotherTime.weekDay;
+        }
+
+        return false;
+    }
+
     public boolean before(WeekDayTime anotherDay) {
         if(this.year < anotherDay.year){
             return true;

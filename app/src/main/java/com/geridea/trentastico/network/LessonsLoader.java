@@ -25,7 +25,7 @@ public class LessonsLoader {
      * Dispatched when the loading of events has been completed and the calendar can be made
      * visible.
      */
-    public final Signal2<LessonsSet, CalendarInterval> onLoadingOperationSuccessful = new Signal2<>();
+    public final Signal2<LessonsSet, WeekInterval> onLoadingOperationSuccessful = new Signal2<>();
 
     /**
      * Dispatched when the calendar starts loading something from internet. The argument is that
@@ -63,7 +63,7 @@ public class LessonsLoader {
             public void apply(LessonsSet lessons, WeekInterval interval) {
                 removeLoadingInterval(interval);
 
-                onLoadingOperationSuccessful.dispatch(lessons, interval.toCalendarInterval());
+                onLoadingOperationSuccessful.dispatch(lessons, interval);
             }
         });
         Networker.onErrorHappened.connect(new Listener1<VolleyError>() {

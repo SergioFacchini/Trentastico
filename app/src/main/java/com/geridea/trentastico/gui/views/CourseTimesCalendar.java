@@ -87,9 +87,9 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
                 onLoadingOperationResult.dispatch(operation);
             }
         });
-        loader.onLoadingOperationSuccessful.connect(new Listener2<LessonsSet, CalendarInterval>() {
+        loader.onLoadingOperationSuccessful.connect(new Listener2<LessonsSet, WeekInterval>() {
             @Override
-            public void apply(LessonsSet lessons, CalendarInterval interval) {
+            public void apply(LessonsSet lessons, WeekInterval interval) {
                 currentlyShownLessonsSet.mergeWith(lessons);
 
                 addEnabledInterval(interval);
@@ -129,7 +129,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     private void addEnabledIntervals(ArrayList<WeekInterval> intervals) {
         for (WeekInterval interval : intervals) {
-            addEnabledInterval(interval.toCalendarInterval());
+            addEnabledInterval(interval);
         }
     }
 

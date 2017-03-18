@@ -15,7 +15,7 @@ public class CalendarInterval {
     }
 
     public boolean contains(Calendar time) {
-        return from.equals(time) || (time.after(from) && time.before(to));
+        return (time.after(from) && time.before(to)) || from.equals(time);
     }
 
     public boolean matches(Calendar searchedFrom, Calendar searchedTo) {
