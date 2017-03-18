@@ -62,6 +62,8 @@
             app:textSize="12sp"
             app:todayBackgroundColor="#30fca7cd"
             app:todayHeaderTextColor="@color/colorAccentLight"
+            app:showNowLine="true"
+            app:nowLineColor="@color/colorAccent"
             />
 
     </FrameLayout>

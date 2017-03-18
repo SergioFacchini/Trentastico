@@ -188,7 +188,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     @Override
     public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
-        if(isADisabledDay(newFirstVisibleDay)){
+        if(isADisabledDay(newFirstVisibleDay) && !isInEditMode()){
             loader.loadDayOnDayChangeIfNeeded(new WeekDayTime(newFirstVisibleDay), new WeekDayTime(oldFirstVisibleDay));
         }
     }
