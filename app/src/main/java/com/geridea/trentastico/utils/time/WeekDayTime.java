@@ -39,8 +39,25 @@ public class WeekDayTime {
     }
 
     public boolean before(WeekDayTime anotherDay) {
-        return this.year       < anotherDay.year ||
-               this.weekNumber < anotherDay.weekNumber ||
-               this.weekDay    < anotherDay.weekDay;
+        if(this.year < anotherDay.year){
+            return true;
+        } else if(this.year > anotherDay.year){
+            return false;
+        }
+
+        if(this.weekNumber < anotherDay.weekNumber){
+            return true;
+        } else if(this.weekNumber > anotherDay.weekNumber){
+            return false;
+        }
+
+        if(this.weekDay < anotherDay.weekDay){
+            return true;
+        } else if(this.weekDay > anotherDay.weekDay){
+            return false;
+        } else {
+            return false;
+        }
+
     }
 }

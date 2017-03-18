@@ -31,7 +31,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
     );
 
     private final StudyCourse studyCourse;
-    private final LessonsFetchedListener listener;
 
     private final WeekInterval intervalToLoad;
 
@@ -39,11 +38,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
      * Dispatched when the request has been successfully fulfilled.
      */
     public final Signal1<LessonsSet> onRequestSuccessful = new Signal1<>();
-
-    /**
-     * Dispatched right before the request is about to be sent.
-     */
-    public final Signal0 inRequestAboutToBeSent = new Signal0();
 
     /**
      * Dispatched when the request has encountered an error while trying to parse the response.
@@ -55,21 +49,13 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
     public final Signal1<VolleyError> onNetworkErrorHappened = new Signal1<>();
 
 
-    public LessonsRequest(final WeekInterval intervalToLoad, StudyCourse studyCourse, final LessonsFetchedListener listener) {
+    public LessonsRequest(final WeekInterval intervalToLoad, StudyCourse studyCourse) {
         super(Method.GET, buildRequestURL(studyCourse, intervalToLoad), null, null);
 
         this.intervalToLoad = intervalToLoad;
         this.studyCourse = studyCourse;
-        this.listener = listener;
 
         setRetryPolicy(retryPolicy);
-
-        inRequestAboutToBeSent.connect(new Listener0() {
-            @Override
-            public void apply() {
-                listener.onLoadingAboutToStart(intervalToLoad.toCalendarInterval());
-            }
-        });
     }
 
     public StudyCourse getStudyCourse() {
@@ -88,7 +74,6 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
 
     @Override
     public void deliverError(VolleyError error) {
-        listener.onErrorHappened(error);
         onNetworkErrorHappened.dispatch(error);
     }
 
@@ -122,10 +107,8 @@ public class LessonsRequest extends StringRequest implements Response.Listener<S
             }
 
             onRequestSuccessful.dispatch(lessonsSet);
-            listener.onLessonsLoaded(lessonsSet, intervalToLoad);
         } catch (Exception e) {
             e.printStackTrace();
-            listener.onParsingErrorHappened(e);
 
             onParsingErrorHappened.dispatch(e);
         }

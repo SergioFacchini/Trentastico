@@ -121,7 +121,7 @@ public class Cacher {
         writableDatabase = cacheDbHelper.getWritableDatabase();
     }
 
-    public static void cacheLessonsSet(LessonsRequest request, LessonsSet setToCache) {
+    public static void cacheLessonsSet(LessonsSet setToCache, WeekInterval intervalToCache) {
         //0) Overwrite existing lesson types
         //1) Clear the already existing lessons cached in the given interval
         //2) Add the new cache period
@@ -140,9 +140,9 @@ public class Cacher {
             }
         }
 
-        deleteCachedLessonsInInterval(request.getIntervalToLoad());
+        deleteCachedLessonsInInterval(intervalToCache);
 
-        long cachedPeriodId = insertCachedPeriod(new CachedPeriod(request.getIntervalToLoad()));
+        long cachedPeriodId = insertCachedPeriod(new CachedPeriod(intervalToCache));
         for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
             cacheLesson(new CachedLesson(cachedPeriodId, lesson));
         }
@@ -320,14 +320,16 @@ public class Cacher {
 
     @NonNull
     private static String buildCachePeriodSelectionForInterval(WeekInterval intervalToLoad) {
-        WeekInterval startIntervals = new WeekInterval(intervalToLoad.getStart(), intervalToLoad.getEnd());
+        WeekTime startEnd = intervalToLoad.getStart().copy();
+        startEnd.addWeeks(+1);
 
-        WeekTime endWeekInterval = intervalToLoad.getEnd().copy();
-        endWeekInterval.addWeeks(-1);
-        WeekInterval endIntervals   = new WeekInterval(intervalToLoad.getStart(), endWeekInterval);
+        WeekTime endEnd   = intervalToLoad.getEnd()  .copy();
+        endEnd.addWeeks(+1);
+
+        WeekInterval endIntervals   = new WeekInterval(startEnd, endEnd);
 
         return buildWeekTimeSelectionsSQL(intervalToLoad, CP_START_WEEK, CP_START_YEAR) + " OR "+
-               buildWeekTimeSelectionsSQL(intervalToLoad, CP_END_WEEK,   CP_END_YEAR);
+               buildWeekTimeSelectionsSQL(endIntervals,   CP_END_WEEK,   CP_END_YEAR);
     }
 
     private static long getLastValidCacheMs() {
@@ -343,7 +345,7 @@ public class Cacher {
         return id;
     }
 
-    public static CachedLessonsSet getLessonsInFreshOrDeadCache(WeekInterval intervalToLoad) {
+    public static CachedLessonsSet getLessonsInFreshOrDeadCache(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
         CachedLessonsSet lessonsSet = new CachedLessonsSet();
 
         //Lesson types
@@ -351,7 +353,7 @@ public class Cacher {
         lessonsSet.addCachedLessonTypes(lessonTypes);
 
         //Cached periods
-        ArrayList<CachedPeriod> cachePeriods = loadCachePeriodsInInterval(intervalToLoad, false);
+        ArrayList<CachedPeriod> cachePeriods = loadCachePeriodsInInterval(intervalToLoad, fetchOldCacheToo);
         for (CachedPeriod cachedPeriod : cachePeriods) {
             lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod, lessonTypes));
             lessonsSet.addCachedPeriod(cachedPeriod);

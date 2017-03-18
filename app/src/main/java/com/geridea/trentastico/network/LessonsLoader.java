@@ -9,12 +9,15 @@ import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
+import com.threerings.signals.Listener1;
+import com.threerings.signals.Listener2;
 import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal2;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 public class LessonsLoader {
 
@@ -46,40 +49,45 @@ public class LessonsLoader {
      */
     public final Signal1<Exception> onParsingErrorHappened = new Signal1<>();
 
-
     private List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
 
-    public void loadAndAddLessons(final WeekInterval intervalToLoad) {
-        ArrayList<WeekInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad, new LessonsFetchedListener() {
+    public LessonsLoader() {
+        Networker.onLoadingAboutToStart.connect(new Listener1<CalendarInterval>() {
             @Override
-            public void onLoadingAboutToStart(CalendarInterval interval) {
+            public void apply(CalendarInterval interval) {
                 onLoadingOperationStarted.dispatch(new CalendarLoadingOperation(interval));
             }
-
+        });
+        Networker.onLessonsLoaded.connect(new Listener2<LessonsSet, WeekInterval>() {
             @Override
-            public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval) {
+            public void apply(LessonsSet lessons, WeekInterval interval) {
                 removeLoadingInterval(interval);
 
                 onLoadingOperationSuccessful.dispatch(lessons, interval.toCalendarInterval());
             }
-
+        });
+        Networker.onErrorHappened.connect(new Listener1<VolleyError>() {
             @Override
-            public void onErrorHappened(VolleyError error) {
+            public void apply(VolleyError error) {
                 onLoadingErrorHappened.dispatch(error);
             }
-
+        });
+        Networker.onParsingErrorHappened.connect(new Listener1<Exception>() {
             @Override
-            public void onParsingErrorHappened(Exception e) {
+            public void apply(Exception e) {
                 onParsingErrorHappened.dispatch(e);
             }
-
+        });
+        Networker.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
             @Override
-            public void onPartiallyCachedResultsFetched(CachedLessonsSet cacheSet) {
+            public void apply(CachedLessonsSet cacheSet) {
                 onPartiallyCachedResultsFetched.dispatch(cacheSet);
             }
         });
+    }
 
-        addLoadingIntervals(intervalsToLoad);
+    public void loadAndAddLessons(final WeekInterval intervalToLoad) {
+        addLoadingIntervals(Networker.loadLessons(intervalToLoad));
     }
 
     private void addLoadingIntervals(ArrayList<WeekInterval> intervalsToLoad) {
