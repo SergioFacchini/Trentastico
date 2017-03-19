@@ -8,7 +8,7 @@ package com.geridea.trentastico;
 public final class Config {
 
     //Debug
-    public static final boolean IS_IN_DEBUG_MODE = true;
+    public static final boolean IS_IN_DEBUG_MODE = false;
 
     //Networking
     /**

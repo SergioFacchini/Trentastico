@@ -486,4 +486,14 @@ public class Cacher {
 
         return periods;
     }
+
+    /**
+     * Deletes EVERYTHING from the cache.
+     */
+    public static void purge() {
+        writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
+        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
+        writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
+    }
+
 }

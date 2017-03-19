@@ -31,4 +31,14 @@ public class Department {
     public ArrayList<Course> getCourses() {
         return courses;
     }
+
+    public int getCoursePosition(long courseId) {
+        for (int i = 0; i < courses.size(); i++) {
+            if (courses.get(i).getId() == courseId) {
+                return i;
+            }
+        }
+
+        throw new RuntimeException("Unknown course with id: "+courseId);
+    }
 }

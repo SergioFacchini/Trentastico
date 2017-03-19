@@ -133,4 +133,27 @@ public class DepartmentsProvider {
             load();
         }
     }
+
+    public static int getDepartmentPosition(long departmentId) {
+        for(int i = 0; i<DEPARTMENTS.size(); i++){
+            if (DEPARTMENTS.get(i).getId() == departmentId) {
+                return i;
+            }
+
+        }
+
+        throw new RuntimeException("UNKNOWN DEPARTMENT ID: "+departmentId);
+    }
+
+    public static Department getDepartmentWithId(long departmentId) {
+        for (int i = 0; i < DEPARTMENTS.size(); i++) {
+            Department department = DEPARTMENTS.get(i);
+            if (department.getId() == departmentId) {
+                return department;
+            }
+
+        }
+
+        throw new RuntimeException("UNKNOWN DEPARTMENT WITH ID: " + departmentId);
+    }
 }

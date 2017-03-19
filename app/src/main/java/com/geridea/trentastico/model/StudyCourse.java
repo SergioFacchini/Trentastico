@@ -2,25 +2,37 @@ package com.geridea.trentastico.model;
 
 public class StudyCourse {
 
-    private long department;
-    private long course;
+    private long departmentId;
+    private long courseId;
     private long year;
 
-    public StudyCourse(long department, long course, long year) {
-        this.department = department;
-        this.course = course;
+    public StudyCourse(long departmentId, long courseId, long year) {
+        this.departmentId = departmentId;
+        this.courseId = courseId;
         this.year = year;
     }
 
     public long getDepartmentId() {
-        return department;
+        return departmentId;
     }
 
     public long getCourseId() {
-        return course;
+        return courseId;
     }
 
     public long getYear() {
         return year;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof StudyCourse){
+            StudyCourse course = (StudyCourse) obj;
+            return course.departmentId == this.departmentId &&
+                   course.courseId     == this.courseId &&
+                   course.year         == this.year;
+        }
+
+        return false;
     }
 }

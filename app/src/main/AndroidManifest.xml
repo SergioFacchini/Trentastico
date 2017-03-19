@@ -18,21 +18,20 @@
             android:name=".gui.activities.FirstActivityChooserActivity"
             android:noHistory="true"
             android:screenOrientation="portrait">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".gui.activities.WelcomeActivity"
             android:noHistory="true" />
-
         <activity
-            android:name=".gui.activities.CalendarActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
-
+            android:name=".gui.activities.HomeActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 
+import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.utils.AppPreferences;
 
 /**
@@ -25,7 +26,7 @@ public class FirstActivityChooserActivity extends AppCompatActivity {
         if (AppPreferences.isFirstRun()) {
             startActivity(new Intent(this, WelcomeActivity.class));
         } else {
-            startActivity(new Intent(this, CalendarActivity.class));
+            startActivity(new Intent(this, HomeActivity.class));
         }
 
     }

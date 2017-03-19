@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Trentastico!</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <string name="navigation_drawer_open">Apri menu di navigazione</string>
+    <string name="navigation_drawer_close">Chiudi menu di navigazione</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

@@ -9,6 +9,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.geridea.trentastico.R;
+import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.utils.AppPreferences;
 
@@ -33,7 +34,7 @@ public class WelcomeActivity extends AppCompatActivity {
         AppPreferences.setStudyCourse(courseSelector.getSelectedStudyCourse());
         AppPreferences.setIsFirstRun(false);
 
-        startActivity(new Intent(WelcomeActivity.this, CalendarActivity.class));
+        startActivity(new Intent(WelcomeActivity.this, HomeActivity.class));
     }
 
 }
