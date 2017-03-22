@@ -4,9 +4,9 @@ public class StudyCourse {
 
     private long departmentId;
     private long courseId;
-    private long year;
+    private int year;
 
-    public StudyCourse(long departmentId, long courseId, long year) {
+    public StudyCourse(long departmentId, long courseId, int year) {
         this.departmentId = departmentId;
         this.courseId = courseId;
         this.year = year;
@@ -20,7 +20,7 @@ public class StudyCourse {
         return courseId;
     }
 
-    public long getYear() {
+    public int getYear() {
         return year;
     }
 

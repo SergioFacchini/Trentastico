@@ -65,7 +65,7 @@ public class CourseSelectorView extends FrameLayout {
         return new StudyCourse(
                 departmentsSpinner.getSelectedItemId(),
                 coursesSpinner    .getSelectedItemId(),
-                yearsSpinner      .getSelectedItemId()
+                yearsSpinner      .getSelectedItemPosition()+1
         );
     }
 
@@ -76,6 +76,8 @@ public class CourseSelectorView extends FrameLayout {
         int depPosition = DepartmentsProvider.getDepartmentPosition(newStudyCourse.getDepartmentId());
         departmentsSpinner.setSelection(depPosition, false);
 
+
+        yearsSpinner.setSelection(newStudyCourse.getYear()-1);
     }
 
 }

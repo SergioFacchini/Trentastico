@@ -40,7 +40,7 @@ public class AppPreferences {
         SharedPreferences.Editor editor = get().edit();
         editor.putLong("STUDY_DEPARTMENT", course.getDepartmentId());
         editor.putLong("STUDY_COURSE",     course.getCourseId());
-        editor.putLong("STUDY_YEAR",       course.getYear());
+        editor.putInt("STUDY_YEAR",        course.getYear());
         editor.apply();
     }
 
@@ -48,7 +48,7 @@ public class AppPreferences {
         return new StudyCourse(
            get().getLong("STUDY_DEPARTMENT", 0),
            get().getLong("STUDY_COURSE",     0),
-           get().getLong("STUDY_YEAR",       0)
+           get().getInt("STUDY_YEAR",        0)
         );
     }
 
