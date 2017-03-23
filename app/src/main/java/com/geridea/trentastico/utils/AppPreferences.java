@@ -5,6 +5,11 @@ import android.content.SharedPreferences;
 
 import com.geridea.trentastico.model.StudyCourse;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
+
 public class AppPreferences {
 
     private static Context appContext;
@@ -52,4 +57,39 @@ public class AppPreferences {
         );
     }
 
+    public static ArrayList<Integer> getLessonTypesIdsToHide(){
+        ArrayList<Integer> lessonTypesIds = new ArrayList<>();
+
+        String filteredJSON = get().getString("FILTERED_TEACHINGS", "[]");
+
+        try {
+            JSONArray json = new JSONArray(filteredJSON);
+            for(int i = 0; i<json.length(); i++){
+                lessonTypesIds.add(json.getInt(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return lessonTypesIds;
+    }
+
+    public static void setLessonTypesIdsToHide(ArrayList<Integer> teachings) {
+        JSONArray array = new JSONArray();
+        for (Integer teachingId : teachings) {
+            array.put(teachingId);
+        }
+
+        SharedPreferences.Editor editor = get().edit();
+        editor.putString("FILTERED_TEACHINGS", array.toString());
+        editor.apply();
+    }
+
+    public static boolean hasLessonTypeWithIdHidden(int id) {
+        return getLessonTypesIdsToHide().contains(id);
+    }
+
+    public static void removeAllHiddenCourses() {
+        setLessonTypesIdsToHide(new ArrayList<Integer>());
+    }
 }

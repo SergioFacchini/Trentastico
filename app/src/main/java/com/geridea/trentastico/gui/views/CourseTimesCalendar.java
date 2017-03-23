@@ -13,13 +13,13 @@ import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.LessonSchedule;
+import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.LessonsLoader;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.network.operations.ParsingErrorOperation;
 import com.geridea.trentastico.network.operations.ReadingErrorOperation;
-import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
@@ -30,6 +30,7 @@ import com.threerings.signals.Signal1;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -134,7 +135,7 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
     }
 
     public void loadNearEvents() {
-        loader.loadNearEvents();
+        loader.loadEventsNearDay(getFirstVisibleDay());
     }
 
     private void addEventsFromLessonsSet(LessonsSet lessons) {
@@ -191,6 +192,16 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         if(isADisabledDay(newFirstVisibleDay) && !isInEditMode()){
             loader.loadDayOnDayChangeIfNeeded(new WeekDayTime(newFirstVisibleDay), new WeekDayTime(oldFirstVisibleDay));
         }
+    }
+
+    public Collection<LessonType> getCurrentLessonTypes() {
+        return currentlyShownLessonsSet.getLessonTypes();
+    }
+
+    public void notifyLessonTypeVisibilityChanged() {
+        clear();
+
+        loader.loadEventsNearDay(getFirstVisibleDay());
     }
 
     public static class LessonToEventAdapter extends WeekViewEvent {

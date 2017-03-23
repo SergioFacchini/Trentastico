@@ -5,10 +5,10 @@ package com.geridea.trentastico.gui.fragments;
  * Created with ♥ by Slava on 19/03/2017.
  */
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -23,7 +23,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends IFragmentWithMenuItems {
 
     /**
      * Dispatched when the user changed or did not change the study course and just pressed OK.
@@ -52,10 +52,21 @@ public class SettingsFragment extends Fragment {
         } else {
             //We changed our course, let's wipe out all the cache!
             Cacher.purge();
+
+            AppPreferences.removeAllHiddenCourses(); //No longer need them
             AppPreferences.setStudyCourse(selectedCourse);
 
             onChoiceMade.dispatch();
         }
     }
 
+    @Override
+    public int[] getIdsOfMenuItemsToMakeVisible() {
+        return new int[0];
+    }
+
+    @Override
+    public void bindMenuItem(MenuItem item) {
+        //Does not uses menus, nothing to bind!
+    }
 }

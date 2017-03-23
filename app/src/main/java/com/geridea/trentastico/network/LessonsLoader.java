@@ -5,6 +5,7 @@ import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
+import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
@@ -15,6 +16,7 @@ import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal2;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class LessonsLoader {
             public void apply(LessonsSet lessons, WeekInterval interval) {
                 removeLoadingInterval(interval);
 
+                lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
                 onLoadingOperationSuccessful.dispatch(lessons, interval);
             }
         });
@@ -81,13 +84,15 @@ public class LessonsLoader {
         Networker.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
             @Override
             public void apply(CachedLessonsSet cacheSet) {
+                cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
                 onPartiallyCachedResultsFetched.dispatch(cacheSet);
             }
         });
     }
 
     public void loadAndAddLessons(final WeekInterval intervalToLoad) {
-        addLoadingIntervals(Networker.loadLessons(intervalToLoad));
+        ArrayList<WeekInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad);
+        addLoadingIntervals(intervalsToLoad);
     }
 
     private void addLoadingIntervals(ArrayList<WeekInterval> intervalsToLoad) {
@@ -144,11 +149,11 @@ public class LessonsLoader {
         }
     }
 
-    public void loadNearEvents() {
-        WeekTime fromWT = WeekTime.getCurrentInstance();
+    public void loadEventsNearDay(Calendar day) {
+        WeekTime fromWT = new WeekTime(day);
         fromWT.addWeeks(-1);
 
-        WeekTime toWT = WeekTime.getCurrentInstance();
+        WeekTime toWT = new WeekTime(day);
         toWT.addWeeks(+2);
 
         loadAndAddLessons(new WeekInterval(fromWT, toWT));

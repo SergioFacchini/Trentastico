@@ -1,6 +1,5 @@
 package com.geridea.trentastico.gui.activities;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -9,11 +8,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
+import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.threerings.signals.Listener0;
 
@@ -27,7 +29,7 @@ public class HomeActivity extends AppCompatActivity
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view)      NavigationView navigationView;
 
-    Fragment currentFragment;
+    private IFragmentWithMenuItems currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,35 @@ public class HomeActivity extends AppCompatActivity
         switchToCalendarFragment();
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.fragment_calendar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide all action items
+        hideAllMenuItems(menu);
+
+        for (int id : currentFragment.getIdsOfMenuItemsToMakeVisible()) {
+            MenuItem menuItem = menu.findItem(id);
+            currentFragment.bindMenuItem(menuItem);
+            menuItem.setVisible(true);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void hideAllMenuItems(Menu menu) {
+        for(int i = 0; i<menu.size(); i++){
+            menu.getItem(i).setVisible(false);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -63,7 +94,6 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -99,8 +129,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-    private void setCurrentFragment(Fragment nextFragment) {
+    private void setCurrentFragment(IFragmentWithMenuItems nextFragment) {
         currentFragment = nextFragment;
+
+        invalidateOptionsMenu();
 
         getFragmentManager()
                 .beginTransaction()

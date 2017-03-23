@@ -34,7 +34,6 @@ import android.widget.OverScroller;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
-import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -74,6 +73,20 @@ public class CustomWeekView extends View {
         sortAndCacheEvents(weekViewEvents);
         recalculatePositionsOfEvents();
         notifyDatasetChanged();
+    }
+
+    /**
+     * Purges all events and enabled intervals from this WeekView and invalidates it.
+     */
+    public void clear() {
+        mEventRects.clear();
+        enabledIntervals.clear();
+
+        invalidate();
+    }
+
+    public Calendar getFirstVisibleDay() {
+        return mFirstVisibleDay;
     }
 
     protected void addEnabledInterval(WeekInterval interval) {
@@ -1058,7 +1071,7 @@ public class CustomWeekView extends View {
      */
     private void computePositionOfEvents(List<CustomWeekView.EventRect> eventRects) {
         // Make "collision groups" for all events that collide with others.
-        List<List<CustomWeekView.EventRect>> collisionGroups = new ArrayList<List<CustomWeekView.EventRect>>();
+        List<List<CustomWeekView.EventRect>> collisionGroups = new ArrayList<>();
         for (CustomWeekView.EventRect eventRect : eventRects) {
             boolean isPlaced = false;
             outerLoop:
@@ -1072,7 +1085,7 @@ public class CustomWeekView extends View {
                 }
             }
             if (!isPlaced) {
-                List<CustomWeekView.EventRect> newGroup = new ArrayList<CustomWeekView.EventRect>();
+                List<CustomWeekView.EventRect> newGroup = new ArrayList<>();
                 newGroup.add(eventRect);
                 collisionGroups.add(newGroup);
             }
@@ -1090,7 +1103,7 @@ public class CustomWeekView extends View {
      */
     private void expandEventsToMaxWidth(List<CustomWeekView.EventRect> collisionGroup) {
         // Expand the events to maximum possible width.
-        List<List<CustomWeekView.EventRect>> columns = new ArrayList<List<CustomWeekView.EventRect>>();
+        List<List<CustomWeekView.EventRect>> columns = new ArrayList<>();
         columns.add(new ArrayList<CustomWeekView.EventRect>());
         for (CustomWeekView.EventRect eventRect : collisionGroup) {
             boolean isPlaced = false;
@@ -1106,7 +1119,7 @@ public class CustomWeekView extends View {
                 }
             }
             if (!isPlaced) {
-                List<CustomWeekView.EventRect> newColumn = new ArrayList<CustomWeekView.EventRect>();
+                List<CustomWeekView.EventRect> newColumn = new ArrayList<>();
                 newColumn.add(eventRect);
                 columns.add(newColumn);
             }

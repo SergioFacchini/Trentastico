@@ -1,9 +1,10 @@
 package com.geridea.trentastico.model;
 
+import com.geridea.trentastico.model.cache.CachedLessonType;
+import com.geridea.trentastico.utils.AppPreferences;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.geridea.trentastico.model.cache.CachedLessonType;
 
 public class LessonType {
 
@@ -13,13 +14,13 @@ public class LessonType {
 
     private boolean isVisible;
 
-    public LessonType() {
-    }
+    public LessonType() { }
 
-    public LessonType(CachedLessonType cachedLessonType) {
+    public LessonType(CachedLessonType cachedLessonType, boolean isVisible) {
         this.id    = cachedLessonType.getLesson_type_id();
         this.name  = cachedLessonType.getName();
         this.color = cachedLessonType.getColor();
+        this.isVisible = isVisible;
     }
 
     public static LessonType fromJson(JSONObject jsonObject) throws JSONException {
@@ -29,6 +30,8 @@ public class LessonType {
 
         String cssName = jsonObject.getString("Css");
         lessonType.setColor(getColorFromCSSStyle(cssName));
+        lessonType.setVisible(!AppPreferences.hasLessonTypeWithIdHidden(lessonType.getId()));
+
         return lessonType;
     }
 
