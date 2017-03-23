@@ -3,6 +3,7 @@ package com.geridea.trentastico.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.StudyCourse;
 
 import org.json.JSONArray;
@@ -91,5 +92,15 @@ public class AppPreferences {
 
     public static void removeAllHiddenCourses() {
         setLessonTypesIdsToHide(new ArrayList<Integer>());
+    }
+
+    public static void setCalendarNumOfDaysToShow(int numOfDays) {
+        SharedPreferences.Editor editor = get().edit();
+        editor.putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays);
+        editor.apply();
+    }
+
+    public static int getCalendarNumOfDaysToShow() {
+        return get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW);
     }
 }

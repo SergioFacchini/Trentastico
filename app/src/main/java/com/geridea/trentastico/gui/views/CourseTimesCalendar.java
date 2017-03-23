@@ -6,6 +6,7 @@ package com.geridea.trentastico.gui.views;
  */
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
@@ -20,6 +21,7 @@ import com.geridea.trentastico.network.LessonsLoader;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.network.operations.ParsingErrorOperation;
 import com.geridea.trentastico.network.operations.ReadingErrorOperation;
+import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
@@ -34,9 +36,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-public class CourseTimesCalendar extends CustomWeekView implements DateTimeInterpreter, CustomWeekView.ScrollListener {
+public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_MEDIUM = new SimpleDateFormat("EE dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_SHORT  = new SimpleDateFormat("dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_SHORT_ONLY_DAY = new SimpleDateFormat("EE", Locale.ITALIAN);
+
     private final static SimpleDateFormat DATE_FORMAT_DEBUG = new SimpleDateFormat("(w) EEEE d MMMM", Locale.ITALIAN);
 
     private final static SimpleDateFormat FORMAT_ONLY_DAY = new SimpleDateFormat("EEEE", Locale.ITALIAN);
@@ -75,9 +81,106 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
     private void initCalendar() {
         prepareLoader();
-
-        setDateTimeInterpreter(this);
+        setDateTimeInterpreter(getAppropriateDateTimeInterpreter());
         setScrollListener(this);
+    }
+
+    private DateTimeInterpreter getAppropriateDateTimeInterpreter() {
+        return getDateInterpreterForNumberOfDays(getNumberOfVisibleDays());
+    }
+
+    private DateTimeInterpreter getDateInterpreterForNumberOfDays(int numberOfVisibleDays) {
+        if(numberOfVisibleDays <= 2){
+            return new DateTimeInterpreter() {
+                @Override
+                public String interpretDate(Calendar date) {
+                    Calendar today = Calendar.getInstance();
+                    if (isSameDay(today, date)) {
+                        return "Oggi (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, +1);
+                    if (isSameDay(today, date)) {
+                        return "Domani (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, +1);
+                    if (isSameDay(today, date)) {
+                        return "Dopodomani (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, -3);
+                    if (isSameDay(today, date)) {
+                        return "Ieri (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
+                    }
+
+                    return (Config.IS_IN_DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
+                }
+
+                @Override
+                public String interpretTime(int hour) {
+                    return interpretHours(hour);
+                }
+            };
+        } else if(numberOfVisibleDays <= 5) {
+            return new DateTimeInterpreter() {
+                @Override
+                public String interpretDate(Calendar date) {
+                    Calendar today = Calendar.getInstance();
+                    if (isSameDay(today, date)) {
+                        return "Oggi";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, +1);
+                    if (isSameDay(today, date)) {
+                        return "Domani";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, +1);
+                    if (isSameDay(today, date)) {
+                        return "Dopodomani";
+                    }
+
+                    today.add(Calendar.DAY_OF_MONTH, -3);
+                    if (isSameDay(today, date)) {
+                        return "Ieri";
+                    }
+
+                    return DATE_FORMAT_MEDIUM.format(date.getTime());
+                }
+
+                @Override
+                public String interpretTime(int hour) {
+                    return interpretHours(hour);
+                }
+            };
+        } else {// > 6
+            return new DateTimeInterpreter() {
+                @Override
+                public String interpretDate(Calendar date) {
+                    Calendar firstDay = CalendarUtils.calculateFirstDayOfWeek();
+                    Calendar lastDay  = (Calendar) firstDay.clone();
+                    lastDay.add(Calendar.WEEK_OF_MONTH, +1);
+
+                    if (date.equals(firstDay) || (date.after(firstDay) && date.before(lastDay))) {
+                        return DATE_FORMAT_SHORT_ONLY_DAY.format(date.getTime());
+                    } else {
+                        return DATE_FORMAT_SHORT.format(date.getTime());
+                    }
+                }
+
+                @Override
+                public String interpretTime(int hour) {
+                    return interpretHours(hour);
+                }
+            };
+        }
+
+    }
+
+    @NonNull
+    private String interpretHours(int hour) {
+        return hour + ":00";
     }
 
     private void prepareLoader() {
@@ -142,40 +245,10 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
         addEvents(makeEventsFromLessonsSet(lessons));
     }
 
-    @Override
-    public String interpretDate(Calendar date) {
-        Calendar today = Calendar.getInstance();
-        if (isSameDay(today, date)){
-            return "Oggi ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
-        }
-
-        today.add(Calendar.DAY_OF_MONTH, +1);
-        if (isSameDay(today, date)){
-            return "Domani ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
-        }
-
-        today.add(Calendar.DAY_OF_MONTH, +1);
-        if (isSameDay(today, date)){
-            return "Dopodomani ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
-        }
-
-        today.add(Calendar.DAY_OF_MONTH, -3);
-        if (isSameDay(today, date)){
-            return "Ieri ("+ FORMAT_ONLY_DAY.format(date.getTime())+")";
-        }
-
-        return (Config.IS_IN_DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
-    }
-
     private boolean isSameDay(Calendar date1, Calendar date2) {
         return date1.get(Calendar.YEAR)         == date2.get(Calendar.YEAR) &&
                date1.get(Calendar.MONTH)        == date2.get(Calendar.MONTH) &&
                date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);
-    }
-
-    @Override
-    public String interpretTime(int hour) {
-        return hour+":00";
     }
 
     private List<? extends WeekViewEvent> makeEventsFromLessonsSet(LessonsSet lessonsSet) {
@@ -203,6 +276,40 @@ public class CourseTimesCalendar extends CustomWeekView implements DateTimeInter
 
         loader.loadEventsNearDay(getFirstVisibleDay());
     }
+
+    public int rotateNumOfDaysShown() {
+        int numOfDaysToShow = getNextNumberOfDaysToShow(getNumberOfVisibleDays());
+        prepareForNumberOfVisibleDays(numOfDaysToShow);
+
+        return numOfDaysToShow;
+    }
+
+    public void prepareForNumberOfVisibleDays(int numOfDaysToShow) {
+        setNumberOfVisibleDays(numOfDaysToShow);
+        setDateTimeInterpreter(getAppropriateDateTimeInterpreter());
+        invalidate();
+    }
+
+    /**
+     * @deprecated do not call this method directly, but use
+     * {@link CourseTimesCalendar#prepareForNumberOfVisibleDays(int)}
+     */
+    @Override
+    @Deprecated
+    public void setNumberOfVisibleDays(int numberOfVisibleDays) {
+        super.setNumberOfVisibleDays(numberOfVisibleDays);
+    }
+
+    private int getNextNumberOfDaysToShow(int numberOfVisibleDays) {
+        switch(numberOfVisibleDays){
+            case 1: return 2;
+            default:
+            case 2: return 3;
+            case 3: return 7;
+            case 7: return 1;
+        }
+    }
+
 
     public static class LessonToEventAdapter extends WeekViewEvent {
         private LessonSchedule lesson;

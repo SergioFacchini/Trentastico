@@ -19,4 +19,7 @@ public final class Config {
     //Database
     public static final String DATABASE_NAME = "data.db";
     public static final int DATABASE_VERSION = 1;
+
+    //Calendar
+    public static final int CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 2;
 }

@@ -8,4 +8,10 @@
         android:title="Filtra corsi"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/menu_change_view"
+        android:icon="@drawable/ic_calendar_show_7"
+        android:title="Cambia il numero di giorni da mostrare"
+        app:showAsAction="always" />
+
 </menu>

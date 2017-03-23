@@ -7,6 +7,7 @@ package com.geridea.trentastico.gui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -28,6 +29,7 @@ import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 
 import butterknife.BindView;
@@ -47,6 +49,8 @@ public class CalendarFragment extends IFragmentWithMenuItems {
         ButterKnife.bind(this, view);
 
         //Binding calendar
+        calendar.prepareForNumberOfVisibleDays(AppPreferences.getCalendarNumOfDaysToShow());
+        calendar.goToDate(Calendar.getInstance());
         calendar.onLoadingOperationResult.connect(new Listener1<ILoadingOperation>() {
             @Override
             public void apply(final ILoadingOperation operation) {
@@ -74,7 +78,7 @@ public class CalendarFragment extends IFragmentWithMenuItems {
 
     @Override
     public int[] getIdsOfMenuItemsToMakeVisible() {
-        return new int[]{ R.id.menu_filter };
+        return new int[]{ R.id.menu_filter, R.id.menu_change_view };
     }
 
     @Override
@@ -87,9 +91,33 @@ public class CalendarFragment extends IFragmentWithMenuItems {
                     return true;
                 }
             });
+        } else if(item.getItemId() == R.id.menu_change_view){
+            //Note we cannot call here calendar.getNumberOfVisibleDays() because this might have
+            //been called before onCreate
+            item.setIcon(getChangeViewMenuIcon(AppPreferences.getCalendarNumOfDaysToShow()));
+            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int numOfDays = calendar.rotateNumOfDaysShown();
+                    item.setIcon(getChangeViewMenuIcon(numOfDays));
+                    AppPreferences.setCalendarNumOfDaysToShow(numOfDays);
+
+                    return true;
+                }
+            });
         }
     }
 
+    @DrawableRes
+    private int getChangeViewMenuIcon(int numOfDays) {
+        switch (numOfDays){
+            default:
+            case 1: return R.drawable.ic_calendar_show_1;
+            case 2: return R.drawable.ic_calendar_show_2;
+            case 3: return R.drawable.ic_calendar_show_3;
+            case 7: return R.drawable.ic_calendar_show_7;
+        }
+    }
 
     class FilterCoursesDialog extends AlertDialog {
 

@@ -158,7 +158,7 @@ public class CustomWeekView extends View {
     private int mFutureWeekendBackgroundColor = 0;
     private int mNowLineColor = Color.rgb(102, 102, 102);
     private int mNowLineThickness = 5;
-    private int mHourSeparatorColor = Color.rgb(230, 230, 230);
+    private int mHourSeparatorColor = Color.rgb(60, 60, 60);
     private int mTodayBackgroundColor = Color.rgb(239, 247, 254);
     private int mHourSeparatorHeight = 2;
     private int mTodayHeaderTextColor = Color.rgb(39, 137, 228);
@@ -1274,6 +1274,22 @@ public class CustomWeekView extends View {
         // Refresh time column width.
         initTextTimeWidth();
     }
+
+    /**
+     * Set the number of visible days in a week.
+     * @param numberOfVisibleDays The number of visible days in a week.
+     */
+    public void setNumberOfVisibleDays(int numberOfVisibleDays) {
+        this.mNumberOfVisibleDays = numberOfVisibleDays;
+        mCurrentOrigin.x = 0;
+        mCurrentOrigin.y = 0;
+        invalidate();
+    }
+
+    public int getNumberOfVisibleDays() {
+        return mNumberOfVisibleDays;
+    }
+
 
     /////////////////////////////////////////////////////////////////
     //

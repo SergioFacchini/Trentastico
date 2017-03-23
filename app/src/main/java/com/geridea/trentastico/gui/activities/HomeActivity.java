@@ -66,7 +66,7 @@ public class HomeActivity extends AppCompatActivity
         // If the nav drawer is open, hide all action items
         hideAllMenuItems(menu);
 
-        for (int id : currentFragment.getIdsOfMenuItemsToMakeVisible()) {
+        for (int id: currentFragment.getIdsOfMenuItemsToMakeVisible()) {
             MenuItem menuItem = menu.findItem(id);
             currentFragment.bindMenuItem(menuItem);
             menuItem.setVisible(true);
