@@ -11,10 +11,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Locale;
-
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
@@ -23,11 +19,14 @@ import com.geridea.trentastico.model.cache.CachedLesson;
 import com.geridea.trentastico.model.cache.CachedLessonType;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.CachedPeriod;
-import com.geridea.trentastico.network.LessonsRequest;
 import com.geridea.trentastico.utils.StringUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekIntervalCutResult;
 import com.geridea.trentastico.utils.time.WeekTime;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * The class that deals with the caching of lessons.<br>
@@ -358,6 +357,8 @@ public class Cacher {
             lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod, lessonTypes));
             lessonsSet.addCachedPeriod(cachedPeriod);
         }
+
+        lessonsSet.recalculatePartitionings();
 
         //Missing intervals
         lessonsSet.addMissingIntervals(findMissingIntervalsInCachePeriods(intervalToLoad, cachePeriods));

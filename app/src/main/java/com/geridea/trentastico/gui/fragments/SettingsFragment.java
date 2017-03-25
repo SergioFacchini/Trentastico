@@ -54,6 +54,7 @@ public class SettingsFragment extends IFragmentWithMenuItems {
             Cacher.purge();
 
             AppPreferences.removeAllHiddenCourses(); //No longer need them
+            AppPreferences.removeAllHiddenPartitionings(); //No longer need them
             AppPreferences.setStudyCourse(selectedCourse);
 
             onChoiceMade.dispatch();

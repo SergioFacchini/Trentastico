@@ -1,11 +1,13 @@
 package com.geridea.trentastico.model;
 
 import com.geridea.trentastico.model.cache.CachedLesson;
+import com.geridea.trentastico.utils.StringUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,5 +139,19 @@ public class LessonSchedule {
 
     public boolean hasLessonType(LessonType lessonType) {
         return getLessonTypeId() == lessonType.getId();
+    }
+
+    public boolean matchesPartitioningType(PartitioningType partitioningType) {
+        return StringUtils.containsMatchingRegex(partitioningType.getRegex(), getFullDescription());
+    }
+
+    public boolean matchesAnyOfPartitioningCases(ArrayList<PartitioningCase> partitionings) {
+        for (PartitioningCase partitioning : partitionings) {
+            if (fullDescription.contains(partitioning.getCase())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

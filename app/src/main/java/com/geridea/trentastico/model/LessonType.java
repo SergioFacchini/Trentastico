@@ -2,9 +2,12 @@ package com.geridea.trentastico.model;
 
 import com.geridea.trentastico.model.cache.CachedLessonType;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.StringUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class LessonType {
 
@@ -14,6 +17,8 @@ public class LessonType {
 
     private boolean isVisible;
 
+    private Partitioning partitioning;
+
     public LessonType() { }
 
     public LessonType(CachedLessonType cachedLessonType, boolean isVisible) {
@@ -21,6 +26,17 @@ public class LessonType {
         this.name  = cachedLessonType.getName();
         this.color = cachedLessonType.getColor();
         this.isVisible = isVisible;
+    }
+
+    public static Partitioning findPartitioningFromDescription(String description) {
+        for (PartitioningType type : PartitioningType.values()) {
+            String match = StringUtils.findMatchingStringIfAny(description, type.getRegex());
+
+            if (match != null)
+                return new Partitioning(type, match);
+        }
+
+        return Partitioning.NONE;
     }
 
     public static LessonType fromJson(JSONObject jsonObject) throws JSONException {
@@ -123,6 +139,44 @@ public class LessonType {
 
     public void setVisible(boolean visible) {
         isVisible = visible;
+    }
+
+    public void setPartitioning(Partitioning partitioning){
+        this.partitioning = partitioning;
+    }
+
+    public Partitioning getPartitioning() {
+        return partitioning;
+    }
+
+    public ArrayList<PartitioningCase> findPartitioningsToHide() {
+        ArrayList<PartitioningCase> casesToHide = new ArrayList<>(4);
+        for (PartitioningCase partitioningCase : getPartitioning().getCases()) {
+            if (!partitioningCase.isVisible()) {
+                casesToHide.add(partitioningCase);
+            }
+        }
+        return casesToHide;
+    }
+
+    /**
+     * Applies the current visibility to it's partitionings.
+     * @return true if any partitioning has changed, false otherwise
+     */
+    public boolean applyVisibilityToPartitionings() {
+        return getPartitioning().applyVisibilityToPartitionings(isVisible());
+    }
+
+    public boolean hasAllPartitioningsInvisible() {
+        return getPartitioning().hasAllPartitioningsInvisible();
+    }
+
+    public boolean hasAtLeastOnePartitioningVisible() {
+        return getPartitioning().hasAtLeastOnePartitioningVisible();
+    }
+
+    public void mergePartitionings(Partitioning partitioning) {
+        getPartitioning().mergePartitionCases(partitioning);
     }
 
 }

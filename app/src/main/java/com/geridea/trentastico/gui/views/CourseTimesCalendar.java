@@ -310,7 +310,6 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
         }
     }
 
-
     public static class LessonToEventAdapter extends WeekViewEvent {
         private LessonSchedule lesson;
 

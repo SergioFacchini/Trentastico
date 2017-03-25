@@ -5,7 +5,6 @@ package com.geridea.trentastico.model.cache;
  * Created with ♥ by Slava on 13/03/2017.
  */
 
-import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.utils.AppPreferences;
@@ -18,18 +17,11 @@ public class CachedLessonsSet extends LessonsSet {
     private ArrayList<WeekInterval> missingIntervals = new ArrayList<>();
     private ArrayList<CachedPeriod> cachedPeriods = new ArrayList<>();
 
-    public void addLessonSchedules(ArrayList<LessonSchedule> lessons) {
-        for (LessonSchedule lessonToAdd : lessons) {
-            scheduledLessons.put(lessonToAdd.getId(), lessonToAdd);
-        }
-    }
-
     public void addCachedLessonTypes(ArrayList<CachedLessonType> cachedLessonTypes) {
         for (CachedLessonType cachedLessonType : cachedLessonTypes) {
 
             boolean isVisible = !AppPreferences.hasLessonTypeWithIdHidden(cachedLessonType.getLesson_type_id());
-            LessonType lessonType = new LessonType(cachedLessonType, isVisible);
-            addLessonType(lessonType);
+            addLessonType(new LessonType(cachedLessonType, isVisible));
         }
     }
 

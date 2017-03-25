@@ -7,27 +7,17 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/yes_courses_text"
+        android:id="@+id/introduction_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:gravity="center"
-        android:text="Qui puoi nascondere dall'orario i corsi che non ti interessa seguire. Per farlo, togli le spunte vicino ai corsi che non ti interessano."
-        android:textColor="#FFFFFF"
-        android:textSize="14dp" />
-
-    <TextView
-        android:id="@+id/no_courses_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        android:gravity="center"
-        android:text="Non è stato trovato nessun corso. Sei sicuro/a di aver selezionato correttamente il tuo corso di studi? Puoi cambiare il corso di studi nel menu a sinistra."
+        android:text="Gli studenti del corso selezionato sono divisi in N gruppi. Da qui puoi scegliere quali gruppi filtrare."
         android:textColor="#FFFFFF"
         android:textSize="14dp" />
 
     <ListView
-        android:id="@+id/courses_list"
+        android:id="@+id/partitionings_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

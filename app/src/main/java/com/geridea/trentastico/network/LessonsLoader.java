@@ -66,6 +66,7 @@ public class LessonsLoader {
                 removeLoadingInterval(interval);
 
                 lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
+                lessons.removeLessonsWithHiddenPartitionings();
                 onLoadingOperationSuccessful.dispatch(lessons, interval);
             }
         });
@@ -85,6 +86,8 @@ public class LessonsLoader {
             @Override
             public void apply(CachedLessonsSet cacheSet) {
                 cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
+                cacheSet.removeLessonsWithHiddenPartitionings();
+
                 onPartiallyCachedResultsFetched.dispatch(cacheSet);
             }
         });

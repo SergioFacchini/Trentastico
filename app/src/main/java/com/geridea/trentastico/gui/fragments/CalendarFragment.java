@@ -21,20 +21,26 @@ import android.widget.TextView;
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter;
+import com.geridea.trentastico.gui.adapters.PartitioningsAdapter;
 import com.geridea.trentastico.gui.views.CourseTimesCalendar;
 import com.geridea.trentastico.model.LessonType;
+import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
+import com.threerings.signals.Signal1;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.view.View.GONE;
 
 public class CalendarFragment extends IFragmentWithMenuItems {
 
@@ -67,7 +73,7 @@ public class CalendarFragment extends IFragmentWithMenuItems {
         calendar.onLoadingOperationFinished.connect(new Listener0() {
             @Override
             public void apply() {
-                loader.setVisibility(View.GONE);
+                loader.setVisibility(GONE);
             }
         });
 
@@ -121,11 +127,14 @@ public class CalendarFragment extends IFragmentWithMenuItems {
 
     class FilterCoursesDialog extends AlertDialog {
 
-        private final Collection<LessonType> lessonTypes;
-        @BindView(R.id.courses_list)
-        ListView coursesListView;
+        @BindView(R.id.courses_list) ListView coursesListView;
+        @BindView(R.id.no_courses_text)  TextView noCoursesText;
+        @BindView(R.id.yes_courses_text) TextView yesCoursesText;
 
-        protected FilterCoursesDialog(@NonNull Context context) {
+        private final Collection<LessonType> lessonTypes;
+        private final CourseFilterAdapter courseAdapter;
+
+        protected FilterCoursesDialog(@NonNull final Context context) {
             super(context);
 
             //Inflating the view
@@ -135,13 +144,46 @@ public class CalendarFragment extends IFragmentWithMenuItems {
 
             lessonTypes = calendar.getCurrentLessonTypes();
 
-            CourseFilterAdapter courseAdapter = new CourseFilterAdapter(context, lessonTypes);
+            if (lessonTypes.isEmpty()) {
+                yesCoursesText.setVisibility(GONE);
+            } else {
+                noCoursesText.setVisibility(GONE);
+            }
+
+
+            courseAdapter = new CourseFilterAdapter(context, lessonTypes);
             courseAdapter.onLessonTypeVisibilityChanged.connect(new Listener1<LessonType>() {
                 @Override
-                public void apply(LessonType lessonTypeWithChangedVisibility) {
+                public void apply(LessonType lesson) {
                     AppPreferences.setLessonTypesIdsToHide(calculateLessonTypesToHide());
+                    if(lesson.applyVisibilityToPartitionings()){
+                        AppPreferences.updatePartitioningsToHide(lesson);
+                        courseAdapter.notifyDataSetChanged(); //Updating %d of %d shown
+                    }
 
                     calendar.notifyLessonTypeVisibilityChanged();
+                }
+            });
+            courseAdapter.onConfigurePartitioningButtonClicked.connect(new Listener1<LessonType>() {
+                @Override
+                public void apply(LessonType lessonType) {
+                    FilterPartitioningsDialog filterPartitionings = new FilterPartitioningsDialog(context, lessonType);
+                    filterPartitionings.onPartitioningVisibilityChanged.connect(new Listener1<LessonType>() {
+                        @Override
+                        public void apply(LessonType affectedLessonType) {
+                            if(affectedLessonType.hasAllPartitioningsInvisible()){
+                                affectedLessonType.setVisible(false);
+                                AppPreferences.setLessonTypesIdsToHide(calculateLessonTypesToHide());
+                            } else if(affectedLessonType.hasAtLeastOnePartitioningVisible()) {
+                                affectedLessonType.setVisible(true);
+                                AppPreferences.setLessonTypesIdsToHide(calculateLessonTypesToHide());
+                            }
+
+                            courseAdapter.notifyDataSetChanged(); //Updating %d of %d shown
+                            calendar.notifyLessonTypeVisibilityChanged();
+                        }
+                    });
+                    filterPartitionings.show();
                 }
             });
             coursesListView.setAdapter(courseAdapter);
@@ -150,18 +192,67 @@ public class CalendarFragment extends IFragmentWithMenuItems {
         }
 
         private ArrayList<Integer> calculateLessonTypesToHide() {
-            ArrayList<Integer> activitiesToHideIds = new ArrayList<>();
+            ArrayList<Integer> lessonTypesToHideIds = new ArrayList<>();
             for (LessonType lessonType : lessonTypes) {
                 if (!lessonType.isVisible()) {
-                    activitiesToHideIds.add(lessonType.getId());
+                    lessonTypesToHideIds.add(lessonType.getId());
                 }
             }
 
-            return activitiesToHideIds;
+            return lessonTypesToHideIds;
         }
 
         @OnClick(R.id.dismiss_button)
         void onDoFilterButtonClicked(){
+            dismiss();
+        }
+
+    }
+
+    class FilterPartitioningsDialog extends AlertDialog {
+
+        public final Signal1<LessonType> onPartitioningVisibilityChanged = new Signal1<>();
+
+        @BindView(R.id.partitionings_list) ListView partitioningsList;
+        @BindView(R.id.introduction_text)  TextView introductionText;
+
+        protected FilterPartitioningsDialog(@NonNull Context context, final LessonType lessonType) {
+            super(context);
+
+            View view = Views.inflate(context, R.layout.dialog_filter_partition);
+            ButterKnife.bind(this, view);
+
+            calculateIntroductionText(lessonType);
+            bindAdapter(context, lessonType);
+
+            setView(view);
+        }
+
+        private void bindAdapter(@NonNull Context context, final LessonType lessonType) {
+            PartitioningsAdapter adapter = new PartitioningsAdapter(context, lessonType.getPartitioning());
+            adapter.onPartitioningVisibilityChanged.connect(new Listener1<PartitioningCase>() {
+                @Override
+                public void apply(PartitioningCase partitioning) {
+                    AppPreferences.updatePartitioningsToHide(lessonType);
+                    calendar.notifyLessonTypeVisibilityChanged();
+
+                    onPartitioningVisibilityChanged.dispatch(lessonType);
+                }
+            });
+            partitioningsList.setAdapter(adapter);
+        }
+
+        private void calculateIntroductionText(LessonType lessonType) {
+            String introductionString = String.format(Locale.CANADA,
+                "Gli studenti del corso \"%s\" sono divisi in %d gruppi.\nQui sotto puoi togliere la " +
+                "spunta dai gruppi di cui non fai parte per nascondere il relativo orario.",
+                    lessonType.getName(), lessonType.getPartitioning().getPartitioningCasesSize()
+            );
+            introductionText.setText(introductionString);
+        }
+
+        @OnClick(R.id.dismiss_button)
+        void onDismissButtonPressed(){
             dismiss();
         }
 
