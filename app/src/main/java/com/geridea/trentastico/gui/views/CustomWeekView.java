@@ -34,6 +34,7 @@ import android.widget.OverScroller;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -68,6 +69,8 @@ public class CustomWeekView extends View {
     private final int mPastDayBackgroundColor = 0xFFD5D5D5;
 
     private final ArrayList<WeekInterval> enabledIntervals = new ArrayList<>();
+
+    private DisabledDayVisibleResult disabledDayVisibleResult = new DisabledDayVisibleResult();
 
     protected void addEvents(List<? extends WeekViewEvent> weekViewEvents) {
         sortAndCacheEvents(weekViewEvents);
@@ -758,6 +761,32 @@ public class CustomWeekView extends View {
             }
         }
         return true;
+    }
+
+    protected DisabledDayVisibleResult getDisabledDaysVisibleFromDay(Calendar newFirstVisibleDay) {
+        WeekTime firstVisibleWeek = new WeekTime(newFirstVisibleDay);
+
+        Calendar lastVisibleDate = CalendarUtils.getDummyInitializedAs(newFirstVisibleDay);
+        lastVisibleDate.add(Calendar.DAY_OF_MONTH, mNumberOfVisibleDays);
+
+        WeekTime lastVisibleWeek = new WeekTime(newFirstVisibleDay);
+
+        boolean firstEnabled = false, lastEnabled = false;
+        for (WeekInterval enabledInterval: enabledIntervals) {
+            if (!firstEnabled && enabledInterval.contains(firstVisibleWeek)) {
+                firstEnabled = true;
+            }
+
+            if (!lastEnabled && enabledInterval.contains(lastVisibleWeek)) {
+                lastEnabled = true;
+            }
+
+            if (firstEnabled && lastEnabled) {
+                break;
+            }
+        }
+
+        return disabledDayVisibleResult.reinit(firstEnabled, lastEnabled, firstVisibleWeek, lastVisibleWeek);
     }
 
     /**
@@ -1547,4 +1576,35 @@ public class CustomWeekView extends View {
         return today;
     }
 
+    class DisabledDayVisibleResult {
+        private boolean firstDayDisabled;
+        private boolean lastDayDisabled;
+        private WeekTime firstVisibleWeek;
+        private WeekTime lastVisibleWeek;
+
+        public DisabledDayVisibleResult reinit(boolean firstContained, boolean lastContained, WeekTime firstVisibleWeek, WeekTime lastVisibleWeek) {
+            this.firstDayDisabled = !firstContained;
+            this.lastDayDisabled  = !lastContained;
+            this.firstVisibleWeek = firstVisibleWeek;
+            this.lastVisibleWeek  = lastVisibleWeek;
+
+            return this;
+        }
+
+        public boolean isFirstDayDisabled() {
+            return firstDayDisabled;
+        }
+
+        public boolean isLastDayDisabled() {
+            return lastDayDisabled;
+        }
+
+        public WeekTime getFirstVisibleWeek() {
+            return firstVisibleWeek;
+        }
+
+        public WeekTime getLastVisibleWeek() {
+            return lastVisibleWeek;
+        }
+    }
 }

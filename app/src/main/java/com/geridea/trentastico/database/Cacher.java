@@ -82,6 +82,7 @@ public class Cacher {
     public static final String CL_SUBJECT          = "subject";
     public static final String CL_ROOM             = "room";
     public static final String CL_DESCRIPTION      = "description";
+    public static final String CL_COLOR            = "color";
 
     static final String SQL_CREATE_CACHED_LESSONS =
         "CREATE TABLE " + CACHED_LESSONS_TABLE + " (" +
@@ -94,8 +95,9 @@ public class Cacher {
                 CL_YEAR             + " INTEGER NOT NULL, " +
                 CL_SUBJECT          + " VARCHAR(500) NOT NULL, " +
                 CL_ROOM             + " VARCHAR(500) NOT NULL, " +
-                CL_DESCRIPTION      + " VARCHAR(500) NOT NULL " +
-        ")";
+                CL_DESCRIPTION      + " VARCHAR(500) NOT NULL, " +
+                CL_COLOR            + " INTEGER NOT NULL " +
+            ")";
 
 
     //Cached lesson types
@@ -175,6 +177,7 @@ public class Cacher {
         values.put(CL_SUBJECT,          cachedLesson.getSubject());
         values.put(CL_ROOM,             cachedLesson.getRoom());
         values.put(CL_DESCRIPTION,      cachedLesson.getDescription());
+        values.put(CL_COLOR,            cachedLesson.getColor());
 
         writableDatabase.insert(CACHED_LESSONS_TABLE, null, values);
     }
@@ -354,7 +357,7 @@ public class Cacher {
         //Cached periods
         ArrayList<CachedPeriod> cachePeriods = loadCachePeriodsInInterval(intervalToLoad, fetchOldCacheToo);
         for (CachedPeriod cachedPeriod : cachePeriods) {
-            lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod, lessonTypes));
+            lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod));
             lessonsSet.addCachedPeriod(cachedPeriod);
         }
 
@@ -366,12 +369,11 @@ public class Cacher {
         return lessonsSet;
     }
 
-    private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod, ArrayList<CachedLessonType> lessonTypes) {
+    private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod) {
         ArrayList<LessonSchedule> lessons = new ArrayList<>();
 
         for (CachedLesson cachedLesson : loadCachedLessons(cachePeriod)) {
-            CachedLessonType lessonType = getLessonTypeOfLesson(cachedLesson, lessonTypes);
-            lessons.add(new LessonSchedule(cachedLesson, lessonType.getColor()));
+            lessons.add(new LessonSchedule(cachedLesson));
         }
 
         return lessons;
@@ -466,7 +468,8 @@ public class Cacher {
                 CL_YEAR,
                 CL_SUBJECT,
                 CL_ROOM,
-                CL_DESCRIPTION
+                CL_DESCRIPTION,
+                CL_COLOR
         };
 
         String selection = CL_CACHED_PERIOD_ID+" = ?";

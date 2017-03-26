@@ -33,7 +33,7 @@ public class LessonSchedule {
         this.lessonTypeId = lessonTypeId;
     }
 
-    public LessonSchedule(CachedLesson cachedLesson, int color) {
+    public LessonSchedule(CachedLesson cachedLesson) {
         this(
             cachedLesson.getLesson_id(),
             cachedLesson.getRoom(),
@@ -41,7 +41,7 @@ public class LessonSchedule {
             cachedLesson.getStarts_at_ms(),
             cachedLesson.getFinishes_at_ms(),
             cachedLesson.getDescription(),
-            color,
+            cachedLesson.getColor(),
             cachedLesson.getTeaching_id()
         );
 

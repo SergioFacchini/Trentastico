@@ -19,13 +19,14 @@ public class CachedLesson {
     private long finishes_at_ms;
     private long teaching_id;
     private String subject;
+    private int color;
 
     private String room;
     private String description;
 
     private final WeekTime weekTime;
 
-    public CachedLesson(long cached_period_id, long lesson_id, long starts_at_ms, long finishes_at_ms, long teaching_id, String subject, String room, String description) {
+    public CachedLesson(long cached_period_id, long lesson_id, long starts_at_ms, long finishes_at_ms, long teaching_id, String subject, String room, String description, int color) {
         this.lesson_id = lesson_id;
         this.cached_period_id = cached_period_id;
         this.starts_at_ms = starts_at_ms;
@@ -34,6 +35,7 @@ public class CachedLesson {
         this.subject = subject;
         this.room = room;
         this.description = description;
+        this.color = color;
 
         this.weekTime = new WeekTime(starts_at_ms);
     }
@@ -47,7 +49,8 @@ public class CachedLesson {
                 lesson.getLessonTypeId(),
                 lesson.getSubject(),
                 lesson.getRoom(),
-                lesson.getFullDescription()
+                lesson.getFullDescription(),
+                lesson.getColor()
         );
     }
 
@@ -96,8 +99,13 @@ public class CachedLesson {
             cursor.getLong(  cursor.getColumnIndexOrThrow(Cacher.CL_TEACHING_ID)),
             cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_SUBJECT)),
             cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_ROOM)),
-            cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_DESCRIPTION))
+            cursor.getString(cursor.getColumnIndexOrThrow(Cacher.CL_DESCRIPTION)),
+            cursor.getInt(cursor.getColumnIndexOrThrow(Cacher.CL_COLOR))
         );
 
+    }
+
+    public int getColor() {
+        return color;
     }
 }

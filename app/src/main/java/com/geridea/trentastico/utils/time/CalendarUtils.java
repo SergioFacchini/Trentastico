@@ -60,4 +60,11 @@ public class CalendarUtils {
         return DUMMY;
     }
 
+    public static Calendar getDummyInitializedAs(Calendar calendar){
+        DUMMY.clear();
+        DUMMY.setFirstDayOfWeek(Calendar.MONDAY);
+        DUMMY.setTime(calendar.getTime());
+        return DUMMY;
+    }
+
 }

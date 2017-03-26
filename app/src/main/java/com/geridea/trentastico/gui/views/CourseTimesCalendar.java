@@ -22,7 +22,6 @@ import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.network.operations.ParsingErrorOperation;
 import com.geridea.trentastico.network.operations.ReadingErrorOperation;
 import com.geridea.trentastico.utils.time.CalendarUtils;
-import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
 import com.threerings.signals.Listener2;
@@ -261,9 +260,20 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     }
 
     @Override
-    public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
-        if(isADisabledDay(newFirstVisibleDay) && !isInEditMode()){
-            loader.loadDayOnDayChangeIfNeeded(new WeekDayTime(newFirstVisibleDay), new WeekDayTime(oldFirstVisibleDay));
+    public void onFirstVisibleDayChanged(Calendar newFirst, Calendar oldFirst) {
+        if (isInEditMode()) {
+            return;
+        }
+
+        ScrollDirection scrollDirection = newFirst.after(oldFirst) ? ScrollDirection.RIGHT : ScrollDirection.LEFT;
+
+        CustomWeekView.DisabledDayVisibleResult disabledDays = getDisabledDaysVisibleFromDay(newFirst);
+        if(disabledDays.isFirstDayDisabled()) {
+            loader.loadDaysIfNeeded(disabledDays.getFirstVisibleWeek(), scrollDirection);
+        }
+
+        if(disabledDays.isLastDayDisabled()) {
+            loader.loadDaysIfNeeded(disabledDays.getLastVisibleWeek(), scrollDirection);
         }
     }
 

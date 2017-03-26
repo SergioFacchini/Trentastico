@@ -1,13 +1,13 @@
 package com.geridea.trentastico.network;
 
 import com.android.volley.VolleyError;
+import com.geridea.trentastico.gui.views.ScrollDirection;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.CalendarInterval;
-import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
 import com.threerings.signals.Listener1;
@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+
+import static com.geridea.trentastico.gui.views.ScrollDirection.LEFT;
 
 
 public class LessonsLoader {
@@ -122,27 +124,27 @@ public class LessonsLoader {
         loadingIntervals.remove(intervalToDelete);
     }
 
-    private boolean isDayAlreadyBeingLoaded(WeekDayTime day) {
+    private boolean isWeekAlreadyBeingLoaded(WeekTime week) {
         for (WeekInterval loadingInterval : loadingIntervals) {
-            if (loadingInterval.contains(day)) {
+            if (loadingInterval.contains(week)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void loadDayOnDayChangeIfNeeded(WeekDayTime newFirstVisibleDay, WeekDayTime oldFirstVisibleDay) {
-        if (!isDayAlreadyBeingLoaded(newFirstVisibleDay)) {
+    public void loadDaysIfNeeded(WeekTime weekToLoad, ScrollDirection direction) {
+        if (!isWeekAlreadyBeingLoaded(weekToLoad)) {
             WeekTime loadFrom, loadTo;
-            if(newFirstVisibleDay.before(oldFirstVisibleDay)){
-                //We scrolled backwards
-                loadFrom = new WeekTime(newFirstVisibleDay);
-                loadFrom.addWeeks(-1);
+            if(direction == LEFT){
+                loadFrom = weekToLoad.copy();
+                loadFrom.addWeeks(-2);
 
-                loadTo = new WeekTime(oldFirstVisibleDay);
+                loadTo = weekToLoad.copy();
+                loadTo.addWeeks(+1);
             } else {
                 //We scrolled forward
-                loadFrom = new WeekTime(newFirstVisibleDay);
+                loadFrom = weekToLoad.copy();
 
                 loadTo = loadFrom.copy();
                 loadTo.addWeeks(+2);
