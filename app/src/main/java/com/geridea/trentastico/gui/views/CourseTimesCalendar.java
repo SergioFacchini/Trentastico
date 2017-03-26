@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
-import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
@@ -35,14 +34,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import static com.geridea.trentastico.Config.DEBUG_MODE;
+
 public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN);
-    private final static SimpleDateFormat DATE_FORMAT_MEDIUM = new SimpleDateFormat("EE dd/MM", Locale.ITALIAN);
-    private final static SimpleDateFormat DATE_FORMAT_SHORT  = new SimpleDateFormat("dd/MM", Locale.ITALIAN);
-    private final static SimpleDateFormat DATE_FORMAT_SHORT_ONLY_DAY = new SimpleDateFormat("EE", Locale.ITALIAN);
-
     private final static SimpleDateFormat DATE_FORMAT_DEBUG = new SimpleDateFormat("(w) EEEE d MMMM", Locale.ITALIAN);
+
+    private final static SimpleDateFormat DATE_FORMAT_MEDIUM = new SimpleDateFormat("EE dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_MEDIUM_DEBUG = new SimpleDateFormat("(w)EE dd/MM", Locale.ITALIAN);
+
+    private final static SimpleDateFormat DATE_FORMAT_SHORT  = new SimpleDateFormat("dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_SHORT_DEBUG  = new SimpleDateFormat("(w)dd/MM", Locale.ITALIAN);
+
+    private final static SimpleDateFormat DATE_FORMAT_SHORT_ONLY_DAY = new SimpleDateFormat("EE", Locale.ITALIAN);
 
     private final static SimpleDateFormat FORMAT_ONLY_DAY = new SimpleDateFormat("EEEE", Locale.ITALIAN);
 
@@ -113,7 +118,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                         return "Ieri (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
                     }
 
-                    return (Config.IS_IN_DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
+                    return (DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
                 }
 
                 @Override
@@ -145,7 +150,8 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                         return "Ieri";
                     }
 
-                    return DATE_FORMAT_MEDIUM.format(date.getTime());
+                    return (DEBUG_MODE ? DATE_FORMAT_MEDIUM_DEBUG : DATE_FORMAT_MEDIUM)
+                                .format(date.getTime());
                 }
 
                 @Override
@@ -162,9 +168,11 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     lastDay.add(Calendar.WEEK_OF_MONTH, +1);
 
                     if (date.equals(firstDay) || (date.after(firstDay) && date.before(lastDay))) {
-                        return DATE_FORMAT_SHORT_ONLY_DAY.format(date.getTime());
+                        return (DEBUG_MODE ? DATE_FORMAT_SHORT_DEBUG : DATE_FORMAT_SHORT_ONLY_DAY)
+                                .format(date.getTime());
                     } else {
-                        return DATE_FORMAT_SHORT.format(date.getTime());
+                        return (DEBUG_MODE ? DATE_FORMAT_SHORT_DEBUG : DATE_FORMAT_SHORT)
+                                    .format(date.getTime());
                     }
                 }
 
