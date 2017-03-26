@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.Semester;
 import com.geridea.trentastico.model.cache.CachedLesson;
 import com.geridea.trentastico.model.cache.CachedLessonType;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
@@ -129,13 +128,9 @@ public class Cacher {
         //3) Get inserted id
         //4) Make lessons
         //5) Add lessons
-
-        //Technically we should always be fetching the latest lesson types. In some cases, however
-        //we can scroll back so much to be able to see the previous semesters' courses. We do not
-        //want to cache courses that are not actual.
         for (LessonType lessonType : setToCache.getLessonTypes()) {
             LessonSchedule lesson = setToCache.getALessonHavingType(lessonType);
-            if (lesson != null && Semester.isInCurrentSemester(lesson.getStartCal())) {
+            if (lesson != null) {
                 deleteLessonTypeWithId(lessonType.getId());
                 cacheLessonType(new CachedLessonType(lessonType));
             }

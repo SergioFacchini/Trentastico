@@ -11,23 +11,22 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.geridea.trentastico.utils.time.CalendarInterval;
-import com.geridea.trentastico.utils.time.WeekInterval;
-import com.geridea.trentastico.utils.AppPreferences;
-import com.threerings.signals.Listener1;
-
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.WeekInterval;
+import com.threerings.signals.Listener1;
 import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal2;
+
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Networker {
 
@@ -112,6 +111,11 @@ public class Networker {
                 request.onRequestSuccessful.connect(new Listener1<LessonsSet>() {
                     @Override
                     public void apply(LessonsSet result) {
+                        //Technically we should always be fetching the latest lesson types. In some cases, however
+                        //we can scroll back so much to be able to see the previous semesters' courses. We do not
+                        //want to cache courses that are not actual.
+                        result.removeLessonTypesNotInCurrentSemester();
+
                         Cacher.cacheLessonsSet(result, request.getIntervalToLoad());
 
                         onLessonsLoaded.dispatch(result, request.getIntervalToLoad());

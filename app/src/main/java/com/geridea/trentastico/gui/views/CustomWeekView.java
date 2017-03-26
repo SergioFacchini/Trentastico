@@ -769,7 +769,7 @@ public class CustomWeekView extends View {
         Calendar lastVisibleDate = CalendarUtils.getDummyInitializedAs(newFirstVisibleDay);
         lastVisibleDate.add(Calendar.DAY_OF_MONTH, mNumberOfVisibleDays);
 
-        WeekTime lastVisibleWeek = new WeekTime(newFirstVisibleDay);
+        WeekTime lastVisibleWeek = new WeekTime(lastVisibleDate);
 
         boolean firstEnabled = false, lastEnabled = false;
         for (WeekInterval enabledInterval: enabledIntervals) {

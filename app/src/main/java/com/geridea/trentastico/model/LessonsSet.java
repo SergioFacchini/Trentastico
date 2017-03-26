@@ -155,4 +155,30 @@ public class LessonsSet {
 
         scheduledLessons.values().removeAll(lessonsToRemove);
     }
+
+    public void removeLessonTypesNotInCurrentSemester() {
+        Iterator<LessonType> typesIterator = getLessonTypes().iterator();
+
+        while(typesIterator.hasNext()){
+            LessonType lessonType = typesIterator.next();
+
+            boolean keepLessonType = false;
+            ArrayList<LessonSchedule> lessons = getLessonsOfType(lessonType);
+
+            for (LessonSchedule lesson : lessons) {
+                if (Semester.isInCurrentSemester(lesson)) {
+                    keepLessonType = true;
+                    break;
+                }
+            }
+
+            if (!keepLessonType) {
+                typesIterator.remove();
+            }
+
+        }
+
+
+    }
+
 }

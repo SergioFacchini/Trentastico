@@ -46,6 +46,10 @@ public final class Semester {
         return CURRENT_SEMESTER.enclosesDate(date);
     }
 
+    public static boolean isInCurrentSemester(LessonSchedule lesson) {
+        return isInCurrentSemester(lesson.getStartCal());
+    }
+
     private boolean enclosesDate(Calendar date) {
         return year == date.get(Calendar.YEAR) && getSemesterNumber(date) == semesterNumber;
     }
@@ -61,5 +65,4 @@ public final class Semester {
             return 1;
         }
     }
-
 }
