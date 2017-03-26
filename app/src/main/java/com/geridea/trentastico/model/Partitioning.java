@@ -37,7 +37,9 @@ public class Partitioning {
     }
 
     public void mergePartitionCases(Partitioning anotherPartitioning) {
-        cases.addAll(anotherPartitioning.getCases());
+        if (anotherPartitioning.type != PartitioningType.NONE) {
+            cases.addAll(anotherPartitioning.getCases());
+        }
     }
 
     public Collection<PartitioningCase> getCases() {
