@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-
-import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.utils.AppPreferences;
 
 /**
@@ -29,5 +27,6 @@ public class FirstActivityChooserActivity extends AppCompatActivity {
             startActivity(new Intent(this, HomeActivity.class));
         }
 
+        finish();
     }
 }

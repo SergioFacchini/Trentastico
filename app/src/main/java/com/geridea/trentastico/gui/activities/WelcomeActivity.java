@@ -5,13 +5,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.geridea.trentastico.R;
+import com.geridea.trentastico.gui.views.CourseSelectorView;
+import com.geridea.trentastico.utils.AppPreferences;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.geridea.trentastico.R;
-import com.geridea.trentastico.gui.fragments.CalendarFragment;
-import com.geridea.trentastico.gui.views.CourseSelectorView;
-import com.geridea.trentastico.utils.AppPreferences;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -35,6 +35,8 @@ public class WelcomeActivity extends AppCompatActivity {
         AppPreferences.setIsFirstRun(false);
 
         startActivity(new Intent(WelcomeActivity.this, HomeActivity.class));
+
+        finish();
     }
 
 }
