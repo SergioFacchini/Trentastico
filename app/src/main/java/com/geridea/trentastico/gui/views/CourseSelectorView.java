@@ -2,16 +2,10 @@ package com.geridea.trentastico.gui.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 
 import com.alexvasilkov.android.commons.utils.Views;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnItemSelected;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.adapters.CoursesAdapter;
 import com.geridea.trentastico.gui.adapters.DepartmentsAdapter;
@@ -19,6 +13,11 @@ import com.geridea.trentastico.gui.adapters.YearsAdapter;
 import com.geridea.trentastico.model.Department;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.providers.DepartmentsProvider;
+import com.threerings.signals.Signal1;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnItemSelected;
 
 /*
  * Created with ♥ by Slava on 11/03/2017.
@@ -37,6 +36,12 @@ public class CourseSelectorView extends FrameLayout {
      * variable is a workaround.
      */
     private int courseToSelectPosition = 0;
+
+    /**
+     * Dispatched when the user has just selected another study course.
+     */
+    public final Signal1<StudyCourse> onCourseChanged = new Signal1<>();
+
 
     public CourseSelectorView(final Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,6 +64,19 @@ public class CourseSelectorView extends FrameLayout {
         coursesSpinner.setSelection(courseToSelectPosition, false);
 
         courseToSelectPosition = 0;
+
+        onCourseChanged.dispatch(getSelectedStudyCourse());
+    }
+
+
+    @OnItemSelected(R.id.courses_spinner)
+    void onCoursesSelected(){
+        onCourseChanged.dispatch(getSelectedStudyCourse());
+    }
+
+    @OnItemSelected(R.id.year_spinner)
+    void onYearSelected(){
+        onCourseChanged.dispatch(getSelectedStudyCourse());
     }
 
     public StudyCourse getSelectedStudyCourse(){

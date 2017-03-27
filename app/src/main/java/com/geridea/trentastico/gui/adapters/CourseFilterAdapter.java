@@ -17,10 +17,7 @@ import com.geridea.trentastico.model.Partitioning;
 import com.geridea.trentastico.model.PartitioningType;
 import com.threerings.signals.Signal1;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Locale;
 
 public class CourseFilterAdapter extends ItemsAdapter<LessonType> {
@@ -41,16 +38,7 @@ public class CourseFilterAdapter extends ItemsAdapter<LessonType> {
     public CourseFilterAdapter(Context context, Collection<LessonType> lessons) {
         super(context);
 
-        ArrayList<LessonType> lessonTypes = new ArrayList<>(lessons);
-
-        //Sort all the courses alphabetically
-        Collections.sort(lessonTypes, new Comparator<LessonType>() {
-            @Override
-            public int compare(LessonType o1, LessonType o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        setItemsList(lessonTypes);
+        setItemsList(LessonType.getSortedLessonTypes(lessons));
     }
 
     @Override

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Orari extra"
+        android:textColor="@color/colorForeground"
+        android:textSize="24sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="10dp"
+        android:text="Devi dare degli esami degli anni precedenti o vuoi seguire qualche corso che non fa parte del tuo piano di studi? Da qui puoi aggiungere al tuo orario le lezioni che non fanno parte del corso di studi da te selezionato."
+        android:textColor="@color/colorForeground"
+        android:textSize="14sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        
+        <ListView
+            android:id="@+id/extra_lessons_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:divider="@color/colorForeground"
+            android:dividerHeight="1dp" />
+
+        <TextView
+            android:id="@+id/no_extra_courses_label"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:paddingTop="13dp"
+            android:text="Attualmente non hai nessun orario extra. Utilizza il menu in alto per aggiungerne."
+            android:textColor="#FFFFFF"
+            android:textSize="20dp"
+            />
+
+    </FrameLayout>
+
+
+</LinearLayout>

@@ -14,6 +14,10 @@ public class WeekInterval {
     private WeekTime start, end;
 
     public WeekInterval(WeekTime start, WeekTime end) {
+        init(start, end);
+    }
+
+    private void init(WeekTime start, WeekTime end) {
         if(start.after(end)){
             throw new IllegalStateException("Cannot have an interval starting after it's end!");
         }
@@ -28,6 +32,16 @@ public class WeekInterval {
 
     public WeekInterval(int startWeek, int startYear, int endWeek, int endYear) {
         this(new WeekTime(startYear, startWeek), new WeekTime(endYear, endWeek));
+    }
+
+    public WeekInterval(int fromDelta, int toDelta) {
+        WeekTime from = new WeekTime();
+        from.addWeeks(fromDelta);
+
+        WeekTime to = new WeekTime();
+        to.addWeeks(toDelta+1);
+
+        init(from, to);
     }
 
     public WeekTime getStart() {

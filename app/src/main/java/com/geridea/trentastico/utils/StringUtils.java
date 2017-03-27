@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
 
 public class StringUtils {
 
-    public static String implode(Collection<String> strings, String glue) {
+    public static String implode(Collection strings, String glue) {
         StringBuilder builder = new StringBuilder();
 
-        Iterator<String> iterator = strings.iterator();
+        Iterator iterator = strings.iterator();
         while (iterator.hasNext()){
-            String stringToGlue = iterator.next();
+            String stringToGlue = iterator.next().toString();
             builder.append(stringToGlue);
 
             if (iterator.hasNext()) {

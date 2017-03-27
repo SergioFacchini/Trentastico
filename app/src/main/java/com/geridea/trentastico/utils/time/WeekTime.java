@@ -16,6 +16,10 @@ public class WeekTime {
         this.weekNumber = weekNumber;
     }
 
+    public WeekTime() {
+        initFromCalendar(Calendar.getInstance());
+    }
+
     public WeekTime(Calendar calendar) {
         initFromCalendar(calendar);
     }

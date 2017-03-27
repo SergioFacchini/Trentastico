@@ -10,7 +10,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
@@ -25,6 +27,7 @@ import com.geridea.trentastico.utils.time.WeekTime;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -62,7 +65,7 @@ public class Cacher {
             CP_START_YEAR +   " INTEGER NOT NULL, " +
             CP_END_WEEK +     " INTEGER NOT NULL, " +
             CP_END_YEAR +     " INTEGER NOT NULL, " +
-            CP_LESSON_TYPE +  " INTEGER, " +
+            CP_LESSON_TYPE +  " INTEGER NOT NULL, " +
             CP_CACHED_IN_MS + " INTEGER NOT NULL" +
         ")";
 
@@ -105,20 +108,31 @@ public class Cacher {
     public static final String CLT_LESSON_TYPE_ID = "lesson_type_id";
     public static final String CLT_NAME = "name";
     public static final String CLT_COLOR = "color";
+    public static final String CLT_IS_EXTRA_COURSE = "is_extra_course";
 
     static final String SQL_CREATE_CACHED_LESSON_TYPES =
         "CREATE TABLE " + CACHED_LESSON_TYPES_TABLE + " (" +
-            CLT_LESSON_TYPE_ID + " INTEGER NOT NULL, " +
-            CLT_NAME +           " VARCHAR(500) NOT NULL, " +
-            CLT_COLOR +          " INTEGER NOT NULL" +
+            CLT_LESSON_TYPE_ID +  " INTEGER NOT NULL, " +
+            CLT_NAME +            " VARCHAR(500) NOT NULL, " +
+            CLT_COLOR +           " INTEGER NOT NULL," +
+            CLT_IS_EXTRA_COURSE + " INTEGER NOT NULL" +
         ")";
-
 
     private static SQLiteDatabase writableDatabase;
 
     public static void init(Context context){
         CacheDbHelper cacheDbHelper = new CacheDbHelper(context);
         writableDatabase = cacheDbHelper.getWritableDatabase();
+    }
+
+    public static void cacheExtraLessonsSet(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
+        updateLessonTypesFromSet(setToCache, true);
+        deleteCachedExtraLessonsInInterval(interval, extraCourse);
+
+        long cachedPeriodId = insertCachedPeriod(new CachedPeriod(interval, extraCourse.getLessonTypeId()));
+        for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
+            cacheLesson(new CachedLesson(cachedPeriodId, lesson));
+        }
     }
 
     public static void cacheLessonsSet(LessonsSet setToCache, WeekInterval intervalToCache) {
@@ -128,15 +142,8 @@ public class Cacher {
         //3) Get inserted id
         //4) Make lessons
         //5) Add lessons
-        for (LessonType lessonType : setToCache.getLessonTypes()) {
-            LessonSchedule lesson = setToCache.getALessonHavingType(lessonType);
-            if (lesson != null) {
-                deleteLessonTypeWithId(lessonType.getId());
-                cacheLessonType(new CachedLessonType(lessonType));
-            }
-        }
-
-        deleteCachedLessonsInInterval(intervalToCache);
+        updateLessonTypesFromSet(setToCache, false);
+        deleteCachedStudyCourseLessonsInInterval(intervalToCache);
 
         long cachedPeriodId = insertCachedPeriod(new CachedPeriod(intervalToCache));
         for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
@@ -144,11 +151,22 @@ public class Cacher {
         }
     }
 
-    private static void cacheLessonType(CachedLessonType cachedLessonType) {
+    private static void updateLessonTypesFromSet(LessonsSet setToCache, boolean containsExtraLessonTypes) {
+        for (LessonType lessonType : setToCache.getLessonTypes()) {
+            LessonSchedule lesson = setToCache.getALessonHavingType(lessonType);
+            if (lesson != null) {
+                deleteLessonTypeWithId(lessonType.getId());
+                cacheLessonType(new CachedLessonType(lessonType), containsExtraLessonTypes);
+            }
+        }
+    }
+
+    private static void cacheLessonType(CachedLessonType cachedLessonType, boolean isExtraCourse) {
         ContentValues values = new ContentValues();
-        values.put(CLT_LESSON_TYPE_ID, cachedLessonType.getLesson_type_id());
-        values.put(CLT_NAME,           cachedLessonType.getName());
-        values.put(CLT_COLOR,          cachedLessonType.getColor());
+        values.put(CLT_LESSON_TYPE_ID,  cachedLessonType.getLesson_type_id());
+        values.put(CLT_NAME,            cachedLessonType.getName());
+        values.put(CLT_COLOR,           cachedLessonType.getColor());
+        values.put(CLT_IS_EXTRA_COURSE, isExtraCourse);
 
         writableDatabase.insert(CACHED_LESSON_TYPES_TABLE, null, values);
     }
@@ -177,10 +195,10 @@ public class Cacher {
         writableDatabase.insert(CACHED_LESSONS_TABLE, null, values);
     }
 
-    private static void deleteCachedLessonsInInterval(WeekInterval interval) {
+    private static void deleteCachedExtraLessonsInInterval(WeekInterval interval, ExtraCourse extraCourse) {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
-        for (CachedPeriod period : loadCachePeriodsInInterval(interval, true)) {
+        for (CachedPeriod period: loadExtraCourseCachePeriods(interval, true, extraCourse.getLessonTypeId())) {
             WeekIntervalCutResult cutResult = period.getPeriod().cutFromInterval(interval);
 
             if(!cutResult.hasAnyRemainingResult()){
@@ -191,9 +209,29 @@ public class Cacher {
             } else {
                 splitCachePeriod(period, cutResult);
             }
+
+            deleteExtraCourseLessonsInInterval(period.getId(), interval, extraCourse.getLessonTypeId());
         }
 
-        deleteAllLessonsInInterval(interval);
+    }
+
+    private static void deleteCachedStudyCourseLessonsInInterval(WeekInterval interval) {
+        //Trimming existing cached periods so the passed interval won't have any overlapping
+        //cached interval
+        for (CachedPeriod period: loadStudyCourseCachePeriods(interval, true)) {
+            WeekIntervalCutResult cutResult = period.getPeriod().cutFromInterval(interval);
+
+            if(!cutResult.hasAnyRemainingResult()){
+                deleteCachedPeriodWithId(period.getId());
+            } else if(cutResult.hasOnlyOneResult()){
+                period.setPeriod(cutResult.getFirstRemaining());
+                updateCachedPeriod(period);
+            } else {
+                splitCachePeriod(period, cutResult);
+            }
+
+            deleteStudyCourseLessonsInInterval(period.getId(), interval);
+        }
     }
 
     /**
@@ -279,11 +317,47 @@ public class Cacher {
         writableDatabase.delete(CACHED_PERIOD_TABLE, CP_ID+"= ?", selectionArgs);
     }
 
-    private static void deleteAllLessonsInInterval(WeekInterval interval) {
-        writableDatabase.delete(CACHED_LESSONS_TABLE, buildWeekTimeSelectionsSQL(interval), null);
+    private static void deleteExtraCourseLessonsInInterval(long periodId, WeekInterval interval, int lessonTypeId) {
+        deleteCourseLessonsInIntervalInternal(periodId, interval, lessonTypeId);
     }
 
-    private static ArrayList<CachedPeriod> loadCachePeriodsInInterval(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
+    private static void deleteCourseLessonsInIntervalInternal(long periodId, @Nullable WeekInterval interval, long lessonTypeId) {
+        String whereClause = String.format("(%s = ?) ", CL_CACHED_PERIOD_ID);
+
+        if (interval != null) {
+            whereClause += String.format(" AND (%s) ", buildWeekTimeSelectionsSQL(interval));
+        }
+
+        if (lessonTypeId != 0) {
+            whereClause += "AND "+CL_TEACHING_ID+" = "+lessonTypeId;
+        }
+
+        String[] whereArgs = new String[]{ String.valueOf(periodId) };
+        writableDatabase.delete(CACHED_LESSONS_TABLE, whereClause, whereArgs);
+    }
+
+    private static void deleteStudyCourseLessonsInInterval(long periodId, WeekInterval interval) {
+        deleteCourseLessonsInIntervalInternal(periodId, interval, 0);
+    }
+
+    private static void deleteStudyCourseLessons(long periodId) {
+        deleteCourseLessonsInIntervalInternal(periodId, null, 0);
+    }
+
+    private static void deleteExtraLessonsOfType(long periodId, long lessonTypeId) {
+        deleteCourseLessonsInIntervalInternal(periodId, null, lessonTypeId);
+    }
+
+    private static ArrayList<CachedPeriod> loadStudyCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
+        return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, 0);
+    }
+
+    private static ArrayList<CachedPeriod> loadExtraCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo, int lessonTypeId) {
+        return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, lessonTypeId);
+    }
+
+    @NonNull
+    private static ArrayList<CachedPeriod> loadCachePeriodsInternal(WeekInterval intervalToLoad, boolean fetchOldCacheToo, int lessonTypeId) {
         String[] projection = {
                 CP_ID,
                 CP_START_WEEK,
@@ -294,11 +368,12 @@ public class Cacher {
                 CP_CACHED_IN_MS
         };
 
-        String selection = buildCachePeriodSelectionForInterval(intervalToLoad);
+        String sqlCachePeriods = buildCachePeriodSelectionForInterval(intervalToLoad);
+        String selection = String.format("(%s) AND %s = %d ", sqlCachePeriods, CP_LESSON_TYPE, lessonTypeId);
         if(!fetchOldCacheToo){
-            selection = String.format(Locale.UK,
-                    "(%s) AND (%s >= %d AND %s < %d)", selection, CP_CACHED_IN_MS, getLastValidCacheMs(),
-                    CP_CACHED_IN_MS, System.currentTimeMillis()
+            selection += String.format(
+                    " AND (%s >= %d AND %s < %d) ",
+                    CP_CACHED_IN_MS, getLastValidCacheMs(), CP_CACHED_IN_MS, System.currentTimeMillis()
             );
         }
 
@@ -342,26 +417,72 @@ public class Cacher {
         return id;
     }
 
-    public static CachedLessonsSet getLessonsInFreshOrDeadCache(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
+    public static CachedLessonsSet getLessonsInFreshOrDeadCache(WeekInterval intervalToLoad, ArrayList<ExtraCourse> extraCourses, boolean fetchOldCacheToo) {
         CachedLessonsSet lessonsSet = new CachedLessonsSet();
 
         //Lesson types
-        ArrayList<CachedLessonType> lessonTypes = loadLessonTypes();
-        lessonsSet.addCachedLessonTypes(lessonTypes);
+        lessonsSet.addCachedLessonTypes(loadLessonTypes(true, false));
 
-        //Cached periods
-        ArrayList<CachedPeriod> cachePeriods = loadCachePeriodsInInterval(intervalToLoad, fetchOldCacheToo);
-        for (CachedPeriod cachedPeriod : cachePeriods) {
+        //Study course cached periods
+        ArrayList<CachedPeriod> studyCoursePeriods = loadStudyCourseCachePeriods(intervalToLoad, fetchOldCacheToo);
+        for (CachedPeriod cachedPeriod : studyCoursePeriods) {
             lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod));
             lessonsSet.addCachedPeriod(cachedPeriod);
         }
 
+        //Missing study course intervals
+        lessonsSet.addMissingIntervals(
+            toStudyCourseInterval(findMissingIntervalsInCachePeriods(intervalToLoad, studyCoursePeriods))
+        );
+
+        ////////////////
+        //Extra courses
+        lessonsSet.addCachedLessonTypes(loadExtraCoursesLessonTypes());
+
+        //Calculating missing intervals for all the extra study courses
+        for (ExtraCourse extraCourse : extraCourses) {
+            //Loading cached periods
+            ArrayList<CachedPeriod> extraPeriods = loadExtraCourseCachePeriods(
+                    intervalToLoad, fetchOldCacheToo, extraCourse.getLessonTypeId()
+            );
+
+            //Adding to lessons' set what's cached
+            for (CachedPeriod cachedPeriod: extraPeriods) {
+                lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod));
+                lessonsSet.addCachedPeriod(cachedPeriod);
+            }
+
+            //Finding not cached extra intervals
+            ArrayList<WeekInterval> missingIntervals =
+                    findMissingIntervalsInCachePeriods(intervalToLoad, extraPeriods);
+            lessonsSet.addMissingIntervals(toExtraCourseInterval(missingIntervals, extraCourse));
+        }
+        
         lessonsSet.recalculatePartitionings();
 
-        //Missing intervals
-        lessonsSet.addMissingIntervals(findMissingIntervalsInCachePeriods(intervalToLoad, cachePeriods));
-
         return lessonsSet;
+    }
+
+    private static ArrayList<CachedLessonType> loadExtraCoursesLessonTypes() {
+        return loadLessonTypes(false, true);
+    }
+
+    public static ArrayList<NotCachedInterval> toStudyCourseInterval(List<WeekInterval> intervals){
+        ArrayList<NotCachedInterval> notCachedIntervals = new ArrayList<>();
+        for (WeekInterval interval : intervals) {
+            notCachedIntervals.add(new StudyCourseNotCachedInterval(interval));
+        }
+
+        return notCachedIntervals;
+    }
+
+    public static ArrayList<NotCachedInterval> toExtraCourseInterval(List<WeekInterval> intervals, ExtraCourse extraCourse){
+        ArrayList<NotCachedInterval> notCachedIntervals = new ArrayList<>();
+        for (WeekInterval interval : intervals) {
+            notCachedIntervals.add(new ExtraCourseNotCachedInterval(interval, extraCourse));
+        }
+
+        return notCachedIntervals;
     }
 
     private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod) {
@@ -422,34 +543,38 @@ public class Cacher {
         return missingIntervals;
     }
 
-    private static ArrayList<CachedLessonType> loadLessonTypes() {
-        String[] projection = {CLT_LESSON_TYPE_ID, CLT_NAME, CLT_COLOR};
+    private static ArrayList<CachedLessonType> loadLessonTypes(boolean loadStudyCourses, boolean loadExtraCourses) {
+        if (!loadStudyCourses && !loadExtraCourses) {
+            throw new IllegalArgumentException("Cannot load nothing!");
+        }
+
+        String[] projection = {CLT_LESSON_TYPE_ID, CLT_NAME, CLT_COLOR, CLT_IS_EXTRA_COURSE};
+
+        String where;
+        String[] selectionArgs;
+
+        if (loadStudyCourses && loadExtraCourses) {
+            where = null;
+            selectionArgs = null;
+        } else if (loadStudyCourses) {
+            where = CLT_IS_EXTRA_COURSE + " = ?";
+            selectionArgs = new String[]{"0"};
+        } else { //if(loadExtraCourses)
+            where = CLT_IS_EXTRA_COURSE + " = ?";
+            selectionArgs = new String[]{"1"};
+        }
 
         Cursor cursor = writableDatabase.query(
-                CACHED_LESSON_TYPES_TABLE, projection, null, null, null, null, null
+                CACHED_LESSON_TYPES_TABLE, projection, where, selectionArgs, null, null, null
         );
 
         ArrayList<CachedLessonType> periods = new ArrayList<>();
-        while(cursor.moveToNext()) {
-            periods.add(CachedLessonType.fromCursor(cursor));
+        while (cursor.moveToNext()) {
+            periods.add(CachedLessonType.fromLessonTypeCursor(cursor));
         }
         cursor.close();
 
         return periods;
-    }
-
-    /**
-     * @return the first lesson having a given lesson type.
-     */
-    private static CachedLessonType getLessonTypeOfLesson(CachedLesson lesson, ArrayList<CachedLessonType> lessonTypes) {
-        for (CachedLessonType lessonType : lessonTypes) {
-            if (lessonType.getLesson_type_id() == lesson.getTeaching_id()) {
-                return lessonType;
-            }
-        }
-
-        //Technically, should never happen
-        throw new RuntimeException("Could not find the requested lesson type");
     }
 
     private static ArrayList<CachedLesson> loadCachedLessons(CachedPeriod cachedPeriod) {
@@ -467,11 +592,21 @@ public class Cacher {
                 CL_COLOR
         };
 
-        String selection = CL_CACHED_PERIOD_ID+" = ?";
+        String selection;
+        String[] selectionArgs;
 
-        String[] selectionArgs = {
-            String.valueOf(cachedPeriod.getId())
-        };
+        if (cachedPeriod.getLesson_type() == 0) {
+            selection =  CL_CACHED_PERIOD_ID+" = ? ";
+            selectionArgs = new String[]{
+                    String.valueOf(cachedPeriod.getId())
+            };
+        } else { //it's an extra course: we load only it's lessons
+            selection =  CL_CACHED_PERIOD_ID+" = ? AND "+ CL_TEACHING_ID+" = ?";
+            selectionArgs = new String[]{
+                String.valueOf(cachedPeriod.getId()),
+                String.valueOf(cachedPeriod.getLesson_type()),
+            };
+        }
 
         Cursor cursor = writableDatabase.query(
             CACHED_LESSONS_TABLE, projection, selection, selectionArgs, null, null, null
@@ -487,12 +622,55 @@ public class Cacher {
     }
 
     /**
-     * Deletes EVERYTHING from the cache.
+     * Deletes EVERYTHING about the current study course from the cache.
      */
-    public static void purge() {
-        writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
-        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
-        writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
+    public static void purgeStudyCourseCache() {
+        for (Long studyCourseCachedPeriodsId: getIdsOfCachedPeriodsOfStudyCourses()) {
+            deleteStudyCourseLessons(studyCourseCachedPeriodsId);
+            deleteCachedPeriodWithId(studyCourseCachedPeriodsId);
+        }
+
+        deleteAllLessonTypes(true);
     }
 
+    private static ArrayList<Long> getIdsOfCachedPeriodsOfStudyCourses() {
+        return queryForCachedPeriodIds(CP_LESSON_TYPE+" = 0");
+    }
+
+    private static ArrayList<Long> getIdsOfCachedPeriodsWithLessonType(int lessonTypeId) {
+        return queryForCachedPeriodIds(CP_LESSON_TYPE+" = "+lessonTypeId);
+    }
+
+    @NonNull
+    private static ArrayList<Long> queryForCachedPeriodIds(String where) {
+        String[] projection = {CP_ID};
+        Cursor query = writableDatabase.query(CACHED_PERIOD_TABLE, projection, where, null, null, null, null);
+
+        ArrayList<Long> ids = new ArrayList<>();
+        while(query.moveToNext()){
+            ids.add(query.getLong(0));
+        }
+
+        query.close();
+
+        return ids;
+    }
+
+
+    private static void deleteAllLessonTypes(boolean keepExtras) {
+        String whereClause = null;
+        if (keepExtras) {
+            whereClause = CLT_IS_EXTRA_COURSE+" <> 1";
+        }
+
+        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, whereClause, null);
+    }
+
+    public static void removeExtraCoursesWithLessonType(int lessonTypeId) {
+        for (Long cachedExtraId : getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
+            deleteLessonTypeWithId(lessonTypeId);
+            deleteExtraLessonsOfType(cachedExtraId, lessonTypeId);
+            deleteCachedPeriodWithId(cachedExtraId);
+        }
+    }
 }

@@ -7,8 +7,6 @@ package com.geridea.trentastico.model.cache;
 
 import android.database.Cursor;
 
-import java.util.Calendar;
-
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -31,6 +29,13 @@ public class CachedPeriod {
     public CachedPeriod(WeekInterval interval) {
         this.id = -1;
         this.lesson_type   = 0;
+        this.period        = interval.copy();
+        this.cached_in_ms  = System.currentTimeMillis();
+    }
+
+    public CachedPeriod(WeekInterval interval, int lesson_type) {
+        this.id = -1;
+        this.lesson_type   = lesson_type;
         this.period        = interval.copy();
         this.cached_in_ms  = System.currentTimeMillis();
     }
@@ -89,6 +94,6 @@ public class CachedPeriod {
 
     @Override
     public String toString() {
-        return "[id: "+id+" "+period+"]";
+        return "[id: "+id+" "+period+" type:"+lesson_type+"]";
     }
 }

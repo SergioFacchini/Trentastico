@@ -73,7 +73,12 @@ public class CalendarFragment extends IFragmentWithMenuItems {
         calendar.onLoadingOperationFinished.connect(new Listener0() {
             @Override
             public void apply() {
-                loader.setVisibility(GONE);
+                view.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        loader.setVisibility(GONE);
+                    }
+                });
             }
         });
 

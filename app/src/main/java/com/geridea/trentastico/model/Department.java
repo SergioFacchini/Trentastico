@@ -41,4 +41,8 @@ public class Department {
 
         throw new RuntimeException("Unknown course with id: "+courseId);
     }
+
+    public Course getCourseWithId(long courseId) {
+        return courses.get(getCoursePosition(courseId));
+    }
 }

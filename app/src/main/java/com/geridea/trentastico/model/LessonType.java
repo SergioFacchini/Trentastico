@@ -1,5 +1,7 @@
 package com.geridea.trentastico.model;
 
+import android.support.annotation.NonNull;
+
 import com.geridea.trentastico.model.cache.CachedLessonType;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.StringUtils;
@@ -8,6 +10,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class LessonType {
 
@@ -49,6 +54,20 @@ public class LessonType {
         lessonType.setVisible(!AppPreferences.hasLessonTypeWithIdHidden(lessonType.getId()));
 
         return lessonType;
+    }
+
+    @NonNull
+    public static ArrayList<LessonType> getSortedLessonTypes(Collection<LessonType> lessons) {
+        ArrayList<LessonType> lessonTypes = new ArrayList<>(lessons);
+
+        //Sort all the courses alphabetically
+        Collections.sort(lessonTypes, new Comparator<LessonType>() {
+            @Override
+            public int compare(LessonType o1, LessonType o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        return lessonTypes;
     }
 
     private void setId(int id) {

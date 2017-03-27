@@ -14,4 +14,10 @@
         android:title="Cambia il numero di giorni da mostrare"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/menu_add_extra_lessons"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="Aggiungi orario extra"
+        app:showAsAction="always" />
+
 </menu>

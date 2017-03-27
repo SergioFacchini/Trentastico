@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
+import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.threerings.signals.Listener0;
@@ -112,11 +113,10 @@ public class HomeActivity extends AppCompatActivity
             });
             setCurrentFragment(settingsFragment);
         } else if(id == R.id.menu_extra_times) {
-            Toast.makeText(this, "EXTRA", Toast.LENGTH_SHORT).show();
+            setCurrentFragment(new ExtraLessonsFragment());
         } else if(id == R.id.menu_about){
             Toast.makeText(this, "About", Toast.LENGTH_SHORT).show();
         }
-
 
         drawer.closeDrawer(GravityCompat.START);
         return true;

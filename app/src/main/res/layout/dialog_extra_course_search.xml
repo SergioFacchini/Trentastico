@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+    android:background="@color/backgroundMain"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+
+    android:paddingRight="@dimen/activity_horizontal_margin"
+
+    android:paddingTop="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Ricerca lezioni"
+        android:textColor="@color/colorForeground"
+        android:textSize="24sp" />
+
+    <LinearLayout
+        android:id="@+id/searching_lessons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/selected_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:text="Sto cercando le lezioni del corso da te selezionato: "
+            android:textColor="@color/colorForeground"
+            android:textSize="14sp" />
+
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp" />
+
+        <TextView
+            android:id="@+id/error_while_searching"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Si è verificato un errore. Riprovo..."
+            android:textColor="@color/colorForeground"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lessons_found"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:paddingTop="10dp"
+            android:text="Ho trovato le seguenti lezioni. Premi sulla lezione che ti interessa seguire per aggiungerla al calendario."
+            android:textColor="@color/colorForeground"
+            android:textSize="14sp" />
+
+        <ListView
+            android:id="@+id/lessons_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:divider="@color/colorForeground"
+            android:dividerHeight="1dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/cancel_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#3b1629"
+        android:screenOrientation="portrait"
+        android:text="Annulla"
+        android:textColor="@color/colorForeground" />
+
+</LinearLayout>

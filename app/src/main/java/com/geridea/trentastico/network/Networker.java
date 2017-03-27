@@ -9,24 +9,36 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
+import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.database.NotCachedInterval;
+import com.geridea.trentastico.logger.BugLogger;
+import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
+import com.geridea.trentastico.network.operations.ExtraCoursesLoadingOperation;
+import com.geridea.trentastico.network.requests.AbstractServerRequest;
+import com.geridea.trentastico.network.requests.ExtraCourseLessonsRequest;
+import com.geridea.trentastico.network.requests.LessonsRequest;
+import com.geridea.trentastico.network.requests.ListLessonTypesRequest;
 import com.geridea.trentastico.utils.AppPreferences;
-import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
+import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
-import com.threerings.signals.Signal1;
-import com.threerings.signals.Signal2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static com.geridea.trentastico.Config.PRE_LOADING_WAITING_TIME_MS;
 
 public class Networker {
 
@@ -38,43 +50,53 @@ public class Networker {
         CONTEXT = context;
     }
 
-    public static final Signal1<CalendarInterval> onLoadingAboutToStart            = new Signal1<>();
-    public static final Signal2<LessonsSet, WeekInterval> onLessonsLoaded          = new Signal2<>();
-    public static final Signal1<VolleyError> onErrorHappened                       = new Signal1<>();
-    public static final Signal1<Exception> onParsingErrorHappened                  = new Signal1<>();
-    public static final Signal1<CachedLessonsSet> onPartiallyCachedResultsFetched  = new Signal1<>();
-
     /**
      * Loads the lessons in the given period. Fetches all the possible lesson from the fresh cache
      * or dead cache and the remaining from internet.
      * @return a list of intervals that will be fetched from the network
      */
     @Nullable
-    public static ArrayList<WeekInterval> loadLessons(WeekInterval intervalToLoad) {
-        CachedLessonsSet cacheSet = Cacher.getLessonsInFreshOrDeadCache(intervalToLoad, false);
+    public static ArrayList<NotCachedInterval> loadLessons(WeekInterval intervalToLoad, LessonsLoadingListener listener) {
+        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
+        CachedLessonsSet cacheSet = Cacher.getLessonsInFreshOrDeadCache(intervalToLoad, extraCourses, false);
         if (cacheSet.hasMissingIntervals()) {
             if(cacheSet.wereSomeLessonsFoundInCache()){
-                onPartiallyCachedResultsFetched.dispatch(cacheSet);
+                listener.onPartiallyCachedResultsFetched(cacheSet);
             }
 
-            for (WeekInterval interval: cacheSet.getMissingIntervals()) {
-                performLoadingRequest(interval);
+            for (NotCachedInterval interval: cacheSet.getMissingIntervals()) {
+                performLoadingRequest(interval, listener);
             }
         } else {
             //We found everything we needed in cache
-            onLessonsLoaded.dispatch(cacheSet, intervalToLoad);
+            listener.onLessonsLoaded(cacheSet, intervalToLoad);
         }
 
         return cacheSet.getMissingIntervals();
     }
 
-    private static void performLoadingRequest(WeekInterval intervalToLoad) {
+    private static void performLoadingRequest(NotCachedInterval interval, LessonsLoadingListener listener) {
         if (!queuer.isWorking()) {
             queuer = new RequestQueuer();
         }
 
-        StudyCourse studyCourse = AppPreferences.getStudyCourse();
-        queuer.enqueueRequest(new LessonsRequest(intervalToLoad, studyCourse));
+        queuer.enqueueRequest(interval.generateRequest(listener));
+    }
+
+    public static void loadCoursesOfStudyCourse(StudyCourse studyCourse, CoursesOfStudyCourseListener listener) {
+        if (!queuer.isWorking()) {
+            queuer = new RequestQueuer();
+        }
+
+        queuer.enqueueRequest(new ListLessonTypesRequest(studyCourse, listener));
+    }
+
+    public interface CoursesOfStudyCourseListener {
+        void onErrorHappened(VolleyError error);
+
+        void onParsingErrorHappened(Exception e);
+
+        void onLessonTypesRetrieved(Collection<LessonType> lessonTypes);
     }
 
     private static class RequestQueuer extends AsyncTask<Void, Void, Void> {
@@ -86,7 +108,7 @@ public class Networker {
         /**
          * Queue of all the pending requests that have to be made
          */
-        private static ConcurrentLinkedQueue<LessonsRequest> workingQueue = new ConcurrentLinkedQueue<>();
+        private static ConcurrentLinkedQueue<EnqueueableOperation> workingQueue = new ConcurrentLinkedQueue<>();
 
         @Override
         protected synchronized Void doInBackground(Void... lessonsRequests) {
@@ -101,6 +123,87 @@ public class Networker {
             return null;
         }
 
+        private void processRequest(final ListLessonTypesRequest request, boolean isARetry) {
+            if (!isARetry) {
+                request.onRequestSuccessful.connect(new Listener0() {
+                    @Override
+                    public void apply() {
+                        //Start managing the next request
+                        doInBackground();
+                    }
+                });
+                request.onParsingErrorHappened.connect(new Listener1<Exception>() {
+                    @Override
+                    public void apply(Exception e) {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+                request.onNetworkErrorHappened.connect(new Listener0() {
+                    @Override
+                    public void apply() {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+            }
+
+            sendRequest(request);
+        }
+
+        private void processRequest(final ExtraCourseLessonsRequest request, boolean isARetry) {
+            if (!isARetry) {
+                request.onRequestSuccessful.connect(new Listener0() {
+                    @Override
+                    public void apply() {
+                        //Start managing the next request
+                        doInBackground();
+                    }
+                });
+                request.onParsingErrorHappened.connect(new Listener1<Exception>() {
+                    @Override
+                    public void apply(Exception e) {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+                request.onNetworkErrorHappened.connect(new Listener0() {
+                    @Override
+                    public void apply() {
+                        waitForTimeoutAndReprocessRequest(request);
+                    }
+                });
+
+                request.getListener().onLoadingAboutToStart(new ExtraCoursesLoadingOperation(
+                        request.getIntervalToLoad(), request.getExtraCourse())
+                );
+            }
+
+            sendRequest(request);
+        }
+
+        private Request<String> sendRequest(AbstractServerRequest request) {
+            if (Config.DEBUG_MODE && PRE_LOADING_WAITING_TIME_MS != 0) {
+                try {
+                    Thread.sleep(PRE_LOADING_WAITING_TIME_MS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return Volley.newRequestQueue(CONTEXT).add(request);
+        }
+
+        private void processRequest(EnqueueableOperation operation, boolean isARetry) {
+            if (operation instanceof LessonsRequest) {
+                processRequest((LessonsRequest) operation, isARetry);
+            } else if(operation instanceof ListLessonTypesRequest){
+                processRequest((ListLessonTypesRequest) operation, isARetry);
+            } else if(operation instanceof ExtraCourseLessonsRequest){
+                processRequest((ExtraCourseLessonsRequest) operation, isARetry);
+            } else {
+                BugLogger.logBug();
+                throw new RuntimeException("You forgot to add the appropriate processRequest() to the RequestQueuer!");
+            }
+        }
+
         private void processRequest(final LessonsRequest request, final boolean isARetry) {
             //When recalled, we want to know if we already tried to find the lessons in the old
             //cache
@@ -111,17 +214,15 @@ public class Networker {
                 request.onRequestSuccessful.connect(new Listener1<LessonsSet>() {
                     @Override
                     public void apply(LessonsSet result) {
-                        //Technically we should always be fetching the latest lesson types. In some cases, however
-                        //we can scroll back so much to be able to see the previous semesters' courses. We do not
-                        //want to cache courses that are not actual.
-                        result.removeLessonTypesNotInCurrentSemester();
-
-                        Cacher.cacheLessonsSet(result, request.getIntervalToLoad());
-
-                        onLessonsLoaded.dispatch(result, request.getIntervalToLoad());
-
                         //Start managing the next request
                         doInBackground();
+                    }
+                });
+
+                request.onParsingErrorHappened.connect(new Listener1<Exception>() {
+                    @Override
+                    public void apply(Exception e) {
+                        waitForTimeoutAndReprocessRequest(request);
                     }
                 });
 
@@ -132,52 +233,44 @@ public class Networker {
                         //have some old cache to try to reuse. In case we do not have such cache, we
                         //dispatch the error and keep retrying loading
                         if (isARetryCache[0]) {
-                            onErrorHappened.dispatch(error);
+                            request.getListener().onErrorHappened(error);
                             waitForTimeoutAndReprocessRequest(request);
                         } else {
-                            CachedLessonsSet cache = Cacher.getLessonsInFreshOrDeadCache(request.getIntervalToLoad(), true);
+                            ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
+                            CachedLessonsSet cache = Cacher.getLessonsInFreshOrDeadCache(request.getIntervalToLoad(), extraCourses, true);
                             if (cache.wereSomeLessonsFoundInCache()) {
                                 if (cache.hasMissingIntervals()) {
                                     //We found only some pieces. We still return these. To prevent the
                                     //request from fetching same events multiple time or making it merge
                                     //with maybe deleted events we will make the networker load only the
                                     //missing pieces
-                                    onPartiallyCachedResultsFetched.dispatch(cache);
+                                    request.getListener().onPartiallyCachedResultsFetched(cache);
 
                                     for (WeekInterval notCachedInterval : cache.getMissingIntervals()) {
-                                        loadLessons(notCachedInterval);
+                                        loadLessons(notCachedInterval, request.getListener());
                                     }
                                 } else {
                                     //We found everything we needed in the old cache
-                                    onLessonsLoaded.dispatch(cache, request.getIntervalToLoad());
+                                    request.getListener().onLessonsLoaded(cache, request.getIntervalToLoad());
                                 }
 
                                 //Start managing the next request
                                 doInBackground();
                             } else {
                                 //Nothing found in cache: we keep retrying loading
-                                onErrorHappened.dispatch(error);
+                                request.getListener().onErrorHappened(error);
                                 waitForTimeoutAndReprocessRequest(request);
                             }
                         }
                     }
                 });
-
-                request.onParsingErrorHappened.connect(new Listener1<Exception>() {
-                    @Override
-                    public void apply(Exception e) {
-                        onParsingErrorHappened.dispatch(e);
-
-                        waitForTimeoutAndReprocessRequest(request);
-                    }
-                });
             }
 
-            onLoadingAboutToStart.dispatch(request.getIntervalToLoad().toCalendarInterval());
-            Volley.newRequestQueue(CONTEXT).add(request);
+            request.getListener().onLoadingAboutToStart(new CalendarLoadingOperation(request.getIntervalToLoad()));
+            sendRequest(request);
         }
 
-        private void waitForTimeoutAndReprocessRequest(final LessonsRequest request) {
+        private void waitForTimeoutAndReprocessRequest(final EnqueueableOperation request) {
             timeoutWaiter.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -186,8 +279,8 @@ public class Networker {
             }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED);
         }
 
-        public void enqueueRequest(LessonsRequest request) {
-            workingQueue.add(request);
+        public void enqueueRequest(EnqueueableOperation operation) {
+            workingQueue.add(operation);
 
             if (!isWorking) {
                 this.execute();
@@ -197,6 +290,8 @@ public class Networker {
         public boolean isWorking() {
             return isWorking;
         }
+
+
     }
 
 }

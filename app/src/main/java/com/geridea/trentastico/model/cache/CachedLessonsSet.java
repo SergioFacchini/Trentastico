@@ -5,6 +5,7 @@ package com.geridea.trentastico.model.cache;
  * Created with ♥ by Slava on 13/03/2017.
  */
 
+import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.utils.AppPreferences;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 public class CachedLessonsSet extends LessonsSet {
 
-    private ArrayList<WeekInterval> missingIntervals = new ArrayList<>();
+    private ArrayList<NotCachedInterval> missingIntervals = new ArrayList<>();
     private ArrayList<CachedPeriod> cachedPeriods = new ArrayList<>();
 
     public void addCachedLessonTypes(ArrayList<CachedLessonType> cachedLessonTypes) {
@@ -25,7 +26,7 @@ public class CachedLessonsSet extends LessonsSet {
         }
     }
 
-    public void addMissingIntervals(ArrayList<WeekInterval> missingIntervals) {
+    public void addMissingIntervals(ArrayList<NotCachedInterval> missingIntervals) {
         this.missingIntervals.addAll(missingIntervals);
     }
 
@@ -40,16 +41,12 @@ public class CachedLessonsSet extends LessonsSet {
     /**
      * @return the intervals that we were unable to load from cache.
      */
-    public ArrayList<WeekInterval> getMissingIntervals() {
+    public ArrayList<NotCachedInterval> getMissingIntervals() {
         return missingIntervals;
     }
 
     public void addCachedPeriod(CachedPeriod cachedPeriod) {
         cachedPeriods.add(cachedPeriod);
-    }
-
-    public ArrayList<CachedPeriod> getCachedPeriods() {
-        return cachedPeriods;
     }
 
     public ArrayList<WeekInterval> getCachedIntervals() {

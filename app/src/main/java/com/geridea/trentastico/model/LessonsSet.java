@@ -178,7 +178,29 @@ public class LessonsSet {
 
         }
 
-
     }
 
+    /**
+     * Removes all lessons and lesson types types not matching the lesson type passed in the
+     * parameter.
+     */
+    public void prepareForExtraCourse(ExtraCourse extraCourse) {
+        Iterator<LessonType> lessonTypes = getLessonTypes().iterator();
+        while (lessonTypes.hasNext()){
+            LessonType lessonType = lessonTypes.next();
+
+            if (lessonType.getId() != extraCourse.getLessonTypeId()) {
+                lessonTypes.remove();
+            }
+        }
+
+        Iterator<LessonSchedule> scheduledLessons = getScheduledLessons().iterator();
+        while(scheduledLessons.hasNext()){
+            LessonSchedule lesson = scheduledLessons.next();
+            if (lesson.getLessonTypeId() != extraCourse.getLessonTypeId()) {
+                scheduledLessons.remove();
+            }
+        }
+
+    }
 }

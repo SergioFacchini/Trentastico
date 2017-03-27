@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
+import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.model.StudyCourse;
@@ -108,7 +109,7 @@ public class AppPreferences {
         return get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW);
     }
 
-    public static void setPartitioningsToHide(int lessonTypeId, ArrayList<PartitioningCase> partitioningCases) {
+    private static void setPartitioningsToHide(int lessonTypeId, ArrayList<PartitioningCase> partitioningCases) {
         try {
             //Building values array
             JSONArray jsonArrayCases = new JSONArray();
@@ -165,5 +166,84 @@ public class AppPreferences {
         SharedPreferences.Editor editor = get().edit();
         editor.putString("PARTITIONINGS_TO_HIDE", "{}");
         editor.apply();
+    }
+
+    public static ArrayList<ExtraCourse> getExtraCourses() {
+        ArrayList<ExtraCourse> courses = new ArrayList<>();
+
+        try {
+            JSONArray jsonArray = new JSONArray(get().getString("EXTRA_COURSES", "[]"));
+            for (int i = 0; i < jsonArray.length(); i++) {
+                courses.add(ExtraCourse.fromJSON(jsonArray.getJSONObject(i)));
+            }
+            return courses;
+        } catch (JSONException e) {
+            BugLogger.logBug();
+            e.printStackTrace();
+
+            throw new RuntimeException("Could not get extra courses from AppPreferences.");
+        }
+    }
+
+    public static void addExtraCourse(ExtraCourse course) {
+        try {
+            JSONArray jsonArray = new JSONArray(get().getString("EXTRA_COURSES", "[]"));
+            jsonArray.put(course.toJSON());
+
+            saveExtraCourseJson(jsonArray);
+        } catch (JSONException e) {
+            BugLogger.logBug();
+            e.printStackTrace();
+
+            throw new RuntimeException("Error while saving an extra course to preferences.");
+        }
+    }
+
+    private static void saveExtraCourseJson(JSONArray value) {
+        SharedPreferences.Editor editor = get().edit();
+        editor.putString("EXTRA_COURSES", value.toString());
+        editor.apply();
+    }
+
+    public static boolean hasExtraCourseWithId(int lessonTypeId) {
+        for (ExtraCourse extraCourse : getExtraCourses()) {
+            if (extraCourse.getLessonTypeId() == lessonTypeId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void removeExtraCoursesHaving(long courseId, int year) {
+        JSONArray courses = new JSONArray();
+        for (ExtraCourse extraCourse : getExtraCourses()) {
+            if (extraCourse.getCourseId() != courseId || extraCourse.getYear() != year) {
+                courses.put(extraCourse.toJSON());
+            }
+        }
+
+        saveExtraCourseJson(courses);
+    }
+
+    public static ArrayList<ExtraCourse> getExtraCoursesHaving(long courseId, int year) {
+        ArrayList<ExtraCourse> extraCourses = new ArrayList<>();
+        for (ExtraCourse extraCourse : getExtraCourses()) {
+            if (extraCourse.getCourseId() == courseId || extraCourse.getYear() == year) {
+                extraCourses.add(extraCourse);
+            }
+        }
+
+        return extraCourses;
+    }
+
+    public static void removeExtraCourse(int lessonTypeId) {
+        JSONArray courses = new JSONArray();
+        for (ExtraCourse extraCourse : getExtraCourses()) {
+            if (extraCourse.getLessonTypeId() != lessonTypeId) {
+                courses.put(extraCourse.toJSON());
+            }
+        }
+
+        saveExtraCourseJson(courses);
     }
 }

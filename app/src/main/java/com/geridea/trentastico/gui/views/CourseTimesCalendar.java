@@ -8,6 +8,7 @@ package com.geridea.trentastico.gui.views;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
@@ -196,15 +197,22 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             @Override
             public void apply(ILoadingOperation operation) {
                 onLoadingOperationResult.dispatch(operation);
+
+                if (DEBUG_MODE) {
+                    Log.d("TRANTASTICO_DEBUG", "Started request: "+CalendarUtils.formatCurrentTimestamp());
+                }
             }
         });
         loader.onLoadingOperationSuccessful.connect(new Listener2<LessonsSet, WeekInterval>() {
             @Override
             public void apply(LessonsSet lessons, WeekInterval interval) {
+                if (DEBUG_MODE) {
+                    Log.d("TRANTASTICO_DEBUG", "Successful request finished: "+CalendarUtils.formatCurrentTimestamp());
+                }
+
                 currentlyShownLessonsSet.mergeWith(lessons);
 
                 addEnabledInterval(interval);
-
                 addEventsFromLessonsSet(lessons);
 
                 onLoadingOperationFinished.dispatch();
@@ -227,6 +235,9 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             @Override
             public void apply(VolleyError error) {
                 onLoadingOperationResult.dispatch(new ReadingErrorOperation());
+                if (DEBUG_MODE) {
+                    Log.d("TRANTASTICO_DEBUG", "Loading error: "+CalendarUtils.formatCurrentTimestamp());
+                }
             }
         });
         loader.onParsingErrorHappened.connect(new Listener1<Exception>() {
@@ -234,6 +245,9 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             public void apply(Exception e) {
                 e.printStackTrace();
                 onLoadingOperationResult.dispatch(new ParsingErrorOperation());
+                if (DEBUG_MODE) {
+                    Log.d("TRANTASTICO_DEBUG", "Parsing error: "+CalendarUtils.formatCurrentTimestamp());
+                }
             }
         });
     }

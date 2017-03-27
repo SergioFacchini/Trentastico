@@ -15,9 +15,12 @@ import android.view.ViewGroup;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
+import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Signal0;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,14 +53,30 @@ public class SettingsFragment extends IFragmentWithMenuItems {
             //We just clicked ok without changing our course...
             onChoiceMade.dispatch();
         } else {
-            //We changed our course, let's wipe out all the cache!
-            Cacher.purge();
 
             AppPreferences.removeAllHiddenCourses(); //No longer need them
             AppPreferences.removeAllHiddenPartitionings(); //No longer need them
+            clearCache(selectedCourse);
+            AppPreferences.removeExtraCoursesHaving(selectedCourse.getCourseId(), selectedCourse.getYear());
+
             AppPreferences.setStudyCourse(selectedCourse);
 
             onChoiceMade.dispatch();
+        }
+    }
+
+    private void clearCache(StudyCourse selectedCourse) {
+        //We changed our course, let's wipe out all the cache!
+        Cacher.purgeStudyCourseCache();
+
+        //If we've just selected a course that we already had in our extra course, we need to
+        //delete that course from cache
+        ArrayList<ExtraCourse> overlappingExtraCourses = AppPreferences.getExtraCoursesHaving(
+                selectedCourse.getCourseId(), selectedCourse.getYear()
+        );
+
+        for (ExtraCourse overlappingExtraCourse : overlappingExtraCourses) {
+            Cacher.removeExtraCoursesWithLessonType(overlappingExtraCourse.getLessonTypeId());
         }
     }
 

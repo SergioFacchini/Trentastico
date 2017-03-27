@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 /*
@@ -12,6 +13,7 @@ import java.util.Locale;
 public class CalendarUtils {
 
     private final static SimpleDateFormat formatDDMMYY = new SimpleDateFormat("dd MM yyyy", Locale.ITALIAN);
+    private final static SimpleDateFormat formatTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN);
 
     public static final Calendar TODAY = Calendar.getInstance();
 
@@ -67,4 +69,11 @@ public class CalendarUtils {
         return DUMMY;
     }
 
+    public static String formatTimestamp(long millis) {
+        return formatTimestamp.format(new Date(millis));
+    }
+
+    public static String formatCurrentTimestamp() {
+        return formatTimestamp(System.currentTimeMillis());
+    }
 }

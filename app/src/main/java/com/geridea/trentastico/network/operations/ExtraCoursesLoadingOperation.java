@@ -1,5 +1,6 @@
 package com.geridea.trentastico.network.operations;
 
+import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
@@ -7,19 +8,24 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class CalendarLoadingOperation implements ILoadingOperation {
+public class ExtraCoursesLoadingOperation implements ILoadingOperation {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM", Locale.ITALIAN);
 
-    private Calendar from, to;
+    private Calendar from;
+    private Calendar to;
 
-    public CalendarLoadingOperation(CalendarInterval interval) {
+    private final ExtraCourse course;
+
+    public ExtraCoursesLoadingOperation(CalendarInterval interval, ExtraCourse course) {
         this.from = interval.getFrom();
         this.to   = interval.getTo();
+
+        this.course = course;
     }
 
-    public CalendarLoadingOperation(WeekInterval intervalToLoad) {
-        this(intervalToLoad.toCalendarInterval());
+    public ExtraCoursesLoadingOperation(WeekInterval intervalToLoad, ExtraCourse extraCourse) {
+        this(intervalToLoad.toCalendarInterval(), extraCourse);
     }
 
     @Override
@@ -31,7 +37,8 @@ public class CalendarLoadingOperation implements ILoadingOperation {
         adjustedTo.add(Calendar.SECOND, -1);
 
         return String.format(
-                "Sto scaricando gli orari dal %s al %s...",
+                "Sto scaricando gli orari del corso \"%s\" dal %s al %s...",
+                course.getName(),
                 DATE_FORMAT.format(from.getTime()),
                 DATE_FORMAT.format(adjustedTo.getTime())
         );

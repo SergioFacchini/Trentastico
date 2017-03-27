@@ -1,17 +1,14 @@
 package com.geridea.trentastico.network;
 
 import com.android.volley.VolleyError;
+import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.gui.views.ScrollDirection;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
 import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.utils.AppPreferences;
-import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
-import com.threerings.signals.Listener1;
-import com.threerings.signals.Listener2;
 import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal2;
 
@@ -23,7 +20,7 @@ import java.util.List;
 import static com.geridea.trentastico.gui.views.ScrollDirection.LEFT;
 
 
-public class LessonsLoader {
+public class LessonsLoader implements LessonsLoadingListener {
 
     /**
      * Dispatched when the loading of events has been completed and the calendar can be made
@@ -56,51 +53,15 @@ public class LessonsLoader {
     private List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
 
     public LessonsLoader() {
-        Networker.onLoadingAboutToStart.connect(new Listener1<CalendarInterval>() {
-            @Override
-            public void apply(CalendarInterval interval) {
-                onLoadingOperationStarted.dispatch(new CalendarLoadingOperation(interval));
-            }
-        });
-        Networker.onLessonsLoaded.connect(new Listener2<LessonsSet, WeekInterval>() {
-            @Override
-            public void apply(LessonsSet lessons, WeekInterval interval) {
-                removeLoadingInterval(interval);
 
-                lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
-                lessons.removeLessonsWithHiddenPartitionings();
-                onLoadingOperationSuccessful.dispatch(lessons, interval);
-            }
-        });
-        Networker.onErrorHappened.connect(new Listener1<VolleyError>() {
-            @Override
-            public void apply(VolleyError error) {
-                onLoadingErrorHappened.dispatch(error);
-            }
-        });
-        Networker.onParsingErrorHappened.connect(new Listener1<Exception>() {
-            @Override
-            public void apply(Exception e) {
-                onParsingErrorHappened.dispatch(e);
-            }
-        });
-        Networker.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
-            @Override
-            public void apply(CachedLessonsSet cacheSet) {
-                cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
-                cacheSet.removeLessonsWithHiddenPartitionings();
-
-                onPartiallyCachedResultsFetched.dispatch(cacheSet);
-            }
-        });
     }
 
     public void loadAndAddLessons(final WeekInterval intervalToLoad) {
-        ArrayList<WeekInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad);
+        ArrayList<NotCachedInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad, this);
         addLoadingIntervals(intervalsToLoad);
     }
 
-    private void addLoadingIntervals(ArrayList<WeekInterval> intervalsToLoad) {
+    private void addLoadingIntervals(ArrayList<NotCachedInterval> intervalsToLoad) {
         if (intervalsToLoad != null) {
             for (WeekInterval interval : intervalsToLoad) {
                 addLoadingInterval(interval);
@@ -162,5 +123,37 @@ public class LessonsLoader {
         toWT.addWeeks(+2);
 
         loadAndAddLessons(new WeekInterval(fromWT, toWT));
+    }
+
+    @Override
+    public void onLoadingAboutToStart(ILoadingOperation loadingOperation) {
+        onLoadingOperationStarted.dispatch(loadingOperation);
+    }
+
+    @Override
+    public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval) {
+        removeLoadingInterval(interval);
+
+        lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
+        lessons.removeLessonsWithHiddenPartitionings();
+        onLoadingOperationSuccessful.dispatch(lessons, interval);
+    }
+
+    @Override
+    public void onErrorHappened(VolleyError error) {
+        onLoadingErrorHappened.dispatch(error);
+    }
+
+    @Override
+    public void onParsingErrorHappened(Exception exception) {
+        onParsingErrorHappened.dispatch(exception);
+    }
+
+    @Override
+    public void onPartiallyCachedResultsFetched(CachedLessonsSet cacheSet) {
+        cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
+        cacheSet.removeLessonsWithHiddenPartitionings();
+
+        onPartiallyCachedResultsFetched.dispatch(cacheSet);
     }
 }

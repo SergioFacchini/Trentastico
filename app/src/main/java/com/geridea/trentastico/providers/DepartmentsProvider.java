@@ -1,9 +1,10 @@
 package com.geridea.trentastico.providers;
 
-import java.util.ArrayList;
-
+import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.Course;
 import com.geridea.trentastico.model.Department;
+
+import java.util.ArrayList;
 
 /*
  * Created with ♥ by Slava on 03/03/2017.
@@ -142,6 +143,7 @@ public class DepartmentsProvider {
 
         }
 
+        BugLogger.logBug();
         throw new RuntimeException("UNKNOWN DEPARTMENT ID: "+departmentId);
     }
 
@@ -154,6 +156,7 @@ public class DepartmentsProvider {
 
         }
 
+        BugLogger.logBug();
         throw new RuntimeException("UNKNOWN DEPARTMENT WITH ID: " + departmentId);
     }
 }

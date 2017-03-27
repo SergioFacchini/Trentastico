@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark">
+    android:background="@color/backgroundMain">
 
     <LinearLayout
-        android:id="@+id/activity_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
@@ -19,11 +18,10 @@
         tools:context=".gui.activities.WelcomeActivity">
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Cambia corso di studi"
+            android:text="Aggiungi lezioni extra"
             android:textColor="@color/colorForeground"
             android:textSize="24sp" />
 
@@ -32,7 +30,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Da qui è possibile cambiare il corso di studi che avevi selezionato in precedenza. Gli orari del nuovo corso di studi verranno automaticamente scaricati."
+            android:text="Seleziona il corso di studi di cui vuoi aggiungere le lezioni"
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
@@ -40,16 +38,27 @@
             android:id="@+id/course_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center" />
+        
+        <TextView
+            android:id="@+id/cannot_select_current_study_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorForeground"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:gravity="center"
+            android:text="Devi selezionare un corso di studi diverso da quello che stai attualmente frequentando! "
+            />
 
         <Button
-            android:id="@+id/change_button"
+            android:id="@+id/search_for_lessons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:background="#3b1629"
             android:screenOrientation="portrait"
-            android:text="Cambia!"
+            android:text="Cerca lezioni!"
             android:textColor="@color/colorForeground" />
 
     </LinearLayout>
