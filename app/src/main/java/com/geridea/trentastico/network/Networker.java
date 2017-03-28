@@ -41,7 +41,7 @@ public class Networker {
 
     private static Context CONTEXT;
 
-    private static RequestSender queuer = new RequestSender();
+    private static RequestSender sender = new RequestSender();
 
     public static void init(Context context) {
         CONTEXT = context;
@@ -73,11 +73,11 @@ public class Networker {
     }
 
     private static void performLoadingRequest(NotCachedInterval interval, LessonsLoadingListener listener) {
-        queuer.enqueueRequest(interval.generateRequest(listener));
+        sender.processRequest(interval.generateRequest(listener));
     }
 
     public static void loadCoursesOfStudyCourse(StudyCourse studyCourse, CoursesOfStudyCourseListener listener) {
-        queuer.enqueueRequest(new ListLessonTypesRequest(studyCourse, listener));
+        sender.processRequest(new ListLessonTypesRequest(studyCourse, listener));
     }
 
     public interface CoursesOfStudyCourseListener {
@@ -226,7 +226,7 @@ public class Networker {
             }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED);
         }
 
-        public void enqueueRequest(EnqueueableOperation operation) {
+        public void processRequest(EnqueueableOperation operation) {
             processRequest(operation, false);
         }
 
