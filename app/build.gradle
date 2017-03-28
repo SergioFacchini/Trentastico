@@ -47,9 +47,6 @@ dependencies {
     //Signals
     compile 'com.threerings:signals:0.3'
 
-    //Parallel processing
-    compile 'com.birbit:android-priority-jobqueue:2.0.1'
-
     //DB browser
     debugCompile 'com.amitshekhar.android:debug-db:1.0.0'
 
