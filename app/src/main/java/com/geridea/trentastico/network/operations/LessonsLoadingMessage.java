@@ -11,17 +11,20 @@ import java.util.Locale;
 public class LessonsLoadingMessage extends AbstractTextMessage {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM", Locale.ITALIAN);
+    private final boolean isARetry;
 
     private Calendar from, to;
 
-    public LessonsLoadingMessage(int operationId, CalendarInterval interval) {
+    public LessonsLoadingMessage(int operationId, CalendarInterval interval, boolean isARetry) {
         super(operationId);
         this.from = interval.getFrom();
         this.to   = interval.getTo();
+        this.isARetry = isARetry;
     }
 
-    public LessonsLoadingMessage(int operationId, WeekInterval intervalToLoad) {
-        this(operationId, intervalToLoad.toCalendarInterval());
+    public LessonsLoadingMessage(int operationId, WeekInterval intervalToLoad, boolean isARetry) {
+        this(operationId, intervalToLoad.toCalendarInterval(), isARetry);
+
     }
 
     @Override
@@ -32,8 +35,12 @@ public class LessonsLoadingMessage extends AbstractTextMessage {
         Calendar adjustedTo = (Calendar) to.clone();
         adjustedTo.add(Calendar.SECOND, -1);
 
+        String message = isARetry ?
+                "Sto riprovando a scaricare gli orari dal %s al %s..."
+               :"Sto scaricando gli orari dal %s al %s...";
+
         return String.format(
-                "Sto scaricando gli orari dal %s al %s...",
+                message,
                 DATE_FORMAT.format(from.getTime()),
                 DATE_FORMAT.format(adjustedTo.getTime())
         );

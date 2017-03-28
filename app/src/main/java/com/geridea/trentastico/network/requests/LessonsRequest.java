@@ -42,6 +42,7 @@ public class LessonsRequest extends AbstractServerRequest {
 
     @Override
     public void deliverError(VolleyError error) {
+        listener.onErrorHappened(error, getOperationId());
         onNetworkErrorHappened.dispatch(error);
     }
 
@@ -74,8 +75,8 @@ public class LessonsRequest extends AbstractServerRequest {
             e.printStackTrace();
             BugLogger.logBug();
 
-            onParsingErrorHappened.dispatch(e);
             listener.onParsingErrorHappened(e, getOperationId());
+            onParsingErrorHappened.dispatch(e);
         }
     }
 

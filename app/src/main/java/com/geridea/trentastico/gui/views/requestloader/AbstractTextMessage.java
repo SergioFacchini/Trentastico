@@ -23,4 +23,9 @@ public abstract class AbstractTextMessage implements ILoadingMessage {
     public int getMessageId() {
         return messageId;
     }
+
+    @Override
+    public String toString() {
+        return "["+messageId+": "+getText()+"]";
+    }
 }

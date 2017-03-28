@@ -125,12 +125,11 @@ public class Networker {
                         waitForTimeoutAndReprocessRequest(request);
                     }
                 });
-
-                request.getListener().onLoadingAboutToStart(new ExtraCoursesLoadingMessage(
-                        request.getOperationId(), request.getIntervalToLoad(), request.getExtraCourse())
-                );
             }
 
+            request.getListener().onLoadingAboutToStart(new ExtraCoursesLoadingMessage(
+                    request.getOperationId(), request.getIntervalToLoad(), request.getExtraCourse(), isARetry)
+            );
             sendRequest(request);
         }
 
@@ -212,7 +211,7 @@ public class Networker {
             }
 
             request.getListener().onLoadingAboutToStart(
-                new LessonsLoadingMessage(request.getOperationId(), request.getIntervalToLoad())
+                new LessonsLoadingMessage(request.getOperationId(), request.getIntervalToLoad(), isARetry)
             );
             sendRequest(request);
         }

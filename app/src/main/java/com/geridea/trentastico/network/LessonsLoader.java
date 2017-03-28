@@ -8,8 +8,8 @@ import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage;
 import com.geridea.trentastico.gui.views.requestloader.TerminalMessage;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.network.operations.NetworkErrorMessage;
 import com.geridea.trentastico.network.operations.ParsingErrorMessage;
-import com.geridea.trentastico.network.operations.ReadingErrorMessage;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -151,7 +151,7 @@ public class LessonsLoader implements LessonsLoadingListener {
 
     @Override
     public void onErrorHappened(VolleyError error, int operationId) {
-        onLoadingErrorHappened.dispatch(error, new ReadingErrorMessage(operationId));
+        onLoadingErrorHappened.dispatch(error, new NetworkErrorMessage(operationId, error));
     }
 
     @Override

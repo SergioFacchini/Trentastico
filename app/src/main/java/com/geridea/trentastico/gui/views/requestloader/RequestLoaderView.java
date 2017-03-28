@@ -61,8 +61,6 @@ public class RequestLoaderView extends FrameLayout {
     }
 
     void addOrReplaceMessage(AbstractTextMessage newMessage){
-        currentMessages.add(newMessage);
-
         boolean wasMessageInserted = false;
         for (int i = 0; i < currentMessages.size(); i++) {
             AbstractTextMessage currentMessage = currentMessages.get(i);

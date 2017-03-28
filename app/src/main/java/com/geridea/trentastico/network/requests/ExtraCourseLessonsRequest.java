@@ -57,13 +57,14 @@ public class ExtraCourseLessonsRequest extends AbstractServerRequest {
             e.printStackTrace();
             BugLogger.logBug();
 
-            onParsingErrorHappened.dispatch(e);
             listener.onParsingErrorHappened(e, getOperationId());
+            onParsingErrorHappened.dispatch(e);
         }
     }
 
     @Override
     public void deliverError(VolleyError error) {
+        listener.onErrorHappened(error, getOperationId());
         onNetworkErrorHappened.dispatch(error);
     }
 

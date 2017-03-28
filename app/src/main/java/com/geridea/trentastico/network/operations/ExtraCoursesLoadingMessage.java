@@ -17,18 +17,20 @@ public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
     private Calendar to;
 
     private final ExtraCourse course;
+    private final boolean isARetry;
 
-    public ExtraCoursesLoadingMessage(int operationId, CalendarInterval interval, ExtraCourse course) {
+    public ExtraCoursesLoadingMessage(int operationId, CalendarInterval interval, ExtraCourse course, boolean isARetry) {
         super(operationId);
 
         this.from = interval.getFrom();
         this.to   = interval.getTo();
 
         this.course = course;
+        this.isARetry = isARetry;
     }
 
-    public ExtraCoursesLoadingMessage(int operationId, WeekInterval intervalToLoad, ExtraCourse extraCourse) {
-        this(operationId, intervalToLoad.toCalendarInterval(), extraCourse);
+    public ExtraCoursesLoadingMessage(int operationId, WeekInterval intervalToLoad, ExtraCourse extraCourse, boolean isARetry) {
+        this(operationId, intervalToLoad.toCalendarInterval(), extraCourse, isARetry);
     }
 
 
@@ -40,8 +42,13 @@ public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
         Calendar adjustedTo = (Calendar) to.clone();
         adjustedTo.add(Calendar.SECOND, -1);
 
+        String format = isARetry ?
+                 "Sto riprovando a scaricare gli orari del corso \"%s\" dal %s al %s..."
+               : "Sto scaricando gli orari del corso \"%s\" dal %s al %s...";
+
+
         return String.format(
-                "Sto scaricando gli orari del corso \"%s\" dal %s al %s...",
+                format,
                 course.getName(),
                 DATE_FORMAT.format(from.getTime()),
                 DATE_FORMAT.format(adjustedTo.getTime())

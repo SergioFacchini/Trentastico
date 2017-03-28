@@ -9,7 +9,7 @@ public final class Config {
 
     //Debug
     public static final boolean DEBUG_MODE = true;
-    public static final int PRE_LOADING_WAITING_TIME_MS = 100;
+    public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
     //Networking
     /**
