@@ -673,4 +673,13 @@ public class Cacher {
             deleteCachedPeriodWithId(cachedExtraId);
         }
     }
+
+    /**
+     * Deletes EVERYTHING from the case.
+     */
+    public static void obliterateCache() {
+        writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
+        writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
+        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
+    }
 }

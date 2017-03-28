@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/loading_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentRight="true"
+    android:background="@color/backgroundMain"
+    android:padding="15dp"
+    android:visibility="visible">
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/loading_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:paddingLeft="10dp"
+        android:text="Sto caricando gli orari del tuo corso..."
+        android:textColor="@color/colorForeground" />
+
+    <TextView
+        android:id="@+id/loading_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(0)"
+        android:textColor="@color/colorForeground"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:paddingLeft="12dp"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+</LinearLayout>
+
+
+    

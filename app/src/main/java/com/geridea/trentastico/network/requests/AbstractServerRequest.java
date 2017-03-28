@@ -31,8 +31,14 @@ public abstract class AbstractServerRequest extends StringRequest implements Enq
         15000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
     );
 
+    private static int PROGRESSIVE_OPERATION_ID_COUNTER = 1;
+
+    private int operationId;
+
     AbstractServerRequest() {
         super(Method.GET, null, null, null);
+
+        operationId = PROGRESSIVE_OPERATION_ID_COUNTER++;
 
         setRetryPolicy(retryPolicy);
     }
@@ -97,5 +103,9 @@ public abstract class AbstractServerRequest extends StringRequest implements Enq
             schedules.add(LessonSchedule.fromJson(eventsJson.getJSONObject(i)));
         }
         return schedules;
+    }
+
+    public int getOperationId() {
+        return operationId;
     }
 }

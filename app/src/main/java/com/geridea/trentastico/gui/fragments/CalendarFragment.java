@@ -23,11 +23,11 @@ import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter;
 import com.geridea.trentastico.gui.adapters.PartitioningsAdapter;
 import com.geridea.trentastico.gui.views.CourseTimesCalendar;
+import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
+import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
-import com.geridea.trentastico.network.operations.ILoadingOperation;
 import com.geridea.trentastico.utils.AppPreferences;
-import com.threerings.signals.Listener0;
 import com.threerings.signals.Listener1;
 import com.threerings.signals.Signal1;
 
@@ -44,9 +44,8 @@ import static android.view.View.GONE;
 
 public class CalendarFragment extends IFragmentWithMenuItems {
 
-    @BindView(R.id.calendar)     CourseTimesCalendar calendar;
-    @BindView(R.id.loading_bar)  View loader;
-    @BindView(R.id.loading_text) TextView loadingText;
+    @BindView(R.id.calendar)       CourseTimesCalendar calendar;
+    @BindView(R.id.request_loader) RequestLoaderView loaderView;
 
     @Nullable
     @Override
@@ -57,28 +56,10 @@ public class CalendarFragment extends IFragmentWithMenuItems {
         //Binding calendar
         calendar.prepareForNumberOfVisibleDays(AppPreferences.getCalendarNumOfDaysToShow());
         calendar.goToDate(Calendar.getInstance());
-        calendar.onLoadingOperationResult.connect(new Listener1<ILoadingOperation>() {
+        calendar.onLoadingOperationNotify.connect(new Listener1<ILoadingMessage>() {
             @Override
-            public void apply(final ILoadingOperation operation) {
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        loadingText.setText(operation.describe());
-                        loader.setVisibility(View.VISIBLE);
-                    }
-                });
-            }
-        });
-
-        calendar.onLoadingOperationFinished.connect(new Listener0() {
-            @Override
-            public void apply() {
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        loader.setVisibility(GONE);
-                    }
-                });
+            public void apply(final ILoadingMessage operation) {
+                loaderView.processMessage(operation);;
             }
         });
 

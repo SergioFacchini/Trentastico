@@ -50,7 +50,7 @@ public class ExtraCourseLessonsRequest extends AbstractServerRequest {
 
             Cacher.cacheExtraLessonsSet(lessonsSet, getIntervalToLoad(), extraCourse);
 
-            listener.onLessonsLoaded(lessonsSet, getIntervalToLoad());
+            listener.onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
 
             onRequestSuccessful.dispatch(lessonsSet);
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class ExtraCourseLessonsRequest extends AbstractServerRequest {
             BugLogger.logBug();
 
             onParsingErrorHappened.dispatch(e);
-            listener.onParsingErrorHappened(e);
+            listener.onParsingErrorHappened(e, getOperationId());
         }
     }
 

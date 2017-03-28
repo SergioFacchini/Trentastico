@@ -13,19 +13,17 @@ import android.util.Log;
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.android.volley.VolleyError;
+import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.LessonsLoader;
-import com.geridea.trentastico.network.operations.ILoadingOperation;
-import com.geridea.trentastico.network.operations.ParsingErrorOperation;
-import com.geridea.trentastico.network.operations.ReadingErrorOperation;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
 import com.threerings.signals.Listener2;
-import com.threerings.signals.Signal0;
+import com.threerings.signals.Listener3;
 import com.threerings.signals.Signal1;
 
 import java.text.SimpleDateFormat;
@@ -54,16 +52,11 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
 
     //Signals
     /**
-     * Dispatched when the calendar is about to perform a loading from the network.<br>
+     * Dispatched when something worth of note is happening in the calendar. For instance starting
+     * or finishing fetching lessons from network.<br>
      * WARNING: may be called on a not-UI thread!
      */
-    public final Signal1<ILoadingOperation> onLoadingOperationResult = new Signal1<>();
-
-    /**
-     * Dispatched when the calendar has finished loading something from the network.<br>
-     * WARNING: may be called on a not-UI thread!
-     */
-    public final Signal0 onLoadingOperationFinished = new Signal0();
+    public final Signal1<ILoadingMessage> onLoadingOperationNotify = new Signal1<>();
 
     //Data
     private final LessonsSet currentlyShownLessonsSet = new LessonsSet();
@@ -193,19 +186,19 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
 
     private void prepareLoader() {
         loader = new LessonsLoader();
-        loader.onLoadingOperationStarted.connect(new Listener1<ILoadingOperation>() {
+        loader.onLoadingOperationStarted.connect(new Listener1<ILoadingMessage>() {
             @Override
-            public void apply(ILoadingOperation operation) {
-                onLoadingOperationResult.dispatch(operation);
+            public void apply(ILoadingMessage message) {
+                onLoadingOperationNotify.dispatch(message);
 
                 if (DEBUG_MODE) {
                     Log.d("TRANTASTICO_DEBUG", "Started request: "+CalendarUtils.formatCurrentTimestamp());
                 }
             }
         });
-        loader.onLoadingOperationSuccessful.connect(new Listener2<LessonsSet, WeekInterval>() {
+        loader.onLoadingOperationSuccessful.connect(new Listener3<LessonsSet, WeekInterval, ILoadingMessage>() {
             @Override
-            public void apply(LessonsSet lessons, WeekInterval interval) {
+            public void apply(LessonsSet lessons, WeekInterval interval, ILoadingMessage message) {
                 if (DEBUG_MODE) {
                     Log.d("TRANTASTICO_DEBUG", "Successful request finished: "+CalendarUtils.formatCurrentTimestamp());
                 }
@@ -215,7 +208,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                 addEnabledInterval(interval);
                 addEventsFromLessonsSet(lessons);
 
-                onLoadingOperationFinished.dispatch();
+                onLoadingOperationNotify.dispatch(message);
             }
         });
 
@@ -231,20 +224,20 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             }
         });
 
-        loader.onLoadingErrorHappened.connect(new Listener1<VolleyError>() {
+        loader.onLoadingErrorHappened.connect(new Listener2<VolleyError, ILoadingMessage>() {
             @Override
-            public void apply(VolleyError error) {
-                onLoadingOperationResult.dispatch(new ReadingErrorOperation());
+            public void apply(VolleyError error, ILoadingMessage message) {
+                onLoadingOperationNotify.dispatch(message);
                 if (DEBUG_MODE) {
                     Log.d("TRANTASTICO_DEBUG", "Loading error: "+CalendarUtils.formatCurrentTimestamp());
                 }
             }
         });
-        loader.onParsingErrorHappened.connect(new Listener1<Exception>() {
+        loader.onParsingErrorHappened.connect(new Listener2<Exception, ILoadingMessage>() {
             @Override
-            public void apply(Exception e) {
+            public void apply(Exception e, ILoadingMessage message) {
                 e.printStackTrace();
-                onLoadingOperationResult.dispatch(new ParsingErrorOperation());
+                onLoadingOperationNotify.dispatch(message);
                 if (DEBUG_MODE) {
                     Log.d("TRANTASTICO_DEBUG", "Parsing error: "+CalendarUtils.formatCurrentTimestamp());
                 }

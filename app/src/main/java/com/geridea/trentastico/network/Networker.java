@@ -6,7 +6,6 @@ package com.geridea.trentastico.network;
  */
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Request;
@@ -18,11 +17,10 @@ import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonType;
-import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.operations.CalendarLoadingOperation;
-import com.geridea.trentastico.network.operations.ExtraCoursesLoadingOperation;
+import com.geridea.trentastico.network.operations.ExtraCoursesLoadingMessage;
+import com.geridea.trentastico.network.operations.LessonsLoadingMessage;
 import com.geridea.trentastico.network.requests.AbstractServerRequest;
 import com.geridea.trentastico.network.requests.ExtraCourseLessonsRequest;
 import com.geridea.trentastico.network.requests.LessonsRequest;
@@ -36,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.geridea.trentastico.Config.PRE_LOADING_WAITING_TIME_MS;
 
@@ -44,7 +41,7 @@ public class Networker {
 
     private static Context CONTEXT;
 
-    private static RequestQueuer queuer = new RequestQueuer();
+    private static RequestSender queuer = new RequestSender();
 
     public static void init(Context context) {
         CONTEXT = context;
@@ -69,25 +66,17 @@ public class Networker {
             }
         } else {
             //We found everything we needed in cache
-            listener.onLessonsLoaded(cacheSet, intervalToLoad);
+            listener.onLessonsLoaded(cacheSet, intervalToLoad, 0);
         }
 
         return cacheSet.getMissingIntervals();
     }
 
     private static void performLoadingRequest(NotCachedInterval interval, LessonsLoadingListener listener) {
-        if (!queuer.isWorking()) {
-            queuer = new RequestQueuer();
-        }
-
         queuer.enqueueRequest(interval.generateRequest(listener));
     }
 
     public static void loadCoursesOfStudyCourse(StudyCourse studyCourse, CoursesOfStudyCourseListener listener) {
-        if (!queuer.isWorking()) {
-            queuer = new RequestQueuer();
-        }
-
         queuer.enqueueRequest(new ListLessonTypesRequest(studyCourse, listener));
     }
 
@@ -99,39 +88,12 @@ public class Networker {
         void onLessonTypesRetrieved(Collection<LessonType> lessonTypes);
     }
 
-    private static class RequestQueuer extends AsyncTask<Void, Void, Void> {
+    private static class RequestSender {
 
         private Timer timeoutWaiter = new Timer();
 
-        private boolean isWorking = false;
-
-        /**
-         * Queue of all the pending requests that have to be made
-         */
-        private static ConcurrentLinkedQueue<EnqueueableOperation> workingQueue = new ConcurrentLinkedQueue<>();
-
-        @Override
-        protected synchronized Void doInBackground(Void... lessonsRequests) {
-            isWorking = true;
-
-            if (!workingQueue.isEmpty()) {
-                processRequest(workingQueue.poll(), false);
-            } else {
-                isWorking = false;
-            }
-
-            return null;
-        }
-
         private void processRequest(final ListLessonTypesRequest request, boolean isARetry) {
             if (!isARetry) {
-                request.onRequestSuccessful.connect(new Listener0() {
-                    @Override
-                    public void apply() {
-                        //Start managing the next request
-                        doInBackground();
-                    }
-                });
                 request.onParsingErrorHappened.connect(new Listener1<Exception>() {
                     @Override
                     public void apply(Exception e) {
@@ -151,13 +113,6 @@ public class Networker {
 
         private void processRequest(final ExtraCourseLessonsRequest request, boolean isARetry) {
             if (!isARetry) {
-                request.onRequestSuccessful.connect(new Listener0() {
-                    @Override
-                    public void apply() {
-                        //Start managing the next request
-                        doInBackground();
-                    }
-                });
                 request.onParsingErrorHappened.connect(new Listener1<Exception>() {
                     @Override
                     public void apply(Exception e) {
@@ -171,8 +126,8 @@ public class Networker {
                     }
                 });
 
-                request.getListener().onLoadingAboutToStart(new ExtraCoursesLoadingOperation(
-                        request.getIntervalToLoad(), request.getExtraCourse())
+                request.getListener().onLoadingAboutToStart(new ExtraCoursesLoadingMessage(
+                        request.getOperationId(), request.getIntervalToLoad(), request.getExtraCourse())
                 );
             }
 
@@ -200,7 +155,7 @@ public class Networker {
                 processRequest((ExtraCourseLessonsRequest) operation, isARetry);
             } else {
                 BugLogger.logBug();
-                throw new RuntimeException("You forgot to add the appropriate processRequest() to the RequestQueuer!");
+                throw new RuntimeException("You forgot to add the appropriate processRequest() to the RequestSender!");
             }
         }
 
@@ -211,14 +166,6 @@ public class Networker {
             isARetryCache[0] = isARetry;
 
             if (!isARetry) {
-                request.onRequestSuccessful.connect(new Listener1<LessonsSet>() {
-                    @Override
-                    public void apply(LessonsSet result) {
-                        //Start managing the next request
-                        doInBackground();
-                    }
-                });
-
                 request.onParsingErrorHappened.connect(new Listener1<Exception>() {
                     @Override
                     public void apply(Exception e) {
@@ -233,7 +180,7 @@ public class Networker {
                         //have some old cache to try to reuse. In case we do not have such cache, we
                         //dispatch the error and keep retrying loading
                         if (isARetryCache[0]) {
-                            request.getListener().onErrorHappened(error);
+                            request.getListener().onErrorHappened(error, request.getOperationId());
                             waitForTimeoutAndReprocessRequest(request);
                         } else {
                             ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
@@ -251,14 +198,12 @@ public class Networker {
                                     }
                                 } else {
                                     //We found everything we needed in the old cache
-                                    request.getListener().onLessonsLoaded(cache, request.getIntervalToLoad());
+                                    request.getListener().onLessonsLoaded(cache, request.getIntervalToLoad(), 0);
                                 }
 
-                                //Start managing the next request
-                                doInBackground();
                             } else {
                                 //Nothing found in cache: we keep retrying loading
-                                request.getListener().onErrorHappened(error);
+                                request.getListener().onErrorHappened(error, request.getOperationId());
                                 waitForTimeoutAndReprocessRequest(request);
                             }
                         }
@@ -266,7 +211,9 @@ public class Networker {
                 });
             }
 
-            request.getListener().onLoadingAboutToStart(new CalendarLoadingOperation(request.getIntervalToLoad()));
+            request.getListener().onLoadingAboutToStart(
+                new LessonsLoadingMessage(request.getOperationId(), request.getIntervalToLoad())
+            );
             sendRequest(request);
         }
 
@@ -280,17 +227,8 @@ public class Networker {
         }
 
         public void enqueueRequest(EnqueueableOperation operation) {
-            workingQueue.add(operation);
-
-            if (!isWorking) {
-                this.execute();
-            }
+            processRequest(operation, false);
         }
-
-        public boolean isWorking() {
-            return isWorking;
-        }
-
 
     }
 

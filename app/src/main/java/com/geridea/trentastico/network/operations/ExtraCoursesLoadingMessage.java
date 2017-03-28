@@ -1,5 +1,6 @@
 package com.geridea.trentastico.network.operations;
 
+import com.geridea.trentastico.gui.views.requestloader.AbstractTextMessage;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
@@ -8,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ExtraCoursesLoadingOperation implements ILoadingOperation {
+public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMMM", Locale.ITALIAN);
 
@@ -17,19 +18,22 @@ public class ExtraCoursesLoadingOperation implements ILoadingOperation {
 
     private final ExtraCourse course;
 
-    public ExtraCoursesLoadingOperation(CalendarInterval interval, ExtraCourse course) {
+    public ExtraCoursesLoadingMessage(int operationId, CalendarInterval interval, ExtraCourse course) {
+        super(operationId);
+
         this.from = interval.getFrom();
         this.to   = interval.getTo();
 
         this.course = course;
     }
 
-    public ExtraCoursesLoadingOperation(WeekInterval intervalToLoad, ExtraCourse extraCourse) {
-        this(intervalToLoad.toCalendarInterval(), extraCourse);
+    public ExtraCoursesLoadingMessage(int operationId, WeekInterval intervalToLoad, ExtraCourse extraCourse) {
+        this(operationId, intervalToLoad.toCalendarInterval(), extraCourse);
     }
 
+
     @Override
-    public String describe() {
+    public String getText() {
         //Usually we're loading data that is exactly one or two weeks longs, considering the day
         //starting at 00:00:00. We don't want to show that day as loaded, so we back by a second
         //to the previous day.
@@ -43,4 +47,5 @@ public class ExtraCoursesLoadingOperation implements ILoadingOperation {
                 DATE_FORMAT.format(adjustedTo.getTime())
         );
     }
+
 }

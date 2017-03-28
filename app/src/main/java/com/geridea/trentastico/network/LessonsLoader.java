@@ -3,14 +3,19 @@ package com.geridea.trentastico.network;
 import com.android.volley.VolleyError;
 import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.gui.views.ScrollDirection;
+import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
+import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage;
+import com.geridea.trentastico.gui.views.requestloader.TerminalMessage;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.operations.ILoadingOperation;
+import com.geridea.trentastico.network.operations.ParsingErrorMessage;
+import com.geridea.trentastico.network.operations.ReadingErrorMessage;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
 import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal2;
+import com.threerings.signals.Signal3;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,18 +31,18 @@ public class LessonsLoader implements LessonsLoadingListener {
      * Dispatched when the loading of events has been completed and the calendar can be made
      * visible.
      */
-    public final Signal2<LessonsSet, WeekInterval> onLoadingOperationSuccessful = new Signal2<>();
+    public final Signal3<LessonsSet, WeekInterval, ILoadingMessage> onLoadingOperationSuccessful = new Signal3<>();
 
     /**
      * Dispatched when the calendar starts loading something from internet. The argument is that
      * "something".
      */
-    public final Signal1<ILoadingOperation> onLoadingOperationStarted = new Signal1<>();
+    public final Signal1<ILoadingMessage> onLoadingOperationStarted = new Signal1<>();
 
     /**
      * Dispatched when an error happened when trying to fetch lessons.
      */
-    public final Signal1<VolleyError> onLoadingErrorHappened = new Signal1<>();
+    public final Signal2<VolleyError, ILoadingMessage> onLoadingErrorHappened = new Signal2<>();
 
     /**
      * Dispatched when some results were retrieved from the cache, however some results are still
@@ -48,7 +53,7 @@ public class LessonsLoader implements LessonsLoadingListener {
     /**
      * Dispatched when the received response could not be parsed correctly.
      */
-    public final Signal1<Exception> onParsingErrorHappened = new Signal1<>();
+    public final Signal2<Exception, ILoadingMessage> onParsingErrorHappened = new Signal2<>();
 
     private List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
 
@@ -126,27 +131,32 @@ public class LessonsLoader implements LessonsLoadingListener {
     }
 
     @Override
-    public void onLoadingAboutToStart(ILoadingOperation loadingOperation) {
+    public void onLoadingAboutToStart(ILoadingMessage loadingOperation) {
         onLoadingOperationStarted.dispatch(loadingOperation);
     }
 
     @Override
-    public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval) {
+    public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval, int operationId) {
         removeLoadingInterval(interval);
 
         lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
         lessons.removeLessonsWithHiddenPartitionings();
-        onLoadingOperationSuccessful.dispatch(lessons, interval);
+
+        //Operation id is null when we loaded the lesson without starting any new request
+        //(example: fetched from cache)
+        ILoadingMessage message = (operationId == 0) ? new NoOperationMessage() : new TerminalMessage(operationId);
+
+        onLoadingOperationSuccessful.dispatch(lessons, interval, message);
     }
 
     @Override
-    public void onErrorHappened(VolleyError error) {
-        onLoadingErrorHappened.dispatch(error);
+    public void onErrorHappened(VolleyError error, int operationId) {
+        onLoadingErrorHappened.dispatch(error, new ReadingErrorMessage(operationId));
     }
 
     @Override
-    public void onParsingErrorHappened(Exception exception) {
-        onParsingErrorHappened.dispatch(exception);
+    public void onParsingErrorHappened(Exception exception, int operationId) {
+        onParsingErrorHappened.dispatch(exception, new ParsingErrorMessage(operationId));
     }
 
     @Override

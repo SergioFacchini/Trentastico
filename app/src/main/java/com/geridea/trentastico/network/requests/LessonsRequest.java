@@ -67,7 +67,7 @@ public class LessonsRequest extends AbstractServerRequest {
 
             Cacher.cacheLessonsSet(lessonsSet, getIntervalToLoad());
 
-            getListener().onLessonsLoaded(lessonsSet, getIntervalToLoad());
+            getListener().onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
 
             onRequestSuccessful.dispatch(lessonsSet);
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class LessonsRequest extends AbstractServerRequest {
             BugLogger.logBug();
 
             onParsingErrorHappened.dispatch(e);
-            listener.onParsingErrorHappened(e);
+            listener.onParsingErrorHappened(e, getOperationId());
         }
     }
 
