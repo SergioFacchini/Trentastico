@@ -101,8 +101,9 @@ public class RequestLoaderView extends FrameLayout {
     }
 
     private void showCounter() {
-        int progress = maxMessagesSinceLastShow-currentMessages.size();
-        loadingProgress.setText("("+ progress +"/"+maxMessagesSinceLastShow+")");
+        int progress = (int)
+                ((maxMessagesSinceLastShow-currentMessages.size())*100/((double) maxMessagesSinceLastShow));
+        loadingProgress.setText("("+ progress +"%)");
         loadingProgress.setVisibility(VISIBLE);
     }
 
