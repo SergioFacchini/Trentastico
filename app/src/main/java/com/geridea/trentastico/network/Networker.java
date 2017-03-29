@@ -5,7 +5,6 @@ package com.geridea.trentastico.network;
  * Created with ♥ by Slava on 11/03/2017.
  */
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.geridea.trentastico.database.Cacher;
@@ -13,8 +12,11 @@ import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.network.request.ExtraLessonsRequest;
+import com.geridea.trentastico.network.request.IRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
+import com.geridea.trentastico.network.request.StudyCourseLessonsRequest;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
@@ -23,10 +25,6 @@ import java.util.ArrayList;
 public class Networker {
 
     private static RequestSender requestSender = new RequestSender();
-
-    public static void init(Context context) {
-        ;
-    }
 
     /**
      * Loads the lessons in the given period. Fetches all the possible lesson from the fresh cache
@@ -53,12 +51,34 @@ public class Networker {
         return cacheSet.getMissingIntervals();
     }
 
+    public static void refreshLessonsCache(WeekInterval interval, LessonsLoadingListener listener) {
+        StudyCourse studyCourse = AppPreferences.getStudyCourse();
+        StudyCourseLessonsRequest courseRequest = new StudyCourseLessonsRequest(interval, studyCourse, listener);
+        courseRequest.setCacheCheckEnabled(false);
+        courseRequest.setRetrialsEnabled(false);
+
+        processRequest(courseRequest);
+
+        for (ExtraCourse extraCourse : AppPreferences.getExtraCourses()) {
+            ExtraLessonsRequest request = new ExtraLessonsRequest(interval, extraCourse, listener);
+            request.setCacheCheckEnabled(false);
+            request.setRetrialsEnabled(false);
+
+            processRequest(request);
+        }
+    }
+
+
     private static void loadInterval(NotCachedInterval interval, LessonsLoadingListener listener) {
-        requestSender.processRequest(interval.generateRequest(listener));
+        processRequest(interval.generateRequest(listener));
+    }
+
+    private static void processRequest(IRequest requestToSend) {
+        requestSender.processRequest(requestToSend);
     }
 
     public static void loadCoursesOfStudyCourse(StudyCourse studyCourse, ListLessonsListener listener) {
-        requestSender.processRequest(new ListLessonsRequest(studyCourse, listener));
+        processRequest(new ListLessonsRequest(studyCourse, listener));
     }
 
 }

@@ -20,8 +20,10 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
     private final LessonsLoadingListener listener;
     private final ExtraCourse extraCourse;
     private boolean isRetrying;
+    private boolean cacheCheckEnabled;
+    private boolean retrialsEnabled;
 
-    public ExtraLessonsRequest(WeekInterval interval, LessonsLoadingListener listener, ExtraCourse extraCourse) {
+    public ExtraLessonsRequest(WeekInterval interval, ExtraCourse extraCourse, LessonsLoadingListener listener) {
         this.interval = interval;
         this.listener = listener;
         this.extraCourse = extraCourse;
@@ -32,7 +34,8 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
     public void notifyFailure(Exception e, RequestSender sender) {
         listener.onErrorHappened(e, getOperationId());
 
-        retrySendingRequest(sender);
+        //Remember to manage cacheCheckEnabled here when retrieving data from dead cache
+        resendRequestIfNeeded(sender);
     }
 
     @Override
@@ -50,13 +53,17 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
 
             listener.onParsingErrorHappened(e, getOperationId());
 
-            retrySendingRequest(sender);
+            resendRequestIfNeeded(sender);
         }
     }
 
-    private void retrySendingRequest(RequestSender sender) {
-        isRetrying = true;
-        sender.processRequestAfterTimeout(this);
+    private void resendRequestIfNeeded(RequestSender sender) {
+        if (retrialsEnabled) {
+            isRetrying = true;
+            sender.processRequestAfterTimeout(this);
+        } else {
+            listener.onLoadingAborted(getOperationId());
+        }
     }
 
     @Override
@@ -64,7 +71,7 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
         listener.onErrorHappened(new ResponseUnsuccessfulException(code), getOperationId());
 
         //In case of error, we resend the request after the timeout
-        retrySendingRequest(sender);
+        resendRequestIfNeeded(sender);
     }
 
     @Override
@@ -88,5 +95,13 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
 
     public boolean isRetrying() {
         return isRetrying;
+    }
+
+    public void setCacheCheckEnabled(boolean cacheCheckEnabled) {
+        this.cacheCheckEnabled = cacheCheckEnabled;
+    }
+
+    public void setRetrialsEnabled(boolean retrialsEnabled) {
+        this.retrialsEnabled = retrialsEnabled;
     }
 }

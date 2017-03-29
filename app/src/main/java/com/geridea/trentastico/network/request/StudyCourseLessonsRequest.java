@@ -24,7 +24,10 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
     private final WeekInterval interval;
     private final StudyCourse course;
     private final LessonsLoadingListener listener;
+    private boolean isCacheCheckEnabled;
+
     private boolean isRetrying;
+    private boolean areRetrialsEnabled;
 
     public StudyCourseLessonsRequest(WeekInterval interval, StudyCourse course, LessonsLoadingListener listener) {
         this.interval = interval;
@@ -32,6 +35,9 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         this.listener = listener;
 
         this.isRetrying = false;
+
+        this.isCacheCheckEnabled = true;
+        this.areRetrialsEnabled = true;
     }
 
     @Override
@@ -41,8 +47,8 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         //dispatch the error and keep retrying loading
         if (isRetrying) {
             listener.onErrorHappened(exception, getOperationId());
-            sender.processRequestAfterTimeout(this);
-        } else {
+            resendRequestIfNeeded(sender);
+        } else if(isCacheCheckEnabled) {
             ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
             CachedLessonsSet cache = Cacher.getLessonsInFreshOrDeadCache(getIntervalToLoad(), extraCourses, true);
             if (cache.wereSomeLessonsFoundInCache()) {
@@ -66,8 +72,12 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
             } else {
                 //Nothing found in cache: we keep retrying loading
                 listener.onErrorHappened(exception, getOperationId());
-                retrySendingRequest(sender);
+                resendRequestIfNeeded(sender);
             }
+        } else {
+            //Cache check disabled: we just retry to fetch
+            listener.onErrorHappened(exception, getOperationId());
+            resendRequestIfNeeded(sender);
         }
     }
 
@@ -90,14 +100,17 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
 
             listener.onParsingErrorHappened(e, getOperationId());
 
-            retrySendingRequest(sender);
+            resendRequestIfNeeded(sender);
         }
-
     }
 
-    private void retrySendingRequest(RequestSender sender) {
-        isRetrying = true;
-        sender.processRequestAfterTimeout(this);
+    private void resendRequestIfNeeded(RequestSender sender) {
+        if (areRetrialsEnabled) {
+            isRetrying = true;
+            sender.processRequestAfterTimeout(this);
+        } else {
+            listener.onLoadingAborted(getOperationId());
+        }
     }
 
     @Override
@@ -105,7 +118,7 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         listener.onErrorHappened(new ResponseUnsuccessfulException(code), getOperationId());
 
         //In case of error, we resend the request after the timeout
-        retrySendingRequest(sender);
+        resendRequestIfNeeded(sender);
     }
 
     @Override
@@ -121,5 +134,13 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
     @Override
     protected StudyCourse getStudyCourse() {
         return course;
+    }
+
+    public void setCacheCheckEnabled(boolean isCacheCheckEnabled) {
+        this.isCacheCheckEnabled = isCacheCheckEnabled;
+    }
+
+    public void setRetrialsEnabled(boolean areRetrialsEnabled) {
+        this.areRetrialsEnabled = areRetrialsEnabled;
     }
 }

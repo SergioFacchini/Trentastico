@@ -12,6 +12,11 @@ import java.util.Locale;
  */
 public class CalendarUtils {
 
+    public static final int SECONDS_MS = 1000;
+    public static final int MINUTE_MS  = 60 * SECONDS_MS;
+    public static final int HOUR_MS    = 60 * MINUTE_MS;
+    public static final int DAY_MS     = 24 * HOUR_MS;
+
     private final static SimpleDateFormat formatDDMMYY = new SimpleDateFormat("dd MM yyyy", Locale.ITALIAN);
     private final static SimpleDateFormat formatTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN);
 
@@ -66,6 +71,14 @@ public class CalendarUtils {
         instance.clear();
         instance.setFirstDayOfWeek(Calendar.MONDAY);
         instance.setTime(calendar.getTime());
+        return instance;
+    }
+
+    public static Calendar getCalendarInitializedAs(long millis){
+        Calendar instance = Calendar.getInstance();
+        instance.clear();
+        instance.setFirstDayOfWeek(Calendar.MONDAY);
+        instance.setTimeInMillis(millis);
         return instance;
     }
 

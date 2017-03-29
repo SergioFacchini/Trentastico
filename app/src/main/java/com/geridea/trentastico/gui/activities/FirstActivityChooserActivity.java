@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.geridea.trentastico.services.LessonsUpdatesCheckerService;
 import com.geridea.trentastico.utils.AppPreferences;
 
 /**
@@ -20,6 +21,8 @@ public class FirstActivityChooserActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        startService(new Intent(this, LessonsUpdatesCheckerService.class));
 
         if (AppPreferences.isFirstRun()) {
             startActivity(new Intent(this, WelcomeActivity.class));

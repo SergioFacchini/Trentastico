@@ -246,4 +246,20 @@ public class AppPreferences {
 
         saveExtraCourseJson(courses);
     }
+
+    public static boolean isStudyCourseSet() {
+        return get().getLong("STUDY_DEPARTMENT", 0) != 0 &&
+               get().getLong("STUDY_COURSE",     0) != 0 &&
+               get().getInt( "STUDY_YEAR",       0) != 0;
+    }
+
+    public static void setLastLessonsUpdateTime(long time) {
+        SharedPreferences.Editor editor = get().edit();
+        editor.putLong("LAST_LESSONS_UPDATE_TIME", time);
+        editor.apply();
+    }
+
+    public static long getLastLessonsUpdateTime() {
+        return get().getLong("LAST_LESSONS_UPDATE_TIME", 0);
+    }
 }

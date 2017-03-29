@@ -168,4 +168,10 @@ public class LessonsLoader implements LessonsLoadingListener {
 
         onPartiallyCachedResultsFetched.dispatch(cacheSet);
     }
+
+    @Override
+    public void onLoadingAborted(int operationId) {
+        //Technically it should never happen here since each request retries infinite times
+        onLoadingMessageDispatched.dispatch(new TerminalMessage(operationId));
+    }
 }

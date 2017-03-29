@@ -6,4 +6,8 @@
     <string name="navigation_drawer_close">Chiudi menu di navigazione</string>
 
     <string name="action_settings">Settings</string>
+    <string name="lessons_update_checker_description">
+        Aggiorna periodicamente gli orari delle tue lezioni e ti manda una notifica quando nota dei
+        cambiamenti.
+    </string>
 </resources>

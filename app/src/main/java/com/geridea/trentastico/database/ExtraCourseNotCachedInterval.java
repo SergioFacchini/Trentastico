@@ -22,7 +22,7 @@ public class ExtraCourseNotCachedInterval extends NotCachedInterval {
 
     @Override
     public IRequest generateRequest(LessonsLoadingListener listener) {
-        return new ExtraLessonsRequest(this, listener, extraCourse);
+        return new ExtraLessonsRequest(this, extraCourse, listener);
     }
 
 

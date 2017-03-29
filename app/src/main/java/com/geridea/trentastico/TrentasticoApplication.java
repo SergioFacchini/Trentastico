@@ -3,7 +3,6 @@ package com.geridea.trentastico;
 import android.app.Application;
 
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.providers.DepartmentsProvider;
 import com.geridea.trentastico.utils.AppPreferences;
 
@@ -18,7 +17,6 @@ public class TrentasticoApplication extends Application {
         super.onCreate();
 
         Cacher.init(this);
-        Networker.init(this);
         AppPreferences.init(this);
         DepartmentsProvider.loadIfNeeded();
 

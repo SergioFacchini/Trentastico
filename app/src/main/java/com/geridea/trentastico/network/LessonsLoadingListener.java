@@ -17,4 +17,10 @@ public interface LessonsLoadingListener {
     void onParsingErrorHappened(Exception exception, int operationId);
     void onLoadingDelegated(int operationId);
     void onPartiallyCachedResultsFetched(CachedLessonsSet lessonsSet);
+
+    /**
+     * Called when the loading of the request has been aborted. Can happen when the request could
+     * not be fetched and it doesn't allow retrials.
+     */
+    void onLoadingAborted(int operationId);
 }

@@ -6,7 +6,13 @@ package com.geridea.trentastico.network.request;
  */
 
 class ResponseUnsuccessfulException extends Exception {
-    public ResponseUnsuccessfulException(int code) {
+    private int code;
 
+    public ResponseUnsuccessfulException(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 }
