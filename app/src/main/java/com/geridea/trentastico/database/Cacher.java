@@ -303,10 +303,10 @@ public class Cacher {
     @NonNull
     private static ContentValues getCachedPeriodContentValues(CachedPeriod period) {
         ContentValues values = new ContentValues();
-        values.put(CP_START_WEEK,   period.getPeriod().getStart().getWeekNumber());
-        values.put(CP_START_YEAR,   period.getPeriod().getStart().getYear());
-        values.put(CP_END_WEEK,     period.getPeriod().getEnd()  .getWeekNumber());
-        values.put(CP_END_YEAR,     period.getPeriod().getEnd()  .getYear());
+        values.put(CP_START_WEEK,   period.getPeriod().getStartWeekNumber());
+        values.put(CP_START_YEAR,   period.getPeriod().getStartYear());
+        values.put(CP_END_WEEK,     period.getPeriod().getEndWeekNumber());
+        values.put(CP_END_YEAR,     period.getPeriod().getEndYear());
         values.put(CP_LESSON_TYPE,  period.getLesson_type());
         values.put(CP_CACHED_IN_MS, period.getCached_in_ms());
         return values;
@@ -392,16 +392,23 @@ public class Cacher {
 
     @NonNull
     private static String buildCachePeriodSelectionForInterval(WeekInterval intervalToLoad) {
-        WeekTime startEnd = intervalToLoad.getStart().copy();
-        startEnd.addWeeks(+1);
+        WeekTime startFrom = intervalToLoad.getStartCopy();
+        WeekTime startTo   = intervalToLoad.getEndCopy();
+        WeekInterval intervalContainingStart = new WeekInterval(startFrom, startTo);
 
-        WeekTime endEnd   = intervalToLoad.getEnd()  .copy();
-        endEnd.addWeeks(+1);
+        WeekTime endFrom = intervalToLoad.getStartCopy();
+        endFrom.addWeeks(1);
+        WeekTime endTo   = intervalToLoad.getEndCopy();
+        WeekInterval intervalContainingEnd = new WeekInterval(endFrom, endTo);
 
-        WeekInterval endIntervals   = new WeekInterval(startEnd, endEnd);
+        String startStr = buildWeekTimeSelectionsSQL(intervalContainingStart, CP_START_WEEK, CP_START_YEAR);
+        String endStr   = buildWeekTimeSelectionsSQL(intervalContainingEnd,   CP_END_WEEK,   CP_END_YEAR);
 
-        return buildWeekTimeSelectionsSQL(intervalToLoad, CP_START_WEEK, CP_START_YEAR) + " OR "+
-               buildWeekTimeSelectionsSQL(endIntervals,   CP_END_WEEK,   CP_END_YEAR);
+        String expression = startStr;
+        if(!endStr.isEmpty()){ //Can happen when fetching a one-week interval
+            expression +=  " OR "+ endStr;
+        }
+        return expression;
     }
 
     private static long getLastValidCacheMs() {

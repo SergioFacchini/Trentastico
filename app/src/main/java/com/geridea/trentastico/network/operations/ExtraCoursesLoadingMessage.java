@@ -2,8 +2,8 @@ package com.geridea.trentastico.network.operations;
 
 import com.geridea.trentastico.gui.views.requestloader.AbstractTextMessage;
 import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.network.request.ExtraLessonsRequest;
 import com.geridea.trentastico.utils.time.CalendarInterval;
-import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,18 +19,15 @@ public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
     private final ExtraCourse course;
     private final boolean isARetry;
 
-    public ExtraCoursesLoadingMessage(int operationId, CalendarInterval interval, ExtraCourse course, boolean isARetry) {
-        super(operationId);
+    public ExtraCoursesLoadingMessage(ExtraLessonsRequest request) {
+        super(request.getOperationId());
 
+        CalendarInterval interval = request.getIntervalToLoad().toCalendarInterval();
         this.from = interval.getFrom();
         this.to   = interval.getTo();
 
-        this.course = course;
-        this.isARetry = isARetry;
-    }
-
-    public ExtraCoursesLoadingMessage(int operationId, WeekInterval intervalToLoad, ExtraCourse extraCourse, boolean isARetry) {
-        this(operationId, intervalToLoad.toCalendarInterval(), extraCourse, isARetry);
+        this.course = request.getExtraCourse();
+        this.isARetry = request.isRetrying();
     }
 
 

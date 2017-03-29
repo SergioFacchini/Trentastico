@@ -25,7 +25,7 @@ public class WeekTime {
     }
 
     public WeekTime(long milliseconds) {
-        Calendar dummy = CalendarUtils.getClearDummyCalendar();
+        Calendar dummy = CalendarUtils.getClearCalendar();
         dummy.setTimeInMillis(milliseconds);
 
         initFromCalendar(dummy);
@@ -68,14 +68,6 @@ public class WeekTime {
             return this.year < arg.year;
     }
 
-
-    /**
-     * Creates a new <code>WeekTime</code> that is referring to the current week.
-     */
-    public static WeekTime getCurrentInstance() {
-        return new WeekTime(CalendarUtils.getCachedToday());
-    }
-
     public boolean hasSameWeekTime(WeekDayTime day) {
         return getWeekNumber() == day.getWeekNumber() &&
                      getYear() == day.getYear();
@@ -99,7 +91,7 @@ public class WeekTime {
     public void addWeeks(int numWeeksToAdd) {
         //Some years may have 53 weeks, so it's a good thing to delegate this calculation to the
         //calendar
-        Calendar dummy = CalendarUtils.getClearDummyCalendar();
+        Calendar dummy = CalendarUtils.getClearCalendar();
         dummy.set(Calendar.YEAR, year);
         dummy.set(Calendar.WEEK_OF_YEAR, weekNumber);
         dummy.add(Calendar.WEEK_OF_YEAR, numWeeksToAdd);

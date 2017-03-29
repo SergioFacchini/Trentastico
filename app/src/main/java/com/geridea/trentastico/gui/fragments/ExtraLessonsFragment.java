@@ -21,7 +21,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alexvasilkov.android.commons.utils.Views;
-import com.android.volley.VolleyError;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter;
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter;
@@ -29,6 +28,7 @@ import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.network.ListLessonsListener;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener0;
@@ -216,7 +216,7 @@ public class ExtraLessonsFragment extends IFragmentWithMenuItems {
 
     }
 
-    class ExtraCourseSearchDialog extends AlertDialog implements Networker.CoursesOfStudyCourseListener {
+    class ExtraCourseSearchDialog extends AlertDialog implements ListLessonsListener {
 
         private final StudyCourse studyCourse;
         @BindView(R.id.searching_lessons)     View searchingLessons;
@@ -270,7 +270,7 @@ public class ExtraLessonsFragment extends IFragmentWithMenuItems {
         }
 
         @Override
-        public void onErrorHappened(VolleyError error) {
+        public void onErrorHappened(Exception error) {
             showErrorMessage();
         }
 

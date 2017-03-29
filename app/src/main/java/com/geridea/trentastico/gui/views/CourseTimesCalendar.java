@@ -8,11 +8,9 @@ package com.geridea.trentastico.gui.views;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
-import com.android.volley.VolleyError;
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
@@ -22,7 +20,6 @@ import com.geridea.trentastico.network.LessonsLoader;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
-import com.threerings.signals.Listener2;
 import com.threerings.signals.Listener3;
 import com.threerings.signals.Signal1;
 
@@ -186,7 +183,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
 
     private void prepareLoader() {
         loader = new LessonsLoader();
-        loader.onLoadingOperationStarted.connect(new Listener1<ILoadingMessage>() {
+        loader.onLoadingMessageDispatched.connect(new Listener1<ILoadingMessage>() {
             @Override
             public void apply(ILoadingMessage message) {
                 onLoadingOperationNotify.dispatch(message);
@@ -224,26 +221,6 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     }
                 });
 
-            }
-        });
-
-        loader.onLoadingErrorHappened.connect(new Listener2<VolleyError, ILoadingMessage>() {
-            @Override
-            public void apply(VolleyError error, ILoadingMessage message) {
-                onLoadingOperationNotify.dispatch(message);
-                if (DEBUG_MODE) {
-                    Log.d("TRANTASTICO_DEBUG", "Loading error: "+CalendarUtils.formatCurrentTimestamp());
-                }
-            }
-        });
-        loader.onParsingErrorHappened.connect(new Listener2<Exception, ILoadingMessage>() {
-            @Override
-            public void apply(Exception e, ILoadingMessage message) {
-                e.printStackTrace();
-                onLoadingOperationNotify.dispatch(message);
-                if (DEBUG_MODE) {
-                    Log.d("TRANTASTICO_DEBUG", "Parsing error: "+CalendarUtils.formatCurrentTimestamp());
-                }
             }
         });
     }

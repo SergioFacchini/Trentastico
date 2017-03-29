@@ -5,6 +5,8 @@ package com.geridea.trentastico.utils.time;
  * Created with ♥ by Slava on 15/03/2017.
  */
 
+import com.geridea.trentastico.logger.BugLogger;
+
 import java.util.Calendar;
 import java.util.Iterator;
 
@@ -19,6 +21,7 @@ public class WeekInterval {
 
     private void init(WeekTime start, WeekTime end) {
         if(start.after(end)){
+            BugLogger.logBug();
             throw new IllegalStateException("Cannot have an interval starting after it's end!");
         }
 
@@ -44,26 +47,12 @@ public class WeekInterval {
         init(from, to);
     }
 
-    public WeekTime getStart() {
-        return start;
+    public WeekTime getStartCopy() {
+        return start.copy();
     }
 
-    public void setStart(WeekTime start) {
-        if(start.after(end)){
-            throw new IllegalStateException("Cannot have an interval starting after it's end!");
-        }
-        this.start = start;
-    }
-
-    public WeekTime getEnd() {
-        return end;
-    }
-
-    public void setEnd(WeekTime end) {
-        if(end.before(start)){
-            throw new IllegalStateException("Cannot have an interval ending before it's start!");
-        }
-        this.end = end;
+    public WeekTime getEndCopy() {
+        return end.copy();
     }
 
     public CalendarInterval toCalendarInterval() {
@@ -109,8 +98,8 @@ public class WeekInterval {
         WeekTime intStart = start;
         WeekTime intEnd   = end;
 
-        WeekTime cutStart = toCut.getStart();
-        WeekTime cutEnd   = toCut.getEnd();
+        WeekTime cutStart = toCut.getStartCopy();
+        WeekTime cutEnd   = toCut.getEndCopy();
 
         //-----|cache-cache|-------------------
         //--------------------|cut-cut-cut|----
@@ -165,7 +154,10 @@ public class WeekInterval {
         return EMPTY_WEEK;
     }
 
-
+    /**
+     * @return an iterator that iterates on all the week times of the interval, starting from the
+     * start (included) and finishing with the end (excluded).
+     */
     public Iterator<WeekTime> getIterator() {
         final WeekTime iterator = this.start.copy();
         iterator.addWeeks(-1);
@@ -199,5 +191,22 @@ public class WeekInterval {
     @Override
     public String toString() {
         return "["+start+" - "+end+"]";
+    }
+
+    public int getStartWeekNumber() {
+        return start.getWeekNumber();
+    }
+
+
+    public int getStartYear() {
+        return start.getYear();
+    }
+
+    public int getEndWeekNumber() {
+        return end.getWeekNumber();
+    }
+
+    public int getEndYear() {
+        return end.getYear();
     }
 }

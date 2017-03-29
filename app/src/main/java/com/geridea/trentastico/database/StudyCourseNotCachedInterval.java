@@ -6,9 +6,9 @@ package com.geridea.trentastico.database;
  */
 
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.EnqueueableOperation;
 import com.geridea.trentastico.network.LessonsLoadingListener;
-import com.geridea.trentastico.network.requests.LessonsRequest;
+import com.geridea.trentastico.network.request.IRequest;
+import com.geridea.trentastico.network.request.StudyCourseLessonsRequest;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -21,13 +21,13 @@ public class StudyCourseNotCachedInterval extends NotCachedInterval {
     }
 
     public StudyCourseNotCachedInterval(WeekInterval interval) {
-        super(interval.getStart(), interval.getEnd());
+        super(interval.getStartCopy(), interval.getEndCopy());
     }
 
     @Override
-    public EnqueueableOperation generateRequest(LessonsLoadingListener listener) {
+    public IRequest generateRequest(LessonsLoadingListener listener) {
         StudyCourse studyCourse = AppPreferences.getStudyCourse();
-        return new LessonsRequest(this, studyCourse, listener);
+        return new StudyCourseLessonsRequest(this, studyCourse, listener);
     }
 
 }

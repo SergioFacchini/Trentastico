@@ -1,19 +1,16 @@
-package com.geridea.trentastico.network.requests;
+package com.geridea.trentastico.network.request;
 
 
 /*
- * Created with ♥ by Slava on 27/03/2017.
+ * Created with ♥ by Slava on 29/03/2017.
  */
 
 import android.support.annotation.NonNull;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.EnqueueableOperation;
 import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
@@ -24,39 +21,25 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public abstract class AbstractServerRequest extends StringRequest implements EnqueueableOperation {
+abstract class BasicLessonsRequest implements IRequest {
 
     private static int PROGRESSIVE_OPERATION_ID_COUNTER = 1;
 
-    private int operationId;
+    private final int operationId;
 
-    AbstractServerRequest() {
-        super(Method.GET, null, null, null);
-
-        operationId = PROGRESSIVE_OPERATION_ID_COUNTER++;
+    public BasicLessonsRequest() {
+        this.operationId = PROGRESSIVE_OPERATION_ID_COUNTER++;
     }
 
     @Override
-    public String getUrl() {
+    public String getURL() {
         return buildRequestURL(getStudyCourse(), getIntervalToLoad());
     }
 
-    //We cannot provide the listeners to the constructor, so we use this workaround do still manage
-    //the listeners.
-    protected void deliverResponse(String response) {
-        onResponse(response);
-    }
-
-    protected abstract void onResponse(String response);
-
-    @Override
-    abstract public void deliverError(VolleyError error);
-
-    abstract public StudyCourse getStudyCourse();
-
-    abstract public WeekInterval getIntervalToLoad();
-
-    private static String buildRequestURL(StudyCourse studyCourse, WeekInterval intervalToLoad) {
+    protected abstract WeekInterval getIntervalToLoad();
+    protected abstract StudyCourse getStudyCourse();
+    
+    protected static String buildRequestURL(StudyCourse studyCourse, WeekInterval intervalToLoad) {
         CalendarInterval interval = intervalToLoad.toCalendarInterval();
 
         return String.format(
@@ -101,4 +84,5 @@ public abstract class AbstractServerRequest extends StringRequest implements Enq
     public int getOperationId() {
         return operationId;
     }
+
 }

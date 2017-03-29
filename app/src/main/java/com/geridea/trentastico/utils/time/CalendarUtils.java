@@ -17,8 +17,6 @@ public class CalendarUtils {
 
     public static final Calendar TODAY = Calendar.getInstance();
 
-    public static final Calendar DUMMY = Calendar.getInstance();
-
     /**
      * @return the first day of the current week, at 00:00:00.
      */
@@ -56,17 +54,19 @@ public class CalendarUtils {
         return TODAY;
     }
 
-    public static Calendar getClearDummyCalendar(){
-        DUMMY.clear();
-        DUMMY.setFirstDayOfWeek(Calendar.MONDAY);
-        return DUMMY;
+    public static Calendar getClearCalendar(){
+        Calendar instance = Calendar.getInstance();
+        instance.clear();
+        instance.setFirstDayOfWeek(Calendar.MONDAY);
+        return instance;
     }
 
-    public static Calendar getDummyInitializedAs(Calendar calendar){
-        DUMMY.clear();
-        DUMMY.setFirstDayOfWeek(Calendar.MONDAY);
-        DUMMY.setTime(calendar.getTime());
-        return DUMMY;
+    public static Calendar getCalendarInitializedAs(Calendar calendar){
+        Calendar instance = Calendar.getInstance();
+        instance.clear();
+        instance.setFirstDayOfWeek(Calendar.MONDAY);
+        instance.setTime(calendar.getTime());
+        return instance;
     }
 
     public static String formatTimestamp(long millis) {

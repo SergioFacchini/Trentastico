@@ -1,8 +1,8 @@
 package com.geridea.trentastico.network.operations;
 
-import com.android.volley.NoConnectionError;
-import com.android.volley.VolleyError;
 import com.geridea.trentastico.gui.views.requestloader.AbstractTextMessage;
+
+import java.net.UnknownHostException;
 
 /*
  * Created with ♥ by Slava on 13/03/2017.
@@ -11,10 +11,10 @@ public class NetworkErrorMessage extends AbstractTextMessage {
 
     private final String errorMessage;
 
-    public NetworkErrorMessage(int messageId, VolleyError error) {
+    public NetworkErrorMessage(int messageId, Exception error) {
         super(messageId);
 
-        if (error instanceof NoConnectionError) {
+        if (error instanceof UnknownHostException) {
             errorMessage = "Non riesco a scaricare gli orari perché non sei connesso/a ad internet!";
         } else {
             errorMessage = "Non sono riuscito a scaricare gli orari per un problema con internet. Riprovo...";

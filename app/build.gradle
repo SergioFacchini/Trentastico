@@ -38,7 +38,7 @@ dependencies {
     compile 'com.github.alamkanak:android-week-view:1.2.6'
 
     //Networking
-    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
 
     //Butter knife (BindView)
     compile 'com.jakewharton:butterknife:8.5.1'
