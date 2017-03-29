@@ -9,6 +9,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.geridea.trentastico.Config;
@@ -42,9 +43,11 @@ public class Networker {
     private static Context CONTEXT;
 
     private static RequestSender sender = new RequestSender();
+    private static RequestQueue requestQueue;
 
     public static void init(Context context) {
         CONTEXT = context;
+        requestQueue = Volley.newRequestQueue(CONTEXT);
     }
 
     /**
@@ -142,7 +145,7 @@ public class Networker {
                 }
             }
 
-            return Volley.newRequestQueue(CONTEXT).add(request);
+            return requestQueue.add(request);
         }
 
         private void processRequest(EnqueueableOperation operation, boolean isARetry) {

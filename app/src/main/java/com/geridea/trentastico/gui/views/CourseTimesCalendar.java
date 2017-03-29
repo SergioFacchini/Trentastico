@@ -190,37 +190,40 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             @Override
             public void apply(ILoadingMessage message) {
                 onLoadingOperationNotify.dispatch(message);
-
-                if (DEBUG_MODE) {
-                    Log.d("TRANTASTICO_DEBUG", "Started request: "+CalendarUtils.formatCurrentTimestamp());
-                }
             }
         });
         loader.onLoadingOperationSuccessful.connect(new Listener3<LessonsSet, WeekInterval, ILoadingMessage>() {
             @Override
-            public void apply(LessonsSet lessons, WeekInterval interval, ILoadingMessage message) {
-                if (DEBUG_MODE) {
-                    Log.d("TRANTASTICO_DEBUG", "Successful request finished: "+CalendarUtils.formatCurrentTimestamp());
-                }
+            public void apply(final LessonsSet lessons, final WeekInterval interval, final ILoadingMessage message) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentlyShownLessonsSet.mergeWith(lessons);
 
-                currentlyShownLessonsSet.mergeWith(lessons);
+                        addEnabledInterval(interval);
+                        addEventsFromLessonsSet(lessons);
 
-                addEnabledInterval(interval);
-                addEventsFromLessonsSet(lessons);
-
-                onLoadingOperationNotify.dispatch(message);
+                        onLoadingOperationNotify.dispatch(message);
+                    }
+                });
             }
         });
 
         loader.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
             @Override
-            public void apply(CachedLessonsSet lessonsSet) {
-                currentlyShownLessonsSet.mergeWith(lessonsSet);
+            public void apply(final CachedLessonsSet lessonsSet) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentlyShownLessonsSet.mergeWith(lessonsSet);
 
-                ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedIntervals();
-                addEnabledIntervals(cachedIntervals);
+                        ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedIntervals();
+                        addEnabledIntervals(cachedIntervals);
 
-                addEventsFromLessonsSet(lessonsSet);
+                        addEventsFromLessonsSet(lessonsSet);
+                    }
+                });
+
             }
         });
 
