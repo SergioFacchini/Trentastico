@@ -7,7 +7,6 @@ package com.geridea.trentastico.network.requests;
 
 import android.support.annotation.NonNull;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.geridea.trentastico.model.LessonSchedule;
@@ -27,10 +26,6 @@ import java.util.Locale;
 
 public abstract class AbstractServerRequest extends StringRequest implements EnqueueableOperation {
 
-    private static final DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(
-        15000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-    );
-
     private static int PROGRESSIVE_OPERATION_ID_COUNTER = 1;
 
     private int operationId;
@@ -39,8 +34,6 @@ public abstract class AbstractServerRequest extends StringRequest implements Enq
         super(Method.GET, null, null, null);
 
         operationId = PROGRESSIVE_OPERATION_ID_COUNTER++;
-
-        setRetryPolicy(retryPolicy);
     }
 
     @Override
