@@ -21,8 +21,6 @@ import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
 
-
-
 public class Networker {
 
     private static RequestSender requestSender = new RequestSender();
