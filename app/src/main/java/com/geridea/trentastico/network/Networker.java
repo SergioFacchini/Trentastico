@@ -1,6 +1,5 @@
 package com.geridea.trentastico.network;
 
-
 /*
  * Created with ♥ by Slava on 11/03/2017.
  */
