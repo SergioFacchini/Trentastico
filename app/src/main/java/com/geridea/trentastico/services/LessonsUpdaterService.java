@@ -152,7 +152,7 @@ public class LessonsUpdaterService extends Service {
     private Calendar calculateAndSaveNextSchedule(int scheduleType) {
         Calendar calendar;
         if(scheduleType == SCHEDULE_MISSING) {
-            //Posticipating due to alam manager approximations
+            //Posticipating due to alarm manager approximations
             calendar = CalendarUtils.getCalendarInitializedAs(AppPreferences.getNextLessonsUpdateTime());
 
             if(Config.DEBUG_MODE){
