@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <service
-            android:name=".services.LessonsUpdatesCheckerService"
+            android:name=".services.LessonsUpdaterService"
             android:description="@string/lessons_update_checker_description"
             android:exported="false" />
 

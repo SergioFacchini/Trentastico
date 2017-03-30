@@ -8,6 +8,7 @@ package com.geridea.trentastico.services;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -36,7 +37,9 @@ import com.threerings.signals.Signal1;
 
 import java.util.Calendar;
 
-public class LessonsUpdatesCheckerService extends Service {
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
+public class LessonsUpdaterService extends Service {
 
     public static final String EXTRA_STARTER = "EXTRA_STARTER";
 
@@ -46,17 +49,13 @@ public class LessonsUpdatesCheckerService extends Service {
     public static final int STARTER_APP_START = 3;
     public static final int STARTER_ALARM_MANAGER = 4;
 
-
-    public static final int RESCHEDULING_NO = -1;
-    public static final int RESCHEDULING_YES_NORMAL = -2;
-    public static final int RESCHEDULING_YES_QUICK = -3;
-
+    public static final int SCHEDULE_SLOW = 1;
+    public static final int SCHEDULE_QUICK = 2;
+    public static final int SCHEDULE_MISSING = 3;
 
     private JobManager jobManager;
 
     private boolean updateAlreadyInProgress = false;
-
-    private int needsRescheduling = RESCHEDULING_NO;
 
     @Override
     public void onCreate() {
@@ -78,54 +77,43 @@ public class LessonsUpdatesCheckerService extends Service {
         // 1) More than 4 hours have passed since last check
         // 2) In the last check we had no internet and now we have it
 
-
         //Rescheduling of the lessons
         // 1) The check has been successful:
         //    Just reschedule at the normal pace
         // 2) We had no internet:
-        //    No reason to reschedule the check; we just wait for the connectivity change broadcast
-        //    and start rescheduling from that.
+        //    We reschedule the check and check on the connectivity change broadcast.
         // 3) The check was unsuccessful:
         //    Reschedule at a slower rate.
-
         if (updateAlreadyInProgress) {
             //The service is already started and it's doing something
             showToastIfInDebug("Update already in progress... ignoring update.");
             return START_REDELIVER_INTENT;
         } else {
             updateAlreadyInProgress = true;
-        }
 
-        int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
-        if(shouldUpdateBecauseWeGainedInternet(starter)){
-            showToastIfInDebug("Updating because of internet refresh state.");
+            final int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
+            if(shouldUpdateBecauseWeGainedInternet(starter)){
+                showToastIfInDebug("Updating lessons because of internet refresh state...");
+                AppPreferences.hadInternetInLastCheck(true);
 
-            updateLessons(new LessonsUpdateListener() {
-                @Override
-                public void onLessonsUpdateTerminated(boolean successful) {
-
-
-                }
-
-                @Override
-                public void onNoInternet() {
-
-                }
-            });
-
-        } else if (shouldUpdateBecauseOfUpdateTimeout()) {
-            showToastIfInDebug("Checking for lessons updates...");
-            updateLessons(starter);
-        } else
-
-        updateAlreadyInProgress = true;
-
-        long lastUpdate = AppPreferences.getLastLessonsUpdateTime();
-        if (lastUpdate <= getLastPermittedNotUpdatePeriod()) {
-            showToastIfInDebug("Checking for lessons updates...");
-            updateLessons(starter);
-        } else {
-            showToastIfInDebug("Too early to check for updates.");
+                updateLessons(new LessonsUpdateListener() {
+                    @Override
+                    public void onLessonsUpdateTerminated(boolean successful) {
+                        scheduleNextStartAndTerminate(successful ? SCHEDULE_SLOW : SCHEDULE_QUICK);
+                    }
+                });
+            } else if (shouldUpdateBecauseOfUpdateTimeout()) {
+                showToastIfInDebug("Checking for lessons updates...");
+                updateLessons(new LessonsUpdateListener() {
+                    @Override
+                    public void onLessonsUpdateTerminated(boolean successful) {
+                        scheduleNextStartAndTerminate(successful ? SCHEDULE_SLOW : SCHEDULE_QUICK);
+                    }
+                });
+            } else {
+                showToastIfInDebug("Too early to check for updates.");
+                scheduleNextStartAndTerminate(SCHEDULE_MISSING);
+            }
         }
 
         return START_REDELIVER_INTENT;
@@ -133,12 +121,12 @@ public class LessonsUpdatesCheckerService extends Service {
 
     private boolean shouldUpdateBecauseWeGainedInternet(int starter) {
         return starter == STARTER_NETWORK_BROADCAST
-            && !AppPreferences.hadInternetInTheLastLessonsUpdate()
+            && !AppPreferences.hadInternetInLastCheck()
             && ContextUtils.weHaveInternet(this);
     }
 
     private boolean shouldUpdateBecauseOfUpdateTimeout() {
-        return AppPreferences.getLastLessonsUpdateTime() <= getLastPermittedNotUpdatePeriod();
+        return AppPreferences.getNextLessonsUpdateTime() <= System.currentTimeMillis();
     }
 
 
@@ -148,30 +136,56 @@ public class LessonsUpdatesCheckerService extends Service {
         }
     }
 
-    private void scheduleNextStartAndTerminate(boolean halfTime) {
-        long lastUpdate = AppPreferences.getLastLessonsUpdateTime();
-        Calendar calendar = CalendarUtils.getCalendarInitializedAs(lastUpdate);
+    private void scheduleNextStartAndTerminate(int scheduleType) {
+        Calendar calendar = calculateAndSaveNextSchedule(scheduleType);
 
-        if (Config.DEBUG_MODE) {
-            int timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS;
-            if (halfTime) timeToAdd /= 2;
-
-            calendar.add(Calendar.SECOND, timeToAdd);
-        } else {
-            int timeToAdd = Config.LESSONS_REFRESH_WAITING_HOURS;
-            if (halfTime) timeToAdd /= 2;
-
-            calendar.add(Calendar.HOUR_OF_DAY, timeToAdd);
-        }
-
-        Intent intent = new Intent(this, LessonsUpdatesCheckerService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+        Intent intent = createServiceIntent(this, STARTER_ALARM_MANAGER);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
-        updateAlreadyInProgress = false;
         stopSelf();
+    }
+
+    @NonNull
+    private Calendar calculateAndSaveNextSchedule(int scheduleType) {
+        Calendar calendar;
+        if(scheduleType == SCHEDULE_MISSING) {
+            //Posticipating due to alam manager approximations
+            calendar = CalendarUtils.getCalendarInitializedAs(AppPreferences.getNextLessonsUpdateTime());
+
+            if(Config.DEBUG_MODE){
+                calendar.add(Calendar.SECOND, Config.DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS);
+            } else {
+                calendar.add(Calendar.MINUTE, Config.LESSONS_REFRESH_POSTICIPATION_MINUTES);
+            }
+
+        } else {
+            calendar = CalendarUtils.getCalendarInitializedAs(System.currentTimeMillis());
+
+            if (Config.DEBUG_MODE) {
+                int timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS;
+                if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2;
+
+                calendar.add(Calendar.SECOND, timeToAdd);
+            } else {
+                int timeToAdd = Config.LESSONS_REFRESH_WAITING_HOURS;
+                if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2;
+
+                calendar.add(Calendar.HOUR_OF_DAY, timeToAdd);
+            }
+
+            AppPreferences.setNextLessonsUpdateTime(calendar.getTimeInMillis());
+        }
+        return calendar;
+    }
+
+    @NonNull
+    public static Intent createServiceIntent(Context context, int starterAlarmManager) {
+        Intent intent = new Intent(context, LessonsUpdaterService.class);
+        intent.putExtra(EXTRA_STARTER, starterAlarmManager);
+        return intent;
     }
 
     private void updateLessons(final LessonsUpdateListener listener) {
@@ -181,7 +195,6 @@ public class LessonsUpdatesCheckerService extends Service {
                 job.onCheckTerminated.connect(new Listener1<Boolean>() {
                     @Override
                     public void apply(Boolean isSuccessful) {
-                        updateLastUpdateTime();
                         if (isSuccessful) {
                             showToastIfInDebug("Lesson update successful!");
                         } else {
@@ -195,35 +208,22 @@ public class LessonsUpdatesCheckerService extends Service {
             } else {
                 //The user has just run the app or reset it's settings. We currently do not have any
                 //study course to fetch lessons from, so we just re-plan the check to the next time.
-                updateLastUpdateTime();
                 listener.onLessonsUpdateTerminated(false);
             }
         } else {
             showToastIfInDebug("No internet. Cannot check for updates.");
-            listener.onNoInternet();
+            AppPreferences.hadInternetInLastCheck(false);
+            listener.onLessonsUpdateTerminated(false);
         }
-    }
-
-    private void updateLastUpdateTime() {
-        AppPreferences.setLastLessonsUpdateTime(System.currentTimeMillis());
     }
 
     private void showToastOnMainThread(final String message) {
         UIUtils.runOnMainThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(LessonsUpdatesCheckerService.this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(LessonsUpdaterService.this, message, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private long getLastPermittedNotUpdatePeriod() {
-        long currentMillis = System.currentTimeMillis();
-        if (Config.DEBUG_MODE) {
-            return currentMillis - CalendarUtils.SECONDS_MS * Config.DEBUG_LESSONS_REFRESH_RATE_SECONDS;
-        } else {
-            return currentMillis - CalendarUtils.HOUR_MS * Config.LESSONS_REFRESH_RATE_HOURS;
-        }
     }
 
     private class UpdateLessonsJob extends Job implements LessonsLoadingListener {
@@ -316,7 +316,5 @@ public class LessonsUpdatesCheckerService extends Service {
 
     private interface LessonsUpdateListener {
         void onLessonsUpdateTerminated(boolean successful);
-
-        void onNoInternet();
     }
 }
