@@ -1,6 +1,5 @@
 package com.geridea.trentastico.gui.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -21,7 +20,6 @@ import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
-import com.threerings.signals.Listener0;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -105,16 +103,7 @@ public class HomeActivity extends AppCompatActivity
         if(id == R.id.menu_timetables){
             switchToCalendarFragment();
         } else if(id == R.id.menu_settings) {
-            SettingsFragment settingsFragment = new SettingsFragment();
-            settingsFragment.onChoiceMade.connect(new Listener0() {
-                @Override
-                public void apply() {
-                    //The user might have changed his/ser courses or not. However he/she will have
-                    //to return to the calendar fragment
-                    switchToCalendarFragment();
-                }
-            });
-            setCurrentFragment(settingsFragment);
+            setCurrentFragment(new SettingsFragment());
         } else if(id == R.id.menu_extra_times) {
             setCurrentFragment(new ExtraLessonsFragment());
         } else if(id == R.id.menu_about){

@@ -8,7 +8,7 @@ package com.geridea.trentastico;
 public final class Config {
 
     //Debug
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
     //Networking
@@ -16,7 +16,7 @@ public final class Config {
      * How much ms we should wait after a request has failed loading and the next retry?
      */
     public static final int WAITING_TIME_AFTER_A_REQUEST_FAILED = 5000;
-    public static final boolean LAUNCH_REQUESTS_TO_DEBUG_SERVER = true;
+    public static final boolean LAUNCH_REQUESTS_TO_DEBUG_SERVER = false;
 
     public static final String DEBUG_SERVER_URL = "http://ideagenesi.com/trentastico/lessons.json";
 

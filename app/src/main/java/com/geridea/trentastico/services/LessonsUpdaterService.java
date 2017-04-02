@@ -54,7 +54,8 @@ public class LessonsUpdaterService extends Service {
     public static final int STARTER_BOOT_BROADCAST = 2;
     public static final int STARTER_APP_START = 3;
     public static final int STARTER_ALARM_MANAGER = 4;
-    public static final int STARTER_DEBUGGER = 5;
+    public static final int STARTER_SETTING_CHANGED = 5;
+    public static final int STARTER_DEBUGGER = 6;
 
     public static final int SCHEDULE_SLOW = 1;
     public static final int SCHEDULE_QUICK = 2;
@@ -96,7 +97,7 @@ public class LessonsUpdaterService extends Service {
             //The service is already started and it's doing something
             showToastIfInDebug("Update already in progress... ignoring update.");
             return START_NOT_STICKY;
-        } else {
+        } else if(AppPreferences.isSearchForLessonChangesEnabled()) {
             updateAlreadyInProgress = true;
 
             final int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
@@ -122,6 +123,8 @@ public class LessonsUpdaterService extends Service {
                 showToastIfInDebug("Too early to check for updates.");
                 scheduleNextStartAndTerminate(SCHEDULE_MISSING);
             }
+        } else {
+            showToastIfInDebug("Searching for lesson updates is disabled!");
         }
 
         return START_NOT_STICKY;
@@ -166,7 +169,7 @@ public class LessonsUpdaterService extends Service {
     private Calendar calculateAndSaveNextSchedule(int scheduleType) {
         Calendar calendar;
         if(scheduleType == SCHEDULE_MISSING) {
-            //Posticipating due to alarm manager approximations
+            //Postponing due to alarm manager approximations
             calendar = CalendarUtils.getCalendarInitializedAs(AppPreferences.getNextLessonsUpdateTime());
 
             if(Config.DEBUG_MODE){
@@ -196,9 +199,9 @@ public class LessonsUpdaterService extends Service {
     }
 
     @NonNull
-    public static Intent createServiceIntent(Context context, int starterAlarmManager) {
+    public static Intent createServiceIntent(Context context, int starter) {
         Intent intent = new Intent(context, LessonsUpdaterService.class);
-        intent.putExtra(EXTRA_STARTER, starterAlarmManager);
+        intent.putExtra(EXTRA_STARTER, starter);
         return intent;
     }
 
@@ -240,34 +243,36 @@ public class LessonsUpdaterService extends Service {
     }
 
     private void showLessonsChangedNotification(LessonsDiffResult diffResult) {
-        int numDifferences = diffResult.getNumTotalDifferences();
+        if (AppPreferences.isNotificationForLessonChangesEnabled()) {
+            int numDifferences = diffResult.getNumTotalDifferences();
 
-        String message = "È cambiato l'orario di una lezione!";
-        if (numDifferences > 1) {
-            message = "Sono cambiati gli orari di "+numDifferences+" lezioni!";
+            String message = "È cambiato l'orario di una lezione!";
+            if (numDifferences > 1) {
+                message = "Sono cambiati gli orari di "+numDifferences+" lezioni!";
+            }
+
+
+            NotificationCompat.Builder notificationBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_launcher)
+                            .setContentTitle(message)
+                            .setContentText("Premi qui per i dettagli")
+                            .setColor(getResources().getColor(R.color.colorPrimary))
+                            .setAutoCancel(true);
+
+
+            Intent intent = new Intent(this, LessonsChangedActivity.class);
+            intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult);
+
+            PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+            );
+
+            notificationBuilder.setContentIntent(resultPendingIntent);
+
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, notificationBuilder.build());
         }
-
-
-        NotificationCompat.Builder notificationBuilder =
-            new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_launcher)
-                    .setContentTitle(message)
-                    .setContentText("Premi qui per i dettagli")
-                    .setColor(getResources().getColor(R.color.colorPrimary))
-                    .setAutoCancel(true);
-
-
-        Intent intent = new Intent(this, LessonsChangedActivity.class);
-        intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult);
-
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        notificationBuilder.setContentIntent(resultPendingIntent);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, notificationBuilder.build());
     }
 
     private Signal1<Boolean> loadMissingLesson(WeekInterval intervalToCheck) {
@@ -289,6 +294,19 @@ public class LessonsUpdaterService extends Service {
                 Toast.makeText(LessonsUpdaterService.this, message, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    public static void cancelSchedules(Context context, int starter) {
+        Intent serviceIntent = LessonsUpdaterService.createServiceIntent(
+                context, starter
+        );
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+
+        PendingIntent pendingIntent = PendingIntent.getService(context,
+                0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        pendingIntent.cancel();
+        alarmManager.cancel(pendingIntent);
     }
 
     private class DiffLessonsJob extends Job implements LessonsDifferenceListener {

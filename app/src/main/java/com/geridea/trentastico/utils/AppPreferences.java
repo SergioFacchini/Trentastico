@@ -35,7 +35,7 @@ public class AppPreferences {
     }
 
     public static void setIsFirstRun(boolean isFirstRun) {
-        putBoolean(isFirstRun, "IS_FIRST_RUN");
+        putBoolean("IS_FIRST_RUN", isFirstRun);
     }
 
     /**
@@ -84,7 +84,7 @@ public class AppPreferences {
             array.put(teachingId);
         }
 
-        putString("FILTERED_TEACHINGS", array.toString());
+        putString(array.toString(), "FILTERED_TEACHINGS");
     }
 
     public static boolean hasLessonTypeWithIdHidden(int id) {
@@ -121,7 +121,7 @@ public class AppPreferences {
             JSONObject partitioningJSON = getPartitioningsJSON();
             partitioningJSON.put(String.valueOf(lessonTypeId), jsonArrayCases);
 
-            putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString());
+            putString(partitioningJSON.toString(), "PARTITIONINGS_TO_HIDE");
         } catch (JSONException e) {
             BugLogger.logBug();
             e.printStackTrace();
@@ -161,7 +161,7 @@ public class AppPreferences {
     }
 
     public static void removeAllHiddenPartitionings() {
-        putString("PARTITIONINGS_TO_HIDE", "{}");
+        putString("{}", "PARTITIONINGS_TO_HIDE");
     }
 
     public static ExtraCoursesList getExtraCourses() {
@@ -196,10 +196,10 @@ public class AppPreferences {
     }
 
     private static void saveExtraCourseJson(JSONArray value) {
-        putString("EXTRA_COURSES", value.toString());
+        putString(value.toString(), "EXTRA_COURSES");
     }
 
-    private static void putString(String key, String value) {
+    private static void putString(String value, String key) {
         SharedPreferences.Editor editor = get().edit();
         editor.putString(key, value);
         editor.apply();
@@ -254,10 +254,10 @@ public class AppPreferences {
     }
 
     public static void setNextLessonsUpdateTime(long time) {
-        putLong(time, "NEXT_LESSONS_UPDATE_TIME");
+        putLong("NEXT_LESSONS_UPDATE_TIME", time);
     }
 
-    private static void putLong(long time, String key) {
+    private static void putLong(String key, long time) {
         SharedPreferences.Editor editor = get().edit();
         editor.putLong(key, time);
         editor.apply();
@@ -272,12 +272,28 @@ public class AppPreferences {
     }
 
     public static void hadInternetInLastCheck(boolean had) {
-        putBoolean(had, "HAD_INTERNET_DURING_LAST_LESSON_UPDATE");
+        putBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", had);
     }
 
-    private static void putBoolean(boolean bool, String key) {
+    private static void putBoolean(String key, boolean bool) {
         SharedPreferences.Editor editor = get().edit();
         editor.putBoolean(key, bool);
         editor.apply();
+    }
+
+    public static boolean isSearchForLessonChangesEnabled() {
+        return get().getBoolean("SEARCH_LESSON_CHANGES", true);
+    }
+
+    public static void setSearchForLessonChangesEnabled(boolean enabled) {
+        putBoolean("SEARCH_LESSON_CHANGES", enabled);
+    }
+
+    public static boolean isNotificationForLessonChangesEnabled() {
+        return get().getBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true);
+    }
+
+    public static void setNotificationForLessonChangesEnabled(boolean enabled) {
+        putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled);
     }
 }

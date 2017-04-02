@@ -15,12 +15,12 @@
         <item
             android:id="@+id/menu_settings"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Cambia corso di studi" />
+            android:title="Configurazione" />
 
         <item
             android:id="@+id/update_courses"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Aggiorna corsi" />
+            android:title="Aggiorna lezioni" />
 
     </group>
 
@@ -29,7 +29,7 @@
             <item
                 android:id="@+id/menu_about"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Informazioni su..." />
+                android:title="Pulisci cache" />
         </menu>
     </item>
 

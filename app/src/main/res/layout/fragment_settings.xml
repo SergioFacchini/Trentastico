@@ -19,11 +19,10 @@
         tools:context=".gui.activities.WelcomeActivity">
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Cambia corso di studi"
+            android:text="Configurazione"
             android:textColor="@color/colorForeground"
             android:textSize="24sp" />
 
@@ -32,24 +31,146 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Da qui è possibile cambiare il corso di studi che avevi selezionato in precedenza. Gli orari del nuovo corso di studi verranno automaticamente scaricati."
+            android:text="Da qui puoi cambiare le impostazioni di Trentastico!"
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
-        <com.geridea.trentastico.gui.views.CourseSelectorView
-            android:id="@+id/course_selector"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-
-        <Button
-            android:id="@+id/change_button"
+        <TextView
+            style="@style/TextForegroundBig"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:gravity="left"
+            android:paddingTop="20dp"
+            android:text="Cambia corso di studi"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Il corso di studi attualmente selezionato è:"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            android:id="@+id/current_study_course"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Nome corso di studi"
+            android:textColor="@color/colorForeground" />
+
+        <Button
+            android:id="@+id/change_study_course_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="#3b1629"
-            android:screenOrientation="portrait"
-            android:text="Cambia!"
+            android:text="Cambia corso di studi!"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundBig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="20dp"
+            android:text="Cerca aggiornamenti degli orari"
+            android:textColor="@color/colorForeground" />
+
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Trentastico! riscarica periodicamente gli orari del corso di studi e corsi extra da te frequentati e può avvisarti  mediante una notifica se, ad esempio, qualche lezione è stata annullata o spostata. La ricerca influisce leggermente sul traffico dati da te utilizzato."
+            android:textColor="@color/colorForeground" />
+
+        <Switch
+            android:id="@+id/search_for_lesson_changes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Scarica periodicamente gli orari aggiornati"
+            android:textColor="@color/colorForeground" />
+
+        <Switch
+            android:id="@+id/lesson_change_show_notification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Mostrami una notifica quando qualche lezione cambia"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundBig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="20dp"
+            android:text="Notifica della prossima lezione"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Trentastico! ti mostra una notifica con il nome della prossima lezione e aula in qui la lezione si terrà. In questo modo non devi aprire l'app ad ogni fine lezione per sapere dove devi andare."
+            android:textColor="@color/colorForeground" />
+
+        <Switch
+            android:id="@+id/show_next_lesson_notification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Mostrami una notifica con la mia prossima lezione"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="5dp"
+            android:text="Trentastico! mostra la notifica della prossima lezione con un certo anticipo prima della fine della lezione."
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            android:id="@+id/current_notification_anticipation"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Attualmente la notifica della prossima lezione viene mostrata con N minuti in anticipo."
+            android:textColor="@color/colorForeground" />
+
+        <Button
+            android:id="@+id/next_lesson_notification_anticipation_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#3b1629"
+            android:text="Modifica minuti di anticipo"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="10dp"
+            android:text="È possibile rendere fissa la notifica della prossima lezione. Le notifiche fisse non possono essere cancellate dall'utente e quindi non rischi di rimuoverle per sbaglio."
+            android:textColor="@color/colorForeground" />
+
+        <Switch
+            android:id="@+id/make_notifications_fixed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Rendi fissa la notifica della prossima lezione"
             android:textColor="@color/colorForeground" />
 
     </LinearLayout>
