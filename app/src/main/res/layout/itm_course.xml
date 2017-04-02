@@ -7,12 +7,9 @@
 
     <ImageView
         android:id="@+id/color"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
-        android:background="#FF0000"
-        android:contentDescription="Colore corso" />
+        android:contentDescription="Colore"
+        style="@style/CourseColor" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -30,7 +27,7 @@
             android:layout_toLeftOf="@+id/color"
             android:gravity="center_vertical|left"
             android:text="text"
-            android:textColor="#FFFFFFFF" />
+            android:textColor="@color/colorForeground" />
 
         <TextView
             android:id="@+id/partitionings"

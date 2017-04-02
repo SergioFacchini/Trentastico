@@ -8,7 +8,7 @@ package com.geridea.trentastico.network.request;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.ListLessonsListener;
+import com.geridea.trentastico.network.request.listener.ListLessonsListener;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 

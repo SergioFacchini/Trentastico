@@ -6,13 +6,13 @@ package com.geridea.trentastico.network.request;
  */
 
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.database.NotCachedInterval;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.LessonsLoadingListener;
+import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.network.operations.LessonsLoadingMessage;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
@@ -21,23 +21,19 @@ import java.util.ArrayList;
 
 public class StudyCourseLessonsRequest extends BasicLessonsRequest {
 
-    private final WeekInterval interval;
-    private final StudyCourse course;
-    private final LessonsLoadingListener listener;
-    private boolean isCacheCheckEnabled;
+    protected final WeekInterval interval;
+    protected final StudyCourse course;
+    protected LessonsLoadingListener listener;
 
-    private boolean isRetrying;
-    private boolean areRetrialsEnabled;
+    protected boolean areRetrialsEnabled = true;
+    protected boolean isCacheCheckEnabled = true;
+
+    protected boolean isRetrying = false;
 
     public StudyCourseLessonsRequest(WeekInterval interval, StudyCourse course, LessonsLoadingListener listener) {
         this.interval = interval;
         this.course = course;
         this.listener = listener;
-
-        this.isRetrying = false;
-
-        this.isCacheCheckEnabled = true;
-        this.areRetrialsEnabled = true;
     }
 
     @Override
@@ -51,7 +47,7 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         } else if(isCacheCheckEnabled) {
             ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
             CachedLessonsSet cache = Cacher.getLessonsInFreshOrDeadCache(getIntervalToLoad(), extraCourses, true);
-            if (cache.wereSomeLessonsFoundInCache()) {
+            if (cache.isIntervalPartiallyOrFullyCached(interval)) {
                 if (cache.hasMissingIntervals()) {
                     //We found only some pieces. We still return these. To prevent the
                     //request from fetching same events multiple time or making it merge
@@ -91,6 +87,8 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
             //want to cache courses that are not actual.
             lessonsSet.removeLessonTypesNotInCurrentSemester();
 
+            onLessonsSetAvailable(lessonsSet);
+
             Cacher.cacheLessonsSet(lessonsSet, getIntervalToLoad());
 
             listener.onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
@@ -104,7 +102,11 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         }
     }
 
-    private void resendRequestIfNeeded(RequestSender sender) {
+    protected void onLessonsSetAvailable(LessonsSet lessonsSet) {
+        //Hook methods for elaborations
+    }
+
+    protected void resendRequestIfNeeded(RequestSender sender) {
         if (areRetrialsEnabled) {
             isRetrying = true;
             sender.processRequestAfterTimeout(this);

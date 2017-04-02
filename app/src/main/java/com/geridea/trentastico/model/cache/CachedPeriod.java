@@ -8,13 +8,17 @@ package com.geridea.trentastico.model.cache;
 import android.database.Cursor;
 
 import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
 
 public class CachedPeriod {
 
+    private static final int LESSON_TYPE_NONE = 0;
+
     private long id;
-    private long lesson_type = 0;
+    private long lesson_type = LESSON_TYPE_NONE;
     private long cached_in_ms;
 
     private WeekInterval period;
@@ -28,7 +32,7 @@ public class CachedPeriod {
 
     public CachedPeriod(WeekInterval interval) {
         this.id = -1;
-        this.lesson_type   = 0;
+        this.lesson_type   = LESSON_TYPE_NONE;
         this.period        = interval.copy();
         this.cached_in_ms  = System.currentTimeMillis();
     }
@@ -64,7 +68,7 @@ public class CachedPeriod {
         this.id = id;
     }
 
-    public WeekInterval getPeriod() {
+    public WeekInterval getInterval() {
         return period;
     }
 
@@ -85,7 +89,7 @@ public class CachedPeriod {
     }
 
     public CachedPeriod copy() {
-        return new CachedPeriod(-1, getPeriod(), lesson_type, cached_in_ms);
+        return new CachedPeriod(-1, getInterval(), lesson_type, cached_in_ms);
     }
 
     public boolean contains(WeekTime timeToCheck) {
@@ -95,5 +99,24 @@ public class CachedPeriod {
     @Override
     public String toString() {
         return "[id: "+id+" "+period+" type:"+lesson_type+"]";
+    }
+
+
+    public boolean isStudyCoursePeriod() {
+        return getLesson_type() == LESSON_TYPE_NONE;
+    }
+
+    public boolean isExtraCoursePeriod() {
+        return getLesson_type() != LESSON_TYPE_NONE;
+    }
+
+    public boolean canContainStudyLesson(LessonSchedule lesson) {
+        return getLesson_type() == LESSON_TYPE_NONE &&
+                getInterval().contains(lesson.getStartCal());
+    }
+
+    public boolean canContainExtraLesson(LessonSchedule lesson, ExtraCourse extraCourse) {
+        return lesson.getLessonTypeId() == extraCourse.getLessonTypeId() &&
+                getInterval().contains(lesson.getStartCal());
     }
 }

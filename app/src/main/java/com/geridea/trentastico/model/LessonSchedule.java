@@ -1,19 +1,25 @@
 package com.geridea.trentastico.model;
 
 import com.geridea.trentastico.model.cache.CachedLesson;
+import com.geridea.trentastico.network.request.LessonsDiffResult;
+import com.geridea.trentastico.utils.NumbersUtils;
 import com.geridea.trentastico.utils.StringUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LessonSchedule {
-    private final long id; //Seems to be an unique identifier
+public class LessonSchedule implements Serializable {
+    private final long id;
     private final String room;
     private final String subject;
     private final long startsAt;
@@ -47,6 +53,121 @@ public class LessonSchedule {
 
     }
 
+    public static LessonsDiffResult diffLessons(ArrayList<LessonSchedule> cachedLessons, ArrayList<LessonSchedule> fetchedLessons) {
+        LessonsDiffResult diffResult = new LessonsDiffResult();
+
+        sortByStartDateOrId(fetchedLessons);
+        sortByStartDateOrId(cachedLessons);
+
+        ArrayList<LessonSchedule> fetchedNotCachedLesson = new ArrayList<>(fetchedLessons);
+        for (LessonSchedule cached : cachedLessons) {
+
+            boolean cacheLessonFound = false;
+            for (LessonSchedule fetched : fetchedLessons) {
+                if (cached.getId() == fetched.getId()) {
+                    //We found the lesson
+                    fetchedNotCachedLesson.remove(fetched);
+
+                    if(!cached.isMeaningfullyEqualTo(fetched)){
+                        diffResult.addChangedLesson(cached, fetched);
+                    }
+
+                    cacheLessonFound = true;
+                    break;
+                }
+            }
+
+            if (!cacheLessonFound) {
+                diffResult.addRemovedLesson(cached);
+            }
+        }
+
+        for (LessonSchedule lessonNotInCache : fetchedNotCachedLesson) {
+            diffResult.addAddedLesson(lessonNotInCache);
+        }
+
+        return diffResult;
+
+        //TODO: check if to keep this code or not.
+//        int cachedI = 0, fetchedI = 0;
+//        int stop = Math.min(fetchedLessons.size(), cachedLessons.size());
+//        while(Math.max(cachedI, fetchedI) == stop){
+//            LessonSchedule cached  = cachedLessons .get(cachedI);
+//            LessonSchedule fetched = fetchedLessons.get(fetchedI);
+//
+//            if(cached.equals(fetched)){
+//                //This lesson did not change
+//                cachedI++;
+//                fetchedI++;
+//            } else if(cached.getId() == fetched.getId()) {
+//                //We've got the same event, but it has some details changed
+//                differenceListener.onStudyCourseLessonChanged(cached, fetched);
+//
+//                cachedI++;
+//                fetchedI++;
+//            } else {
+//                //The lessons differ, two things might have happened:
+//                //* A new lesson was added before the one that's equal to ours
+//                //* The lesson was removed
+//
+//                //Checking if our lessons still exists:
+//                boolean foundCachedLesson = false;
+//                int fetchedIWithId;
+//                for(fetchedIWithId = fetchedI+1;
+//                    fetchedIWithId<fetchedLessons.size() && !foundCachedLesson;
+//                    fetchedIWithId++){
+//
+//                    LessonSchedule futureFetched = fetchedLessons.get(fetchedIWithId);
+//                    if (cached.getId() == futureFetched.getId()) {
+//                        //We found our lesson some lessons away. This means that new lessons were
+//                        //inserted
+//                        foundCachedLesson = true;
+//                    }
+//                }
+//
+//                if (foundCachedLesson) {
+//                    //We found our cached lesson; all the lessons in between have to be considered
+//                    //new
+//                    for(int i = fetchedI+1; i<fetchedIWithId; i++){
+//                        differenceListener.onStudyLessonAdded(fetchedLessons.get(i));
+//                        fetchedI++;
+//                    }
+//
+//                    cachedI++;
+//                } else {
+//                    //We didn't find the missing lesson. This means that the lesson has been removed
+//                    differenceListener.onStudyLessonRemoved(cached);
+//                    cachedI++;
+//                }
+//
+//            }
+//        }
+//
+//        if(cachedI > fetchedLessons.size()){
+//            //We have some unprocessed cached lessons; these lessons have been removed
+//            for(; cachedI<cachedLessons.size(); cachedI++){
+//                differenceListener.onStudyLessonRemoved(cachedLessons.get(cachedI));
+//            }
+//        } else if(cachedI < fetchedLessons.size()) {
+//            //We have some lessons that were added after the cache
+//            for(; fetchedI<cachedLessons.size(); fetchedI++){
+//                differenceListener.onStudyLessonAdded(fetchedLessons.get(fetchedI));
+//            }
+//        }
+    }
+
+    private boolean isMeaningfullyEqualTo(LessonSchedule that) {
+        if (id         != that.id)         return false;
+        if (startsAt   != that.startsAt)   return false;
+        if (finishesAt != that.finishesAt) return false;
+        if (!room   .equals(that.room))    return false;
+        if (!subject.equals(that.subject)) return false;
+        return fullDescription.equals(that.fullDescription);
+    }
+
+    /**
+     * @return the unique identifier of the lesson
+     */
     public long getId() {
         return id;
     }
@@ -153,5 +274,51 @@ public class LessonSchedule {
         }
 
         return false;
+    }
+
+    public static void sortByStartDateOrId(ArrayList<LessonSchedule> lessons) {
+        Collections.sort(lessons, new Comparator<LessonSchedule>() {
+            @Override
+            public int compare(LessonSchedule a, LessonSchedule b) {
+                int compare = NumbersUtils.compare(a.getStartsAt(), b.getStartsAt());
+                if (compare == 0) {
+                    compare = NumbersUtils.compare(a.getId(), b.getId());
+                }
+
+                return compare;
+            }
+        });
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[id: %d lessonType: %d desctipion: %s ]", getId(), getLessonTypeId(), getFullDescription());
+    }
+
+    public int getDurationInMinutes() {
+        return (int) TimeUnit.MILLISECONDS.toMinutes(finishesAt - startsAt);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LessonSchedule that = (LessonSchedule) o;
+
+        if (id           != that.id)           return false;
+        if (startsAt     != that.startsAt)     return false;
+        if (finishesAt   != that.finishesAt)   return false;
+        if (color        != that.color)        return false;
+        if (lessonTypeId != that.lessonTypeId) return false;
+
+        if (!room   .equals(that.room))    return false;
+        if (!subject.equals(that.subject)) return false;
+        return fullDescription.equals(that.fullDescription);
+
+    }
+
+    public boolean startsBefore(long currentMillis) {
+        return getStartsAt() < currentMillis;
     }
 }

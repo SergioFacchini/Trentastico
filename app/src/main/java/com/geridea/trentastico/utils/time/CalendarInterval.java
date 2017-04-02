@@ -34,4 +34,12 @@ public class CalendarInterval {
     public Calendar getTo() {
         return to;
     }
+
+    public long getFromMs() {
+        return getFrom().getTimeInMillis();
+    }
+
+    public long getToMs(){
+        return getTo().getTimeInMillis();
+    }
 }

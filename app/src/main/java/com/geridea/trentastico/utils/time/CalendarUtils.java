@@ -19,6 +19,8 @@ public class CalendarUtils {
 
     private final static SimpleDateFormat formatDDMMYY = new SimpleDateFormat("dd MM yyyy", Locale.ITALIAN);
     private final static SimpleDateFormat formatTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN);
+    private final static SimpleDateFormat formatEEEEDDMMMM = new SimpleDateFormat("EEEE dd MMMM", Locale.ITALIAN);
+    private final static SimpleDateFormat formatHHMM = new SimpleDateFormat("HH:mm", Locale.ITALIAN);
 
     public static final Calendar TODAY = Calendar.getInstance();
 
@@ -82,11 +84,22 @@ public class CalendarUtils {
         return instance;
     }
 
+    /**
+     * @return yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     */
     public static String formatTimestamp(long millis) {
         return formatTimestamp.format(new Date(millis));
     }
 
     public static String formatCurrentTimestamp() {
         return formatTimestamp(System.currentTimeMillis());
+    }
+
+    public static String formatEEEEDDMMMM(long millis) {
+        return formatEEEEDDMMMM.format(new Date(millis));
+    }
+
+    public static String formatHHMM(long millis) {
+        return formatHHMM.format(new Date(millis));
     }
 }

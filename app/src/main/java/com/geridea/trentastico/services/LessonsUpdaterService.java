@@ -6,6 +6,7 @@ package com.geridea.trentastico.services;
  */
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.Job;
@@ -21,19 +23,23 @@ import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 import com.birbit.android.jobqueue.config.Configuration;
 import com.geridea.trentastico.Config;
-import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
+import com.geridea.trentastico.R;
+import com.geridea.trentastico.gui.activities.LessonsChangedActivity;
 import com.geridea.trentastico.logger.BugLogger;
-import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.LessonsLoadingListener;
 import com.geridea.trentastico.network.Networker;
+import com.geridea.trentastico.network.request.LessonsDiffResult;
+import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
+import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.ContextUtils;
 import com.geridea.trentastico.utils.UIUtils;
+import com.geridea.trentastico.utils.listeners.GenericListener1;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
+import com.threerings.signals.Listener2;
 import com.threerings.signals.Signal1;
+import com.threerings.signals.Signal2;
 
 import java.util.Calendar;
 
@@ -48,10 +54,12 @@ public class LessonsUpdaterService extends Service {
     public static final int STARTER_BOOT_BROADCAST = 2;
     public static final int STARTER_APP_START = 3;
     public static final int STARTER_ALARM_MANAGER = 4;
+    public static final int STARTER_DEBUGGER = 5;
 
     public static final int SCHEDULE_SLOW = 1;
     public static final int SCHEDULE_QUICK = 2;
     public static final int SCHEDULE_MISSING = 3;
+    public static final int NOTIFICATION_LESSONS_CHANGED_ID = 1000;
 
     private JobManager jobManager;
 
@@ -87,7 +95,7 @@ public class LessonsUpdaterService extends Service {
         if (updateAlreadyInProgress) {
             //The service is already started and it's doing something
             showToastIfInDebug("Update already in progress... ignoring update.");
-            return START_REDELIVER_INTENT;
+            return START_NOT_STICKY;
         } else {
             updateAlreadyInProgress = true;
 
@@ -96,17 +104,17 @@ public class LessonsUpdaterService extends Service {
                 showToastIfInDebug("Updating lessons because of internet refresh state...");
                 AppPreferences.hadInternetInLastCheck(true);
 
-                updateLessons(new LessonsUpdateListener() {
+                diffAndUpdateLessonsIfPossible(new LessonsDiffAndUpdateListener() {
                     @Override
-                    public void onLessonsUpdateTerminated(boolean successful) {
+                    public void onTerminated(boolean successful) {
                         scheduleNextStartAndTerminate(successful ? SCHEDULE_SLOW : SCHEDULE_QUICK);
                     }
                 });
-            } else if (shouldUpdateBecauseOfUpdateTimeout()) {
+            } else if (shouldUpdateBecauseOfUpdateTimeout() || startedAppInDebugMode(starter)) {
                 showToastIfInDebug("Checking for lessons updates...");
-                updateLessons(new LessonsUpdateListener() {
+                diffAndUpdateLessonsIfPossible(new LessonsDiffAndUpdateListener() {
                     @Override
-                    public void onLessonsUpdateTerminated(boolean successful) {
+                    public void onTerminated(boolean successful) {
                         scheduleNextStartAndTerminate(successful ? SCHEDULE_SLOW : SCHEDULE_QUICK);
                     }
                 });
@@ -116,7 +124,11 @@ public class LessonsUpdaterService extends Service {
             }
         }
 
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
+    }
+
+    private boolean startedAppInDebugMode(int starter) {
+        return (Config.DEBUG_MODE && starter == STARTER_APP_START) || (starter == STARTER_DEBUGGER);
     }
 
     private boolean shouldUpdateBecauseWeGainedInternet(int starter) {
@@ -144,6 +156,8 @@ public class LessonsUpdaterService extends Service {
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+        showToastIfInDebug("Scheduled alarm manager to "+CalendarUtils.formatTimestamp(calendar.getTimeInMillis()));
 
         stopSelf();
     }
@@ -188,133 +202,215 @@ public class LessonsUpdaterService extends Service {
         return intent;
     }
 
-    private void updateLessons(final LessonsUpdateListener listener) {
+    private void diffAndUpdateLessonsIfPossible(final LessonsDiffAndUpdateListener listener) {
         if (ContextUtils.weHaveInternet(this)) {
             if (AppPreferences.isStudyCourseSet()) {
-                UpdateLessonsJob job = new UpdateLessonsJob();
-                job.onCheckTerminated.connect(new Listener1<Boolean>() {
+                //The current and next week
+                final WeekInterval intervalToCheck = new WeekInterval(0, +1);
+
+                diffLessons(intervalToCheck).connect(new Listener2<LessonsDiffResult, Boolean>() {
                     @Override
-                    public void apply(Boolean isSuccessful) {
-                        if (isSuccessful) {
-                            showToastIfInDebug("Lesson update successful!");
+                    public void apply(LessonsDiffResult diffResult, final Boolean diffSuccessful) {
+                        if (diffResult.isEmpty()) {
+                            showToastIfInDebug("No lesson differences found.");
                         } else {
-                            showToastIfInDebug("Lesson update happened with error!");
+                            showLessonsChangedNotification(diffResult);
                         }
 
-                        listener.onLessonsUpdateTerminated(isSuccessful);
+                        //We've tracked all the updates. Now we have to fetch the eventually missing
+                        //schedules so we can be notified if they change in the future.
+                        loadMissingLesson(intervalToCheck).connect(new Listener1<Boolean>(){
+                            @Override
+                            public void apply(Boolean updateSuccessful) {
+                                listener.onTerminated(diffSuccessful && updateSuccessful);
+                            }
+                        });
                     }
                 });
-                jobManager.addJobInBackground(job);
             } else {
                 //The user has just run the app or reset it's settings. We currently do not have any
                 //study course to fetch lessons from, so we just re-plan the check to the next time.
-                listener.onLessonsUpdateTerminated(false);
+                listener.onTerminated(false);
             }
         } else {
             showToastIfInDebug("No internet. Cannot check for updates.");
             AppPreferences.hadInternetInLastCheck(false);
-            listener.onLessonsUpdateTerminated(false);
+            listener.onTerminated(false);
         }
+    }
+
+    private void showLessonsChangedNotification(LessonsDiffResult diffResult) {
+        int numDifferences = diffResult.getNumTotalDifferences();
+
+        String message = "È cambiato l'orario di una lezione!";
+        if (numDifferences > 1) {
+            message = "Sono cambiati gli orari di "+numDifferences+" lezioni!";
+        }
+
+
+        NotificationCompat.Builder notificationBuilder =
+            new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setContentTitle(message)
+                    .setContentText("Premi qui per i dettagli")
+                    .setColor(getResources().getColor(R.color.colorPrimary))
+                    .setAutoCancel(true);
+
+
+        Intent intent = new Intent(this, LessonsChangedActivity.class);
+        intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult);
+
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, notificationBuilder.build());
+    }
+
+    private Signal1<Boolean> loadMissingLesson(WeekInterval intervalToCheck) {
+        LoadMissingLessonsJob job = new LoadMissingLessonsJob(intervalToCheck);
+        jobManager.addJobInBackground(job);
+        return job.onCheckTerminated;
+    }
+
+    private Signal2<LessonsDiffResult, Boolean> diffLessons(WeekInterval intervalToDiff) {
+        DiffLessonsJob job = new DiffLessonsJob(intervalToDiff);
+        jobManager.addJobInBackground(job);
+        return job.onCheckTerminated;
     }
 
     private void showToastOnMainThread(final String message) {
         UIUtils.runOnMainThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(LessonsUpdaterService.this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(LessonsUpdaterService.this, message, Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private class UpdateLessonsJob extends Job implements LessonsLoadingListener {
+    private class DiffLessonsJob extends Job implements LessonsDifferenceListener {
 
-        final Signal1<Boolean> onCheckTerminated = new Signal1<>();
+        final Signal2<LessonsDiffResult, Boolean> onCheckTerminated = new Signal2<>();
+
+        private final WeekInterval intervalToDiff;
+        private final LessonsDiffResult diffAccumulator;
 
         private int numRequestsSent, numRequestsSucceeded, numRequestsFailed;
 
-        UpdateLessonsJob() {
+        DiffLessonsJob(WeekInterval intervalToDiff) {
             super(new Params(1));
 
-            numRequestsSent = 0;
-            numRequestsSucceeded = 0;
-            numRequestsFailed = 0;
-        }
+            this.numRequestsSent = 0;
+            this.numRequestsSucceeded = 0;
+            this.numRequestsFailed = 0;
 
-        @Override
-        public void onAdded() {
+            this.intervalToDiff = intervalToDiff;
+
+            this.diffAccumulator = new LessonsDiffResult();
         }
 
         @Override
         public void onRun() throws Throwable {
-
             //Loading the current and the next week
-            Networker.refreshLessonsCache(new WeekInterval(0, +1), this);
-        }
-
-        @Override
-        protected void onCancel(int cancelReason, @Nullable Throwable throwable) {
+            Networker.diffLessonsInCache(intervalToDiff, this);
         }
 
         @Override
         protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
+            BugLogger.logBug();
+            filterDiffAndDispatchCheckTerminated(false);
             return RetryConstraint.CANCEL;
         }
 
-        ////////////////
-        //Listener stuff
-
         @Override
-        public void onLoadingAboutToStart(ILoadingMessage operation) {
-            numRequestsSent++;
-        }
-
-        @Override
-        public void onLessonsLoaded(LessonsSet lessonsSet, WeekInterval interval, int operationId) {
+        public void onRequestCompleted() {
             numRequestsSucceeded++;
             checkIfWeHaveFinished();
         }
 
         @Override
-        public void onErrorHappened(Exception error, int operationId) {
-            //Managed in onLoadingAborted
-        }
-
-        @Override
-        public void onParsingErrorHappened(Exception exception, int operationId) {
-            //Managed in onLoadingAborted
-        }
-
-        @Override
-        public void onLoadingDelegated(int operationId) {
-            //Should never happen since we do not manage loading from cache
-            BugLogger.logBug();
-        }
-
-        @Override
-        public void onPartiallyCachedResultsFetched(CachedLessonsSet lessonsSet) {
-            //Should never happen since we do not manage loading from cache
-            BugLogger.logBug();
-        }
-
-        @Override
-        public void onLoadingAborted(int operationId) {
+        public void onLoadingError() {
             numRequestsFailed++;
             checkIfWeHaveFinished();
         }
 
-        private void checkIfWeHaveFinished() {
-            if (numRequestsSent == (numRequestsSucceeded + numRequestsFailed)) {
-                if (numRequestsSent == numRequestsSucceeded) {
-                    onCheckTerminated.dispatch(true);
-                } else {
-                    onCheckTerminated.dispatch(false);
-                }
+        @Override
+        public void onNumberOfRequestToSendKnown(int numRequests) {
+            numRequestsSent = numRequests;
+        }
+
+        public void checkIfWeHaveFinished() {
+            if(numRequestsSent == numRequestsFailed + numRequestsSucceeded){
+                boolean allSucceeded = numRequestsSent == numRequestsSucceeded;
+                filterDiffAndDispatchCheckTerminated(allSucceeded);
             }
         }
 
+        private void filterDiffAndDispatchCheckTerminated(boolean allSucceeded) {
+            diffAccumulator.discardPastLessons();
+            onCheckTerminated.dispatch(diffAccumulator, allSucceeded);
+        }
+
+        @Override
+        public void onNoLessonsInCache() {
+            //Nothing to diff!
+            filterDiffAndDispatchCheckTerminated(false);
+        }
+
+        @Override
+        public void onDiffResult(LessonsDiffResult lessonsDiffResult) {
+            diffAccumulator.addFrom(lessonsDiffResult);
+        }
+
+        @Override
+        protected void onCancel(int cancelReason, @Nullable Throwable throwable) { }
+
+        @Override
+        public void onAdded() { }
     }
 
-    private interface LessonsUpdateListener {
-        void onLessonsUpdateTerminated(boolean successful);
+    private class LoadMissingLessonsJob extends Job {
+
+        final Signal1<Boolean> onCheckTerminated = new Signal1<>();
+
+        private WeekInterval intervalToLoad;
+
+        public LoadMissingLessonsJob(WeekInterval intervalToLoad) {
+            super(new Params(1));
+
+            this.intervalToLoad = intervalToLoad;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            Networker.loadAndCacheNotCachedLessons(intervalToLoad,
+                    new WaitForDownloadLessonListener(new GenericListener1<Boolean>() {
+
+                @Override
+                public void onFinish(Boolean success) {
+                    onCheckTerminated.dispatch(success);
+                }
+            }));
+        }
+
+        @Override
+        protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
+            BugLogger.logBug();
+            onCheckTerminated.dispatch(false);
+            return RetryConstraint.CANCEL;
+        }
+
+        @Override
+        public void onAdded() { }
+
+        @Override
+        protected void onCancel(int cancelReason, @Nullable Throwable throwable) { }
+    }
+
+    private interface LessonsDiffAndUpdateListener {
+        void onTerminated(boolean successful);
     }
 }

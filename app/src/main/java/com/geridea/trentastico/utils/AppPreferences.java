@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.model.StudyCourse;
@@ -163,8 +164,8 @@ public class AppPreferences {
         putString("PARTITIONINGS_TO_HIDE", "{}");
     }
 
-    public static ArrayList<ExtraCourse> getExtraCourses() {
-        ArrayList<ExtraCourse> courses = new ArrayList<>();
+    public static ExtraCoursesList getExtraCourses() {
+        ExtraCoursesList courses = new ExtraCoursesList();
 
         try {
             JSONArray jsonArray = new JSONArray(get().getString("EXTRA_COURSES", "[]"));

@@ -17,6 +17,11 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="Cambia corso di studi" />
 
+        <item
+            android:id="@+id/update_courses"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Aggiorna corsi" />
+
     </group>
 
     <item android:title="Altro">

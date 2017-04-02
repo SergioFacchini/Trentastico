@@ -28,7 +28,7 @@ import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.ListLessonsListener;
+import com.geridea.trentastico.network.request.listener.ListLessonsListener;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener0;

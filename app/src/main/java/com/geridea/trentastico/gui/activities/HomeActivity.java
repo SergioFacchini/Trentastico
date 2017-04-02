@@ -1,5 +1,6 @@
 package com.geridea.trentastico.gui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -19,6 +20,7 @@ import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
+import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.threerings.signals.Listener0;
 
 import butterknife.BindView;
@@ -119,6 +121,8 @@ public class HomeActivity extends AppCompatActivity
             Cacher.obliterateCache();
             Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
             switchToCalendarFragment();
+        } else if(id == R.id.update_courses){
+            startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
         }
 
         drawer.closeDrawer(GravityCompat.START);

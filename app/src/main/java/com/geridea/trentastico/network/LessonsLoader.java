@@ -1,6 +1,6 @@
 package com.geridea.trentastico.network;
 
-import com.geridea.trentastico.database.NotCachedInterval;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.gui.views.ScrollDirection;
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
 import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage;
@@ -10,6 +10,7 @@ import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.operations.NetworkErrorMessage;
 import com.geridea.trentastico.network.operations.ParsingErrorMessage;
+import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;

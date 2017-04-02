@@ -16,6 +16,9 @@ public final class Config {
      * How much ms we should wait after a request has failed loading and the next retry?
      */
     public static final int WAITING_TIME_AFTER_A_REQUEST_FAILED = 5000;
+    public static final boolean LAUNCH_REQUESTS_TO_DEBUG_SERVER = true;
+
+    public static final String DEBUG_SERVER_URL = "http://ideagenesi.com/trentastico/lessons.json";
 
     //Database
     public static final String DATABASE_NAME = "data.db";

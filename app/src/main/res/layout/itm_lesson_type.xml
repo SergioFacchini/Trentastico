@@ -14,12 +14,9 @@
 
         <ImageView
             android:id="@+id/color"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
             android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:background="#FF0000"
-            android:contentDescription="Colore corso" />
+            android:contentDescription="Colore corso"
+            style="@style/CourseColor" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -36,8 +33,7 @@
                 android:layout_toLeftOf="@+id/color"
                 android:gravity="center_vertical|left"
                 android:text="text"
-                android:textColor="#FFFFFFFF"
-                android:textSize="18sp" />
+                style="@style/TextForegroundMedium" />
 
             <TextView
                 android:id="@+id/course_already_selected"
@@ -48,7 +44,7 @@
                 android:gravity="center_vertical|left"
                 android:text="Stai già seguendo questo corso!"
                 android:textColor="@color/colorAccent"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
