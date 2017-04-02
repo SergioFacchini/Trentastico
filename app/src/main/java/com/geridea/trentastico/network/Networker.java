@@ -7,15 +7,18 @@ package com.geridea.trentastico.network;
 import android.support.annotation.Nullable;
 
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.database.NotCachedInterval;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.model.cache.CachedInterval;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.request.ExtraLessonsRequest;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.IRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
-import com.geridea.trentastico.network.request.StudyCourseLessonsRequest;
+import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
+import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
+import com.geridea.trentastico.network.request.listener.ListLessonsListener;
+import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
@@ -50,23 +53,35 @@ public class Networker {
         return cacheSet.getMissingIntervals();
     }
 
-    public static void refreshLessonsCache(WeekInterval interval, LessonsLoadingListener listener) {
-        StudyCourse studyCourse = AppPreferences.getStudyCourse();
-        StudyCourseLessonsRequest courseRequest = new StudyCourseLessonsRequest(interval, studyCourse, listener);
-        courseRequest.setCacheCheckEnabled(false);
-        courseRequest.setRetrialsEnabled(false);
+    public static void diffLessonsInCache(WeekInterval intervalToCheck, LessonsDifferenceListener listener) {
+        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
+        CachedLessonsSet cacheSet = Cacher.getLessonsInFreshOrDeadCache(intervalToCheck, extraCourses, false);
 
-        processRequest(courseRequest);
+        if(cacheSet.isIntervalPartiallyOrFullyCached(intervalToCheck)){
+            ArrayList<CachedInterval> cachedIntervals = cacheSet.getCachedIntervals();
 
-        for (ExtraCourse extraCourse : AppPreferences.getExtraCourses()) {
-            ExtraLessonsRequest request = new ExtraLessonsRequest(interval, extraCourse, listener);
-            request.setCacheCheckEnabled(false);
-            request.setRetrialsEnabled(false);
+            listener.onNumberOfRequestToSendKnown(cachedIntervals.size());
 
-            processRequest(request);
+            for (CachedInterval cachedInterval: cachedIntervals) {
+                processRequest(cachedInterval.generateDiffRequest(listener));
+            }
+        } else {
+            listener.onNoLessonsInCache();
         }
     }
 
+    public static void loadAndCacheNotCachedLessons(WeekInterval interval, WaitForDownloadLessonListener listener) {
+        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
+        ArrayList<NotCachedInterval> notCachedIntervals = Cacher.getNotCachedSubintervals(interval, extraCourses);
+        for (NotCachedInterval notCachedInterval : notCachedIntervals) {
+            processRequest(notCachedInterval.generateOneTimeRequest(listener));
+        }
+
+        if (notCachedIntervals.isEmpty()) {
+            listener.onNothingToLoad();
+        }
+
+    }
 
     private static void loadInterval(NotCachedInterval interval, LessonsLoadingListener listener) {
         processRequest(interval.generateRequest(listener));

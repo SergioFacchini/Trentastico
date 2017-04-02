@@ -72,6 +72,10 @@ public class WeekInterval {
             || (start.before(day) && end.after(day));
     }
 
+    public boolean contains(Calendar calendar) {
+        return contains(new WeekDayTime(calendar));
+    }
+
     public boolean contains(WeekTime time) {
         return start.beforeOrEqual(time) && end.after(time);
     }
@@ -193,10 +197,10 @@ public class WeekInterval {
         return "["+start+" - "+end+"]";
     }
 
+
     public int getStartWeekNumber() {
         return start.getWeekNumber();
     }
-
 
     public int getStartYear() {
         return start.getYear();
@@ -208,5 +212,21 @@ public class WeekInterval {
 
     public int getEndYear() {
         return end.getYear();
+    }
+
+    /**
+     * @return true if this interval has at least one week in common with the interval passes as
+     * parameter
+     */
+    public boolean overlaps(WeekInterval intervalToCheck) {
+        return equals(intervalToCheck) || cutFromInterval(intervalToCheck).hasAnyRemainingResult();
+    }
+
+    public boolean spansMultipleYears() {
+        return getStartYear() != getEndYear();
+    }
+
+    public WeekInterval intersect(WeekInterval interval) {
+        return cutFromInterval(interval).getCutInterval();
     }
 }

@@ -34,7 +34,7 @@ public class WelcomeActivity extends AppCompatActivity {
         AppPreferences.setStudyCourse(courseSelector.getSelectedStudyCourse());
         AppPreferences.setIsFirstRun(false);
 
-        startActivity(new Intent(WelcomeActivity.this, HomeActivity.class));
+        startActivity(new Intent(this, HomeActivity.class));
 
         finish();
     }

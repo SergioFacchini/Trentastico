@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.model.StudyCourse;
@@ -34,11 +35,8 @@ public class AppPreferences {
     }
 
     public static void setIsFirstRun(boolean isFirstRun) {
-        SharedPreferences.Editor editor = get().edit();
-        editor.putBoolean("IS_FIRST_RUN", isFirstRun);
-        editor.apply();
+        putBoolean("IS_FIRST_RUN", isFirstRun);
     }
-
 
     /**
      * @return true if tis the first time the application is run
@@ -86,9 +84,7 @@ public class AppPreferences {
             array.put(teachingId);
         }
 
-        SharedPreferences.Editor editor = get().edit();
-        editor.putString("FILTERED_TEACHINGS", array.toString());
-        editor.apply();
+        putString(array.toString(), "FILTERED_TEACHINGS");
     }
 
     public static boolean hasLessonTypeWithIdHidden(int id) {
@@ -100,8 +96,12 @@ public class AppPreferences {
     }
 
     public static void setCalendarNumOfDaysToShow(int numOfDays) {
+        putInt(numOfDays, "CALENDAR_NUM_OF_DAYS_TO_SHOW");
+    }
+
+    private static void putInt(int numOfDays, String key) {
         SharedPreferences.Editor editor = get().edit();
-        editor.putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays);
+        editor.putInt(key, numOfDays);
         editor.apply();
     }
 
@@ -121,9 +121,7 @@ public class AppPreferences {
             JSONObject partitioningJSON = getPartitioningsJSON();
             partitioningJSON.put(String.valueOf(lessonTypeId), jsonArrayCases);
 
-            SharedPreferences.Editor editor = get().edit();
-            editor.putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString());
-            editor.apply();
+            putString(partitioningJSON.toString(), "PARTITIONINGS_TO_HIDE");
         } catch (JSONException e) {
             BugLogger.logBug();
             e.printStackTrace();
@@ -163,13 +161,11 @@ public class AppPreferences {
     }
 
     public static void removeAllHiddenPartitionings() {
-        SharedPreferences.Editor editor = get().edit();
-        editor.putString("PARTITIONINGS_TO_HIDE", "{}");
-        editor.apply();
+        putString("{}", "PARTITIONINGS_TO_HIDE");
     }
 
-    public static ArrayList<ExtraCourse> getExtraCourses() {
-        ArrayList<ExtraCourse> courses = new ArrayList<>();
+    public static ExtraCoursesList getExtraCourses() {
+        ExtraCoursesList courses = new ExtraCoursesList();
 
         try {
             JSONArray jsonArray = new JSONArray(get().getString("EXTRA_COURSES", "[]"));
@@ -200,8 +196,12 @@ public class AppPreferences {
     }
 
     private static void saveExtraCourseJson(JSONArray value) {
+        putString(value.toString(), "EXTRA_COURSES");
+    }
+
+    private static void putString(String value, String key) {
         SharedPreferences.Editor editor = get().edit();
-        editor.putString("EXTRA_COURSES", value.toString());
+        editor.putString(key, value);
         editor.apply();
     }
 
@@ -253,13 +253,47 @@ public class AppPreferences {
                get().getInt( "STUDY_YEAR",       0) != 0;
     }
 
-    public static void setLastLessonsUpdateTime(long time) {
+    public static void setNextLessonsUpdateTime(long time) {
+        putLong("NEXT_LESSONS_UPDATE_TIME", time);
+    }
+
+    private static void putLong(String key, long time) {
         SharedPreferences.Editor editor = get().edit();
-        editor.putLong("LAST_LESSONS_UPDATE_TIME", time);
+        editor.putLong(key, time);
         editor.apply();
     }
 
-    public static long getLastLessonsUpdateTime() {
-        return get().getLong("LAST_LESSONS_UPDATE_TIME", 0);
+    public static long getNextLessonsUpdateTime() {
+        return get().getLong("NEXT_LESSONS_UPDATE_TIME", 0);
+    }
+
+    public static boolean hadInternetInLastCheck() {
+        return get().getBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", true);
+    }
+
+    public static void hadInternetInLastCheck(boolean had) {
+        putBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", had);
+    }
+
+    private static void putBoolean(String key, boolean bool) {
+        SharedPreferences.Editor editor = get().edit();
+        editor.putBoolean(key, bool);
+        editor.apply();
+    }
+
+    public static boolean isSearchForLessonChangesEnabled() {
+        return get().getBoolean("SEARCH_LESSON_CHANGES", true);
+    }
+
+    public static void setSearchForLessonChangesEnabled(boolean enabled) {
+        putBoolean("SEARCH_LESSON_CHANGES", enabled);
+    }
+
+    public static boolean isNotificationForLessonChangesEnabled() {
+        return get().getBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true);
+    }
+
+    public static void setNotificationForLessonChangesEnabled(boolean enabled) {
+        putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled);
     }
 }

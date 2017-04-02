@@ -10,15 +10,17 @@ import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.LessonsLoadingListener;
+import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.network.operations.ExtraCoursesLoadingMessage;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 public class ExtraLessonsRequest extends BasicLessonsRequest {
 
     private final WeekInterval interval;
-    private final LessonsLoadingListener listener;
     private final ExtraCourse extraCourse;
+
+    protected LessonsLoadingListener listener;
+
     private boolean isRetrying;
     private boolean cacheCheckEnabled;
     private boolean retrialsEnabled;
@@ -44,6 +46,8 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
             LessonsSet lessonsSet = parseResponse(response);
             lessonsSet.prepareForExtraCourse(extraCourse);
 
+            onLessonsSetAvailable(lessonsSet);
+
             Cacher.cacheExtraLessonsSet(lessonsSet, getIntervalToLoad(), extraCourse);
 
             listener.onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
@@ -55,6 +59,10 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
 
             resendRequestIfNeeded(sender);
         }
+    }
+
+    protected void onLessonsSetAvailable(LessonsSet lessonsSet) {
+        //hook method for further computations
     }
 
     private void resendRequestIfNeeded(RequestSender sender) {

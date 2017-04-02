@@ -25,10 +25,10 @@ public class WeekTime {
     }
 
     public WeekTime(long milliseconds) {
-        Calendar dummy = CalendarUtils.getClearCalendar();
-        dummy.setTimeInMillis(milliseconds);
+        Calendar calendar = CalendarUtils.getClearCalendar();
+        calendar.setTimeInMillis(milliseconds);
 
-        initFromCalendar(dummy);
+        initFromCalendar(calendar);
     }
 
     public WeekTime(WeekDayTime weekDayTime) {

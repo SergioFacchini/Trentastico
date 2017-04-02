@@ -40,6 +40,10 @@ public class WeekIntervalCutResult {
         return cutInterval;
     }
 
+    /**
+     * @return false if the the entire interval has been cut (the weeks of the cut interval were a
+     * subset of the weeks of the cutter), true otherwise.
+     */
     public boolean hasAnyRemainingResult() {
         return firstRemaining != null || secondRemaining != null;
     }

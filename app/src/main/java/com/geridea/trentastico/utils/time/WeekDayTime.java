@@ -19,7 +19,11 @@ public class WeekDayTime {
     }
 
     public WeekDayTime(Calendar calendar) {
-        this(calendar.get(Calendar.YEAR), calendar.get(Calendar.WEEK_OF_YEAR), calendar.get(Calendar.DAY_OF_WEEK));
+        this(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.WEEK_OF_YEAR),
+            calendar.get(Calendar.DAY_OF_WEEK)
+        );
     }
 
     public int getYear() {

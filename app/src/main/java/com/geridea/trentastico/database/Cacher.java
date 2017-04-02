@@ -16,11 +16,19 @@ import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
+import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLesson;
 import com.geridea.trentastico.model.cache.CachedLessonType;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.CachedPeriod;
+import com.geridea.trentastico.model.cache.ExtraCourseCachedInterval;
+import com.geridea.trentastico.model.cache.ExtraCourseNotCachedInterval;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
+import com.geridea.trentastico.model.cache.StudyCourseCachedInterval;
+import com.geridea.trentastico.model.cache.StudyCourseNotCachedInterval;
+import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.StringUtils;
+import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekIntervalCutResult;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -199,7 +207,7 @@ public class Cacher {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
         for (CachedPeriod period: loadExtraCourseCachePeriods(interval, true, extraCourse.getLessonTypeId())) {
-            WeekIntervalCutResult cutResult = period.getPeriod().cutFromInterval(interval);
+            WeekIntervalCutResult cutResult = period.getInterval().cutFromInterval(interval);
 
             if(!cutResult.hasAnyRemainingResult()){
                 deleteCachedPeriodWithId(period.getId());
@@ -219,7 +227,7 @@ public class Cacher {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
         for (CachedPeriod period: loadStudyCourseCachePeriods(interval, true)) {
-            WeekIntervalCutResult cutResult = period.getPeriod().cutFromInterval(interval);
+            WeekIntervalCutResult cutResult = period.getInterval().cutFromInterval(interval);
 
             if(!cutResult.hasAnyRemainingResult()){
                 deleteCachedPeriodWithId(period.getId());
@@ -250,7 +258,7 @@ public class Cacher {
         newPeriod.setPeriod(cutResult.getSecondRemaining());
         insertCachedPeriod(newPeriod);
 
-        associateCachedLessonsToAnotherPeriod(originalPeriod.getId(), newPeriod.getId(), newPeriod.getPeriod());
+        associateCachedLessonsToAnotherPeriod(originalPeriod.getId(), newPeriod.getId(), newPeriod.getInterval());
     }
 
     private static void associateCachedLessonsToAnotherPeriod(long originalPeriodId, long newPeriodId, WeekInterval periodToMove) {
@@ -303,10 +311,10 @@ public class Cacher {
     @NonNull
     private static ContentValues getCachedPeriodContentValues(CachedPeriod period) {
         ContentValues values = new ContentValues();
-        values.put(CP_START_WEEK,   period.getPeriod().getStartWeekNumber());
-        values.put(CP_START_YEAR,   period.getPeriod().getStartYear());
-        values.put(CP_END_WEEK,     period.getPeriod().getEndWeekNumber());
-        values.put(CP_END_YEAR,     period.getPeriod().getEndYear());
+        values.put(CP_START_WEEK,   period.getInterval().getStartWeekNumber());
+        values.put(CP_START_YEAR,   period.getInterval().getStartYear());
+        values.put(CP_END_WEEK,     period.getInterval().getEndWeekNumber());
+        values.put(CP_END_YEAR,     period.getInterval().getEndYear());
         values.put(CP_LESSON_TYPE,  period.getLesson_type());
         values.put(CP_CACHED_IN_MS, period.getCached_in_ms());
         return values;
@@ -348,16 +356,31 @@ public class Cacher {
         deleteCourseLessonsInIntervalInternal(periodId, null, lessonTypeId);
     }
 
+    /**
+     * WARNING: this method can load periods that are bigger than the requested one, but never
+     * smaller. These periods might contain lessons that are not requested and have to be filtered
+     * out.
+     */
     private static ArrayList<CachedPeriod> loadStudyCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
         return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, 0);
     }
 
+    /**
+     * WARNING: this method can load periods that are bigger than the requested one, but never
+     * smaller. These periods might contain lessons that are not requested and have to be filtered
+     * out.
+     */
     private static ArrayList<CachedPeriod> loadExtraCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo, int lessonTypeId) {
         return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, lessonTypeId);
     }
 
+    /**
+     * WARNING: this method can load periods that are bigger than the requested one, but never
+     * smaller. These periods might contain lessons that are not requested and have to be filtered
+     * out.
+     */
     @NonNull
-    private static ArrayList<CachedPeriod> loadCachePeriodsInternal(WeekInterval intervalToLoad, boolean fetchOldCacheToo, int lessonTypeId) {
+    private static ArrayList<CachedPeriod> loadCachePeriodsInternal(WeekInterval interval, boolean fetchOldCacheToo, int lessonTypeId) {
         String[] projection = {
                 CP_ID,
                 CP_START_WEEK,
@@ -368,8 +391,22 @@ public class Cacher {
                 CP_CACHED_IN_MS
         };
 
-        String sqlCachePeriods = buildCachePeriodSelectionForInterval(intervalToLoad);
-        String selection = String.format("(%s) AND %s = %d ", sqlCachePeriods, CP_LESSON_TYPE, lessonTypeId);
+        String query;
+        if(interval.spansMultipleYears()){
+            //Note: che cached interval might never span more than two different year.
+            //Note 2: this method does not considers the cases when the interval that starts in the
+            //previous starts before the start of the interval. This is such a rare case, I don't
+            //want to fix this
+            query = buildCachePeriodSelectionForInterval(interval);
+        } else {
+            query = String.format(Locale.UK,
+                " %s <= %d AND %s = %d AND %s >=%d AND %s = %d ",
+                    CP_START_WEEK, interval.getStartWeekNumber(), CP_START_YEAR, interval.getStartYear(),
+                    CP_END_WEEK  , interval.getEndWeekNumber()  , CP_END_YEAR,   interval.getEndYear()
+            );
+        }
+
+        String selection = String.format("%s AND %s = %d ", query, CP_LESSON_TYPE, lessonTypeId);
         if(!fetchOldCacheToo){
             selection += String.format(
                     " AND (%s >= %d AND %s < %d) ",
@@ -431,10 +468,16 @@ public class Cacher {
         lessonsSet.addCachedLessonTypes(loadLessonTypes(true, false));
 
         //Study course cached periods
+        StudyCourse studyCourse = AppPreferences.getStudyCourse();
         ArrayList<CachedPeriod> studyCoursePeriods = loadStudyCourseCachePeriods(intervalToLoad, fetchOldCacheToo);
         for (CachedPeriod cachedPeriod : studyCoursePeriods) {
-            lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod));
-            lessonsSet.addCachedPeriod(cachedPeriod);
+            ArrayList<LessonSchedule> lessons = loadLessonsOfCachePeriod(cachedPeriod, intervalToLoad);
+            lessonsSet.addLessonSchedules(lessons);
+
+            //Here we load an intersection of the cached period and the interval we wanted to load,
+            //not the whole cached period
+            WeekInterval cachedPeriodIntersection = intervalToLoad.intersect(cachedPeriod.getInterval());
+            lessonsSet.addCachedPeriod(new StudyCourseCachedInterval(cachedPeriodIntersection, studyCourse, lessons));
         }
 
         //Missing study course intervals
@@ -455,8 +498,11 @@ public class Cacher {
 
             //Adding to lessons' set what's cached
             for (CachedPeriod cachedPeriod: extraPeriods) {
-                lessonsSet.addLessonSchedules(loadLessonsOfCachePeriod(cachedPeriod));
-                lessonsSet.addCachedPeriod(cachedPeriod);
+                ArrayList<LessonSchedule> cachedLessons = loadLessonsOfCachePeriod(cachedPeriod, intervalToLoad);
+                lessonsSet.addLessonSchedules(cachedLessons);
+
+                WeekInterval cachedPeriodIntersection = intervalToLoad.intersect(cachedPeriod.getInterval());
+                lessonsSet.addCachedPeriod(new ExtraCourseCachedInterval(cachedPeriodIntersection, extraCourse, cachedLessons));
             }
 
             //Finding not cached extra intervals
@@ -492,10 +538,10 @@ public class Cacher {
         return notCachedIntervals;
     }
 
-    private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod) {
+    private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod, WeekInterval intervalToLoad) {
         ArrayList<LessonSchedule> lessons = new ArrayList<>();
 
-        for (CachedLesson cachedLesson : loadCachedLessons(cachePeriod)) {
+        for (CachedLesson cachedLesson : loadCachedLessonsIntersectingInterval(cachePeriod, intervalToLoad)) {
             lessons.add(new LessonSchedule(cachedLesson));
         }
 
@@ -584,7 +630,7 @@ public class Cacher {
         return periods;
     }
 
-    private static ArrayList<CachedLesson> loadCachedLessons(CachedPeriod cachedPeriod) {
+    private static ArrayList<CachedLesson> loadCachedLessonsIntersectingInterval(CachedPeriod cachedPeriod, WeekInterval interval) {
         String[] projection = {
                 CL_CACHED_PERIOD_ID,
                 CL_LESSON_ID,
@@ -599,19 +645,26 @@ public class Cacher {
                 CL_COLOR
         };
 
+        CalendarInterval intervalToIntersect = interval.toCalendarInterval();
+
         String selection;
         String[] selectionArgs;
-
         if (cachedPeriod.getLesson_type() == 0) {
-            selection =  CL_CACHED_PERIOD_ID+" = ? ";
+            selection =  CL_CACHED_PERIOD_ID+" = ? " +
+                    "AND "+CL_STARTS_AT_MS+" >= ? AND "+CL_FINISHES_AT_MS+" <= ?";
             selectionArgs = new String[]{
-                    String.valueOf(cachedPeriod.getId())
+                    String.valueOf(cachedPeriod.getId()),
+                    String.valueOf(intervalToIntersect.getFromMs()),
+                    String.valueOf(intervalToIntersect.getToMs()),
             };
         } else { //it's an extra course: we load only it's lessons
-            selection =  CL_CACHED_PERIOD_ID+" = ? AND "+ CL_TEACHING_ID+" = ?";
+            selection =  CL_CACHED_PERIOD_ID+" = ? AND "+ CL_TEACHING_ID+" = ? " +
+                    "AND "+CL_STARTS_AT_MS+" >= ? AND "+CL_FINISHES_AT_MS+" <= ?";
             selectionArgs = new String[]{
                 String.valueOf(cachedPeriod.getId()),
                 String.valueOf(cachedPeriod.getLesson_type()),
+                String.valueOf(intervalToIntersect.getFromMs()),
+                String.valueOf(intervalToIntersect.getToMs())
             };
         }
 
@@ -688,5 +741,12 @@ public class Cacher {
         writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
         writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
         writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
+    }
+
+    public static ArrayList<NotCachedInterval> getNotCachedSubintervals(
+            WeekInterval interval, ArrayList<ExtraCourse> courses) {
+
+        //Well, this function could become more performant one day
+        return getLessonsInFreshOrDeadCache(interval, courses, false).getMissingIntervals();
     }
 }

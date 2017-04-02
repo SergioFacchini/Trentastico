@@ -7,6 +7,7 @@ package com.geridea.trentastico.network.request;
 
 import android.support.annotation.NonNull;
 
+import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
@@ -41,6 +42,10 @@ abstract class BasicLessonsRequest implements IRequest {
     
     protected static String buildRequestURL(StudyCourse studyCourse, WeekInterval intervalToLoad) {
         CalendarInterval interval = intervalToLoad.toCalendarInterval();
+
+        if(Config.DEBUG_MODE && Config.LAUNCH_REQUESTS_TO_DEBUG_SERVER){
+            return Config.DEBUG_SERVER_URL;
+        }
 
         return String.format(
                 Locale.CANADA,

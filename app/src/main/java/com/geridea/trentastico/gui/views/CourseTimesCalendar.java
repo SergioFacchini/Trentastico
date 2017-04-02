@@ -214,7 +214,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     public void run() {
                         currentlyShownLessonsSet.mergeWith(lessonsSet);
 
-                        ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedIntervals();
+                        ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedWeekIntervals();
                         addEnabledIntervals(cachedIntervals);
 
                         addEventsFromLessonsSet(lessonsSet);

@@ -19,7 +19,7 @@ import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
-import com.threerings.signals.Listener0;
+import com.geridea.trentastico.services.LessonsUpdaterService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -103,22 +103,15 @@ public class HomeActivity extends AppCompatActivity
         if(id == R.id.menu_timetables){
             switchToCalendarFragment();
         } else if(id == R.id.menu_settings) {
-            SettingsFragment settingsFragment = new SettingsFragment();
-            settingsFragment.onChoiceMade.connect(new Listener0() {
-                @Override
-                public void apply() {
-                    //The user might have changed his/ser courses or not. However he/she will have
-                    //to return to the calendar fragment
-                    switchToCalendarFragment();
-                }
-            });
-            setCurrentFragment(settingsFragment);
+            setCurrentFragment(new SettingsFragment());
         } else if(id == R.id.menu_extra_times) {
             setCurrentFragment(new ExtraLessonsFragment());
         } else if(id == R.id.menu_about){
             Cacher.obliterateCache();
             Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
             switchToCalendarFragment();
+        } else if(id == R.id.update_courses){
+            startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
         }
 
         drawer.closeDrawer(GravityCompat.START);
