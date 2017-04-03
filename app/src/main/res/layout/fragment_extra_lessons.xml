@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="10dp"
-        android:text="Devi dare degli esami degli anni precedenti o vuoi seguire qualche corso che non fa parte del tuo piano di studi? Da qui puoi aggiungere al tuo orario le lezioni che non fanno parte del corso di studi da te selezionato."
+        android:text="Devi dare degli esami degli anni precedenti o vuoi seguire qualche corso che non fa parte del tuo piano di studi? Da qui puoi aggiungere al tuo orario le lezioni che non fanno parte del corso di studi da te selezionato.\nPer cancellare dei corsi da te inseriti, tieni premuto sul nome del corso."
         android:textColor="@color/colorForeground"
         android:textSize="14sp" />
 
