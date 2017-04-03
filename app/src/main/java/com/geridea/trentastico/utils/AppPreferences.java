@@ -2,6 +2,7 @@ package com.geridea.trentastico.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
@@ -21,8 +22,16 @@ public class AppPreferences {
 
     private static Context appContext;
 
+    /**
+     * Here we're caching the extra courses list. It's being deserialized very often and this
+     * caching is made to prevent this.
+     */
+    private static ExtraCoursesList extraCourses = new ExtraCoursesList();
+
     public static void init(Context context) {
         appContext = context;
+
+        extraCourses = readExtraCourses();
     }
 
     private static SharedPreferences get() {
@@ -84,7 +93,7 @@ public class AppPreferences {
             array.put(teachingId);
         }
 
-        putString(array.toString(), "FILTERED_TEACHINGS");
+        putString("FILTERED_TEACHINGS", array.toString());
     }
 
     public static boolean hasLessonTypeWithIdHidden(int id) {
@@ -121,7 +130,7 @@ public class AppPreferences {
             JSONObject partitioningJSON = getPartitioningsJSON();
             partitioningJSON.put(String.valueOf(lessonTypeId), jsonArrayCases);
 
-            putString(partitioningJSON.toString(), "PARTITIONINGS_TO_HIDE");
+            putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString());
         } catch (JSONException e) {
             BugLogger.logBug();
             e.printStackTrace();
@@ -161,10 +170,15 @@ public class AppPreferences {
     }
 
     public static void removeAllHiddenPartitionings() {
-        putString("{}", "PARTITIONINGS_TO_HIDE");
+        putString("PARTITIONINGS_TO_HIDE", "{}");
     }
 
     public static ExtraCoursesList getExtraCourses() {
+        return extraCourses;
+    }
+
+    @NonNull
+    private static ExtraCoursesList readExtraCourses() {
         ExtraCoursesList courses = new ExtraCoursesList();
 
         try {
@@ -182,69 +196,37 @@ public class AppPreferences {
     }
 
     public static void addExtraCourse(ExtraCourse course) {
-        try {
-            JSONArray jsonArray = new JSONArray(get().getString("EXTRA_COURSES", "[]"));
-            jsonArray.put(course.toJSON());
+        extraCourses.add(course);
 
-            saveExtraCourseJson(jsonArray);
-        } catch (JSONException e) {
-            BugLogger.logBug();
-            e.printStackTrace();
-
-            throw new RuntimeException("Error while saving an extra course to preferences.");
-        }
+        saveExtraCourses();
     }
 
-    private static void saveExtraCourseJson(JSONArray value) {
-        putString(value.toString(), "EXTRA_COURSES");
+    private static void saveExtraCourses() {
+        putString("EXTRA_COURSES", extraCourses.toJSON().toString());
     }
 
-    private static void putString(String value, String key) {
+    private static void putString(String key, String value) {
         SharedPreferences.Editor editor = get().edit();
         editor.putString(key, value);
         editor.apply();
     }
 
     public static boolean hasExtraCourseWithId(int lessonTypeId) {
-        for (ExtraCourse extraCourse : getExtraCourses()) {
-            if (extraCourse.getLessonTypeId() == lessonTypeId) {
-                return true;
-            }
-        }
-        return false;
+        return extraCourses.hasCourseWithId(lessonTypeId);
     }
 
     public static void removeExtraCoursesHaving(long courseId, int year) {
-        JSONArray courses = new JSONArray();
-        for (ExtraCourse extraCourse : getExtraCourses()) {
-            if (extraCourse.getCourseId() != courseId || extraCourse.getYear() != year) {
-                courses.put(extraCourse.toJSON());
-            }
-        }
-
-        saveExtraCourseJson(courses);
+        extraCourses.removeHaving(courseId, year);
+        saveExtraCourses();
     }
 
     public static ArrayList<ExtraCourse> getExtraCoursesHaving(long courseId, int year) {
-        ArrayList<ExtraCourse> extraCourses = new ArrayList<>();
-        for (ExtraCourse extraCourse : getExtraCourses()) {
-            if (extraCourse.getCourseId() == courseId || extraCourse.getYear() == year) {
-                extraCourses.add(extraCourse);
-            }
-        }
-
-        return extraCourses;
+        return extraCourses.getExtraCoursesHaving(courseId, year);
     }
 
     public static void removeExtraCourse(int lessonTypeId) {
-        JSONArray courses = new JSONArray();
-        for (ExtraCourse extraCourse : getExtraCourses()) {
-            if (extraCourse.getLessonTypeId() != lessonTypeId) {
-                courses.put(extraCourse.toJSON());
-            }
-        }
-
-        saveExtraCourseJson(courses);
+        extraCourses.removeHavingLessonType(lessonTypeId);
+        saveExtraCourses();
     }
 
     public static boolean isStudyCourseSet() {
