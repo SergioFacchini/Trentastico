@@ -1,15 +1,17 @@
 package com.geridea.trentastico.network;
 
-import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.gui.views.ScrollDirection;
+import com.geridea.trentastico.gui.views.requestloader.FinishedLoadingFromCacheMessage;
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
+import com.geridea.trentastico.gui.views.requestloader.LoadingFromCacheMessage;
+import com.geridea.trentastico.gui.views.requestloader.NetworkErrorMessage;
 import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage;
+import com.geridea.trentastico.gui.views.requestloader.ParsingErrorMessage;
 import com.geridea.trentastico.gui.views.requestloader.TerminalMessage;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.network.operations.NetworkErrorMessage;
-import com.geridea.trentastico.network.operations.ParsingErrorMessage;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
@@ -26,7 +28,7 @@ import java.util.List;
 import static com.geridea.trentastico.gui.views.ScrollDirection.LEFT;
 
 
-public class LessonsLoader implements LessonsLoadingListener {
+public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKnownListener {
 
     /**
      * Dispatched when the loading of events has been completed and the calendar can be made
@@ -53,15 +55,21 @@ public class LessonsLoader implements LessonsLoadingListener {
     }
 
     private void loadAndAddLessons(final WeekInterval intervalToLoad) {
-        ArrayList<NotCachedInterval> intervalsToLoad = Networker.loadLessons(intervalToLoad, this);
-        addLoadingIntervals(intervalsToLoad);
+        addLoadingInterval(intervalToLoad);
+        Networker.loadLessons(intervalToLoad, this, this);
+
+        onLoadingMessageDispatched.dispatch(new LoadingFromCacheMessage(intervalToLoad));
+    }
+
+    @Override
+    public void onIntervalsToLoadKnown(WeekInterval originalInterval, ArrayList<NotCachedInterval> intervals) {
+        addLoadingIntervals(intervals);
+        removeLoadingInterval(originalInterval);
     }
 
     private void addLoadingIntervals(ArrayList<NotCachedInterval> intervalsToLoad) {
-        if (intervalsToLoad != null) {
-            for (WeekInterval interval : intervalsToLoad) {
-                addLoadingInterval(interval);
-            }
+        for (WeekInterval interval : intervalsToLoad) {
+            addLoadingInterval(interval);
         }
     }
 
@@ -70,15 +78,7 @@ public class LessonsLoader implements LessonsLoadingListener {
     }
 
     private void removeLoadingInterval(WeekInterval intervalToRemove) {
-        WeekInterval intervalToDelete = null;
-        for (WeekInterval loadingInterval : loadingIntervals) {
-            if(loadingInterval.equals(intervalToRemove)) {
-                intervalToDelete = loadingInterval;
-                break;
-            }
-        }
-
-        loadingIntervals.remove(intervalToDelete);
+        loadingIntervals.remove(intervalToRemove);
     }
 
     private boolean isWeekAlreadyBeingLoaded(WeekTime week) {
@@ -128,6 +128,9 @@ public class LessonsLoader implements LessonsLoadingListener {
 
     @Override
     public void onLessonsLoaded(LessonsSet lessons, WeekInterval interval, int operationId) {
+        //We might have gotten this lessons from cache:
+        onLoadingMessageDispatched.dispatch(new FinishedLoadingFromCacheMessage());
+
         removeLoadingInterval(interval);
 
         lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
@@ -164,10 +167,17 @@ public class LessonsLoader implements LessonsLoadingListener {
 
     @Override
     public void onPartiallyCachedResultsFetched(CachedLessonsSet cacheSet) {
+        onLoadingMessageDispatched.dispatch(new FinishedLoadingFromCacheMessage());
+
         cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
         cacheSet.removeLessonsWithHiddenPartitionings();
 
         onPartiallyCachedResultsFetched.dispatch(cacheSet);
+    }
+
+    @Override
+    public void onNothingFoundInCache() {
+        onLoadingMessageDispatched.dispatch(new FinishedLoadingFromCacheMessage());
     }
 
     @Override

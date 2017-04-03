@@ -6,14 +6,15 @@ package com.geridea.trentastico.network.request;
  */
 
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.model.cache.NotCachedInterval;
+import com.geridea.trentastico.database.LessonsSetAvailableListener;
+import com.geridea.trentastico.gui.views.requestloader.LessonsLoadingMessage;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
+import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
-import com.geridea.trentastico.network.operations.LessonsLoadingMessage;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
@@ -37,7 +38,7 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
     }
 
     @Override
-    public void notifyFailure(Exception exception, RequestSender sender) {
+    public void notifyFailure(final Exception exception, final RequestSender sender) {
         //We had an error trying to load the lessons from the network. We may still
         //have some old cache to try to reuse. In case we do not have such cache, we
         //dispatch the error and keep retrying loading
@@ -45,31 +46,35 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
             listener.onErrorHappened(exception, getOperationId());
             resendRequestIfNeeded(sender);
         } else if(isCacheCheckEnabled) {
-            ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
-            CachedLessonsSet cache = Cacher.getLessonsInFreshOrDeadCache(getIntervalToLoad(), extraCourses, true);
-            if (cache.isIntervalPartiallyOrFullyCached(interval)) {
-                if (cache.hasMissingIntervals()) {
-                    //We found only some pieces. We still return these. To prevent the
-                    //request from fetching same events multiple time or making it merge
-                    //with maybe deleted events we will make the networker load only the
-                    //missing pieces
-                    listener.onPartiallyCachedResultsFetched(cache);
+            final ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
+            Cacher.getLessonsInFreshOrDeadCacheAsync(interval, extraCourses, true, new LessonsSetAvailableListener() {
+                @Override
+                public void onLessonsSetAvailable(CachedLessonsSet cache) {
+                    if (cache.isIntervalPartiallyOrFullyCached(interval)) {
+                        if (cache.hasMissingIntervals()) {
+                            //We found only some pieces. We still return these. To prevent the
+                            //request from fetching same events multiple time or making it merge
+                            //with maybe deleted events we will make the networker load only the
+                            //missing pieces
+                            listener.onPartiallyCachedResultsFetched(cache);
 
-                    for (NotCachedInterval notCachedInterval : cache.getMissingIntervals()) {
-                        sender.processRequest(notCachedInterval.generateRequest(listener));
+                            for (NotCachedInterval notCachedInterval : cache.getMissingIntervals()) {
+                                sender.processRequest(notCachedInterval.generateRequest(listener));
+                            }
+
+                            listener.onLoadingDelegated(getOperationId());
+                        } else {
+                            //We found everything we needed in the old cache
+                            listener.onLessonsLoaded(cache, getIntervalToLoad(), 0);
+                        }
+
+                    } else {
+                        //Nothing found in cache: we keep retrying loading
+                        listener.onErrorHappened(exception, getOperationId());
+                        resendRequestIfNeeded(sender);
                     }
-
-                    listener.onLoadingDelegated(getOperationId());
-                } else {
-                    //We found everything we needed in the old cache
-                    listener.onLessonsLoaded(cache, getIntervalToLoad(), 0);
                 }
-
-            } else {
-                //Nothing found in cache: we keep retrying loading
-                listener.onErrorHappened(exception, getOperationId());
-                resendRequestIfNeeded(sender);
-            }
+            });
         } else {
             //Cache check disabled: we just retry to fetch
             listener.onErrorHappened(exception, getOperationId());

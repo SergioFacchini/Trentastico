@@ -52,6 +52,11 @@ public class DiffCompletedListener implements LessonsLoadingListener {
     }
 
     @Override
+    public void onNothingFoundInCache() {
+        //Nothing to do
+    }
+
+    @Override
     public void onLoadingAborted(int operationId) {
         differenceListener.onLoadingError();
     }

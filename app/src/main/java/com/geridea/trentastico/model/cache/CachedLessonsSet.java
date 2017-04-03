@@ -5,13 +5,11 @@ package com.geridea.trentastico.model.cache;
  * Created with ♥ by Slava on 13/03/2017.
  */
 
-import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 

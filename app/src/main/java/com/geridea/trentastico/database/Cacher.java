@@ -12,6 +12,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.birbit.android.jobqueue.Job;
+import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.Params;
+import com.birbit.android.jobqueue.RetryConstraint;
+import com.birbit.android.jobqueue.config.Configuration;
+import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
@@ -126,37 +132,29 @@ public class Cacher {
             CLT_IS_EXTRA_COURSE + " INTEGER NOT NULL" +
         ")";
 
+    public static final int PRIORITY_NORMAL = 1;
+
     private static SQLiteDatabase writableDatabase;
+    private static JobManager jobQueue;
 
     public static void init(Context context){
         CacheDbHelper cacheDbHelper = new CacheDbHelper(context);
         writableDatabase = cacheDbHelper.getWritableDatabase();
+
+        jobQueue = new JobManager(
+            new Configuration.Builder(context)
+                .minConsumerCount(1)
+                .maxConsumerCount(1)
+                .build()
+        );
     }
 
     public static void cacheExtraLessonsSet(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
-        updateLessonTypesFromSet(setToCache, true);
-        deleteCachedExtraLessonsInInterval(interval, extraCourse);
-
-        long cachedPeriodId = insertCachedPeriod(new CachedPeriod(interval, extraCourse.getLessonTypeId()));
-        for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
-            cacheLesson(new CachedLesson(cachedPeriodId, lesson));
-        }
+        jobQueue.addJobInBackground(new CacheExtraLessonsSetJob(setToCache, interval, extraCourse));
     }
 
     public static void cacheLessonsSet(LessonsSet setToCache, WeekInterval intervalToCache) {
-        //0) Overwrite existing lesson types
-        //1) Clear the already existing lessons cached in the given interval
-        //2) Add the new cache period
-        //3) Get inserted id
-        //4) Make lessons
-        //5) Add lessons
-        updateLessonTypesFromSet(setToCache, false);
-        deleteCachedStudyCourseLessonsInInterval(intervalToCache);
-
-        long cachedPeriodId = insertCachedPeriod(new CachedPeriod(intervalToCache));
-        for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
-            cacheLesson(new CachedLesson(cachedPeriodId, lesson));
-        }
+        jobQueue.addJobInBackground(new CacheLessonsSetJob(setToCache, intervalToCache));
     }
 
     private static void updateLessonTypesFromSet(LessonsSet setToCache, boolean containsExtraLessonTypes) {
@@ -461,7 +459,18 @@ public class Cacher {
         return id;
     }
 
-    public static CachedLessonsSet getLessonsInFreshOrDeadCache(WeekInterval intervalToLoad, ArrayList<ExtraCourse> extraCourses, boolean fetchOldCacheToo) {
+    public static void getLessonsInFreshOrDeadCacheAsync(
+            WeekInterval intervalToLoad, ArrayList<ExtraCourse> extraCourses,
+            boolean fetchOldCacheToo, LessonsSetAvailableListener listener) {
+
+        jobQueue.addJobInBackground(
+            new GetLessonsInFreshOrDeadCacheJob(intervalToLoad, extraCourses, fetchOldCacheToo, listener)
+        );
+    }
+
+    private static CachedLessonsSet getLessonsInFreshOrDeadCache(
+            WeekInterval intervalToLoad, ArrayList<ExtraCourse> extraCourses, boolean fetchOldCacheToo){
+
         CachedLessonsSet lessonsSet = new CachedLessonsSet();
 
         //Lesson types
@@ -482,7 +491,7 @@ public class Cacher {
 
         //Missing study course intervals
         lessonsSet.addMissingIntervals(
-            toStudyCourseInterval(findMissingIntervalsInCachePeriods(intervalToLoad, studyCoursePeriods))
+                toStudyCourseInterval(findMissingIntervalsInCachePeriods(intervalToLoad, studyCoursePeriods))
         );
 
         ////////////////
@@ -510,7 +519,7 @@ public class Cacher {
                     findMissingIntervalsInCachePeriods(intervalToLoad, extraPeriods);
             lessonsSet.addMissingIntervals(toExtraCourseInterval(missingIntervals, extraCourse));
         }
-        
+
         lessonsSet.recalculatePartitionings();
 
         return lessonsSet;
@@ -520,7 +529,7 @@ public class Cacher {
         return loadLessonTypes(false, true);
     }
 
-    public static ArrayList<NotCachedInterval> toStudyCourseInterval(List<WeekInterval> intervals){
+    private static ArrayList<NotCachedInterval> toStudyCourseInterval(List<WeekInterval> intervals){
         ArrayList<NotCachedInterval> notCachedIntervals = new ArrayList<>();
         for (WeekInterval interval : intervals) {
             notCachedIntervals.add(new StudyCourseNotCachedInterval(interval));
@@ -529,7 +538,7 @@ public class Cacher {
         return notCachedIntervals;
     }
 
-    public static ArrayList<NotCachedInterval> toExtraCourseInterval(List<WeekInterval> intervals, ExtraCourse extraCourse){
+    private static ArrayList<NotCachedInterval> toExtraCourseInterval(List<WeekInterval> intervals, ExtraCourse extraCourse){
         ArrayList<NotCachedInterval> notCachedIntervals = new ArrayList<>();
         for (WeekInterval interval : intervals) {
             notCachedIntervals.add(new ExtraCourseNotCachedInterval(interval, extraCourse));
@@ -685,12 +694,7 @@ public class Cacher {
      * Deletes EVERYTHING about the current study course from the cache.
      */
     public static void purgeStudyCourseCache() {
-        for (Long studyCourseCachedPeriodsId: getIdsOfCachedPeriodsOfStudyCourses()) {
-            deleteStudyCourseLessons(studyCourseCachedPeriodsId);
-            deleteCachedPeriodWithId(studyCourseCachedPeriodsId);
-        }
-
-        deleteAllLessonTypes(true);
+        jobQueue.addJobInBackground(new PurgeStudyCourseCacheJob());
     }
 
     private static ArrayList<Long> getIdsOfCachedPeriodsOfStudyCourses() {
@@ -727,26 +731,175 @@ public class Cacher {
     }
 
     public static void removeExtraCoursesWithLessonType(int lessonTypeId) {
-        for (Long cachedExtraId : getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
-            deleteLessonTypeWithId(lessonTypeId);
-            deleteExtraLessonsOfType(cachedExtraId, lessonTypeId);
-            deleteCachedPeriodWithId(cachedExtraId);
-        }
+        jobQueue.addJobInBackground(new RemoveExtraCoursesWithLessonType(lessonTypeId));
     }
 
     /**
      * Deletes EVERYTHING from the case.
      */
     public static void obliterateCache() {
-        writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
-        writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
-        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
+        jobQueue.addJobInBackground(new ObliterateCacheJob());
     }
 
-    public static ArrayList<NotCachedInterval> getNotCachedSubintervals(
-            WeekInterval interval, ArrayList<ExtraCourse> courses) {
+    public static void getNotCachedSubintervals(
+            WeekInterval interval, ArrayList<ExtraCourse> courses, NotCachedIntervalsListener notCachedIntervalsListener) {
 
-        //Well, this function could become more performant one day
-        return getLessonsInFreshOrDeadCache(interval, courses, false).getMissingIntervals();
+        jobQueue.addJobInBackground(new GetNotCachedSubintervalsJob(interval, courses, notCachedIntervalsListener));
+    }
+
+    private static abstract class CacheJob extends Job {
+
+        protected CacheJob() {
+            super(new Params(PRIORITY_NORMAL));
+        }
+
+        @Override
+        public void onAdded() { }
+
+        @Override
+        protected void onCancel(int cancelReason, @Nullable Throwable throwable) { }
+
+        @Override
+        protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
+            throwable.printStackTrace();
+            BugLogger.logBug();
+
+            return RetryConstraint.CANCEL;
+        }
+    }
+
+    private static class GetLessonsInFreshOrDeadCacheJob extends CacheJob {
+        private final WeekInterval intervalToLoad;
+        private final ArrayList<ExtraCourse> extraCourses;
+        private final boolean fetchOldCache;
+        private final LessonsSetAvailableListener listener;
+
+        public GetLessonsInFreshOrDeadCacheJob(WeekInterval intervalToLoad, ArrayList<ExtraCourse>
+                extraCourses, boolean fetchOldCache, LessonsSetAvailableListener listener) {
+
+            this.intervalToLoad = intervalToLoad;
+            this.extraCourses = extraCourses;
+            this.fetchOldCache = fetchOldCache;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            listener.onLessonsSetAvailable(
+                getLessonsInFreshOrDeadCache(intervalToLoad, extraCourses, fetchOldCache)
+            );
+        }
+    }
+
+    private static class CacheExtraLessonsSetJob extends CacheJob {
+        private final LessonsSet setToCache;
+        private final WeekInterval interval;
+        private final ExtraCourse extraCourse;
+
+        public CacheExtraLessonsSetJob(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
+            this.setToCache = setToCache;
+            this.interval = interval;
+            this.extraCourse = extraCourse;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            updateLessonTypesFromSet(setToCache, true);
+            deleteCachedExtraLessonsInInterval(interval, extraCourse);
+
+            long cachedPeriodId = insertCachedPeriod(new CachedPeriod(interval, extraCourse.getLessonTypeId()));
+            for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
+                cacheLesson(new CachedLesson(cachedPeriodId, lesson));
+            }
+        }
+    }
+
+    private static class CacheLessonsSetJob extends CacheJob {
+
+        private final LessonsSet setToCache;
+        private final WeekInterval intervalToCache;
+
+        public CacheLessonsSetJob(LessonsSet setToCache, WeekInterval intervalToCache) {
+            this.setToCache = setToCache;
+            this.intervalToCache = intervalToCache;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            //0) Overwrite existing lesson types
+            //1) Clear the already existing lessons cached in the given interval
+            //2) Add the new cache period
+            //3) Get inserted id
+            //4) Make lessons
+            //5) Add lessons
+            updateLessonTypesFromSet(setToCache, false);
+            deleteCachedStudyCourseLessonsInInterval(intervalToCache);
+
+            long cachedPeriodId = insertCachedPeriod(new CachedPeriod(intervalToCache));
+            for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
+                cacheLesson(new CachedLesson(cachedPeriodId, lesson));
+            }
+        }
+
+    }
+
+    private static class PurgeStudyCourseCacheJob extends CacheJob {
+
+        @Override
+        public void onRun() throws Throwable {
+            for (Long studyCourseCachedPeriodsId: getIdsOfCachedPeriodsOfStudyCourses()) {
+                deleteStudyCourseLessons(studyCourseCachedPeriodsId);
+                deleteCachedPeriodWithId(studyCourseCachedPeriodsId);
+            }
+
+            deleteAllLessonTypes(true);
+        }
+
+    }
+
+    private static class RemoveExtraCoursesWithLessonType extends CacheJob {
+        private final int lessonTypeId;
+
+        public RemoveExtraCoursesWithLessonType(int lessonTypeId) {
+            this.lessonTypeId = lessonTypeId;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            for (Long cachedExtraId : getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
+                deleteLessonTypeWithId(lessonTypeId);
+                deleteExtraLessonsOfType(cachedExtraId, lessonTypeId);
+                deleteCachedPeriodWithId(cachedExtraId);
+            }
+        }
+    }
+
+    private static class ObliterateCacheJob extends CacheJob {
+        @Override
+        public void onRun() throws Throwable {
+            writableDatabase.delete(CACHED_PERIOD_TABLE,       null, null);
+            writableDatabase.delete(CACHED_LESSONS_TABLE,      null, null);
+            writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null);
+        }
+    }
+
+    private static class GetNotCachedSubintervalsJob extends CacheJob {
+        private final WeekInterval interval;
+        private final ArrayList<ExtraCourse> courses;
+        private final NotCachedIntervalsListener notCachedIntervalsListener;
+
+        public GetNotCachedSubintervalsJob(WeekInterval interval, ArrayList<ExtraCourse> courses,
+                                           NotCachedIntervalsListener notCachedIntervalsListener) {
+            this.interval = interval;
+            this.courses = courses;
+            this.notCachedIntervalsListener = notCachedIntervalsListener;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            ArrayList<NotCachedInterval> intervals =
+                    getLessonsInFreshOrDeadCache(interval, courses, false).getMissingIntervals();
+            notCachedIntervalsListener.onIntervalsKnown(intervals);
+        }
     }
 }

@@ -1,6 +1,4 @@
-package com.geridea.trentastico.network.operations;
-
-import com.geridea.trentastico.gui.views.requestloader.AbstractTextMessage;
+package com.geridea.trentastico.gui.views.requestloader;
 
 import java.net.UnknownHostException;
 

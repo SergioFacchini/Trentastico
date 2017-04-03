@@ -25,6 +25,8 @@ import butterknife.ButterKnife;
 
 public class RequestLoaderView extends FrameLayout {
 
+    public static final int LOADING_FROM_CACHE_OPERATION_ID = -1;
+
     @BindView(R.id.loading_text)     TextView loadingText;
     @BindView(R.id.loading_progress) TextView loadingProgress;
 

@@ -6,12 +6,12 @@ package com.geridea.trentastico.network.request;
  */
 
 import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.gui.views.requestloader.ExtraCoursesLoadingMessage;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
-import com.geridea.trentastico.network.operations.ExtraCoursesLoadingMessage;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 public class ExtraLessonsRequest extends BasicLessonsRequest {

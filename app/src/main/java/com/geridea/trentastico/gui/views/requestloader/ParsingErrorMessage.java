@@ -1,6 +1,4 @@
-package com.geridea.trentastico.network.operations;
-
-import com.geridea.trentastico.gui.views.requestloader.AbstractTextMessage;
+package com.geridea.trentastico.gui.views.requestloader;
 
 /*
  * Created with ♥ by Slava on 13/03/2017.

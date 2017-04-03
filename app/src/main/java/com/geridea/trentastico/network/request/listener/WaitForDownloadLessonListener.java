@@ -60,6 +60,11 @@ public class WaitForDownloadLessonListener implements LessonsLoadingListener {
     }
 
     @Override
+    public void onNothingFoundInCache() {
+        //Nothing to do
+    }
+
+    @Override
     public void onLoadingAborted(int operationId) {
         numRequestsFailed++;
         checkIfWeHaveFinished();
