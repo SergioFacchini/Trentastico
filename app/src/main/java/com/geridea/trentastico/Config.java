@@ -8,7 +8,7 @@ package com.geridea.trentastico;
 public final class Config {
 
     //Debug
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
     //Networking
@@ -30,6 +30,8 @@ public final class Config {
     //Services
     public static final int LESSONS_REFRESH_WAITING_HOURS = 4;
     public static final int LESSONS_REFRESH_POSTICIPATION_MINUTES = 5;
+
+    public static final boolean DEBUG_QUICK_LESSONS_REFRESHES = false;
 
     public static final int DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30;
     public static final int DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS = 8;

@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.geridea.trentastico.services.LessonsUpdaterService;
+import com.geridea.trentastico.services.NextLessonNotificationService;
 import com.geridea.trentastico.utils.AppPreferences;
 
 /**
@@ -23,6 +24,7 @@ public class FirstActivityChooserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_APP_START));
+        startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_APP_BOOT));
 
         if (AppPreferences.isFirstRun()) {
             startActivity(new Intent(this, WelcomeActivity.class));

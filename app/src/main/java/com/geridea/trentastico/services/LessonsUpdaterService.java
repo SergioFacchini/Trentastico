@@ -15,7 +15,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
@@ -95,14 +94,14 @@ public class LessonsUpdaterService extends Service {
         //    Reschedule at a slower rate.
         if (updateAlreadyInProgress) {
             //The service is already started and it's doing something
-            showToastIfInDebug("Update already in progress... ignoring update.");
+            UIUtils.showToastIfInDebug(this, "Update already in progress... ignoring update.");
             return START_NOT_STICKY;
         } else if(AppPreferences.isSearchForLessonChangesEnabled()) {
             updateAlreadyInProgress = true;
 
             final int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
             if(shouldUpdateBecauseWeGainedInternet(starter)){
-                showToastIfInDebug("Updating lessons because of internet refresh state...");
+                UIUtils.showToastIfInDebug(this, "Updating lessons because of internet refresh state...");
                 AppPreferences.hadInternetInLastCheck(true);
 
                 diffAndUpdateLessonsIfPossible(new LessonsDiffAndUpdateListener() {
@@ -112,7 +111,7 @@ public class LessonsUpdaterService extends Service {
                     }
                 });
             } else if (shouldUpdateBecauseOfUpdateTimeout() || startedAppInDebugMode(starter)) {
-                showToastIfInDebug("Checking for lessons updates...");
+                UIUtils.showToastIfInDebug(this, "Checking for lessons updates...");
                 diffAndUpdateLessonsIfPossible(new LessonsDiffAndUpdateListener() {
                     @Override
                     public void onTerminated(boolean successful) {
@@ -120,11 +119,11 @@ public class LessonsUpdaterService extends Service {
                     }
                 });
             } else {
-                showToastIfInDebug("Too early to check for updates.");
+                UIUtils.showToastIfInDebug(this, "Too early to check for updates.");
                 scheduleNextStartAndTerminate(SCHEDULE_MISSING);
             }
         } else {
-            showToastIfInDebug("Searching for lesson updates is disabled!");
+            UIUtils.showToastIfInDebug(this, "Searching for lesson updates is disabled!");
         }
 
         return START_NOT_STICKY;
@@ -145,12 +144,6 @@ public class LessonsUpdaterService extends Service {
     }
 
 
-    private void showToastIfInDebug(String message) {
-        if (Config.DEBUG_MODE) {
-            showToastOnMainThread(message);
-        }
-    }
-
     private void scheduleNextStartAndTerminate(int scheduleType) {
         Calendar calendar = calculateAndSaveNextSchedule(scheduleType);
 
@@ -160,7 +153,7 @@ public class LessonsUpdaterService extends Service {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
-        showToastIfInDebug("Scheduled alarm manager to "+CalendarUtils.formatTimestamp(calendar.getTimeInMillis()));
+        UIUtils.showToastIfInDebug(this, "Scheduled alarm manager to "+CalendarUtils.formatTimestamp(calendar.getTimeInMillis()));
 
         stopSelf();
     }
@@ -181,7 +174,7 @@ public class LessonsUpdaterService extends Service {
         } else {
             calendar = CalendarUtils.getCalendarInitializedAs(System.currentTimeMillis());
 
-            if (Config.DEBUG_MODE) {
+            if (Config.DEBUG_MODE && Config.DEBUG_QUICK_LESSONS_REFRESHES) {
                 int timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS;
                 if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2;
 
@@ -215,7 +208,7 @@ public class LessonsUpdaterService extends Service {
                     @Override
                     public void apply(LessonsDiffResult diffResult, final Boolean diffSuccessful) {
                         if (diffResult.isEmpty()) {
-                            showToastIfInDebug("No lesson differences found.");
+                            UIUtils.showToastIfInDebug(LessonsUpdaterService.this, "No lesson differences found.");
                         } else {
                             showLessonsChangedNotification(diffResult);
                         }
@@ -236,7 +229,7 @@ public class LessonsUpdaterService extends Service {
                 listener.onTerminated(false);
             }
         } else {
-            showToastIfInDebug("No internet. Cannot check for updates.");
+            UIUtils.showToastIfInDebug(this, "No internet. Cannot check for updates.");
             AppPreferences.hadInternetInLastCheck(false);
             listener.onTerminated(false);
         }
@@ -285,15 +278,6 @@ public class LessonsUpdaterService extends Service {
         DiffLessonsJob job = new DiffLessonsJob(intervalToDiff);
         jobManager.addJobInBackground(job);
         return job.onCheckTerminated;
-    }
-
-    private void showToastOnMainThread(final String message) {
-        UIUtils.runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(LessonsUpdaterService.this, message, Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     public static void cancelSchedules(Context context, int starter) {

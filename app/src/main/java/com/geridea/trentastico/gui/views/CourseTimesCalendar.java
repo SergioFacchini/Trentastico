@@ -89,7 +89,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = Calendar.getInstance();
+                    Calendar today = getDebuggableInstance();
                     if (isSameDay(today, date)) {
                         return "Oggi (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
                     }
@@ -121,7 +121,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = Calendar.getInstance();
+                    Calendar today = CalendarUtils.getDebuggableInstance();
                     if (isSameDay(today, date)) {
                         return "Oggi";
                     }
@@ -174,6 +174,10 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             };
         }
 
+    }
+
+    public static Calendar getDebuggableInstance() {
+        return Calendar.getInstance();
     }
 
     @NonNull

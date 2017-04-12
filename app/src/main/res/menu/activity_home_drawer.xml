@@ -22,6 +22,11 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="Aggiorna lezioni" />
 
+        <item
+            android:id="@+id/start_next_lesson_service"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Start serv. prossima lezione" />
+
     </group>
 
     <item android:title="Altro">

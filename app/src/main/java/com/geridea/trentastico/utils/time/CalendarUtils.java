@@ -102,4 +102,8 @@ public class CalendarUtils {
     public static String formatHHMM(long millis) {
         return formatHHMM.format(new Date(millis));
     }
+
+    public static Calendar getDebuggableInstance() {
+        return Calendar.getInstance();
+    }
 }
