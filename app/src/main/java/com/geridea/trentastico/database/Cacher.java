@@ -40,6 +40,7 @@ import com.geridea.trentastico.utils.time.WeekIntervalCutResult;
 import com.geridea.trentastico.utils.time.WeekTime;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -525,6 +526,35 @@ public class Cacher {
         return lessonsSet;
     }
 
+    private static ArrayList<CachedLesson> getLessonsInPeriod(long from, long to) {
+        String[] projection = {
+                CL_CACHED_PERIOD_ID,
+                CL_LESSON_ID,
+                CL_STARTS_AT_MS,
+                CL_FINISHES_AT_MS,
+                CL_TEACHING_ID,
+                CL_WEEK_NUMBER,
+                CL_YEAR,
+                CL_SUBJECT,
+                CL_ROOM,
+                CL_DESCRIPTION,
+                CL_COLOR
+        };
+
+        String selection = String.format("%s >= ? AND %s <= ?", CL_STARTS_AT_MS, CL_STARTS_AT_MS);
+        String[] args = new String[]{ String.valueOf(from), String.valueOf(to) };
+
+        Cursor cursor = writableDatabase.query(
+            CACHED_LESSONS_TABLE, projection, selection, args, null, null, CL_STARTS_AT_MS
+        );
+
+        ArrayList<CachedLesson> lessons = getCachedLessonsFromCursor(cursor);
+
+        cursor.close();
+
+        return lessons;
+    }
+
     private static ArrayList<CachedLessonType> loadExtraCoursesLessonTypes() {
         return loadLessonTypes(false, true);
     }
@@ -548,12 +578,17 @@ public class Cacher {
     }
 
     private static ArrayList<LessonSchedule> loadLessonsOfCachePeriod(CachedPeriod cachePeriod, WeekInterval intervalToLoad) {
-        ArrayList<LessonSchedule> lessons = new ArrayList<>();
+        return cachedLessonsToLessonSchedule(
+            loadCachedLessonsIntersectingInterval(cachePeriod, intervalToLoad)
+        );
+    }
 
-        for (CachedLesson cachedLesson : loadCachedLessonsIntersectingInterval(cachePeriod, intervalToLoad)) {
+    @NonNull
+    private static ArrayList<LessonSchedule> cachedLessonsToLessonSchedule(ArrayList<CachedLesson> cachedLessons) {
+        ArrayList<LessonSchedule> lessons = new ArrayList<>();
+        for (CachedLesson cachedLesson : cachedLessons) {
             lessons.add(new LessonSchedule(cachedLesson));
         }
-
         return lessons;
     }
 
@@ -681,12 +716,18 @@ public class Cacher {
             CACHED_LESSONS_TABLE, projection, selection, selectionArgs, null, null, null
         );
 
+        ArrayList<CachedLesson> lessons = getCachedLessonsFromCursor(cursor);
+        cursor.close();
+
+        return lessons;
+    }
+
+    @NonNull
+    private static ArrayList<CachedLesson> getCachedLessonsFromCursor(Cursor cursor) {
         ArrayList<CachedLesson> periods = new ArrayList<>();
         while(cursor.moveToNext()) {
             periods.add(CachedLesson.fromCursor(cursor));
         }
-        cursor.close();
-
         return periods;
     }
 
@@ -745,6 +786,13 @@ public class Cacher {
             WeekInterval interval, ArrayList<ExtraCourse> courses, NotCachedIntervalsListener notCachedIntervalsListener) {
 
         jobQueue.addJobInBackground(new GetNotCachedSubintervalsJob(interval, courses, notCachedIntervalsListener));
+    }
+
+    /**
+     * Fetches all the lessons planned for today; the lessons are ordered by start ms.
+     */
+    public static void getTodaysLessons(TodaysLessonsListener listener) {
+        jobQueue.addJobInBackground(new GetTodaysLessonsJob(listener));
     }
 
     private static abstract class CacheJob extends Job {
@@ -902,4 +950,41 @@ public class Cacher {
             notCachedIntervalsListener.onIntervalsKnown(intervals);
         }
     }
+
+
+    private static class GetTodaysLessonsJob extends CacheJob {
+
+        private TodaysLessonsListener listener;
+
+        public GetTodaysLessonsJob(TodaysLessonsListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            Calendar now = Calendar.getInstance();
+            now.set(Calendar.HOUR_OF_DAY, 0);
+            now.set(Calendar.MINUTE, 0);
+            now.set(Calendar.SECOND, 0);
+
+//            if(now.get(Calendar.MINUTE) <= deltaMinutes && now.get(Calendar.HOUR_OF_DAY) == 0){
+//                now.set(Calendar.MINUTE, 0);
+//            }
+
+            Calendar endOfDay = (Calendar) now.clone();
+            endOfDay.set(Calendar.HOUR_OF_DAY, 23);
+            endOfDay.set(Calendar.MINUTE, 59);
+
+
+            ArrayList<LessonSchedule> lessons =
+                    cachedLessonsToLessonSchedule(
+                            getLessonsInPeriod(now.getTimeInMillis(), endOfDay.getTimeInMillis()));
+
+            listener.onLessonsAvailable(lessons);
+        }
+
+
+    }
+
+
 }

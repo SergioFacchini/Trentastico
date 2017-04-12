@@ -70,15 +70,15 @@ public class AppPreferences {
         );
     }
 
-    public static ArrayList<Integer> getLessonTypesIdsToHide(){
-        ArrayList<Integer> lessonTypesIds = new ArrayList<>();
+    public static ArrayList<Long> getLessonTypesIdsToHide(){
+        ArrayList<Long> lessonTypesIds = new ArrayList<>();
 
         String filteredJSON = get().getString("FILTERED_TEACHINGS", "[]");
 
         try {
             JSONArray json = new JSONArray(filteredJSON);
             for(int i = 0; i<json.length(); i++){
-                lessonTypesIds.add(json.getInt(i));
+                lessonTypesIds.add(json.getLong(i));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -87,9 +87,9 @@ public class AppPreferences {
         return lessonTypesIds;
     }
 
-    public static void setLessonTypesIdsToHide(ArrayList<Integer> teachings) {
+    public static void setLessonTypesIdsToHide(ArrayList<Long> teachings) {
         JSONArray array = new JSONArray();
-        for (Integer teachingId : teachings) {
+        for (Long teachingId : teachings) {
             array.put(teachingId);
         }
 
@@ -101,7 +101,7 @@ public class AppPreferences {
     }
 
     public static void removeAllHiddenCourses() {
-        setLessonTypesIdsToHide(new ArrayList<Integer>());
+        setLessonTypesIdsToHide(new ArrayList<Long>());
     }
 
     public static void setCalendarNumOfDaysToShow(int numOfDays) {
@@ -148,11 +148,11 @@ public class AppPreferences {
         }
     }
 
-    public static ArrayList<String> getHiddenPartitionings(int id) {
+    public static ArrayList<String> getHiddenPartitionings(long lessonTypeId) {
         ArrayList<String> partitionings = new ArrayList<>();
 
         try {
-            JSONArray hiddenPartitioningsArray = getPartitioningsJSON().optJSONArray(String.valueOf(id));
+            JSONArray hiddenPartitioningsArray = getPartitioningsJSON().optJSONArray(String.valueOf(lessonTypeId));
             if (hiddenPartitioningsArray != null) {
                 for (int i = 0; i < hiddenPartitioningsArray.length(); i++) {
                     partitionings.add(hiddenPartitioningsArray.getString(i));

@@ -19,6 +19,11 @@
             android:description="@string/lessons_update_checker_description"
             android:exported="false" />
 
+        <service
+            android:name=".services.NextLessonNotificationService"
+            android:description="@string/lessons_update_checker_description"
+            android:exported="false" />
+
         <receiver
             android:name=".receivers.BootBroadcastReceiver"
             android:exported="false">

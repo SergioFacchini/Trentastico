@@ -20,6 +20,7 @@ import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
+import com.geridea.trentastico.services.NextLessonNotificationService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -112,6 +113,8 @@ public class HomeActivity extends AppCompatActivity
             switchToCalendarFragment();
         } else if(id == R.id.update_courses){
             startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
+        } else if(id == R.id.start_next_lesson_service){
+            startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_DEBUG));
         }
 
         drawer.closeDrawer(GravityCompat.START);

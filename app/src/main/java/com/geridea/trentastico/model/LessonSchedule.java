@@ -221,7 +221,7 @@ public class LessonSchedule implements Serializable {
         String startTime = hhmm.format(getStartCal().getTime());
         String endTime   = hhmm.format(getEndCal()  .getTime());
 
-        return String.format("%s  %s - %s", room, startTime, endTime);
+        return String.format("%s-%s | %s", room, startTime, endTime);
     }
 
 

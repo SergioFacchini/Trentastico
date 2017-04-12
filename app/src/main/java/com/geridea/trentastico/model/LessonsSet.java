@@ -66,12 +66,12 @@ public class LessonsSet {
         return null;
     }
 
-    public void removeLessonsWithTypeIds(ArrayList<Integer> lessonTypesIdsToHide) {
+    public void removeLessonsWithTypeIds(ArrayList<Long> lessonTypesIdsToHide) {
         Iterator<LessonSchedule> lessonsIterator = scheduledLessons.values().iterator();
 
         while(lessonsIterator.hasNext()){
             LessonSchedule schedule = lessonsIterator.next();
-            for (Integer lessonTypeIdToHide : lessonTypesIdsToHide) {
+            for (Long lessonTypeIdToHide : lessonTypesIdsToHide) {
                 if (schedule.getLessonTypeId() == lessonTypeIdToHide) {
                     lessonsIterator.remove();
                     break;

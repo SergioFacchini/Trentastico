@@ -177,11 +177,11 @@ public class CalendarFragment extends IFragmentWithMenuItems {
             setView(view);
         }
 
-        private ArrayList<Integer> calculateLessonTypesToHide() {
-            ArrayList<Integer> lessonTypesToHideIds = new ArrayList<>();
+        private ArrayList<Long> calculateLessonTypesToHide() {
+            ArrayList<Long> lessonTypesToHideIds = new ArrayList<>();
             for (LessonType lessonType : lessonTypes) {
                 if (!lessonType.isVisible()) {
-                    lessonTypesToHideIds.add(lessonType.getId());
+                    lessonTypesToHideIds.add((long) lessonType.getId());
                 }
             }
 
