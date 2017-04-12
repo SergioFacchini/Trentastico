@@ -31,6 +31,8 @@ public final class Config {
     public static final int LESSONS_REFRESH_WAITING_HOURS = 4;
     public static final int LESSONS_REFRESH_POSTICIPATION_MINUTES = 5;
 
+    public static final boolean QUICK_LESSON_CHECKS = false;
+
     public static final int DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30;
     public static final int DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS = 8;
 }
