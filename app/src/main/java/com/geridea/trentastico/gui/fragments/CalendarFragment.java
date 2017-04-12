@@ -28,11 +28,11 @@ import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.threerings.signals.Listener1;
 import com.threerings.signals.Signal1;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -55,11 +55,11 @@ public class CalendarFragment extends IFragmentWithMenuItems {
 
         //Binding calendar
         calendar.prepareForNumberOfVisibleDays(AppPreferences.getCalendarNumOfDaysToShow());
-        calendar.goToDate(Calendar.getInstance());
+        calendar.goToDate(CalendarUtils.getDebuggableToday());
         calendar.onLoadingOperationNotify.connect(new Listener1<ILoadingMessage>() {
             @Override
             public void apply(final ILoadingMessage operation) {
-                loaderView.processMessage(operation);;
+                loaderView.processMessage(operation);
             }
         });
 

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.geridea.trentastico.Config.DEBUG_MODE;
+import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToday;
 
 public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
@@ -89,7 +90,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = Calendar.getInstance();
+                    Calendar today = getDebuggableToday();
                     if (isSameDay(today, date)) {
                         return "Oggi (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
                     }
@@ -121,7 +122,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = Calendar.getInstance();
+                    Calendar today = getDebuggableToday();
                     if (isSameDay(today, date)) {
                         return "Oggi";
                     }

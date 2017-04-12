@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableMillis;
+
 public class LessonsDiffResult implements Serializable {
 
     private final ArrayList<LessonSchedule> removedLessons = new ArrayList<>();
@@ -65,7 +67,7 @@ public class LessonsDiffResult implements Serializable {
     }
 
     private void discardPastLessonsChanges(ArrayList<LessonChange> lessons) {
-        long currentMillis = System.currentTimeMillis();
+        long currentMillis = getDebuggableMillis();
 
         Iterator<LessonChange> iterator = lessons.iterator();
         while(iterator.hasNext()) {
@@ -77,7 +79,7 @@ public class LessonsDiffResult implements Serializable {
     }
 
     private void discardPastLessons(ArrayList<LessonSchedule> lessons) {
-        long currentMillis = System.currentTimeMillis();
+        long currentMillis = getDebuggableMillis();
 
         Iterator<LessonSchedule> iterator = lessons.iterator();
         while(iterator.hasNext()) {

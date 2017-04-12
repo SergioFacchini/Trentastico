@@ -7,6 +7,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.geridea.trentastico.Config.DATE_TO_FORCE;
+import static com.geridea.trentastico.Config.DEBUG_FORCE_ANOTHER_DATE;
+import static com.geridea.trentastico.Config.DEBUG_MODE;
+
 /*
  * Created with ♥ by Slava on 12/03/2017.
  */
@@ -22,14 +26,14 @@ public class CalendarUtils {
     private final static SimpleDateFormat formatEEEEDDMMMM = new SimpleDateFormat("EEEE dd MMMM", Locale.ITALIAN);
     private final static SimpleDateFormat formatHHMM = new SimpleDateFormat("HH:mm", Locale.ITALIAN);
 
-    public static final Calendar TODAY = Calendar.getInstance();
+    public static final Calendar TODAY = getDebuggableToday();
 
     /**
      * @return the first day of the current week, at 00:00:00.
      */
     @NonNull
     public static Calendar calculateFirstDayOfWeek() {
-        return calculateFirstDayOfWeek(Calendar.getInstance());
+        return calculateFirstDayOfWeek(getDebuggableToday());
     }
 
     /**
@@ -91,15 +95,24 @@ public class CalendarUtils {
         return formatTimestamp.format(new Date(millis));
     }
 
-    public static String formatCurrentTimestamp() {
-        return formatTimestamp(System.currentTimeMillis());
-    }
-
     public static String formatEEEEDDMMMM(long millis) {
         return formatEEEEDDMMMM.format(new Date(millis));
     }
 
     public static String formatHHMM(long millis) {
         return formatHHMM.format(new Date(millis));
+    }
+
+    public static Calendar getDebuggableToday() {
+        Calendar aDay = Calendar.getInstance();
+        if(DEBUG_MODE && DEBUG_FORCE_ANOTHER_DATE){
+            aDay.setTimeInMillis(DATE_TO_FORCE);
+        }
+
+        return aDay;
+    }
+
+    public static long getDebuggableMillis() {
+       return DEBUG_MODE && DEBUG_FORCE_ANOTHER_DATE ? DATE_TO_FORCE : System.currentTimeMillis();
     }
 }

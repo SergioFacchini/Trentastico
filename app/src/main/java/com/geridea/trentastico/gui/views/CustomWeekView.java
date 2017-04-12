@@ -48,6 +48,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToday;
+
 /**
  * Created by Raquib-ul-Alam Kanak on 7/21/2014.
  * Website: http://alamkanak.github.io/
@@ -136,7 +138,7 @@ public class CustomWeekView extends View {
     private CustomWeekView.Direction mCurrentFlingDirection = CustomWeekView.Direction.NONE;
     private ScaleGestureDetector mScaleDetector;
     private boolean mIsZooming;
-    private Calendar mFirstVisibleDay = Calendar.getInstance();
+    private Calendar mFirstVisibleDay = getDebuggableToday();
     private int mDefaultEventColor;
     private int mMinimumFlingVelocity = 0;
     private int mScaledTouchSlop = 0;
@@ -670,7 +672,7 @@ public class CustomWeekView extends View {
                     float startY = mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight/2 + mHeaderMarginBottom + mCurrentOrigin.y;
 
                     if (isToday){
-                        Calendar now = Calendar.getInstance();
+                        Calendar now = getDebuggableToday();
                         float beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE)/60.0f) * mHourHeight;
                         canvas.drawRect(start, startY, startPixel + mWidthPerDay, startY+beforeNow, pastPaint);
                         canvas.drawRect(start, startY+beforeNow, startPixel + mWidthPerDay, getHeight(), futurePaint);
@@ -720,7 +722,7 @@ public class CustomWeekView extends View {
             // Draw the line at the current time.
             if (mShowNowLine && isToday){
                 float startY = mHeaderTextHeight + mHeaderRowPadding * 2 + mTimeTextHeight/2 + mHeaderMarginBottom + mCurrentOrigin.y;
-                Calendar now = Calendar.getInstance();
+                Calendar now = getDebuggableToday();
                 float beforeNow = ((now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE)/60.0f)-mStartingHour) * mHourHeight;
                 canvas.drawLine(start, startY + beforeNow, startPixel + mWidthPerDay, startY + beforeNow, mNowLinePaint);
             }
@@ -1276,7 +1278,7 @@ public class CustomWeekView extends View {
 
                 @Override
                 public String interpretTime(int hour) {
-                    Calendar calendar = Calendar.getInstance();
+                    Calendar calendar = getDebuggableToday();
                     calendar.set(Calendar.HOUR_OF_DAY, hour);
                     calendar.set(Calendar.MINUTE, 0);
 
@@ -1412,15 +1414,6 @@ public class CustomWeekView extends View {
     //      Public methods.
     //
     /////////////////////////////////////////////////////////////////
-
-    /**
-     * Show today on the week view.
-     */
-    public void goToToday() {
-        Calendar today = Calendar.getInstance();
-        goToDate(today);
-    }
-
     /**
      * Show a specific day on the week view.
      * @param date The date to show.
@@ -1440,7 +1433,7 @@ public class CustomWeekView extends View {
         }
 
 
-        Calendar today = Calendar.getInstance();
+        Calendar today = getDebuggableToday();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
@@ -1568,7 +1561,7 @@ public class CustomWeekView extends View {
      * @return the calendar instance
      */
     private Calendar today(){
-        Calendar today = Calendar.getInstance();
+        Calendar today = getDebuggableToday();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);

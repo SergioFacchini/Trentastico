@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToday;
+
 public class LessonSchedule implements Serializable {
     private final long id;
     private final String room;
@@ -201,13 +203,13 @@ public class LessonSchedule implements Serializable {
     }
 
     public Calendar getStartCal() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getDebuggableToday();
         calendar.setTimeInMillis(getStartsAt());
         return calendar;
     }
 
     public Calendar getEndCal() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = getDebuggableToday();
         calendar.setTimeInMillis(getFinishesAt());
         return calendar;
     }

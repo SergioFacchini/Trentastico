@@ -7,6 +7,8 @@ package com.geridea.trentastico.utils.time;
 
 import java.util.Calendar;
 
+import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToday;
+
 public class WeekTime {
     private int year;
     private int weekNumber;
@@ -17,7 +19,7 @@ public class WeekTime {
     }
 
     public WeekTime() {
-        initFromCalendar(Calendar.getInstance());
+        initFromCalendar(getDebuggableToday());
     }
 
     public WeekTime(Calendar calendar) {
