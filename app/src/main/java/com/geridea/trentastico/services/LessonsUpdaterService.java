@@ -172,7 +172,7 @@ public class LessonsUpdaterService extends Service {
             }
 
         } else {
-            calendar = CalendarUtils.getDebuggableToday();
+            calendar = Calendar.getInstance();
 
             if (Config.DEBUG_MODE && Config.QUICK_LESSON_CHECKS) {
                 int timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS;
