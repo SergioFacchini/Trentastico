@@ -134,35 +134,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:paddingTop="5dp"
-            android:text="Trentastico! mostra la notifica della prossima lezione con un certo anticipo prima della fine della lezione."
-            android:textColor="@color/colorForeground" />
-
-        <TextView
-            android:id="@+id/current_notification_anticipation"
-            style="@style/TextForegroundMedium"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="left"
-            android:text="Attualmente la notifica della prossima lezione viene mostrata con N minuti in anticipo."
-            android:textColor="@color/colorForeground" />
-
-        <Button
-            android:id="@+id/next_lesson_notification_anticipation_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="#3b1629"
-            android:text="Modifica minuti di anticipo"
-            android:textColor="@color/colorForeground" />
-
-        <TextView
-            style="@style/TextForegroundMedium"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="left"
             android:paddingTop="10dp"
-            android:text="È possibile rendere fissa la notifica della prossima lezione. Le notifiche fisse non possono essere cancellate dall'utente e quindi non rischi di rimuoverle per sbaglio."
+            android:text="È possibile rendere fissa la notifica della prossima lezione. Le notifiche fisse non possono essere rimosse dall'utente e quindi non rischi di rimuoverle per sbaglio."
             android:textColor="@color/colorForeground" />
 
         <Switch

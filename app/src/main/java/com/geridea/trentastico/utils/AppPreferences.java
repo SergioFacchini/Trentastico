@@ -96,7 +96,7 @@ public class AppPreferences {
         putString("FILTERED_TEACHINGS", array.toString());
     }
 
-    public static boolean hasLessonTypeWithIdHidden(int id) {
+    public static boolean hasLessonTypeWithIdHidden(long id) {
         return getLessonTypesIdsToHide().contains(id);
     }
 
@@ -278,4 +278,21 @@ public class AppPreferences {
     public static void setNotificationForLessonChangesEnabled(boolean enabled) {
         putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled);
     }
+
+    public static boolean areNextLessonNotificationsEnabled() {
+        return get().getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true);
+    }
+
+    public static void setNextLessonNotificationsEnabled(boolean enabled) {
+        putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled);
+    }
+
+    public static boolean areNextLessonNotificationsFixed() {
+        return get().getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false);
+    }
+
+    public static void setNextLessonNotificationsFixed(boolean enabled) {
+        putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", enabled);
+    }
+
 }

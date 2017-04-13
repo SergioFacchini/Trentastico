@@ -37,6 +37,7 @@ public class NextLessonNotificationService extends Service {
     public static final int STARTER_NETWORK_BROADCAST = 2;
     public static final int STARTER_APP_BOOT = 3;
     public static final int STARTER_STUDY_COURSE_CHANGE = 4;
+    public static final int STARTER_SWITCHED_ON = 5;
 
     public static final String EXTRA_STARTER = "EXTRA_STARTER";
 
@@ -51,6 +52,13 @@ public class NextLessonNotificationService extends Service {
         if (!AppPreferences.isStudyCourseSet()) {
             //Probably first start. We have nothing to show to a user that doesn't have any lesson
             //planned!
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        if (!AppPreferences.areNextLessonNotificationsEnabled()) {
+            //The notifications are disabled: nothing to do!
+            stopSelf();
             return START_NOT_STICKY;
         }
 
@@ -83,6 +91,7 @@ public class NextLessonNotificationService extends Service {
                     //Finding the lessons starting in less than N minutes:
                     ArrayList<LessonSchedule> lessonsStartingSoon = findLessonsStartingSoon(validLessons);
                     if (lessonsStartingSoon.isEmpty()) {
+                        //TODO: fetch rooms if not available!
                         //There are no lessons starting soon, however we still have some lessons to
                         //show. We're going to show the notification for the lessons starting next:
                         ArrayList<LessonSchedule> nextLessons = findLessonsStartingNext(validLessons);
@@ -91,7 +100,7 @@ public class NextLessonNotificationService extends Service {
                         //Since we've already shown notifications for these lessons, we won't
                         //consider them for the next scheduling:
                         validLessons.removeAll(nextLessons);
-
+                        scheduleForTheNextLessonAndStop(validLessons, currentLessons);
                     } else {
                         //We have to show a notification for each lesson:
                         showNotificationsForLessons(lessonsStartingSoon);
@@ -99,9 +108,8 @@ public class NextLessonNotificationService extends Service {
                         //We have already shown notifications for the lessons starting soon. We don't
                         //consider these for the next start calculation
                         validLessons.removeAll(lessonsStartingSoon);
+                        scheduleForTheNextLessonAndStop(validLessons, currentLessons);
                     }
-
-                    scheduleForTheNextLesson(validLessons, currentLessons);
                 }
             }
 
@@ -109,6 +117,7 @@ public class NextLessonNotificationService extends Service {
             public void onLessonsCouldNotBeLoaded() {
                 //We're going to wait for the lessons to be available; the service will still start
                 //at the app opening and network state change.
+                stopSelf();
             }
         });
 
@@ -183,7 +192,7 @@ public class NextLessonNotificationService extends Service {
         return lessonsStartingSoon;
     }
 
-    private void scheduleForTheNextLesson(ArrayList<LessonSchedule> lessons, ArrayList<LessonSchedule> currentLessons) {
+    private void scheduleForTheNextLessonAndStop(ArrayList<LessonSchedule> lessons, ArrayList<LessonSchedule> currentLessons) {
         //Note: If we're finishing a lesson and don't have the next lesson starting immediately at
         // the end of it, then we must show a notification before the end of that lessons telling us
         // when the next lessons starts.
@@ -219,6 +228,8 @@ public class NextLessonNotificationService extends Service {
         } else {
             scheduleNextStartAt(CalendarUtils.addMinutes(nextStartPlannedAt, -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN));
         }
+
+        stopSelf();
     }
 
     private void scheduleAtNextDayMorning() {
@@ -254,6 +265,10 @@ public class NextLessonNotificationService extends Service {
                     .setContentText(lesson.getSynopsis())
                     .setColor(getResources().getColor(R.color.colorNotification))
                     .setAutoCancel(true);
+
+        if (AppPreferences.areNextLessonNotificationsFixed()) {
+            notificationBuilder.setOngoing(true);
+        }
 
 
         Intent intent = new Intent(this, FirstActivityChooserActivity.class);
@@ -303,8 +318,7 @@ public class NextLessonNotificationService extends Service {
 
     public static void clearNotifications(Context context) {
         //Technically this could cancel the "Your lessons has changed" notification. However, this
-        //method is called when the user switches study course, so he won't need that notification
-        //anyway.
+        //would happen very infrequently since the changes to lesson are not performed very often
         ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancelAll();
     }
 }

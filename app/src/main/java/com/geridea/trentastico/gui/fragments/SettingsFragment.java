@@ -52,7 +52,9 @@ public class SettingsFragment extends IFragmentWithMenuItems {
     @BindView(R.id.lesson_change_show_notification) Switch shownNotificationOnLessonChanges;
 
     //Next lesson notification
-    @BindView(R.id.current_notification_anticipation) TextView currentNotificationAnticipation;
+    @BindView(R.id.show_next_lesson_notification) Switch showNextLessonNotification;
+    @BindView(R.id.make_notifications_fixed) Switch makeNotificationFixedSwitch;
+
 
     @Nullable
     @Override
@@ -69,6 +71,10 @@ public class SettingsFragment extends IFragmentWithMenuItems {
         //Lesson changes
         searchForLessonChanges.setChecked(AppPreferences.isSearchForLessonChangesEnabled());
         shownNotificationOnLessonChanges.setChecked(AppPreferences.isNotificationForLessonChangesEnabled());
+
+        //Next lesson notification
+        showNextLessonNotification.setChecked(AppPreferences.areNextLessonNotificationsEnabled());
+        makeNotificationFixedSwitch.setChecked(AppPreferences.areNextLessonNotificationsFixed());
 
         isLoading = false;
 
@@ -124,17 +130,36 @@ public class SettingsFragment extends IFragmentWithMenuItems {
 
     @OnCheckedChanged(R.id.show_next_lesson_notification)
     void onShowNextLessonNotificationSwitchChanged(boolean checked){
+        if (isLoading) {
+            return;
+        }
 
+        AppPreferences.setNextLessonNotificationsEnabled(checked);
+        makeNotificationFixedSwitch.setEnabled(checked);
+
+        if (checked) {
+            startNextLessonNotificationService();
+        } else {
+            NextLessonNotificationService.clearNotifications(getActivity());
+        }
+    }
+
+    private void startNextLessonNotificationService() {
+        getActivity().startService(NextLessonNotificationService.createIntent(
+            getActivity(), NextLessonNotificationService.STARTER_SWITCHED_ON)
+        );
     }
 
     @OnCheckedChanged(R.id.make_notifications_fixed)
     void onMakeNotificationsFixedSwitchChanged(boolean checked){
+        if (isLoading) {
+            return;
+        }
 
-    }
+        AppPreferences.setNextLessonNotificationsFixed(checked);
 
-    @OnClick(R.id.next_lesson_notification_anticipation_button)
-    void onChangeNextLessonNotificationAnticipationButtonPressed(){
-
+        //If we have any notification, we have to update them:
+        startNextLessonNotificationService();
     }
 
     @Override
