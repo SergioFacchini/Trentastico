@@ -23,7 +23,7 @@ public class FirstActivityChooserActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_APP_START));
+        startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_APP_START));
         startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_APP_BOOT));
 
         if (AppPreferences.isFirstRun()) {

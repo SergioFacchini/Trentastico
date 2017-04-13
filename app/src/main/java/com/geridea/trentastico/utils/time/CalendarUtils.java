@@ -115,4 +115,16 @@ public class CalendarUtils {
     public static long getDebuggableMillis() {
        return DEBUG_MODE && DEBUG_FORCE_ANOTHER_DATE ? DATE_TO_FORCE : System.currentTimeMillis();
     }
+
+    public static long getMillisWithMinutesDelta(int delta) {
+        Calendar now = getDebuggableToday();
+        now.add(Calendar.MINUTE, delta);
+        return now.getTimeInMillis();
+    }
+
+    public static long addMinutes(long millis, int delta) {
+        Calendar cal = getCalendarInitializedAs(millis);
+        cal.add(Calendar.MINUTE, delta);
+        return cal.getTimeInMillis();
+    }
 }

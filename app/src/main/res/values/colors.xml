@@ -6,4 +6,5 @@
     <color name="colorForeground">#FFFFFF</color>
     <color name="backgroundMain">#622545</color>
     <color name="colorAccentLight">#f7bfdd</color>
+    <color name="colorNotification">#a13c71</color>
 </resources>

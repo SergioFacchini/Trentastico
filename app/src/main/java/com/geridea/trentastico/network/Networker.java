@@ -7,6 +7,7 @@ package com.geridea.trentastico.network;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.database.LessonsSetAvailableListener;
 import com.geridea.trentastico.database.NotCachedIntervalsListener;
+import com.geridea.trentastico.database.TodaysLessonsListener;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedInterval;
@@ -20,6 +21,7 @@ import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.network.request.listener.ListLessonsListener;
 import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
@@ -85,12 +87,12 @@ public class Networker {
         Cacher.getNotCachedSubintervals(interval, extraCourses, new NotCachedIntervalsListener(){
 
             public void onIntervalsKnown(ArrayList<NotCachedInterval> notCachedIntervals ){
-                for (NotCachedInterval notCachedInterval : notCachedIntervals) {
-                    processRequest(notCachedInterval.generateOneTimeRequest(listener));
-                }
-
                 if (notCachedIntervals.isEmpty()) {
                     listener.onNothingToLoad();
+                } else {
+                    for (NotCachedInterval notCachedInterval : notCachedIntervals) {
+                        processRequest(notCachedInterval.generateOneTimeRequest(listener));
+                    }
                 }
             }
         });
@@ -108,4 +110,20 @@ public class Networker {
         processRequest(new ListLessonsRequest(studyCourse, listener));
     }
 
+    public static void loadTodaysLessons(final TodaysLessonsListener todaysLessonsListener) {
+        final WeekDayTime today = new WeekDayTime();
+
+        //Here we have to load all the lesson scheduled for today.
+        WeekInterval dayInterval = today.getContainingInterval();
+        loadAndCacheNotCachedLessons(dayInterval, new WaitForDownloadLessonListener() {
+            @Override
+            public void onFinish(boolean loadingSuccessful) {
+                if (loadingSuccessful) {
+                    Cacher.getTodaysLessons(todaysLessonsListener);
+                } else {
+                    todaysLessonsListener.onLessonsCouldNotBeLoaded();
+                }
+            }
+        });
+    }
 }

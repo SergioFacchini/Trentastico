@@ -35,6 +35,8 @@ import com.geridea.trentastico.model.cache.StudyCourseNotCachedInterval;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.StringUtils;
 import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.CalendarUtils;
+import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekIntervalCutResult;
 import com.geridea.trentastico.utils.time.WeekTime;
@@ -795,6 +797,15 @@ public class Cacher {
         jobQueue.addJobInBackground(new GetTodaysLessonsJob(listener));
     }
 
+    /**
+     * @param day the day to check
+     * @param listener the callback. Note that this callback will be positive only when the
+     *                 study course and all the extra courses are cached.
+     */
+    public static void isDayCached(WeekDayTime day, IsDayCachedListener listener) {
+        jobQueue.addJobInBackground(new IsDayCachedJob(day, listener));
+    }
+
     private static abstract class CacheJob extends Job {
 
         protected CacheJob() {
@@ -962,14 +973,10 @@ public class Cacher {
 
         @Override
         public void onRun() throws Throwable {
-            Calendar now = Calendar.getInstance();
+            Calendar now = CalendarUtils.getDebuggableToday();
             now.set(Calendar.HOUR_OF_DAY, 0);
             now.set(Calendar.MINUTE, 0);
             now.set(Calendar.SECOND, 0);
-
-//            if(now.get(Calendar.MINUTE) <= deltaMinutes && now.get(Calendar.HOUR_OF_DAY) == 0){
-//                now.set(Calendar.MINUTE, 0);
-//            }
 
             Calendar endOfDay = (Calendar) now.clone();
             endOfDay.set(Calendar.HOUR_OF_DAY, 23);
@@ -987,4 +994,42 @@ public class Cacher {
     }
 
 
+    private static class IsDayCachedJob extends CacheJob {
+
+        private final WeekDayTime today;
+        private final IsDayCachedListener listener;
+
+        public IsDayCachedJob(WeekDayTime today, IsDayCachedListener listener) {
+            this.today = today;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            WeekInterval thisWeekInterval = today.getContainingInterval();
+
+            //Is study course cached
+            if(isStudyCourseCached(thisWeekInterval)){
+                listener.onIsCachedResult(areExtraCoursesCached(thisWeekInterval));
+            } else {
+                listener.onIsCachedResult(false);
+            }
+        }
+
+        private boolean areExtraCoursesCached(WeekInterval thisWeekInterval) {
+            for (ExtraCourse extraCourse : AppPreferences.getExtraCourses()) {
+                int lessonTypeId = extraCourse.getLessonTypeId();
+                if (loadExtraCourseCachePeriods(thisWeekInterval, true, lessonTypeId).isEmpty()) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private boolean isStudyCourseCached(WeekInterval thisWeekInterval) {
+            return !loadStudyCourseCachePeriods(thisWeekInterval, true).isEmpty();
+        }
+
+    }
 }

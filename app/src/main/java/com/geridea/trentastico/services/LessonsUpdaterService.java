@@ -28,11 +28,10 @@ import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.network.request.LessonsDiffResult;
 import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
-import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
+import com.geridea.trentastico.network.request.listener.WaitForDownloadListenerToSignalAdapter;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.ContextUtils;
 import com.geridea.trentastico.utils.UIUtils;
-import com.geridea.trentastico.utils.listeners.GenericListener1;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
@@ -147,7 +146,7 @@ public class LessonsUpdaterService extends Service {
     private void scheduleNextStartAndTerminate(int scheduleType) {
         Calendar calendar = calculateAndSaveNextSchedule(scheduleType);
 
-        Intent intent = createServiceIntent(this, STARTER_ALARM_MANAGER);
+        Intent intent = createIntent(this, STARTER_ALARM_MANAGER);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -192,7 +191,7 @@ public class LessonsUpdaterService extends Service {
     }
 
     @NonNull
-    public static Intent createServiceIntent(Context context, int starter) {
+    public static Intent createIntent(Context context, int starter) {
         Intent intent = new Intent(context, LessonsUpdaterService.class);
         intent.putExtra(EXTRA_STARTER, starter);
         return intent;
@@ -281,7 +280,7 @@ public class LessonsUpdaterService extends Service {
     }
 
     public static void cancelSchedules(Context context, int starter) {
-        Intent serviceIntent = LessonsUpdaterService.createServiceIntent(
+        Intent serviceIntent = LessonsUpdaterService.createIntent(
                 context, starter
         );
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
@@ -388,14 +387,9 @@ public class LessonsUpdaterService extends Service {
 
         @Override
         public void onRun() throws Throwable {
-            Networker.loadAndCacheNotCachedLessons(intervalToLoad,
-                    new WaitForDownloadLessonListener(new GenericListener1<Boolean>() {
-
-                @Override
-                public void onFinish(Boolean success) {
-                    onCheckTerminated.dispatch(success);
-                }
-            }));
+            Networker.loadAndCacheNotCachedLessons(
+                intervalToLoad, new WaitForDownloadListenerToSignalAdapter(onCheckTerminated)
+            );
         }
 
         @Override

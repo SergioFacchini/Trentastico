@@ -25,17 +25,17 @@ public class LessonSchedule implements Serializable {
     private final String room;
     private final String subject;
     private final long startsAt;
-    private final long finishesAt;
+    private final long endsAt;
     private final String fullDescription;
     private final int color;
     private final long lessonTypeId;
 
-    public LessonSchedule(long id, String room, String subject, long startsAt, long finishesAt, String fullDescription, int color, long lessonTypeId) {
+    public LessonSchedule(long id, String room, String subject, long startsAt, long endsAt, String fullDescription, int color, long lessonTypeId) {
         this.id = id;
         this.room = room;
         this.subject = subject;
         this.startsAt = startsAt;
-        this.finishesAt = finishesAt;
+        this.endsAt = endsAt;
         this.fullDescription = fullDescription;
         this.color = color;
         this.lessonTypeId = lessonTypeId;
@@ -161,7 +161,7 @@ public class LessonSchedule implements Serializable {
     private boolean isMeaningfullyEqualTo(LessonSchedule that) {
         if (id         != that.id)         return false;
         if (startsAt   != that.startsAt)   return false;
-        if (finishesAt != that.finishesAt) return false;
+        if (endsAt != that.endsAt) return false;
         if (!room   .equals(that.room))    return false;
         if (!subject.equals(that.subject)) return false;
         return fullDescription.equals(that.fullDescription);
@@ -186,8 +186,8 @@ public class LessonSchedule implements Serializable {
         return startsAt;
     }
 
-    public long getFinishesAt() {
-        return finishesAt;
+    public long getEndsAt() {
+        return endsAt;
     }
 
     public String getFullDescription() {
@@ -210,7 +210,7 @@ public class LessonSchedule implements Serializable {
 
     public Calendar getEndCal() {
         Calendar calendar = getDebuggableToday();
-        calendar.setTimeInMillis(getFinishesAt());
+        calendar.setTimeInMillis(getEndsAt());
         return calendar;
     }
 
@@ -221,7 +221,11 @@ public class LessonSchedule implements Serializable {
         String startTime = hhmm.format(getStartCal().getTime());
         String endTime   = hhmm.format(getEndCal()  .getTime());
 
-        return String.format("%s-%s | %s", room, startTime, endTime);
+        if (room.isEmpty()) {
+            return String.format("%s-%s", startTime, endTime);
+        } else {
+            return String.format("%s-%s | %s", startTime, endTime, room);
+        }
     }
 
 
@@ -294,11 +298,11 @@ public class LessonSchedule implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("[id: %d lessonType: %d desctipion: %s ]", getId(), getLessonTypeId(), getFullDescription());
+        return String.format("[id: %d lessonType: %d description: %s ]", getId(), getLessonTypeId(), getFullDescription());
     }
 
     public int getDurationInMinutes() {
-        return (int) TimeUnit.MILLISECONDS.toMinutes(finishesAt - startsAt);
+        return (int) TimeUnit.MILLISECONDS.toMinutes(endsAt - startsAt);
     }
 
     @Override
@@ -308,19 +312,21 @@ public class LessonSchedule implements Serializable {
 
         LessonSchedule that = (LessonSchedule) o;
 
-        if (id           != that.id)           return false;
-        if (startsAt     != that.startsAt)     return false;
-        if (finishesAt   != that.finishesAt)   return false;
-        if (color        != that.color)        return false;
-        if (lessonTypeId != that.lessonTypeId) return false;
-
-        if (!room   .equals(that.room))    return false;
-        if (!subject.equals(that.subject)) return false;
-        return fullDescription.equals(that.fullDescription);
-
+        return id           == that.id
+            && startsAt     == that.startsAt
+            && endsAt       == that.endsAt
+            && color        == that.color
+            && lessonTypeId == that.lessonTypeId
+            && room           .equals(that.room)
+            && subject        .equals(that.subject)
+            && fullDescription.equals(that.fullDescription);
     }
 
     public boolean startsBefore(long currentMillis) {
         return getStartsAt() < currentMillis;
+    }
+
+    public boolean isHeldInMilliseconds(long ms) {
+        return startsAt >= ms && ms <= endsAt;
     }
 }

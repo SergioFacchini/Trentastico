@@ -6,6 +6,7 @@ package com.geridea.trentastico.gui.fragments;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,6 +25,7 @@ import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.services.LessonsUpdaterService;
+import com.geridea.trentastico.services.NextLessonNotificationService;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener1;
 import com.threerings.signals.Signal1;
@@ -36,6 +38,11 @@ import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 public class SettingsFragment extends IFragmentWithMenuItems {
+
+    /**
+     * Prevents listeners from triggering unnecessarily.
+     */
+    boolean isLoading = true;
 
     //Study course
     @BindView(R.id.current_study_course) TextView currentStudyCourse;
@@ -50,6 +57,8 @@ public class SettingsFragment extends IFragmentWithMenuItems {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        isLoading = true;
+
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
 
@@ -60,6 +69,8 @@ public class SettingsFragment extends IFragmentWithMenuItems {
         //Lesson changes
         searchForLessonChanges.setChecked(AppPreferences.isSearchForLessonChangesEnabled());
         shownNotificationOnLessonChanges.setChecked(AppPreferences.isNotificationForLessonChangesEnabled());
+
+        isLoading = false;
 
         return view;
     }
@@ -82,12 +93,16 @@ public class SettingsFragment extends IFragmentWithMenuItems {
 
     @OnCheckedChanged(R.id.search_for_lesson_changes)
     void onSearchForLessonsSwitchChanged(boolean enabled){
+        if (isLoading) {
+            return;
+        }
+
         AppPreferences.setSearchForLessonChangesEnabled(enabled);
         shownNotificationOnLessonChanges.setEnabled(enabled);
 
         if (enabled) {
             getActivity().startService(
-                LessonsUpdaterService.createServiceIntent(getActivity(), LessonsUpdaterService.STARTER_SETTING_CHANGED)
+                LessonsUpdaterService.createIntent(getActivity(), LessonsUpdaterService.STARTER_SETTING_CHANGED)
             );
         } else {
             LessonsUpdaterService.cancelSchedules(getActivity(), LessonsUpdaterService.STARTER_SETTING_CHANGED);
@@ -96,6 +111,10 @@ public class SettingsFragment extends IFragmentWithMenuItems {
 
     @OnCheckedChanged(R.id.search_for_lesson_changes)
     void onShowLessonChangeNotificationSwitchChanged(boolean checked){
+        if (isLoading) {
+            return;
+        }
+
         AppPreferences.setNotificationForLessonChangesEnabled(checked);
     }
 
@@ -156,18 +175,36 @@ public class SettingsFragment extends IFragmentWithMenuItems {
                 //We just clicked ok without changing our course...
                 onChoiceMade.dispatch(selectedCourse);
             } else {
-
-                AppPreferences.removeAllHiddenCourses(); //No longer need them
-                AppPreferences.removeAllHiddenPartitionings(); //No longer need them
+                clearFilters();
                 clearCache(selectedCourse);
-                AppPreferences.removeExtraCoursesHaving(selectedCourse.getCourseId(), selectedCourse.getYear());
+                removeOverlappingExtraCourses(selectedCourse);
 
                 AppPreferences.setStudyCourse(selectedCourse);
 
+                dealWithNextLessonNotifications();
                 onChoiceMade.dispatch(selectedCourse);
             }
 
             dismiss();
+        }
+
+        private void dealWithNextLessonNotifications() {
+            NextLessonNotificationService.clearNotifications(getContext());
+
+            //We need to show the next lesson notification for the new course
+            Intent intent = NextLessonNotificationService.createIntent(
+                    getContext(), NextLessonNotificationService.STARTER_STUDY_COURSE_CHANGE
+            );
+            getActivity().startService(intent);
+        }
+
+        private void removeOverlappingExtraCourses(StudyCourse selectedCourse) {
+            AppPreferences.removeExtraCoursesHaving(selectedCourse.getCourseId(), selectedCourse.getYear());
+        }
+
+        private void clearFilters() {
+            AppPreferences.removeAllHiddenCourses(); //No longer need them
+            AppPreferences.removeAllHiddenPartitionings(); //No longer need them
         }
 
         private void clearCache(StudyCourse selectedCourse) {

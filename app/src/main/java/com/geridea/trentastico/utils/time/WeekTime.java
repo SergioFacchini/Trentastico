@@ -90,7 +90,7 @@ public class WeekTime {
     }
 
 
-    public void addWeeks(int numWeeksToAdd) {
+    public WeekTime addWeeks(int numWeeksToAdd) {
         //Some years may have 53 weeks, so it's a good thing to delegate this calculation to the
         //calendar
         Calendar dummy = CalendarUtils.getClearCalendar();
@@ -99,6 +99,8 @@ public class WeekTime {
         dummy.add(Calendar.WEEK_OF_YEAR, numWeeksToAdd);
 
         initFromCalendar(dummy);
+
+        return this;
     }
 
     public WeekTime copy() {

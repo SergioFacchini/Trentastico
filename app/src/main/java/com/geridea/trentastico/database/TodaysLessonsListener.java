@@ -11,4 +11,5 @@ import java.util.ArrayList;
 
 public interface TodaysLessonsListener {
     void onLessonsAvailable(ArrayList<LessonSchedule> lessons);
+    void onLessonsCouldNotBeLoaded();
 }

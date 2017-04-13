@@ -26,6 +26,10 @@ public class WeekDayTime {
         );
     }
 
+    public WeekDayTime() {
+        this(CalendarUtils.getDebuggableToday());
+    }
+
     public int getYear() {
         return year;
     }
@@ -75,5 +79,15 @@ public class WeekDayTime {
             return false;
         }
 
+    }
+
+    /**
+     * @return the smallest week interval that contains this WeekDayTime.
+     */
+    public WeekInterval getContainingInterval() {
+        WeekTime from = new WeekTime(this);
+        WeekTime to = from.copy().addWeeks(1);
+
+        return new WeekInterval(from, to);
     }
 }

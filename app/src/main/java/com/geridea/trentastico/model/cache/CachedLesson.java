@@ -45,7 +45,7 @@ public class CachedLesson {
                 cachedPeriodId,
                 lesson.getId(),
                 lesson.getStartsAt(),
-                lesson.getFinishesAt(),
+                lesson.getEndsAt(),
                 lesson.getLessonTypeId(),
                 lesson.getSubject(),
                 lesson.getRoom(),

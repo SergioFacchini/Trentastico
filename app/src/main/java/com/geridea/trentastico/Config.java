@@ -11,8 +11,8 @@ public final class Config {
     public static final boolean DEBUG_MODE = true;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
-    public static final boolean DEBUG_FORCE_ANOTHER_DATE = true;
-    public static long DATE_TO_FORCE = 1491814532000L; //Mon Apr 10 10:55:32 2017 GMT
+    public static final boolean DEBUG_FORCE_ANOTHER_DATE = false;
+    public static long DATE_TO_FORCE = 1491814932000L; //Mon Apr 10 10:55:32 2017 GMT
 
     //Networking
     /**
@@ -30,11 +30,14 @@ public final class Config {
     //Calendar
     public static final int CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 2;
 
-    //Services
+    //Lessons update service
     public static final int LESSONS_REFRESH_WAITING_HOURS = 4;
     public static final int LESSONS_REFRESH_POSTICIPATION_MINUTES = 5;
 
     public static final boolean QUICK_LESSON_CHECKS = false;
     public static final int DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30;
     public static final int DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS = 8;
+
+    //Next lesson notification service
+    public static final int NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15;
 }

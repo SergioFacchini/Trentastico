@@ -25,7 +25,7 @@
             android:exported="false" />
 
         <receiver
-            android:name=".receivers.BootBroadcastReceiver"
+            android:name=".receivers.BootAndNetworkBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

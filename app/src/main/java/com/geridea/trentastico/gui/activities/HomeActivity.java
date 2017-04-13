@@ -112,7 +112,7 @@ public class HomeActivity extends AppCompatActivity
             Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
             switchToCalendarFragment();
         } else if(id == R.id.update_courses){
-            startService(LessonsUpdaterService.createServiceIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
+            startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
         } else if(id == R.id.start_next_lesson_service){
             startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_DEBUG));
         }
