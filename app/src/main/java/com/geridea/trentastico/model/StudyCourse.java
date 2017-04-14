@@ -62,4 +62,12 @@ public class StudyCourse {
 
 
     }
+
+    public CourseAndYear getCourseAndYear() {
+        CourseAndYear cay = new CourseAndYear();
+        cay.courseId = getCourseId();
+        cay.year = getYear();
+        return cay;
+    }
+
 }

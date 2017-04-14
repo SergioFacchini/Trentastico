@@ -38,6 +38,6 @@ public final class Config {
     public static final int DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30;
     public static final int DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS = 8;
 
-    //Next lesson notification service
+    //Next lessons notification service
     public static final int NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15;
 }

@@ -8,16 +8,21 @@ import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.database.LessonsSetAvailableListener;
 import com.geridea.trentastico.database.NotCachedIntervalsListener;
 import com.geridea.trentastico.database.TodaysLessonsListener;
+import com.geridea.trentastico.model.CourseAndYear;
 import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedInterval;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
+import com.geridea.trentastico.network.request.FetchRoomForLessonRequest;
 import com.geridea.trentastico.network.request.IRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
 import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
+import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
+import com.geridea.trentastico.network.request.listener.LessonsWithRoomMultipleListener;
 import com.geridea.trentastico.network.request.listener.ListLessonsListener;
 import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.utils.AppPreferences;
@@ -126,4 +131,27 @@ public class Networker {
             }
         });
     }
+
+    public static void loadRoomsForLessonsIfMissing(ArrayList<LessonSchedule> lessons, final LessonsWithRoomListener listener) {
+        ArrayList<LessonSchedule> lessonsToLoad = new ArrayList<>();
+        for (LessonSchedule lesson : lessons) {
+            if(!lesson.hasRoomSpecified()){
+                lessonsToLoad.add(lesson);
+            }
+        }
+
+        if (lessonsToLoad.isEmpty()) {
+            listener.onLoadingCompleted(lessons);
+        } else {
+            LessonsWithRoomMultipleListener fetchRoomListener
+                    = new LessonsWithRoomMultipleListener(lessonsToLoad, listener);
+
+            for (LessonSchedule lesson: lessonsToLoad) {
+                CourseAndYear cay = LessonSchedule.findCourseAndYearForLesson(lesson);
+                processRequest(new FetchRoomForLessonRequest(lesson, cay, fetchRoomListener));
+            }
+
+        }
+    }
+
 }

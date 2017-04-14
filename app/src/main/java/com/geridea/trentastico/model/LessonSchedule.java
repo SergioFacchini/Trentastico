@@ -2,8 +2,11 @@ package com.geridea.trentastico.model;
 
 import com.geridea.trentastico.model.cache.CachedLesson;
 import com.geridea.trentastico.network.request.LessonsDiffResult;
+import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.NumbersUtils;
 import com.geridea.trentastico.utils.StringUtils;
+import com.geridea.trentastico.utils.time.CalendarInterval;
+import com.geridea.trentastico.utils.time.CalendarUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +25,7 @@ import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToda
 
 public class LessonSchedule implements Serializable {
     private final long id;
-    private final String room;
+    private String room;
     private final String subject;
     private final long startsAt;
     private final long endsAt;
@@ -89,82 +92,25 @@ public class LessonSchedule implements Serializable {
         }
 
         return diffResult;
+    }
 
-        //TODO: check if to keep this code or not.
-//        int cachedI = 0, fetchedI = 0;
-//        int stop = Math.min(fetchedLessons.size(), cachedLessons.size());
-//        while(Math.max(cachedI, fetchedI) == stop){
-//            LessonSchedule cached  = cachedLessons .get(cachedI);
-//            LessonSchedule fetched = fetchedLessons.get(fetchedI);
-//
-//            if(cached.equals(fetched)){
-//                //This lesson did not change
-//                cachedI++;
-//                fetchedI++;
-//            } else if(cached.getId() == fetched.getId()) {
-//                //We've got the same event, but it has some details changed
-//                differenceListener.onStudyCourseLessonChanged(cached, fetched);
-//
-//                cachedI++;
-//                fetchedI++;
-//            } else {
-//                //The lessons differ, two things might have happened:
-//                //* A new lesson was added before the one that's equal to ours
-//                //* The lesson was removed
-//
-//                //Checking if our lessons still exists:
-//                boolean foundCachedLesson = false;
-//                int fetchedIWithId;
-//                for(fetchedIWithId = fetchedI+1;
-//                    fetchedIWithId<fetchedLessons.size() && !foundCachedLesson;
-//                    fetchedIWithId++){
-//
-//                    LessonSchedule futureFetched = fetchedLessons.get(fetchedIWithId);
-//                    if (cached.getId() == futureFetched.getId()) {
-//                        //We found our lesson some lessons away. This means that new lessons were
-//                        //inserted
-//                        foundCachedLesson = true;
-//                    }
-//                }
-//
-//                if (foundCachedLesson) {
-//                    //We found our cached lesson; all the lessons in between have to be considered
-//                    //new
-//                    for(int i = fetchedI+1; i<fetchedIWithId; i++){
-//                        differenceListener.onStudyLessonAdded(fetchedLessons.get(i));
-//                        fetchedI++;
-//                    }
-//
-//                    cachedI++;
-//                } else {
-//                    //We didn't find the missing lesson. This means that the lesson has been removed
-//                    differenceListener.onStudyLessonRemoved(cached);
-//                    cachedI++;
-//                }
-//
-//            }
-//        }
-//
-//        if(cachedI > fetchedLessons.size()){
-//            //We have some unprocessed cached lessons; these lessons have been removed
-//            for(; cachedI<cachedLessons.size(); cachedI++){
-//                differenceListener.onStudyLessonRemoved(cachedLessons.get(cachedI));
-//            }
-//        } else if(cachedI < fetchedLessons.size()) {
-//            //We have some lessons that were added after the cache
-//            for(; fetchedI<cachedLessons.size(); fetchedI++){
-//                differenceListener.onStudyLessonAdded(fetchedLessons.get(fetchedI));
-//            }
-//        }
+    public static CourseAndYear findCourseAndYearForLesson(LessonSchedule lesson) {
+        for (ExtraCourse extraCourse : AppPreferences.getExtraCourses()) {
+            if (extraCourse.getLessonTypeId() == lesson.getLessonTypeId()) {
+                return extraCourse.getCourseAndYear();
+            }
+        }
+
+        return AppPreferences.getStudyCourse().getCourseAndYear();
     }
 
     private boolean isMeaningfullyEqualTo(LessonSchedule that) {
-        if (id         != that.id)         return false;
-        if (startsAt   != that.startsAt)   return false;
-        if (endsAt != that.endsAt) return false;
-        if (!room   .equals(that.room))    return false;
-        if (!subject.equals(that.subject)) return false;
-        return fullDescription.equals(that.fullDescription);
+        return id == that.id
+            && startsAt == that.startsAt
+            && endsAt == that.endsAt
+            && room.equals(that.room)
+            && subject.equals(that.subject)
+            && fullDescription.equals(that.fullDescription);
     }
 
     /**
@@ -329,4 +275,24 @@ public class LessonSchedule implements Serializable {
     public boolean isHeldInMilliseconds(long ms) {
         return startsAt >= ms && ms <= endsAt;
     }
+
+    public boolean hasRoomSpecified() {
+        return !room.isEmpty();
+    }
+
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public CalendarInterval toExpandedCalendarInterval(int typeOfTime, int delta) {
+        Calendar calFrom = CalendarUtils.getCalendarInitializedAs(startsAt);
+        calFrom.add(typeOfTime, -delta);
+
+        Calendar calTo = CalendarUtils.getCalendarInitializedAs(endsAt);
+        calTo.add(typeOfTime, delta);
+
+        return new CalendarInterval(calFrom, calTo);
+    }
+
 }

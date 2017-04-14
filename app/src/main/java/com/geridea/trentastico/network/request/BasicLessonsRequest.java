@@ -11,9 +11,7 @@ import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.utils.time.CalendarInterval;
-import com.geridea.trentastico.utils.time.WeekInterval;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,15 +32,14 @@ abstract class BasicLessonsRequest implements IRequest {
 
     @Override
     public String getURL() {
-        return buildRequestURL(getStudyCourse(), getIntervalToLoad());
+        return buildRequestURL(getCourseId(), getYear(), getCalendarIntervalToLoad());
     }
 
-    protected abstract WeekInterval getIntervalToLoad();
-    protected abstract StudyCourse getStudyCourse();
-    
-    protected static String buildRequestURL(StudyCourse studyCourse, WeekInterval intervalToLoad) {
-        CalendarInterval interval = intervalToLoad.toCalendarInterval();
+    protected abstract CalendarInterval getCalendarIntervalToLoad();
+    protected abstract long getCourseId();
+    protected abstract int getYear();
 
+    protected static String buildRequestURL(long courseId, int year, CalendarInterval intervalToLoad) {
         if(Config.DEBUG_MODE && Config.LAUNCH_REQUESTS_TO_DEBUG_SERVER){
             return Config.DEBUG_SERVER_URL;
         }
@@ -50,11 +47,11 @@ abstract class BasicLessonsRequest implements IRequest {
         return String.format(
                 Locale.CANADA,
                 "http://webapps.unitn.it/Orari/it/Web/AjaxEventi/c/%d-%d/agendaWeek?_=%d&start=%d&end=%d",
-                studyCourse.getCourseId(),
-                studyCourse.getYear(),
+                courseId,
+                year,
                 System.currentTimeMillis(),
-                interval.getFrom().getTimeInMillis() / 1000,
-                interval.getTo()  .getTimeInMillis() / 1000
+                intervalToLoad.getFrom().getTimeInMillis() / 1000,
+                intervalToLoad.getTo()  .getTimeInMillis() / 1000
         );
     }
 

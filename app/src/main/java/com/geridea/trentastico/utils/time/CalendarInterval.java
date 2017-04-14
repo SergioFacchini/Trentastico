@@ -14,6 +14,11 @@ public class CalendarInterval {
         this.to = to;
     }
 
+    public CalendarInterval(long from, long to) {
+        this.from = CalendarUtils.getCalendarInitializedAs(from);
+        this.to   = CalendarUtils.getCalendarInitializedAs(to);
+    }
+
     public boolean contains(Calendar time) {
         return (time.after(from) && time.before(to)) || from.equals(time);
     }

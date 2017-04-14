@@ -101,4 +101,11 @@ public class ExtraCourse {
     public String getStudyCourseFullName() {
         return studyCourse;
     }
+
+    public CourseAndYear getCourseAndYear() {
+        CourseAndYear cay = new CourseAndYear();
+        cay.courseId = getCourseId();
+        cay.year     = getYear();
+        return cay;
+    }
 }

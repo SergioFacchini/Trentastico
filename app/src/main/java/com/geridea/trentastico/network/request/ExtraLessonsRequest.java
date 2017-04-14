@@ -10,8 +10,8 @@ import com.geridea.trentastico.gui.views.requestloader.ExtraCoursesLoadingMessag
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonsSet;
-import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
+import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 public class ExtraLessonsRequest extends BasicLessonsRequest {
@@ -87,14 +87,23 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
         listener.onLoadingAboutToStart(new ExtraCoursesLoadingMessage(this));
     }
 
-    @Override
     public WeekInterval getIntervalToLoad() {
         return interval;
     }
 
     @Override
-    public StudyCourse getStudyCourse() {
-        return new StudyCourse(-1, extraCourse.getCourseId(), extraCourse.getYear());
+    protected CalendarInterval getCalendarIntervalToLoad() {
+        return interval.toCalendarInterval();
+    }
+
+    @Override
+    protected long getCourseId() {
+        return extraCourse.getCourseId();
+    }
+
+    @Override
+    protected int getYear() {
+        return extraCourse.getYear();
     }
 
     public ExtraCourse getExtraCourse() {

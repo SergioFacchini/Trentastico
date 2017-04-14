@@ -16,6 +16,7 @@ import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
                             listener.onLoadingDelegated(getOperationId());
                         } else {
                             //We found everything we needed in the old cache
-                            listener.onLessonsLoaded(cache, getIntervalToLoad(), 0);
+                            listener.onLessonsLoaded(cache, interval, 0);
                         }
 
                     } else {
@@ -94,9 +95,9 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
 
             onLessonsSetAvailable(lessonsSet);
 
-            Cacher.cacheLessonsSet(lessonsSet, getIntervalToLoad());
+            Cacher.cacheLessonsSet(lessonsSet, interval);
 
-            listener.onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
+            listener.onLessonsLoaded(lessonsSet, interval, getOperationId());
         } catch (Exception e) {
             e.printStackTrace();
             BugLogger.logBug();
@@ -133,21 +134,26 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
         listener.onLoadingAboutToStart(new LessonsLoadingMessage(getOperationId(), interval, isRetrying));
     }
 
-    @Override
-    protected WeekInterval getIntervalToLoad() {
-        return interval;
-    }
-
-    @Override
-    protected StudyCourse getStudyCourse() {
-        return course;
-    }
-
     public void setCacheCheckEnabled(boolean isCacheCheckEnabled) {
         this.isCacheCheckEnabled = isCacheCheckEnabled;
     }
 
     public void setRetrialsEnabled(boolean areRetrialsEnabled) {
         this.areRetrialsEnabled = areRetrialsEnabled;
+    }
+
+    @Override
+    protected CalendarInterval getCalendarIntervalToLoad() {
+        return interval.toCalendarInterval();
+    }
+
+    @Override
+    protected long getCourseId() {
+        return course.getCourseId();
+    }
+
+    @Override
+    protected int getYear() {
+        return course.getYear();
     }
 }

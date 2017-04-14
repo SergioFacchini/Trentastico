@@ -9,6 +9,7 @@ import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.network.request.listener.ListLessonsListener;
+import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 
@@ -56,12 +57,18 @@ public class ListLessonsRequest extends BasicLessonsRequest {
     }
 
     @Override
-    protected WeekInterval getIntervalToLoad() {
-        return weekInterval;
+    protected CalendarInterval getCalendarIntervalToLoad() {
+        return weekInterval.toCalendarInterval();
     }
 
     @Override
-    protected StudyCourse getStudyCourse() {
-        return studyCourse;
+    protected long getCourseId() {
+        return studyCourse.getCourseId();
     }
+
+    @Override
+    protected int getYear() {
+        return studyCourse.getYear();
+    }
+
 }

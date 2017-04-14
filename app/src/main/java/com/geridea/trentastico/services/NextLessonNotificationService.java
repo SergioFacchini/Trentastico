@@ -22,6 +22,7 @@ import com.geridea.trentastico.database.TodaysLessonsListener;
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.network.Networker;
+import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 
@@ -75,12 +76,12 @@ public class NextLessonNotificationService extends Service {
             public void onLessonsAvailable(ArrayList<LessonSchedule> lessons) {
                 //Finding passed lessons to hide the notifications of the past lessons
                 ArrayList<LessonSchedule> passedLessons  = findPassedLessons(lessons);
-                ArrayList<LessonSchedule> currentLessons = findCurrentLessons(lessons);
+                final ArrayList<LessonSchedule> currentLessons = findCurrentLessons(lessons);
 
                 hideNotificationsForPassedLessons(passedLessons);
 
                 //Calculating lessons that will possibly be shown
-                ArrayList<LessonSchedule> validLessons = getValidLessons(lessons);
+                final ArrayList<LessonSchedule> validLessons = getValidLessons(lessons);
                 validLessons.removeAll(passedLessons);
 
                 if (validLessons.isEmpty()) {
@@ -91,24 +92,37 @@ public class NextLessonNotificationService extends Service {
                     //Finding the lessons starting in less than N minutes:
                     ArrayList<LessonSchedule> lessonsStartingSoon = findLessonsStartingSoon(validLessons);
                     if (lessonsStartingSoon.isEmpty()) {
-                        //TODO: fetch rooms if not available!
                         //There are no lessons starting soon, however we still have some lessons to
-                        //show. We're going to show the notification for the lessons starting next:
-                        ArrayList<LessonSchedule> nextLessons = findLessonsStartingNext(validLessons);
-                        showNotificationsForLessons(nextLessons);
+                        //show. We're going to show the notification for the lessons starting next
+                        final ArrayList<LessonSchedule> nextLessons = findLessonsStartingNext(validLessons);
+                        loadRoomsForLessonsIfMissing(nextLessons, new LessonsWithRoomListener(){
 
-                        //Since we've already shown notifications for these lessons, we won't
-                        //consider them for the next scheduling:
-                        validLessons.removeAll(nextLessons);
-                        scheduleForTheNextLessonAndStop(validLessons, currentLessons);
+                            @Override
+                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons){
+                                showNotificationsForLessons(updatedLessons);
+
+                                //Since we've already shown notifications for these lessons, we won't
+                                //consider them for the next scheduling:
+                                validLessons.removeAll(updatedLessons);
+                                scheduleForTheNextLessonAndStop(validLessons, currentLessons);
+                            }
+                        });
+
                     } else {
-                        //We have to show a notification for each lesson:
-                        showNotificationsForLessons(lessonsStartingSoon);
+                        loadRoomsForLessonsIfMissing(lessonsStartingSoon, new LessonsWithRoomListener(){
 
-                        //We have already shown notifications for the lessons starting soon. We don't
-                        //consider these for the next start calculation
-                        validLessons.removeAll(lessonsStartingSoon);
-                        scheduleForTheNextLessonAndStop(validLessons, currentLessons);
+                            @Override
+                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons){
+                                //We have to show a notification for each lesson:
+                                showNotificationsForLessons(updatedLessons);
+
+                                //We have already shown notifications for the lessons starting soon. We don't
+                                //consider these for the next start calculation
+                                validLessons.removeAll(updatedLessons);
+                                scheduleForTheNextLessonAndStop(validLessons, currentLessons);
+                            }
+                        });
+
                     }
                 }
             }
@@ -122,6 +136,10 @@ public class NextLessonNotificationService extends Service {
         });
 
         return START_NOT_STICKY;
+    }
+
+    private void loadRoomsForLessonsIfMissing(ArrayList<LessonSchedule> lessons, LessonsWithRoomListener listener) {
+        Networker.loadRoomsForLessonsIfMissing(lessons, listener);
     }
 
     private ArrayList<LessonSchedule> findCurrentLessons(ArrayList<LessonSchedule> lessons) {
