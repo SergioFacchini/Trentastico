@@ -13,7 +13,6 @@ import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
-import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
 import com.threerings.signals.Signal1;
@@ -133,9 +132,6 @@ public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKno
 
         removeLoadingInterval(interval);
 
-        lessons.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
-        lessons.removeLessonsWithHiddenPartitionings();
-
         //Operation id is null when we loaded the lesson without starting any new request
         //(example: fetched from cache)
         ILoadingMessage message = (operationId == 0) ? new NoOperationMessage() : new TerminalMessage(operationId);
@@ -168,10 +164,6 @@ public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKno
     @Override
     public void onPartiallyCachedResultsFetched(CachedLessonsSet cacheSet) {
         onLoadingMessageDispatched.dispatch(new FinishedLoadingFromCacheMessage());
-
-        cacheSet.removeLessonsWithTypeIds(AppPreferences.getLessonTypesIdsToHide());
-        cacheSet.removeLessonsWithHiddenPartitionings();
-
         onPartiallyCachedResultsFetched.dispatch(cacheSet);
     }
 

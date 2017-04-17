@@ -32,6 +32,11 @@ public class ExtraCourseLessonsDiffRequest extends ExtraLessonsRequest {
     @Override
     protected void onLessonsSetAvailable(LessonsSet lessonsSet) {
         ArrayList<LessonSchedule> fetchedLessons = new ArrayList<>(lessonsSet.getScheduledLessons());
+
+        //Do not compare what we filtered
+        LessonSchedule.filterLessons(fetchedLessons);
+        LessonSchedule.filterLessons(cachedLessons);
+
         differenceListener.onDiffResult(LessonSchedule.diffLessons(cachedLessons, fetchedLessons));
     }
 

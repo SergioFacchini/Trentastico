@@ -20,9 +20,11 @@ public class StudyCourseLessonsDiffRequest extends StudyCourseLessonsRequest  {
     private final LessonsDifferenceListener differenceListener;
 
     public StudyCourseLessonsDiffRequest(
-            WeekInterval interval, StudyCourse course, ArrayList<LessonSchedule> cachedLessons, LessonsDifferenceListener differenceListener) {
+            WeekInterval interval, StudyCourse course, ArrayList<LessonSchedule> cachedLessons,
+            LessonsDifferenceListener differenceListener) {
 
         super(interval, course, new DiffCompletedListener(differenceListener));
+
         this.cachedLessons = cachedLessons;
         this.differenceListener = differenceListener;
 
@@ -33,6 +35,11 @@ public class StudyCourseLessonsDiffRequest extends StudyCourseLessonsRequest  {
     @Override
     protected void onLessonsSetAvailable(LessonsSet lessonsSet) {
         ArrayList<LessonSchedule> fetchedLessons = new ArrayList<>(lessonsSet.getScheduledLessons());
+
+        //Do not compare what we filtered
+        LessonSchedule.filterLessons(fetchedLessons);
+        LessonSchedule.filterLessons(cachedLessons);
+
         differenceListener.onDiffResult(LessonSchedule.diffLessons(cachedLessons, fetchedLessons));
     }
 

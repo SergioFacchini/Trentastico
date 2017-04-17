@@ -417,7 +417,7 @@ public class Cacher {
 
         //Adding timing filter
         if(!fetchOldCacheToo){
-            query +=String.format(" AND (%s >= %d AND %s < %d) ",
+            query += String.format(" AND (%s >= %d AND %s < %d) ",
                     CP_CACHED_IN_MS, getLastValidCacheMs(), CP_CACHED_IN_MS, System.currentTimeMillis()
             );
         }

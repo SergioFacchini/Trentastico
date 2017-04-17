@@ -52,39 +52,11 @@ public class LessonsSet {
         }
     }
 
-    /**
-     * @return the first lesson having a given lesson type.
-     */
-    public LessonSchedule getALessonHavingType(LessonType lessonType) {
-        for (LessonSchedule scheduledLesson : scheduledLessons.values()) {
-            if(scheduledLesson.hasLessonType(lessonType)){
-                return scheduledLesson;
-            }
-        }
-
-        //Technically, should never happen
-        return null;
-    }
-
-    public void removeLessonsWithTypeIds(ArrayList<Long> lessonTypesIdsToHide) {
-        Iterator<LessonSchedule> lessonsIterator = scheduledLessons.values().iterator();
-
-        while(lessonsIterator.hasNext()){
-            LessonSchedule schedule = lessonsIterator.next();
-            for (Long lessonTypeIdToHide : lessonTypesIdsToHide) {
-                if (schedule.getLessonTypeId() == lessonTypeIdToHide) {
-                    lessonsIterator.remove();
-                    break;
-                }
-            }
-        }
-    }
-
     public void recalculatePartitionings() {
         for (LessonType lessonType : getLessonTypes()) {
 
             Partitioning previous = Partitioning.NONE;
-            for (LessonSchedule lesson : getLessonsOfType(lessonType)) {
+            for (LessonSchedule lesson : LessonSchedule.getLessonsOfType(lessonType, this.getScheduledLessons())) {
 
                 Partitioning found = LessonType.findPartitioningFromDescription(lesson.getFullDescription());
                 if (found.getType() != PartitioningType.NONE) {
@@ -109,51 +81,12 @@ public class LessonsSet {
 
     }
 
-    public ArrayList<LessonSchedule> getLessonsOfType(LessonType lessonType) {
-        ArrayList<LessonSchedule> toReturn = new ArrayList<>();
-
-        for (LessonSchedule lessonSchedule : getScheduledLessons()) {
-            if (lessonSchedule.getLessonTypeId() == lessonType.getId()) {
-                toReturn.add(lessonSchedule);
-            }
-        }
-
-        return toReturn;
-    }
-
     public void addLessonSchedules(ArrayList<LessonSchedule> lessons) {
         for (LessonSchedule lesson : lessons) {
             scheduledLessons.put(lesson.getId(), lesson);
         }
 
         recalculatePartitionings();
-    }
-
-    public void removeLessonsWithHiddenPartitionings() {
-        ArrayList<LessonSchedule> lessonsToRemove = new ArrayList<>();
-
-        for (LessonType lessonType : getLessonTypes()) {
-            ArrayList<LessonSchedule> lessons = getLessonsOfType(lessonType);
-            PartitioningType partitioningType = lessonType.getPartitioning().getType();
-
-            if (partitioningType != PartitioningType.NONE) {
-                ArrayList<PartitioningCase> partitioningsToHide = lessonType.findPartitioningsToHide();
-                for (LessonSchedule lesson : lessons) {
-                    if (!lesson.matchesPartitioningType(partitioningType)) {
-                        //Technically this should never happen since the partitioning type is calculated
-                        //from lessons; however it might be possible that partitionings are introduced
-                        //after the course start. I want to track this possible issue to check whenever
-                        //this might happen.
-                        BugLogger.logBug();
-                    } else if (lesson.matchesAnyOfPartitioningCases(partitioningsToHide)) {
-                        lessonsToRemove.add(lesson);
-                    }
-                }
-            }
-
-        }
-
-        scheduledLessons.values().removeAll(lessonsToRemove);
     }
 
     public void removeLessonTypesNotInCurrentSemester() {
@@ -163,7 +96,7 @@ public class LessonsSet {
             LessonType lessonType = typesIterator.next();
 
             boolean keepLessonType = false;
-            ArrayList<LessonSchedule> lessons = getLessonsOfType(lessonType);
+            ArrayList<LessonSchedule> lessons = LessonSchedule.getLessonsOfType(lessonType, this.getScheduledLessons());
 
             for (LessonSchedule lesson : lessons) {
                 if (Semester.isInCurrentSemester(lesson)) {
@@ -201,6 +134,10 @@ public class LessonsSet {
                 scheduledLessons.remove();
             }
         }
-
     }
+
+    public void filterLessons() {
+        LessonSchedule.filterLessons(this.scheduledLessons.values());
+    }
+
 }

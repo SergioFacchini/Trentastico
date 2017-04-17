@@ -249,7 +249,7 @@ public class LessonsUpdaterService extends Service {
                             .setSmallIcon(R.drawable.ic_launcher)
                             .setContentTitle(message)
                             .setContentText("Premi qui per i dettagli")
-                            .setColor(getResources().getColor(R.color.colorPrimary))
+                            .setColor(getResources().getColor(R.color.colorNotification))
                             .setAutoCancel(true);
 
 

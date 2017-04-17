@@ -321,7 +321,7 @@ public class NextLessonNotificationService extends Service {
 
     private boolean isFilteredByPartitionings(LessonSchedule lesson) {
         for (String partitioningText : AppPreferences.getHiddenPartitionings(lesson.getLessonTypeId())) {
-            if (lesson.getFullDescription().contains("("+partitioningText+")")) {
+            if (lesson.hasPartitioning(partitioningText)) {
                 return true;
             }
         }

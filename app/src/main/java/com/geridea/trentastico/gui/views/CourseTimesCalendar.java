@@ -196,6 +196,8 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                 post(new Runnable() {
                     @Override
                     public void run() {
+                        lessons.filterLessons();
+
                         currentlyShownLessonsSet.mergeWith(lessons);
 
                         addEnabledInterval(interval);
@@ -209,16 +211,18 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
 
         loader.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
             @Override
-            public void apply(final CachedLessonsSet lessonsSet) {
+            public void apply(final CachedLessonsSet lessons) {
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        currentlyShownLessonsSet.mergeWith(lessonsSet);
+                        lessons.filterLessons();
 
-                        ArrayList<WeekInterval> cachedIntervals = lessonsSet.getCachedWeekIntervals();
+                        currentlyShownLessonsSet.mergeWith(lessons);
+
+                        ArrayList<WeekInterval> cachedIntervals = lessons.getCachedWeekIntervals();
                         addEnabledIntervals(cachedIntervals);
 
-                        addEventsFromLessonsSet(lessonsSet);
+                        addEventsFromLessonsSet(lessons);
                     }
                 });
 

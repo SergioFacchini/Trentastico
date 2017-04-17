@@ -15,8 +15,10 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,6 +104,47 @@ public class LessonSchedule implements Serializable {
         }
 
         return AppPreferences.getStudyCourse().getCourseAndYear();
+    }
+
+    public static ArrayList<LessonSchedule> getLessonsOfType(LessonType lessonType, Collection<LessonSchedule> lessons) {
+        ArrayList<LessonSchedule> toReturn = new ArrayList<>();
+
+        for (LessonSchedule lessonSchedule : lessons) {
+            if (lessonSchedule.getLessonTypeId() == lessonType.getId()) {
+                toReturn.add(lessonSchedule);
+            }
+        }
+
+        return toReturn;
+    }
+
+    public static void filterLessons(Collection<LessonSchedule> lessonsToFilter) {
+        Iterator<LessonSchedule> lessonsIterator = lessonsToFilter.iterator();
+
+        while(lessonsIterator.hasNext()){
+            LessonSchedule lesson = lessonsIterator.next();
+
+            boolean wasRemoved = false;
+
+            //Checking if is filtered because of the lesson type
+            for (Long lessonTypeIdToHide : AppPreferences.getLessonTypesIdsToHide()) {
+                if (lesson.getLessonTypeId() == lessonTypeIdToHide) {
+                    lessonsIterator.remove();
+                    wasRemoved = true;
+                    break;
+                }
+            }
+
+            //Checking if is filtered because of the partitioning
+            if (!wasRemoved) {
+                for (String partitioning : AppPreferences.getHiddenPartitionings(lesson.getLessonTypeId())) {
+                    if (lesson.hasPartitioning(partitioning)) {
+                        lessonsIterator.remove();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private boolean isMeaningfullyEqualTo(LessonSchedule that) {
@@ -295,4 +338,7 @@ public class LessonSchedule implements Serializable {
         return new CalendarInterval(calFrom, calTo);
     }
 
+    public boolean hasPartitioning(String partitioningText) {
+        return getFullDescription().contains("("+partitioningText+")");
+    }
 }
