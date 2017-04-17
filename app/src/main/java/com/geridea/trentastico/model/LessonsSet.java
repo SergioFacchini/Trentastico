@@ -55,28 +55,38 @@ public class LessonsSet {
     public void recalculatePartitionings() {
         for (LessonType lessonType : getLessonTypes()) {
 
-            Partitioning previous = Partitioning.NONE;
+            Partitioning current = Partitioning.NONE;
             for (LessonSchedule lesson : LessonSchedule.getLessonsOfType(lessonType, this.getScheduledLessons())) {
 
                 Partitioning found = LessonType.findPartitioningFromDescription(lesson.getFullDescription());
                 if (found.getType() != PartitioningType.NONE) {
-                    if(previous.getType() == PartitioningType.NONE){
+                    if(current.getType() == PartitioningType.NONE){
                         //We found the first partitioning
-                        previous = found;
-                    } else if(found.getType().equals(previous.getType())){
-                        previous.mergePartitionCases(found);
+                        current = found;
+                    } else if(found.getType().equals(current.getType())){
+                        current.mergePartitionCases(found);
                     } else {
                         //We found two lessons with different partitioning methods. We just ignore this
                         //situation for now and consider it to be not partitioned.
                         BugLogger.logBug();
-                        previous = Partitioning.NONE;
+                        current = Partitioning.NONE;
                         break;
                     }
                 }
             }
 
-            previous.hidePartitioningsInList(AppPreferences.getHiddenPartitionings(lessonType.getId()));
-            lessonType.setPartitioning(previous);
+            current.hidePartitioningsInList(AppPreferences.getHiddenPartitionings(lessonType.getId()));
+
+            //Some lessons have strings like "Mod.2" to te that it's the second part of the course.
+            //These are not partitionings. This kind of situation can be found by checking the
+            //number of cases (if there is only one case then it's probably not a partitioning
+            //string).
+            //Fixes #3
+            if (current.hasMoreThanOneCase()) {
+                lessonType.setPartitioning(current);
+            } else {
+                lessonType.setPartitioning(Partitioning.NONE);
+            }
         }
 
     }

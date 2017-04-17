@@ -119,4 +119,8 @@ public class Partitioning {
         return hasOneVisible;
 
     }
+
+    public boolean hasMoreThanOneCase() {
+        return getCases().size() > 1;
+    }
 }
