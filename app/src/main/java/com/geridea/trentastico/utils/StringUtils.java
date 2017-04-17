@@ -44,4 +44,12 @@ public class StringUtils {
     public static boolean containsMatchingRegex(String regex, String stringToMatch) {
         return Pattern.compile(regex).matcher(stringToMatch).find();
     }
+
+    public static String positionFormat(String format, Object... items) {
+        for (int i = 0; i < items.length; i++) {
+            format = format.replace("{"+i+"}", items[i].toString());
+        }
+
+        return format;
+    }
 }

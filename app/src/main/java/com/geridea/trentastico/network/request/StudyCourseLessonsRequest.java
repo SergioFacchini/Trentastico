@@ -93,9 +93,9 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
             //want to cache courses that are not actual.
             lessonsSet.removeLessonTypesNotInCurrentSemester();
 
-            onLessonsSetAvailable(lessonsSet);
-
             Cacher.cacheLessonsSet(lessonsSet, interval);
+
+            onLessonsSetAvailable(lessonsSet);
 
             listener.onLessonsLoaded(lessonsSet, interval, getOperationId());
         } catch (Exception e) {

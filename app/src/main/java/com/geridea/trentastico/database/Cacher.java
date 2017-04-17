@@ -17,6 +17,7 @@ import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 import com.birbit.android.jobqueue.config.Configuration;
+import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
@@ -34,6 +35,7 @@ import com.geridea.trentastico.model.cache.StudyCourseCachedInterval;
 import com.geridea.trentastico.model.cache.StudyCourseNotCachedInterval;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.StringUtils;
+import com.geridea.trentastico.utils.UIUtils;
 import com.geridea.trentastico.utils.time.CalendarInterval;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekDayTime;
@@ -43,6 +45,7 @@ import com.geridea.trentastico.utils.time.WeekTime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -160,13 +163,10 @@ public class Cacher {
         jobQueue.addJobInBackground(new CacheLessonsSetJob(setToCache, intervalToCache));
     }
 
-    private static void updateLessonTypesFromSet(LessonsSet setToCache, boolean containsExtraLessonTypes) {
-        for (LessonType lessonType : setToCache.getLessonTypes()) {
-            LessonSchedule lesson = setToCache.getALessonHavingType(lessonType);
-            if (lesson != null) {
-                deleteLessonTypeWithId(lessonType.getId());
-                cacheLessonType(new CachedLessonType(lessonType), containsExtraLessonTypes);
-            }
+    private static void updateLessonTypesFromSet(boolean containsExtraLessonTypes, Collection<LessonType> lessonTypes) {
+        for (LessonType lessonType : lessonTypes) {
+            deleteLessonTypeWithId(lessonType.getId());
+            cacheLessonType(new CachedLessonType(lessonType), containsExtraLessonTypes);
         }
     }
 
@@ -358,8 +358,8 @@ public class Cacher {
     }
 
     /**
-     * WARNING: this method can load periods that are bigger than the requested one, but never
-     * smaller. These periods might contain lessons that are not requested and have to be filtered
+     * WARNING: this method can load periods that are bigger than the requested one!
+     * These periods might contain lessons that are not requested and have to be filtered
      * out.
      */
     private static ArrayList<CachedPeriod> loadStudyCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo) {
@@ -367,8 +367,8 @@ public class Cacher {
     }
 
     /**
-     * WARNING: this method can load periods that are bigger than the requested one, but never
-     * smaller. These periods might contain lessons that are not requested and have to be filtered
+     * WARNING: this method can load periods that are bigger than the requested one!
+     * These periods might contain lessons that are not requested and have to be filtered
      * out.
      */
     private static ArrayList<CachedPeriod> loadExtraCourseCachePeriods(WeekInterval intervalToLoad, boolean fetchOldCacheToo, int lessonTypeId) {
@@ -392,31 +392,38 @@ public class Cacher {
                 CP_CACHED_IN_MS
         };
 
+        //Building main query:
         String query;
         if(interval.spansMultipleYears()){
             //Note: che cached interval might never span more than two different year.
             //Note 2: this method does not considers the cases when the interval that starts in the
             //previous starts before the start of the interval. This is such a rare case, I don't
-            //want to fix this
+            //bother to fix this
             query = buildCachePeriodSelectionForInterval(interval);
         } else {
-            query = String.format(Locale.UK,
-                " %s <= %d AND %s = %d AND %s >=%d AND %s = %d ",
-                    CP_START_WEEK, interval.getStartWeekNumber(), CP_START_YEAR, interval.getStartYear(),
-                    CP_END_WEEK  , interval.getEndWeekNumber()  , CP_END_YEAR,   interval.getEndYear()
+            query = StringUtils.positionFormat(
+                CP_START_YEAR+" = {0} AND " +
+                CP_END_YEAR  +" = {0} AND (" +
+                "    ("+CP_START_WEEK+" >= {1} AND "+CP_START_WEEK+"< {2}) OR " +
+                "    ("+CP_END_WEEK+"   >  {1} AND "+CP_END_WEEK+" <= {2}) OR " +
+                "    ("+CP_START_WEEK+" <= {1} AND "+CP_END_WEEK+" >= {2}) OR " +
+                "    ("+CP_START_WEEK+" >= {1} AND "+CP_END_WEEK+" <= {2})    " +
+                ") ", interval.getStartYear(), interval.getStartWeekNumber(), interval.getEndWeekNumber()
             );
         }
 
-        String selection = String.format("%s AND %s = %d ", query, CP_LESSON_TYPE, lessonTypeId);
+        //Adding lesson type filtering
+        query += String.format(" AND %s = %d ", CP_LESSON_TYPE, lessonTypeId);
+
+        //Adding timing filter
         if(!fetchOldCacheToo){
-            selection += String.format(
-                    " AND (%s >= %d AND %s < %d) ",
+            query +=String.format(" AND (%s >= %d AND %s < %d) ",
                     CP_CACHED_IN_MS, getLastValidCacheMs(), CP_CACHED_IN_MS, System.currentTimeMillis()
             );
         }
 
         Cursor cursor = writableDatabase.query(
-            CACHED_PERIOD_TABLE, projection, selection, null, null, null, null
+            CACHED_PERIOD_TABLE, projection, query, null, null, null, null
         );
 
         ArrayList<CachedPeriod> periods = new ArrayList<>();
@@ -595,7 +602,9 @@ public class Cacher {
     }
 
     @NonNull
-    private static ArrayList<WeekInterval> findMissingIntervalsInCachePeriods(WeekInterval intervalToLoad, ArrayList<CachedPeriod> cachePeriods) {
+    private static ArrayList<WeekInterval> findMissingIntervalsInCachePeriods(
+            WeekInterval intervalToLoad, ArrayList<CachedPeriod> cachePeriods) {
+
         ArrayList<WeekInterval> missingIntervals = new ArrayList<>();
 
         boolean isMissingIntervalBeingBuild = false;
@@ -608,7 +617,7 @@ public class Cacher {
 
             //true if there is a cached period that contains the week time
             boolean wasCachedPeriodFound = false;
-            for (CachedPeriod cachePeriod : cachePeriods) {
+            for (CachedPeriod cachePeriod: cachePeriods) {
                 if (cachePeriod.contains(timeToCheck)) {
                     wasCachedPeriodFound = true;
                     break;
@@ -806,6 +815,23 @@ public class Cacher {
         jobQueue.addJobInBackground(new IsDayCachedJob(day, listener));
     }
 
+    private static boolean doDuplicatedRecordsExist() {
+        Cursor cursor = writableDatabase.rawQuery(
+            "select count(*) AS duplicated_rows FROM ( " +
+                "select lesson_id, count(*) " +
+                "from cached_lessons " +
+                "group by lesson_id " +
+                "  having count(*) > 1 " +
+            ")", null
+        );
+
+        int numDuplicatedRows = cursor.getInt(0);
+
+        cursor.close();
+
+        return numDuplicatedRows != 0;
+    }
+
     private static abstract class CacheJob extends Job {
 
         protected CacheJob() {
@@ -851,35 +877,54 @@ public class Cacher {
     }
 
     private static class CacheExtraLessonsSetJob extends CacheJob {
-        private final LessonsSet setToCache;
+        private final ArrayList<LessonType> lessonTypesToCache;
+        private final ArrayList<LessonSchedule> lessonsToCache;
+
         private final WeekInterval interval;
         private final ExtraCourse extraCourse;
 
         public CacheExtraLessonsSetJob(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
-            this.setToCache = setToCache;
+            //Since the lessons set is modifiable, it's better to create a copy of what we want to
+            //save before it get's changed in some way. This fixes #42 and #37
+            this.lessonTypesToCache = new ArrayList<>(setToCache.getLessonTypes());
+            this.lessonsToCache     = new ArrayList<>(setToCache.getScheduledLessons());
+
             this.interval = interval;
             this.extraCourse = extraCourse;
         }
 
         @Override
         public void onRun() throws Throwable {
-            updateLessonTypesFromSet(setToCache, true);
+
+            updateLessonTypesFromSet(true, lessonTypesToCache);
+
             deleteCachedExtraLessonsInInterval(interval, extraCourse);
 
             long cachedPeriodId = insertCachedPeriod(new CachedPeriod(interval, extraCourse.getLessonTypeId()));
-            for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
+            for (LessonSchedule lesson : lessonsToCache) {
                 cacheLesson(new CachedLesson(cachedPeriodId, lesson));
             }
+
+            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()){
+                UIUtils.showToastIfInDebug(getApplicationContext(), "DUPLICATE RECORDS FOUND!");
+            }
+
         }
     }
 
     private static class CacheLessonsSetJob extends CacheJob {
 
-        private final LessonsSet setToCache;
         private final WeekInterval intervalToCache;
 
+        private final ArrayList<LessonType> lessonTypesToCache;
+        private final ArrayList<LessonSchedule> lessonsToCache;
+
         public CacheLessonsSetJob(LessonsSet setToCache, WeekInterval intervalToCache) {
-            this.setToCache = setToCache;
+            //Since the lessons set is modifiable, it's better to create a copy of what we want to
+            //save before it get's changed in some way. This fixes #42 and #37
+            this.lessonTypesToCache = new ArrayList<>(setToCache.getLessonTypes());
+            this.lessonsToCache     = new ArrayList<>(setToCache.getScheduledLessons());
+
             this.intervalToCache = intervalToCache;
         }
 
@@ -891,12 +936,16 @@ public class Cacher {
             //3) Get inserted id
             //4) Make lessons
             //5) Add lessons
-            updateLessonTypesFromSet(setToCache, false);
+            updateLessonTypesFromSet(false, lessonTypesToCache);
             deleteCachedStudyCourseLessonsInInterval(intervalToCache);
 
             long cachedPeriodId = insertCachedPeriod(new CachedPeriod(intervalToCache));
-            for (LessonSchedule lesson : setToCache.getScheduledLessons()) {
+            for (LessonSchedule lesson: lessonsToCache) {
                 cacheLesson(new CachedLesson(cachedPeriodId, lesson));
+            }
+
+            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()){
+                UIUtils.showToastIfInDebug(getApplicationContext(), "DUPLICATE RECORDS FOUND!");
             }
         }
 
