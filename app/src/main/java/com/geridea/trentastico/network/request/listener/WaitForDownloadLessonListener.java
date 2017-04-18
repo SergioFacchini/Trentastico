@@ -45,13 +45,13 @@ public abstract class WaitForDownloadLessonListener implements LessonsLoadingLis
     @Override
     public void onLoadingDelegated(int operationId) {
         //Should never happen since we do not manage loading from cache
-        BugLogger.logBug();
+        BugLogger.logBug("Cache used when shouldn't", new RuntimeException("Cache used when shouldn't"));
     }
 
     @Override
     public void onPartiallyCachedResultsFetched(CachedLessonsSet lessonsSet) {
         //Should never happen since we do not manage loading from cache
-        BugLogger.logBug();
+        BugLogger.logBug("Cache used when shouldn't", new RuntimeException("Cache used when shouldn't"));
     }
 
     @Override

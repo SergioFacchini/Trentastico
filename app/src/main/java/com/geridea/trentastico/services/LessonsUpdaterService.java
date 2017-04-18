@@ -321,7 +321,7 @@ public class LessonsUpdaterService extends Service {
 
         @Override
         protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
-            BugLogger.logBug();
+            BugLogger.logBug("Something bad happened when diffing lessons", throwable);
             filterDiffAndDispatchCheckTerminated(false);
             return RetryConstraint.CANCEL;
         }
@@ -394,7 +394,7 @@ public class LessonsUpdaterService extends Service {
 
         @Override
         protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
-            BugLogger.logBug();
+            BugLogger.logBug("Something bad happened when loading missing lessons", throwable);
             onCheckTerminated.dispatch(false);
             return RetryConstraint.CANCEL;
         }

@@ -8,7 +8,6 @@ import com.geridea.trentastico.gui.views.requestloader.NetworkErrorMessage;
 import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage;
 import com.geridea.trentastico.gui.views.requestloader.ParsingErrorMessage;
 import com.geridea.trentastico.gui.views.requestloader.TerminalMessage;
-import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
@@ -18,7 +17,6 @@ import com.geridea.trentastico.utils.time.WeekTime;
 import com.threerings.signals.Signal1;
 import com.threerings.signals.Signal3;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -141,19 +139,12 @@ public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKno
 
     @Override
     public void onErrorHappened(Exception error, int operationId) {
-        if(!(error instanceof IOException)){
-            error.printStackTrace();
-            BugLogger.logBug();
-        }
-
         onLoadingMessageDispatched.dispatch(new NetworkErrorMessage(operationId, error));
     }
 
     @Override
     public void onParsingErrorHappened(Exception exception, int operationId) {
         onLoadingMessageDispatched.dispatch(new ParsingErrorMessage(operationId));
-
-        BugLogger.logBug();
     }
 
     @Override

@@ -847,7 +847,7 @@ public class Cacher {
         @Override
         protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
             throwable.printStackTrace();
-            BugLogger.logBug();
+            BugLogger.logBug("Throwable raised when running a job", throwable);
 
             return RetryConstraint.CANCEL;
         }

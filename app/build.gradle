@@ -53,6 +53,9 @@ dependencies {
     //DB browser
     debugCompile 'com.amitshekhar.android:debug-db:1.0.0'
 
+    //Bug reporter
+    compile 'ch.acra:acra:4.9.0'
+
     testCompile 'junit:junit:4.12'
 
 

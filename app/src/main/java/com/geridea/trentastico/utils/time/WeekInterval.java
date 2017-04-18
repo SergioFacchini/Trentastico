@@ -21,8 +21,9 @@ public class WeekInterval {
 
     private void init(WeekTime start, WeekTime end) {
         if(start.after(end)){
-            BugLogger.logBug();
-            throw new IllegalStateException("Cannot have an interval starting after it's end!");
+            IllegalStateException e = new IllegalStateException("Cannot have an interval starting after it's end!");
+            BugLogger.logBug("Got an interval starting before it's end: "+start+"---"+end, e);
+            throw e;
         }
 
         this.start = start;

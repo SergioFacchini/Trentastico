@@ -100,7 +100,7 @@ public class StudyCourseLessonsRequest extends BasicLessonsRequest {
             listener.onLessonsLoaded(lessonsSet, interval, getOperationId());
         } catch (Exception e) {
             e.printStackTrace();
-            BugLogger.logBug();
+            BugLogger.logBug("Parsing study course request", e);
 
             listener.onParsingErrorHappened(e, getOperationId());
 

@@ -70,7 +70,7 @@ public class ExtraCourse {
 
             return jsonObject;
         } catch (JSONException e) {
-            BugLogger.logBug();
+            BugLogger.logBug("Converting extra course to JSON", e);
             throw new RuntimeException("Could not convert extra course to JSON");
         }
     }
@@ -88,7 +88,7 @@ public class ExtraCourse {
 
             return course;
         } catch (JSONException e) {
-            BugLogger.logBug();
+            BugLogger.logBug("Parsing extra course", e);
             throw new RuntimeException("Could not convert JSON to extra course");
         }
 

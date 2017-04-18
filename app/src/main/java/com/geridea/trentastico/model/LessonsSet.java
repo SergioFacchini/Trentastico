@@ -68,7 +68,10 @@ public class LessonsSet {
                     } else {
                         //We found two lessons with different partitioning methods. We just ignore this
                         //situation for now and consider it to be not partitioned.
-                        BugLogger.logBug();
+                        BugLogger.logBug(
+                            "Two lessons with different partitioning methods",
+                            new RuntimeException("Two lessons with different partitioning methods")
+                        );
                         current = Partitioning.NONE;
                         break;
                     }

@@ -38,7 +38,7 @@ public class ListLessonsRequest extends BasicLessonsRequest {
             listener.onLessonTypesRetrieved(lessonsSet.getLessonTypes());
         } catch (Exception e) {
             e.printStackTrace();
-            BugLogger.logBug();
+            BugLogger.logBug("Parsing lessons list request", e);
 
             listener.onParsingErrorHappened(e);
         }

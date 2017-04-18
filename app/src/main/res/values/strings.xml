@@ -14,5 +14,6 @@
     <string name="next_lesson_notification_description">
         Pianifica quando mostrarti notifiche delle tue prossime lezioni.
     </string>
+    <string name="crash_toast_text">Si è verificato un errore in Trentastico! L\'app verrà chiusa.</string>
 
 </resources>

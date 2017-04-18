@@ -60,6 +60,8 @@ public class AppPreferences {
         editor.putLong("STUDY_COURSE",     course.getCourseId());
         editor.putInt("STUDY_YEAR",        course.getYear());
         editor.apply();
+
+        BugLogger.setStudyCourse(course);
     }
 
     public static StudyCourse getStudyCourse() {
@@ -132,8 +134,7 @@ public class AppPreferences {
 
             putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString());
         } catch (JSONException e) {
-            BugLogger.logBug();
-            e.printStackTrace();
+            BugLogger.logBug("Saving partitionings to hide", e);
         }
     }
 
@@ -141,7 +142,7 @@ public class AppPreferences {
         try {
             return new JSONObject(get().getString("PARTITIONINGS_TO_HIDE", "{}"));
         } catch (JSONException e) {
-            BugLogger.logBug();
+            BugLogger.logBug("Getting partitionings from JSON", e);
             e.printStackTrace();
 
             throw new RuntimeException("Error reading partitionings JSON.");
@@ -188,7 +189,7 @@ public class AppPreferences {
             }
             return courses;
         } catch (JSONException e) {
-            BugLogger.logBug();
+            BugLogger.logBug("Parsing existing extra courses", e);
             e.printStackTrace();
 
             throw new RuntimeException("Could not get extra courses from AppPreferences.");
@@ -203,6 +204,8 @@ public class AppPreferences {
 
     private static void saveExtraCourses() {
         putString("EXTRA_COURSES", extraCourses.toJSON().toString());
+
+        BugLogger.setExtraCourses(extraCourses);
     }
 
     private static void putString(String key, String value) {

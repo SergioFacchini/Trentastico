@@ -42,13 +42,13 @@ public class DiffCompletedListener implements LessonsLoadingListener {
     @Override
     public void onLoadingDelegated(int operationId) {
         //We disabled the cache, this should never happen
-        BugLogger.logBug();
+        BugLogger.logBug("Cache used when shouldn't", new RuntimeException("Cache used when shouldn't"));
     }
 
     @Override
     public void onPartiallyCachedResultsFetched(CachedLessonsSet lessonsSet) {
         //We disabled the cache, this should never happen
-        BugLogger.logBug();
+        BugLogger.logBug("Cache used when shouldn't", new RuntimeException("Cache used when shouldn't"));
     }
 
     @Override

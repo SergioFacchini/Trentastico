@@ -70,4 +70,8 @@ public class StudyCourse {
         return cay;
     }
 
+    @Override
+    public String toString() {
+        return String.format("Department: %d - Course: %d - Year %d", departmentId, courseId, year);
+    }
 }

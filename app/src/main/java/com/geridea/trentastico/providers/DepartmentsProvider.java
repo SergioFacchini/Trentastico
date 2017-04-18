@@ -143,8 +143,9 @@ public class DepartmentsProvider {
 
         }
 
-        BugLogger.logBug();
-        throw new RuntimeException("UNKNOWN DEPARTMENT ID: "+departmentId);
+        RuntimeException exception = new RuntimeException("UNKNOWN DEPARTMENT ID: "+departmentId);
+        BugLogger.logBug("Could not get position of department with id "+departmentId, exception);
+        throw exception;
     }
 
     public static Department getDepartmentWithId(long departmentId) {
@@ -156,7 +157,8 @@ public class DepartmentsProvider {
 
         }
 
-        BugLogger.logBug();
-        throw new RuntimeException("UNKNOWN DEPARTMENT WITH ID: " + departmentId);
+        RuntimeException exception = new RuntimeException("UNKNOWN DEPARTMENT WITH ID: "+departmentId);
+        BugLogger.logBug("Could not find department with id "+departmentId, exception);
+        throw exception;
     }
 }

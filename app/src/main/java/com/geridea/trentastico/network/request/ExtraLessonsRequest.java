@@ -53,7 +53,7 @@ public class ExtraLessonsRequest extends BasicLessonsRequest {
             listener.onLessonsLoaded(lessonsSet, getIntervalToLoad(), getOperationId());
         } catch (Exception e) {
             e.printStackTrace();
-            BugLogger.logBug();
+            BugLogger.logBug("Parsing extra lessons request", e);
 
             listener.onParsingErrorHappened(e, getOperationId());
 
