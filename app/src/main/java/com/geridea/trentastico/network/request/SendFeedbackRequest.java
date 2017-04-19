@@ -7,6 +7,7 @@ package com.geridea.trentastico.network.request;
 
 import android.support.annotation.Nullable;
 
+import com.geridea.trentastico.BuildConfig;
 import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
 import com.geridea.trentastico.utils.AppPreferences;
 
@@ -63,6 +64,7 @@ public class SendFeedbackRequest implements IRequest {
             .add("name",     name)
             .add("feedback", feedback)
             .add("android-id", AppPreferences.getAndroidId())
+            .add("app-version", "("+BuildConfig.VERSION_CODE+") "+ BuildConfig.VERSION_NAME)
             .build();
     }
 
