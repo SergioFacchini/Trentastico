@@ -18,26 +18,22 @@
             android:title="Configurazione" />
 
         <item
-            android:id="@+id/update_courses"
+            android:id="@+id/debug_update_courses"
             android:icon="@drawable/ic_menu_manage"
             android:title="Aggiorna lezioni" />
 
         <item
-            android:id="@+id/start_next_lesson_service"
+            android:id="@+id/debug_start_next_lesson_service"
             android:icon="@drawable/ic_menu_manage"
             android:title="Start serv. prossima lezione" />
 
-    </group>
+        <item
+            android:id="@+id/debug_menu_about"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Pulisci cache" />
 
+    </group>
     <item android:title="Altro">
-        <menu>
-            <item
-                android:id="@+id/menu_about"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Pulisci cache" />
-        </menu>
-    </item>
-    <item android:title="Feedback">
         <menu>
             <item
                 android:id="@+id/menu_feedback"

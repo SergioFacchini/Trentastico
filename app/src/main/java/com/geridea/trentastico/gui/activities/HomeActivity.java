@@ -16,12 +16,13 @@ import android.widget.Toast;
 
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.BuildConfig;
+import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
-import com.geridea.trentastico.gui.fragments.SubmitBugFragment;
+import com.geridea.trentastico.gui.fragments.SubmitFeedbackFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.geridea.trentastico.services.NextLessonNotificationService;
 
@@ -52,12 +53,25 @@ public class HomeActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-
-        //Showing the version
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Showing the version
         TextView versionText = Views.find(navigationView.getHeaderView(0), R.id.version_text);
         versionText.setText(computeVersionName());
+
+        //Removing debug stuff from menu
+        Menu menu = navigationView.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+
+            //If we're not in debug mode, we don't need the debug options
+            if(item.getItemId() == R.id.debug_menu_about ||
+               item.getItemId() == R.id.debug_update_courses ||
+               item.getItemId() == R.id.debug_start_next_lesson_service) {
+
+                item.setVisible(false);
+            }
+        }
 
         //Setting calendar fragment as the first fragment
         switchToCalendarFragment();
@@ -118,16 +132,20 @@ public class HomeActivity extends AppCompatActivity
             setCurrentFragment(new SettingsFragment());
         } else if(id == R.id.menu_extra_times) {
             setCurrentFragment(new ExtraLessonsFragment());
-        } else if(id == R.id.menu_about){
-            Cacher.obliterateCache();
-            Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
-            switchToCalendarFragment();
         } else if(id == R.id.menu_feedback){
-            setCurrentFragment(new SubmitBugFragment());
-        } else if(id == R.id.update_courses){
-            startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
-        } else if(id == R.id.start_next_lesson_service){
-            startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_DEBUG));
+            setCurrentFragment(new SubmitFeedbackFragment());
+        } else if(Config.DEBUG_MODE){
+
+            //Managing debug stuff here
+            if(id == R.id.debug_menu_about){
+                Cacher.obliterateCache();
+                Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
+                switchToCalendarFragment();
+            } else if(id == R.id.debug_update_courses){
+                startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
+            } else if(id == R.id.debug_start_next_lesson_service){
+                startService(NextLessonNotificationService.createIntent(this, NextLessonNotificationService.STARTER_DEBUG));
+            }
         }
 
         drawer.closeDrawer(GravityCompat.START);

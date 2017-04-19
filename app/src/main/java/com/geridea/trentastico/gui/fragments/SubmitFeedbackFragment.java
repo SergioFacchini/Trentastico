@@ -24,7 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SubmitBugFragment extends IFragmentWithMenuItems {
+public class SubmitFeedbackFragment extends IFragmentWithMenuItems {
 
     private boolean isFeedbackBeingSent = false;
 
