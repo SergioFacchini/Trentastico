@@ -11,8 +11,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alexvasilkov.android.commons.utils.Views;
+import com.geridea.trentastico.BuildConfig;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
@@ -49,12 +52,20 @@ public class HomeActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
+        //Showing the version
         navigationView.setNavigationItemSelectedListener(this);
+
+        TextView versionText = Views.find(navigationView.getHeaderView(0), R.id.version_text);
+        versionText.setText(computeVersionName());
 
         //Setting calendar fragment as the first fragment
         switchToCalendarFragment();
     }
 
+    private String computeVersionName() {
+        return String.format("Versione: %s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
