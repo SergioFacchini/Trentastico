@@ -14,12 +14,16 @@ import java.util.Vector;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class RequestSender {
+
+    private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/json");
 
     private final OkHttpClient client = new OkHttpClient();
     private final Vector<Call> callsInProgress = new Vector<>();
@@ -29,9 +33,16 @@ public class RequestSender {
     public void processRequest(IRequest requestToSend) {
         waitForDebuggingIfNeeded();
 
-        Request request = new Request.Builder()
-                .url(requestToSend.getURL())
-                .build();
+        Request.Builder builder = new Request.Builder();
+        builder.url(requestToSend.getURL());
+
+        //If we have something to post, we'll get it here
+        FormBody formBodyToSend = requestToSend.getFormToSend();
+        if (formBodyToSend != null) {
+            builder.post(formBodyToSend);
+        }
+
+        Request request = builder.build();
 
         requestToSend.notifyOnBeforeSend();
 

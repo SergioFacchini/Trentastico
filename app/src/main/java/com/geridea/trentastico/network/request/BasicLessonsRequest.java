@@ -6,6 +6,7 @@ package com.geridea.trentastico.network.request;
  */
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.LessonSchedule;
@@ -19,6 +20,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Locale;
+
+import okhttp3.FormBody;
 
 abstract class BasicLessonsRequest implements IRequest {
 
@@ -87,4 +90,10 @@ abstract class BasicLessonsRequest implements IRequest {
         return operationId;
     }
 
+    @Nullable
+    @Override
+    public FormBody getFormToSend() {
+        //We have nothing to send
+        return null;
+    }
 }

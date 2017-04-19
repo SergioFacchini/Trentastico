@@ -26,7 +26,10 @@ public class TrentasticoApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        ACRA.init(this);
+        if(!Config.DEBUG_MODE){
+            ACRA.init(this);
+        }
+
         Cacher.init(this);
         AppPreferences.init(this);
         DepartmentsProvider.loadIfNeeded();

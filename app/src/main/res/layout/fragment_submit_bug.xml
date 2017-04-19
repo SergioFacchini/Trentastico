@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <!--focusable and focusableInTouchMode prevent the view
+            from being scrolled to the first edit text by android-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Feedback"
+            android:textColor="@color/colorForeground"
+            android:textSize="24sp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Trentastico! è un'app realizzata da me, un omino di nome Slava Rublev. Sono un esemplare della specie studentus-de-informaticum e in quanto tale trovo accoglienza nell'habitat di Povo. Quest'app esiste per far fronte allo stess che suscita l'attuale sito degli orari, troppo scomodo ed inutilizzabile dal telefono (in realtà centra anche il fatto che sono troppo pigro per impararmi gli orari a memoria.. ma non ditelo a nessuno). Creare e mantenere quest'app non è semplice, finora ci ho sacrificato circa 90 ore della mia vita e non ho ancora finito di implementare tutte le cose che avevo in mente!\n\nSapere che Trentastico! è apprezzata da chi la utilizza è una grandissima soddisfazione per me! Per questo motivo mi farebbe molto piacere sentire un tuo parere sulla mia creatura. Puoi utilizzare il campo qua sotto anche per contattarmi oppure segnalarmi problemi che hai incontrato nell'uso di Trentastico così cerco di risolverli.\n\n Grazie per aver utlizzato Trentastico!\n - Slava Rublev"
+            android:paddingTop="10dp"
+            android:textColor="@color/colorForeground"
+            android:textSize="14sp"
+            android:textStyle="italic" />
+
+        <EditText
+            android:id="@+id/feedback_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="100dp"
+            android:text=""
+            android:textColor="@color/colorForeground"
+            android:inputType="textMultiLine"
+            android:textColorHint="@color/colorAccent"
+            android:hint="Feedback"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="10dp"
+            android:text="Se vuoi che io ti ricontatti, puoi lasciare qua sotto il tuo nome ed indirizzo email: "
+            android:textColor="@color/colorForeground"
+            android:textSize="14sp"
+            android:textStyle="italic" />
+
+        <EditText
+            android:id="@+id/name_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/colorForeground"
+            android:textColorHint="@color/colorAccent"
+            android:inputType="textPersonName"
+            android:hint="Nome"
+            />
+
+        <EditText
+            android:id="@+id/email_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/colorForeground"
+            android:textColorHint="@color/colorAccent"
+            android:inputType="textEmailAddress"
+            android:hint="Email"
+            />
+
+        <Button
+            android:id="@+id/send_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#3b1629"
+            android:text="Invia!"
+            android:textColor="@color/colorForeground"
+            />
+
+
+    </LinearLayout>
+</ScrollView>

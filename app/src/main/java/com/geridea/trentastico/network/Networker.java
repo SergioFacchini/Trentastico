@@ -19,6 +19,8 @@ import com.geridea.trentastico.network.request.FetchRoomForLessonRequest;
 import com.geridea.trentastico.network.request.IRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
+import com.geridea.trentastico.network.request.SendFeedbackRequest;
+import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
 import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
@@ -153,5 +155,10 @@ public class Networker {
 
         }
     }
+
+    public static void sendFeedback(String feedback, String name, String email, FeedbackSendListener listener) {
+        processRequest(new SendFeedbackRequest(feedback, name, email, listener));
+    }
+
 
 }

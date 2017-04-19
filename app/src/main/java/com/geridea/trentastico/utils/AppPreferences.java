@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class AppPreferences {
 
@@ -298,4 +299,13 @@ public class AppPreferences {
         putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", enabled);
     }
 
+    public static String getAndroidId() {
+        String androidId = get().getString("ANDROID_ID", "");
+        if (androidId.isEmpty()) {
+            androidId = UUID.randomUUID().toString();
+            putString("ANDROID_ID", androidId);
+        }
+
+        return androidId;
+    }
 }

@@ -8,7 +8,7 @@ package com.geridea.trentastico;
 public final class Config {
 
     //Debug
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
     public static final boolean DEBUG_FORCE_ANOTHER_DATE = false;

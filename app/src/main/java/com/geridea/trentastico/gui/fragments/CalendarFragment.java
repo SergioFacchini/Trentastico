@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
+import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter;
 import com.geridea.trentastico.gui.adapters.PartitioningsAdapter;
 import com.geridea.trentastico.gui.views.CourseTimesCalendar;

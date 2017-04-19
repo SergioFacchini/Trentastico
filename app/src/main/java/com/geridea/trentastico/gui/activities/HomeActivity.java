@@ -17,8 +17,8 @@ import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
-import com.geridea.trentastico.gui.fragments.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
+import com.geridea.trentastico.gui.fragments.SubmitBugFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.geridea.trentastico.services.NextLessonNotificationService;
 
@@ -111,6 +111,8 @@ public class HomeActivity extends AppCompatActivity
             Cacher.obliterateCache();
             Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
             switchToCalendarFragment();
+        } else if(id == R.id.menu_feedback){
+            setCurrentFragment(new SubmitBugFragment());
         } else if(id == R.id.update_courses){
             startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER));
         } else if(id == R.id.start_next_lesson_service){
@@ -121,7 +123,7 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
-    private void switchToCalendarFragment() {
+    public void switchToCalendarFragment() {
         navigationView.setCheckedItem(R.id.menu_timetables);
 
         setCurrentFragment(new CalendarFragment());
@@ -130,6 +132,7 @@ public class HomeActivity extends AppCompatActivity
 
     private void setCurrentFragment(IFragmentWithMenuItems nextFragment) {
         currentFragment = nextFragment;
+        currentFragment.setActivity(this);
 
         invalidateOptionsMenu();
 

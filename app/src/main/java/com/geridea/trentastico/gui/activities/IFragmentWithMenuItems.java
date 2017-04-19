@@ -1,4 +1,4 @@
-package com.geridea.trentastico.gui.fragments;
+package com.geridea.trentastico.gui.activities;
 
 
 /*
@@ -10,8 +10,19 @@ import android.view.MenuItem;
 
 public abstract class IFragmentWithMenuItems extends Fragment {
 
+    private HomeActivity activity;
+
     public abstract int[] getIdsOfMenuItemsToMakeVisible();
     
     public abstract void bindMenuItem(MenuItem item);
+
+    protected void setActivity(HomeActivity activity) {
+        this.activity = activity;
+    }
+
+    public void goToCalendarFragment() {
+        activity.switchToCalendarFragment();
+    }
+
 
 }

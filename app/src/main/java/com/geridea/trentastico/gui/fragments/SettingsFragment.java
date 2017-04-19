@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
