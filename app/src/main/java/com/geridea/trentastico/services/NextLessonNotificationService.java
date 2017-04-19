@@ -39,6 +39,8 @@ public class NextLessonNotificationService extends Service {
     public static final int STARTER_APP_BOOT = 3;
     public static final int STARTER_STUDY_COURSE_CHANGE = 4;
     public static final int STARTER_SWITCHED_ON = 5;
+    public static final int STARTER_FILTERS_CHANGED = 6;
+    public static final int STARTER_EXTRA_COURSE_CHANGE = 6;
 
     public static final String EXTRA_STARTER = "EXTRA_STARTER";
 

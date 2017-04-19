@@ -28,6 +28,7 @@ import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
+import com.geridea.trentastico.services.NextLessonNotificationService;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.threerings.signals.Listener1;
@@ -146,6 +147,9 @@ public class CalendarFragment extends IFragmentWithMenuItems {
                     if(lesson.applyVisibilityToPartitionings()){
                         AppPreferences.updatePartitioningsToHide(lesson);
                         courseAdapter.notifyDataSetChanged(); //Updating %d of %d shown
+
+                        //Updating notifications
+                        NextLessonNotificationService.createIntent(context, NextLessonNotificationService.STARTER_FILTERS_CHANGED);
                     }
 
                     calendar.notifyLessonTypeVisibilityChanged();
