@@ -16,7 +16,7 @@ import org.acra.annotation.ReportsCrashes;
  */
 
 @ReportsCrashes(
-    formUri = "http://ideagenesi.com/trentastico/submit.php",
+    formUri = "http://collector.tracepot.com/20579ea2",
     mode = ReportingInteractionMode.TOAST,
     resToastText = R.string.crash_toast_text
 )
