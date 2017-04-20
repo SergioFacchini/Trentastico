@@ -450,8 +450,15 @@ public class Cacher {
         String endStr   = buildWeekTimeSelectionsSQL(intervalContainingEnd,   CP_END_WEEK,   CP_END_YEAR);
 
         String expression = startStr;
-        if(!endStr.isEmpty()){ //Can happen when fetching a one-week interval
-            expression +=  " OR "+ endStr;
+        if (startStr.isEmpty() && endStr.isEmpty()) {
+            BugLogger.logBug("\"Start and end interval invalid in query!\"", new RuntimeException("Start and end interval invalid in query!"));
+            return "";
+        } else if(endStr.isEmpty()){ //Can happen when fetching a one-week interval
+            expression += startStr;
+        } else if(startStr.isEmpty()){
+            expression += endStr;
+        } else {
+            expression = startStr + " OR " + endStr;
         }
         return expression;
     }
