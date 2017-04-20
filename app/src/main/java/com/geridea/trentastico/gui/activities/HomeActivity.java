@@ -136,6 +136,7 @@ public class HomeActivity extends AppCompatActivity
             setCurrentFragment(new ExtraLessonsFragment());
         } else if(id == R.id.menu_feedback){
             setCurrentFragment(new SubmitFeedbackFragment());
+            throw new RuntimeException("JUST A TEST!");
         } else if(Config.DEBUG_MODE){
 
             //Managing debug stuff here
