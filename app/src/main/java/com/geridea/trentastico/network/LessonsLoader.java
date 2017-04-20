@@ -45,7 +45,7 @@ public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKno
      */
     public final Signal1<ILoadingMessage> onLoadingMessageDispatched = new Signal1<>();
 
-    private List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
+    private final List<WeekInterval> loadingIntervals = Collections.synchronizedList(new ArrayList<WeekInterval>());
 
     public LessonsLoader() {
 
@@ -71,20 +71,26 @@ public class LessonsLoader implements LessonsLoadingListener, LoadingIntervalKno
     }
 
     private void addLoadingInterval(WeekInterval intervalToLoad) {
-        loadingIntervals.add(intervalToLoad);
+        synchronized (loadingIntervals) {
+            loadingIntervals.add(intervalToLoad);
+        }
     }
 
     private void removeLoadingInterval(WeekInterval intervalToRemove) {
-        loadingIntervals.remove(intervalToRemove);
+        synchronized (loadingIntervals) {
+            loadingIntervals.remove(intervalToRemove);
+        }
     }
 
     private boolean isWeekAlreadyBeingLoaded(WeekTime week) {
-        for (WeekInterval loadingInterval : loadingIntervals) {
-            if (loadingInterval.contains(week)) {
-                return true;
+        synchronized (loadingIntervals) {
+            for (WeekInterval loadingInterval : loadingIntervals) {
+                if (loadingInterval.contains(week)) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     public void loadDaysIfNeeded(WeekTime weekToLoad, ScrollDirection direction) {
