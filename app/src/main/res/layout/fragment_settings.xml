@@ -118,7 +118,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:text="Trentastico! ti mostra una notifica con il nome della prossima lezione e aula in qui la lezione si terrà. In questo modo non devi aprire l'app ad ogni fine lezione per sapere dove devi andare."
+            android:text="Trentastico! può mostrarti una notifica con il nome e aula della tua prossima lezione. In questo modo non devi aprire l'app ad ogni fine lezione per sapere dove devi andare."
             android:textColor="@color/colorForeground" />
 
         <Switch
