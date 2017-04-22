@@ -8,7 +8,7 @@ package com.geridea.trentastico;
 public final class Config {
 
     //Debug
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
     public static final boolean DEBUG_FORCE_ANOTHER_DATE = false;
@@ -28,7 +28,7 @@ public final class Config {
     public static final int DATABASE_VERSION = 1;
 
     //Calendar
-    public static final int CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 2;
+    public static final int CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 3;
 
     //Lessons update service
     public static final int LESSONS_REFRESH_WAITING_HOURS = 4;
