@@ -4,15 +4,11 @@
     "items": [
       {
         "type": "F",
-      "title": "Aggiunta una sezione con la versione dell'app e gli ultimi miglioramenti apportati"
+        "title": "Aggiunta una sezione con la versione dell'app e gli ultimi miglioramenti apportati"
       },
       {
         "type": "B",
         "title": "L'app non crasha più quando si scorre il calendario a velocità folli"
-      },
-      {
-        "type": "B",
-        "title": "Risolto un problema che qualche volta faceva crashare l'app quando si scorreva il calendario oltre il 2018"
       },
       {
         "type": "E",
