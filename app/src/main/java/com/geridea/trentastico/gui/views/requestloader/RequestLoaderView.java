@@ -17,8 +17,10 @@ import android.widget.TextView;
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,7 +36,8 @@ public class RequestLoaderView extends FrameLayout {
 
     private View view;
 
-    private final Vector<AbstractTextMessage> currentMessages = new Vector<>(10);
+    private final List<AbstractTextMessage> currentMessages
+            = Collections.synchronizedList(new ArrayList<AbstractTextMessage>());
 
     public RequestLoaderView(@NonNull Context context) {
         super(context);
@@ -63,46 +66,51 @@ public class RequestLoaderView extends FrameLayout {
     }
 
     void addOrReplaceMessage(AbstractTextMessage newMessage){
-        boolean wasMessageInserted = false;
-        for (int i = 0; i < currentMessages.size(); i++) {
-            AbstractTextMessage currentMessage = currentMessages.get(i);
-            if (currentMessage.getMessageId() == newMessage.getMessageId()) {
-                currentMessages.set(i, newMessage);
-                wasMessageInserted = true;
-                break;
+        synchronized (currentMessages) {
+            boolean wasMessageInserted = false;
+            for (int i = 0; i < currentMessages.size(); i++) {
+                AbstractTextMessage currentMessage = currentMessages.get(i);
+                if (currentMessage.getMessageId() == newMessage.getMessageId()) {
+                    currentMessages.set(i, newMessage);
+                    wasMessageInserted = true;
+                    break;
+                }
             }
-        }
 
-        if (!wasMessageInserted) {
-            currentMessages.add(newMessage);
-        }
+            if (!wasMessageInserted) {
+                currentMessages.add(newMessage);
+            }
 
-        maxMessagesSinceLastShow = Math.max(maxMessagesSinceLastShow, currentMessages.size());
+            maxMessagesSinceLastShow = Math.max(maxMessagesSinceLastShow, currentMessages.size());
+        }
 
         postRecalculateMessageToDisplay();
     }
 
     private void recalculateMessagesToDisplay() {
-        if (currentMessages.isEmpty()) {
-            view.setVisibility(GONE);
-            hideAndResetCounter();
-        } else {
-            view.setVisibility(VISIBLE);
-            if(currentMessages.size() == 1 && maxMessagesSinceLastShow <= 1){ //maxMessages can be 0 too here
-                //We show the only message we have
-                showMessage(currentMessages.firstElement());
+        synchronized (currentMessages) {
+            if (currentMessages.isEmpty()) {
+                view.setVisibility(GONE);
                 hideAndResetCounter();
             } else {
-                //We show the first message and get the counter to show how many messages
-                showMessage(currentMessages.firstElement());
-                showCounter();
+                view.setVisibility(VISIBLE);
+                if (currentMessages.size() == 1 && maxMessagesSinceLastShow <= 1) { //maxMessages can be 0 too here
+                    //We show the only message we have
+                    showMessage(currentMessages.get(0));
+                    hideAndResetCounter();
+                } else {
+                    //We show the first message and get the counter to show how many messages
+                    showMessage(currentMessages.get(0));
+                    showCounter();
+                }
             }
         }
+
     }
 
     private void showCounter() {
-        int progress = (int)
-                ((maxMessagesSinceLastShow-currentMessages.size())*100/((double) maxMessagesSinceLastShow));
+        int loadedMessages = maxMessagesSinceLastShow - currentMessages.size();
+        int progress = (int) (loadedMessages * 100/((double) maxMessagesSinceLastShow));
         loadingProgress.setText("("+ progress +"%)");
         loadingProgress.setVisibility(VISIBLE);
     }
@@ -117,12 +125,14 @@ public class RequestLoaderView extends FrameLayout {
     }
 
     synchronized void removeMessage(int messageId){
-        Iterator<AbstractTextMessage> messages = currentMessages.iterator();
-        while(messages.hasNext()){
-            AbstractTextMessage message = messages.next();
-            if (message.getMessageId() == messageId) {
-                messages.remove();
-                break;
+        synchronized (currentMessages) {
+            Iterator<AbstractTextMessage> messages = currentMessages.iterator();
+            while(messages.hasNext()){
+                AbstractTextMessage message = messages.next();
+                if (message.getMessageId() == messageId) {
+                    messages.remove();
+                    break;
+                }
             }
         }
 
