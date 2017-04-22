@@ -327,10 +327,10 @@ public class Cacher {
     }
 
     private static void deleteExtraCourseLessonsInInterval(long periodId, WeekInterval interval, int lessonTypeId) {
-        deleteCourseLessonsInIntervalInternal(periodId, interval, lessonTypeId);
+        deleteLessonsInIntervalInternal(periodId, interval, lessonTypeId);
     }
 
-    private static void deleteCourseLessonsInIntervalInternal(long periodId, @Nullable WeekInterval interval, long lessonTypeId) {
+    private static void deleteLessonsInIntervalInternal(long periodId, @Nullable WeekInterval interval, long lessonTypeId) {
         String whereClause = String.format("(%s = ?) ", CL_CACHED_PERIOD_ID);
 
         if (interval != null) {
@@ -346,15 +346,15 @@ public class Cacher {
     }
 
     private static void deleteStudyCourseLessonsInInterval(long periodId, WeekInterval interval) {
-        deleteCourseLessonsInIntervalInternal(periodId, interval, 0);
+        deleteLessonsInIntervalInternal(periodId, interval, 0);
     }
 
     private static void deleteStudyCourseLessons(long periodId) {
-        deleteCourseLessonsInIntervalInternal(periodId, null, 0);
+        deleteLessonsInIntervalInternal(periodId, null, 0);
     }
 
     private static void deleteExtraLessonsOfType(long periodId, long lessonTypeId) {
-        deleteCourseLessonsInIntervalInternal(periodId, null, lessonTypeId);
+        deleteLessonsInIntervalInternal(periodId, null, lessonTypeId);
     }
 
     /**
