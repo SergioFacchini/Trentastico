@@ -1,7 +1,9 @@
 
 
-**Version**: 
+**Version**: VERSION
 
 **Crash report**:
 
-`CODE_HERE`
+```
+CODE_HERE
+```
