@@ -832,7 +832,12 @@ public class Cacher {
             ")", null
         );
 
-        int numDuplicatedRows = cursor.getInt(0);
+        int numDuplicatedRows;
+        if (cursor.moveToFirst()) {
+            numDuplicatedRows = cursor.getInt(cursor.getColumnIndex("duplicated_rows"));
+        } else {
+            numDuplicatedRows = 0;
+        }
 
         cursor.close();
 
