@@ -297,6 +297,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     public void prepareForNumberOfVisibleDays(int numOfDaysToShow) {
         setNumberOfVisibleDays(numOfDaysToShow);
         setDateTimeInterpreter(getAppropriateDateTimeInterpreter());
+        goToDate(getFirstVisibleDay()); //Fixes #47
         invalidate();
     }
 

@@ -89,6 +89,7 @@ public class CalendarFragment extends FragmentWithMenuItems {
             //Note we cannot call here calendar.getNumberOfVisibleDays() because this might have
             //been called before onCreate
             item.setIcon(getChangeViewMenuIcon(AppPreferences.getCalendarNumOfDaysToShow()));
+
             item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
