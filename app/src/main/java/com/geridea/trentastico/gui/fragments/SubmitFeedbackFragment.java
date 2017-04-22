@@ -15,7 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.geridea.trentastico.R;
-import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
+import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
 import com.geridea.trentastico.utils.UIUtils;
@@ -24,7 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SubmitFeedbackFragment extends IFragmentWithMenuItems {
+public class SubmitFeedbackFragment extends FragmentWithMenuItems {
 
     private boolean isFeedbackBeingSent = false;
 

@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Novità in 0.8.1",
+    "items": [
+      {
+        "type": "F",
+      "title": "Aggiunta una sezione con la versione dell'app e gli ultimi miglioramenti apportati"
+      },
+      {
+        "type": "B",
+        "title": "L'app non crasha più quando si scorre il calendario a velocità folli"
+      },
+      {
+        "type": "B",
+        "title": "Risolto un problema che qualche volta faceva crashare l'app quando si scorreva il calendario oltre il 2018"
+      },
+      {
+        "type": "E",
+        "title": "L'app è ora più stabile, specialmente sui dispositivi Samsung"
+      },
+      {
+        "type": "E",
+        "title": "Corretto qualche error di battitura"
+      }
+    ]
+  },
+  {
+    "name": "Novità in 0.8",
+    "items": [
+      {
+        "type": "F",
+        "title": "Rilasciata la prima beta di Trentastico!"
+      }
+    ]
+  }
+]

@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
-import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
+import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter;
 import com.geridea.trentastico.gui.adapters.PartitioningsAdapter;
 import com.geridea.trentastico.gui.views.CourseTimesCalendar;
@@ -44,7 +44,7 @@ import butterknife.OnClick;
 
 import static android.view.View.GONE;
 
-public class CalendarFragment extends IFragmentWithMenuItems {
+public class CalendarFragment extends FragmentWithMenuItems {
 
     @BindView(R.id.calendar)       CourseTimesCalendar calendar;
     @BindView(R.id.request_loader) RequestLoaderView loaderView;

@@ -3,6 +3,7 @@ package com.geridea.trentastico.gui.activities;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,6 +20,7 @@ import com.geridea.trentastico.BuildConfig;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
+import com.geridea.trentastico.gui.fragments.AboutFragment;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
@@ -36,7 +38,8 @@ public class HomeActivity extends AppCompatActivity
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view)      NavigationView navigationView;
 
-    private IFragmentWithMenuItems currentFragment;
+    private Fragment currentFragment;
+    private IMenuSettings currentMenuSettings = NoMenuSettings.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +99,9 @@ public class HomeActivity extends AppCompatActivity
         // If the nav drawer is open, hide all action items
         hideAllMenuItems(menu);
 
-        for (int id: currentFragment.getIdsOfMenuItemsToMakeVisible()) {
+        for (int id: currentMenuSettings.getIdsOfMenuItemsToMakeVisible()) {
             MenuItem menuItem = menu.findItem(id);
-            currentFragment.bindMenuItem(menuItem);
+            currentMenuSettings.bindMenuItem(menuItem);
             menuItem.setVisible(true);
         }
 
@@ -136,6 +139,8 @@ public class HomeActivity extends AppCompatActivity
             setCurrentFragment(new ExtraLessonsFragment());
         } else if(id == R.id.menu_feedback){
             setCurrentFragment(new SubmitFeedbackFragment());
+        } else if(id == R.id.menu_changelog){
+            setCurrentFragment(new AboutFragment());
         } else if(Config.DEBUG_MODE){
 
             //Managing debug stuff here
@@ -161,13 +166,20 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-    private void setCurrentFragment(IFragmentWithMenuItems nextFragment) {
+    private void setCurrentFragment(Fragment nextFragment) {
         currentFragment = nextFragment;
-        currentFragment.setActivity(this);
+
+        if (currentFragment instanceof FragmentWithMenuItems) {
+            FragmentWithMenuItems currentFragment = (FragmentWithMenuItems) this.currentFragment;
+            currentFragment.setActivity(this);
+            currentMenuSettings = currentFragment;
+        } else {
+            currentMenuSettings = NoMenuSettings.getInstance();
+        }
 
         invalidateOptionsMenu();
 
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.content_frame, nextFragment)
                 .commit();

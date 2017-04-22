@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
-import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
+import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter;
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
@@ -48,7 +48,7 @@ import butterknife.OnItemLongClick;
 
 import static android.view.View.GONE;
 
-public class ExtraLessonsFragment extends IFragmentWithMenuItems {
+public class ExtraLessonsFragment extends FragmentWithMenuItems {
 
     @BindView(R.id.extra_lessons_list)     ListView lessonsList;
     @BindView(R.id.no_extra_courses_label) TextView noExtraCoursesLabel;

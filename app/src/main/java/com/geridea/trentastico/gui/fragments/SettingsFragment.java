@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.gui.activities.IFragmentWithMenuItems;
+import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
@@ -38,7 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
-public class SettingsFragment extends IFragmentWithMenuItems {
+public class SettingsFragment extends FragmentWithMenuItems {
 
     /**
      * Prevents listeners from triggering unnecessarily.
