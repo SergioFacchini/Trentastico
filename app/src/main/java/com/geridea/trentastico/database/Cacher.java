@@ -20,6 +20,7 @@ import com.birbit.android.jobqueue.config.Configuration;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
+import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
@@ -140,19 +141,20 @@ public class Cacher {
 
     public static final int PRIORITY_NORMAL = 1;
 
-    private static SQLiteDatabase writableDatabase;
+    private static SQLiteDatabase writableDatabase = null;
     private static JobManager jobQueue;
 
     public static void init(Context context){
-        CacheDbHelper cacheDbHelper = new CacheDbHelper(context);
-        writableDatabase = cacheDbHelper.getWritableDatabase();
+        if (writableDatabase == null) {
+            writableDatabase = new CacheDbHelper(context).getWritableDatabase();
 
-        jobQueue = new JobManager(
-            new Configuration.Builder(context)
-                .minConsumerCount(1)
-                .maxConsumerCount(1)
-                .build()
-        );
+            jobQueue = new JobManager(
+                    new Configuration.Builder(context)
+                            .minConsumerCount(1)
+                            .maxConsumerCount(1)
+                            .build()
+            );
+        }
     }
 
     public static void cacheExtraLessonsSet(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
@@ -844,6 +846,49 @@ public class Cacher {
         return numDuplicatedRows != 0;
     }
 
+    private static void removeExtraCoursesWithLessonTypeImpl(int lessonTypeId) {
+        for (Long cachedExtraId : getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
+            deleteLessonTypeWithId(lessonTypeId);
+            deleteExtraLessonsOfType(cachedExtraId, lessonTypeId);
+            deleteCachedPeriodWithId(cachedExtraId);
+        }
+    }
+
+    static void removeExtraCoursesNotInList(ExtraCoursesList extraCoursesToKeep) {
+        for (CachedLessonType lessonTypeToDelete: findExtraLessonTypesNotInList(extraCoursesToKeep)) {
+            removeExtraCoursesWithLessonTypeImpl(lessonTypeToDelete.getLesson_type_id());
+        }
+    }
+
+    @NonNull
+    private static ArrayList<CachedLessonType> findExtraLessonTypesNotInList(ExtraCoursesList extraCoursesToKeep) {
+        ArrayList<CachedLessonType> lessonTypesToDelete = new ArrayList<>();
+        for (CachedLessonType cachedLessonType : loadExtraCoursesLessonTypes()) {
+            boolean isLessonToKeep = false;
+            for (ExtraCourse courseToKeep : extraCoursesToKeep) {
+                if (cachedLessonType.getLesson_type_id() == courseToKeep.getLessonTypeId()) {
+                    isLessonToKeep = true;
+                }
+            }
+
+            if (!isLessonToKeep) {
+                lessonTypesToDelete.add(cachedLessonType);
+            }
+        }
+        return lessonTypesToDelete;
+    }
+
+    /**
+     * Method to use during database updates. In this case, {@link Cacher#init(Context)} will fail
+     * because the database is locked.<br>
+     * Warning: while in this mode the job queue is not initialized! Trying to perform job queue
+     * operations will result in an error.
+     * @param db the database to set
+     */
+    static void setTemporaryWritableDatabase(SQLiteDatabase db) {
+        writableDatabase = db;
+    }
+
     private static abstract class CacheJob extends Job {
 
         protected CacheJob() {
@@ -986,11 +1031,7 @@ public class Cacher {
 
         @Override
         public void onRun() throws Throwable {
-            for (Long cachedExtraId : getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
-                deleteLessonTypeWithId(lessonTypeId);
-                deleteExtraLessonsOfType(cachedExtraId, lessonTypeId);
-                deleteCachedPeriodWithId(cachedExtraId);
-            }
+            removeExtraCoursesWithLessonTypeImpl(lessonTypeId);
         }
     }
 
@@ -1093,4 +1134,5 @@ public class Cacher {
         }
 
     }
+
 }

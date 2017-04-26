@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.geridea.trentastico.Config;
+import com.geridea.trentastico.utils.AppPreferences;
 
 public class CacheDbHelper extends SQLiteOpenHelper {
 
@@ -27,7 +28,12 @@ public class CacheDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Cacher.setTemporaryWritableDatabase(db);
 
+        if (oldVersion <= 1) {
+            //Fixing bug #57
+            Cacher.removeExtraCoursesNotInList(AppPreferences.getExtraCourses());
+        }
     }
 
 }

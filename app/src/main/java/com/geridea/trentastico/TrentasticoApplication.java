@@ -2,6 +2,7 @@ package com.geridea.trentastico;
 
 import android.app.Application;
 
+import com.alexvasilkov.android.commons.utils.AppContext;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.providers.DepartmentsProvider;
@@ -30,6 +31,7 @@ public class TrentasticoApplication extends Application {
             ACRA.init(this);
         }
 
+        AppContext.init(this);
         Cacher.init(this);
         AppPreferences.init(this);
         DepartmentsProvider.loadIfNeeded();
