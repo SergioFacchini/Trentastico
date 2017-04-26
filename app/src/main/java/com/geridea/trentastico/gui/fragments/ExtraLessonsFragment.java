@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.R;
+import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter;
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter;
@@ -160,6 +161,8 @@ public class ExtraLessonsFragment extends FragmentWithMenuItems {
         @OnClick(R.id.delete_button)
         void onDeleteButtonPressed() {
             AppPreferences.removeExtraCourse(course.getLessonTypeId());
+            Cacher.removeExtraCoursesWithLessonType(course.getLessonTypeId());
+
             onDeleteConfirm.dispatch();
             dismiss();
         }

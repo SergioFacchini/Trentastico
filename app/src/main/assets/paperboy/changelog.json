@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 0.8.2",
+    "items": [
+      {
+        "type": "B",
+        "title": "Corretto un errore che mostrava le notifiche per delle lezioni extra rimosse"
+      }
+    ]
+  },{
     "name": "Novità in 0.8.1",
     "items": [
       {
@@ -16,7 +24,7 @@
       },
       {
         "type": "E",
-        "title": "Corretto qualche error di battitura"
+        "title": "Corretto qualche errore di battitura"
       }
     ]
   },
