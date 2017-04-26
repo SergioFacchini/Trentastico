@@ -25,6 +25,7 @@ import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.services.LessonsUpdaterService;
+import com.geridea.trentastico.services.NLNStarter;
 import com.geridea.trentastico.services.NextLessonNotificationService;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.threerings.signals.Listener1;
@@ -146,7 +147,7 @@ public class SettingsFragment extends FragmentWithMenuItems {
 
     private void startNextLessonNotificationService() {
         getActivity().startService(NextLessonNotificationService.createIntent(
-            getActivity(), NextLessonNotificationService.STARTER_NOTIFICATIONS_SWITCHED_ON)
+            getActivity(), NLNStarter.NOTIFICATIONS_SWITCHED_ON)
         );
     }
 
@@ -218,7 +219,7 @@ public class SettingsFragment extends FragmentWithMenuItems {
 
             //We need to show the next lesson notification for the new course
             getActivity().startService(NextLessonNotificationService.createIntent(
-                    getContext(), NextLessonNotificationService.STARTER_STUDY_COURSE_CHANGE
+                    getContext(), NLNStarter.STUDY_COURSE_CHANGE
             ));
         }
 

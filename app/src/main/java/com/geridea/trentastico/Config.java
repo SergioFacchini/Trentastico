@@ -11,7 +11,7 @@ public final class Config {
     public static final boolean DEBUG_MODE = BuildConfig.DEBUG;
     public static final int PRE_LOADING_WAITING_TIME_MS = 0;
 
-    public static final boolean DEBUG_FORCE_ANOTHER_DATE = true;
+    public static final boolean DEBUG_FORCE_ANOTHER_DATE = false;
     public static long DATE_TO_FORCE = 1491814432000L; //Mon Apr 10 10:55:32 2017 GMT
 
     //Networking

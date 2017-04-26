@@ -26,7 +26,7 @@ import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
 import com.geridea.trentastico.utils.AppPreferences;
-import com.geridea.trentastico.utils.NumbersUtils;
+import com.geridea.trentastico.utils.ArrayUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 
 import java.util.ArrayList;
@@ -35,18 +35,6 @@ import java.util.Calendar;
 import static com.geridea.trentastico.utils.UIUtils.showToastIfInDebug;
 
 public class NextLessonNotificationService extends Service {
-
-    public static final int STARTER_DEBUG = -1;
-    public static final int STARTER_UNKNOWN = 0;
-    public static final int STARTER_PHONE_BOOT = 1;
-    public static final int STARTER_NETWORK_ON = 2;
-    public static final int STARTER_APP_BOOT = 3;
-    public static final int STARTER_STUDY_COURSE_CHANGE = 4;
-    public static final int STARTER_NOTIFICATIONS_SWITCHED_ON = 5;
-    public static final int STARTER_FILTERS_CHANGED = 6;
-    public static final int STARTER_EXTRA_COURSE_CHANGE = 7;
-    public static final int STARTER_ALARM_MORNING = 8;
-    public static final int STARTER_ALARM_LESSON = 9;
 
     public static final String EXTRA_STARTER = "EXTRA_STARTER";
 
@@ -74,9 +62,9 @@ public class NextLessonNotificationService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        final int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
+        final NLNStarter starter = (NLNStarter) intent.getSerializableExtra(EXTRA_STARTER);
 
-        if (NumbersUtils.isOneOf(starter, STARTER_ALARM_MORNING, STARTER_STUDY_COURSE_CHANGE)) {
+        if (ArrayUtils.isOneOf(starter, NLNStarter.ALARM_MORNING, NLNStarter.STUDY_COURSE_CHANGE)) {
             //We're at the morning of the day. No notifications of the day shown so far. We can
             //clear the tracker.
             notificationsTracker.clear();
@@ -176,7 +164,7 @@ public class NextLessonNotificationService extends Service {
         return START_NOT_STICKY;
     }
 
-    private void showNotificationsForLessonsIfNeeded(ArrayList<LessonSchedule> lessons, int starter) {
+    private void showNotificationsForLessonsIfNeeded(ArrayList<LessonSchedule> lessons, NLNStarter starter) {
         for (LessonSchedule lesson: lessons) {
             if(notificationsTracker.shouldNotificationBeShown(lesson, starter)){
                 showNotificationForLessons(lesson);
@@ -307,7 +295,7 @@ public class NextLessonNotificationService extends Service {
     }
 
     private void scheduleNextStartAt(long ms, boolean isScheduledAtMorning) {
-        int starter = isScheduledAtMorning ? STARTER_ALARM_MORNING : STARTER_ALARM_LESSON;
+        NLNStarter starter = isScheduledAtMorning ? NLNStarter.ALARM_MORNING : NLNStarter.ALARM_LESSON;
         Intent serviceIntent = createIntent(this, starter);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -372,7 +360,7 @@ public class NextLessonNotificationService extends Service {
         return false;
     }
 
-    public static Intent createIntent(Context context, int starter) {
+    public static Intent createIntent(Context context, NLNStarter starter) {
         Intent intent = new Intent(context, NextLessonNotificationService.class);
         intent.putExtra(EXTRA_STARTER, starter);
         return intent;

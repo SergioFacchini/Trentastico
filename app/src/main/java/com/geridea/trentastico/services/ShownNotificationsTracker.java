@@ -7,8 +7,8 @@ package com.geridea.trentastico.services;
 
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LessonSchedule;
+import com.geridea.trentastico.utils.ArrayUtils;
 import com.geridea.trentastico.utils.JsonUtils;
-import com.geridea.trentastico.utils.NumbersUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +52,7 @@ public class ShownNotificationsTracker {
      * @param starter the starter of the service
      * @return true if the notification should be shown, false otherwise
      */
-    public boolean shouldNotificationBeShown(LessonSchedule lesson, int starter) {
+    public boolean shouldNotificationBeShown(LessonSchedule lesson, NLNStarter starter) {
         if (shownNotificationsIds.contains(lesson.getId())) {
             //We already have shown the notification to the user. Let's check if we should
             //reshow that
@@ -61,10 +61,10 @@ public class ShownNotificationsTracker {
                 //lesson is now probably updated.
                 return true;
             } else {
-                return NumbersUtils.isOneOf(starter,
-                    NextLessonNotificationService.STARTER_PHONE_BOOT,
-                    NextLessonNotificationService.STARTER_STUDY_COURSE_CHANGE,
-                    NextLessonNotificationService.STARTER_NOTIFICATIONS_SWITCHED_ON);
+                return ArrayUtils.isOneOf(starter,
+                    NLNStarter.PHONE_BOOT,
+                    NLNStarter.STUDY_COURSE_CHANGE,
+                    NLNStarter.NOTIFICATIONS_SWITCHED_ON);
             }
         } else {
             return true;
