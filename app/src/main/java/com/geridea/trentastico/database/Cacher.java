@@ -809,7 +809,7 @@ public class Cacher {
     /**
      * Fetches all the lessons planned for today; the lessons are ordered by start ms.
      */
-    public static void getTodaysLessons(TodaysLessonsListener listener) {
+    public static void getTodaysCachedLessons(TodaysLessonsListener listener) {
         jobQueue.addJobInBackground(new GetTodaysLessonsJob(listener));
     }
 

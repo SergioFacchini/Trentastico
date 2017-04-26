@@ -27,7 +27,7 @@ public class BootAndNetworkBroadcastReceiver extends BroadcastReceiver {
             //We just switched internet on (or off, or changed from mobile to WIFI)
             if(ContextUtils.weHaveInternet(context)){
                 startLessonUpdaterService(context, LessonsUpdaterService.STARTER_NETWORK_BROADCAST);
-                startNextLessonNotificationService(context, NextLessonNotificationService.STARTER_NETWORK_BROADCAST);
+                startNextLessonNotificationService(context, NextLessonNotificationService.STARTER_NETWORK_ON);
             }
         }
     }

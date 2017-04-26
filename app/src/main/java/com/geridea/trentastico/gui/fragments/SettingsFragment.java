@@ -6,7 +6,6 @@ package com.geridea.trentastico.gui.fragments;
  */
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -147,7 +146,7 @@ public class SettingsFragment extends FragmentWithMenuItems {
 
     private void startNextLessonNotificationService() {
         getActivity().startService(NextLessonNotificationService.createIntent(
-            getActivity(), NextLessonNotificationService.STARTER_SWITCHED_ON)
+            getActivity(), NextLessonNotificationService.STARTER_NOTIFICATIONS_SWITCHED_ON)
         );
     }
 
@@ -218,10 +217,9 @@ public class SettingsFragment extends FragmentWithMenuItems {
             NextLessonNotificationService.clearNotifications(getContext());
 
             //We need to show the next lesson notification for the new course
-            Intent intent = NextLessonNotificationService.createIntent(
+            getActivity().startService(NextLessonNotificationService.createIntent(
                     getContext(), NextLessonNotificationService.STARTER_STUDY_COURSE_CHANGE
-            );
-            getActivity().startService(intent);
+            ));
         }
 
         private void removeOverlappingExtraCourses(StudyCourse selectedCourse) {

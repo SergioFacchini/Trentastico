@@ -31,7 +31,7 @@ public class FetchRoomForLessonRequest extends BasicLessonsRequest {
     @Override
     public void notifyFailure(Exception e, RequestSender sender) {
         //In this request we just don't manage errors
-        listener.onLessonUpdated(lesson);
+        listener.onError(lesson);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class FetchRoomForLessonRequest extends BasicLessonsRequest {
             //but exactly at that time the lessons gets removed. In this case we just keep the
             //lesson as it is, even though the best way to handle this would be to not consider that
             //lesson for further elaborations.
-            listener.onLessonUpdated(lesson);
+            listener.onUpdateSuccessful(lesson);
         } catch (JSONException e) {
             notifyFailure(e, sender);
         }
@@ -59,8 +59,7 @@ public class FetchRoomForLessonRequest extends BasicLessonsRequest {
 
     @Override
     public void notifyResponseUnsuccessful(int code, RequestSender sender) {
-        //In this request we just don't manage errors
-        listener.onLessonUpdated(lesson);
+        listener.onError(lesson);
     }
 
     @Override

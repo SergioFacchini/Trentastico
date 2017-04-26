@@ -11,4 +11,13 @@ public class NumbersUtils {
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
 
+    public static boolean isOneOf(int needle, int... haystack) {
+        for (int element : haystack) {
+            if (element == needle) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

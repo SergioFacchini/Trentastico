@@ -126,7 +126,7 @@ public class Networker {
             @Override
             public void onFinish(boolean loadingSuccessful) {
                 if (loadingSuccessful) {
-                    Cacher.getTodaysLessons(todaysLessonsListener);
+                    Cacher.getTodaysCachedLessons(todaysLessonsListener);
                 } else {
                     todaysLessonsListener.onLessonsCouldNotBeLoaded();
                 }
@@ -135,18 +135,21 @@ public class Networker {
     }
 
     public static void loadRoomsForLessonsIfMissing(ArrayList<LessonSchedule> lessons, final LessonsWithRoomListener listener) {
-        ArrayList<LessonSchedule> lessonsToLoad = new ArrayList<>();
+        ArrayList<LessonSchedule> lessonsToLoad   = new ArrayList<>();
+        ArrayList<LessonSchedule> lessonsWithRoom = new ArrayList<>();
         for (LessonSchedule lesson : lessons) {
-            if(!lesson.hasRoomSpecified()){
+            if (lesson.hasRoomSpecified()) {
+                lessonsWithRoom.add(lesson);
+            } else {
                 lessonsToLoad.add(lesson);
             }
         }
 
         if (lessonsToLoad.isEmpty()) {
-            listener.onLoadingCompleted(lessons);
+            listener.onLoadingCompleted(lessons, new ArrayList<LessonSchedule>());
         } else {
             LessonsWithRoomMultipleListener fetchRoomListener
-                    = new LessonsWithRoomMultipleListener(lessonsToLoad, listener);
+                    = new LessonsWithRoomMultipleListener(lessonsToLoad, lessonsWithRoom,listener);
 
             for (LessonSchedule lesson: lessonsToLoad) {
                 CourseAndYear cay = LessonSchedule.findCourseAndYearForLesson(lesson);

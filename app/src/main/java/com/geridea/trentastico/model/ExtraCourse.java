@@ -108,4 +108,11 @@ public class ExtraCourse {
         cay.year     = getYear();
         return cay;
     }
+
+    /**
+     * @return true if the scheduled lesson refers to the same subject of this extra course.
+     */
+    public boolean isLessonOfCourse(LessonSchedule lesson) {
+        return lesson.getLessonTypeId() == getLessonTypeId();
+    }
 }

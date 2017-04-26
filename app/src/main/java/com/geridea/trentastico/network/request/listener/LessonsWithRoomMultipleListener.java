@@ -13,19 +13,43 @@ public class LessonsWithRoomMultipleListener implements LessonWithRoomFetchedLis
 
     private int numOfRequestReceived;
     private final ArrayList<LessonSchedule> lessonsThatWillBeUpdated;
+    private final ArrayList<LessonSchedule> lessonsWithoutRooms;
+    private final ArrayList<LessonSchedule> lessonsWithRooms;
     private final LessonsWithRoomListener listener;
 
-    public LessonsWithRoomMultipleListener(ArrayList<LessonSchedule> lessons, LessonsWithRoomListener listener) {
-        this.lessonsThatWillBeUpdated = lessons;
-        this.listener = listener;
+    /**
+     *
+     * @param lessonsToLoad the lessons that need the room to be loaded
+     * @param lessonsWithRooms lessons that already have rooms. The will just need to be dispatched
+     *                         as they are, merged with the lessons that gained rooms.
+     * @param listener the listener
+     */
+    public LessonsWithRoomMultipleListener(ArrayList<LessonSchedule> lessonsToLoad, ArrayList<LessonSchedule> lessonsWithRooms, LessonsWithRoomListener listener) {
+        this.lessonsThatWillBeUpdated = lessonsToLoad;
+        this.lessonsWithRooms         = lessonsWithRooms;
+        this.listener                 = listener;
+
+        this.lessonsWithoutRooms = new ArrayList<>();
     }
 
     @Override
-    public void onLessonUpdated(LessonSchedule updatedLessons) {
+    public void onUpdateSuccessful(LessonSchedule updatedLessons) {
+        updateCounterAndCheckIfCompleted();
+    }
+
+    private void updateCounterAndCheckIfCompleted() {
         numOfRequestReceived++;
         if (numOfRequestReceived == lessonsThatWillBeUpdated.size()) {
-            listener.onLoadingCompleted(lessonsThatWillBeUpdated);
+            lessonsThatWillBeUpdated.addAll(lessonsWithRooms);
+            listener.onLoadingCompleted(lessonsThatWillBeUpdated, lessonsWithoutRooms);
         }
+    }
+
+    @Override
+    public void onError(LessonSchedule lesson) {
+        lessonsWithoutRooms.add(lesson);
+
+        updateCounterAndCheckIfCompleted();
     }
 
 }

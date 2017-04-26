@@ -18,12 +18,15 @@ import android.support.v4.app.NotificationCompat;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
+import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.database.TodaysLessonsListener;
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity;
+import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.NumbersUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 
 import java.util.ArrayList;
@@ -34,15 +37,20 @@ import static com.geridea.trentastico.utils.UIUtils.showToastIfInDebug;
 public class NextLessonNotificationService extends Service {
 
     public static final int STARTER_DEBUG = -1;
+    public static final int STARTER_UNKNOWN = 0;
     public static final int STARTER_PHONE_BOOT = 1;
-    public static final int STARTER_NETWORK_BROADCAST = 2;
+    public static final int STARTER_NETWORK_ON = 2;
     public static final int STARTER_APP_BOOT = 3;
     public static final int STARTER_STUDY_COURSE_CHANGE = 4;
-    public static final int STARTER_SWITCHED_ON = 5;
+    public static final int STARTER_NOTIFICATIONS_SWITCHED_ON = 5;
     public static final int STARTER_FILTERS_CHANGED = 6;
-    public static final int STARTER_EXTRA_COURSE_CHANGE = 6;
+    public static final int STARTER_EXTRA_COURSE_CHANGE = 7;
+    public static final int STARTER_ALARM_MORNING = 8;
+    public static final int STARTER_ALARM_LESSON = 9;
 
     public static final String EXTRA_STARTER = "EXTRA_STARTER";
+
+    private ShownNotificationsTracker notificationsTracker;
 
     @Nullable
     @Override
@@ -51,7 +59,29 @@ public class NextLessonNotificationService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
+
+        notificationsTracker = AppPreferences.getNotificationTracker();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        AppPreferences.setNotificationTracker(notificationsTracker);
+    }
+
+    @Override
+    public int onStartCommand(final Intent intent, int flags, int startId) {
+        final int starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN);
+
+        if (NumbersUtils.isOneOf(starter, STARTER_ALARM_MORNING, STARTER_STUDY_COURSE_CHANGE)) {
+            //We're at the morning of the day. No notifications of the day shown so far. We can
+            //clear the tracker.
+            notificationsTracker.clear();
+        }
+
         if (!AppPreferences.isStudyCourseSet()) {
             //Probably first start. We have nothing to show to a user that doesn't have any lesson
             //planned!
@@ -100,8 +130,12 @@ public class NextLessonNotificationService extends Service {
                         loadRoomsForLessonsIfMissing(nextLessons, new LessonsWithRoomListener(){
 
                             @Override
-                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons){
-                                showNotificationsForLessons(updatedLessons);
+                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons,
+                                                           ArrayList<LessonSchedule> lessonsWithoutRooms){
+
+                                showNotificationsForLessonsIfNeeded(updatedLessons, starter);
+
+                                notificationsTracker.notifyLessonsWithoutRoom(lessonsWithoutRooms);
 
                                 //Since we've already shown notifications for these lessons, we won't
                                 //consider them for the next scheduling:
@@ -114,9 +148,11 @@ public class NextLessonNotificationService extends Service {
                         loadRoomsForLessonsIfMissing(lessonsStartingSoon, new LessonsWithRoomListener(){
 
                             @Override
-                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons){
+                            public void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons, ArrayList<LessonSchedule> lessonsWithoutRooms){
                                 //We have to show a notification for each lesson:
-                                showNotificationsForLessons(updatedLessons);
+                                showNotificationsForLessonsIfNeeded(updatedLessons, starter);
+
+                                notificationsTracker.notifyLessonsWithoutRoom(lessonsWithoutRooms);
 
                                 //We have already shown notifications for the lessons starting soon. We don't
                                 //consider these for the next start calculation
@@ -138,6 +174,14 @@ public class NextLessonNotificationService extends Service {
         });
 
         return START_NOT_STICKY;
+    }
+
+    private void showNotificationsForLessonsIfNeeded(ArrayList<LessonSchedule> lessons, int starter) {
+        for (LessonSchedule lesson: lessons) {
+            if(notificationsTracker.shouldNotificationBeShown(lesson, starter)){
+                showNotificationForLessons(lesson);
+            }
+        }
     }
 
     private void loadRoomsForLessonsIfMissing(ArrayList<LessonSchedule> lessons, LessonsWithRoomListener listener) {
@@ -173,14 +217,8 @@ public class NextLessonNotificationService extends Service {
         return lessonsStartingNext;
     }
 
-    private void showNotificationsForLessons(ArrayList<LessonSchedule> lessonsStartingSoon) {
-        for (LessonSchedule lesson : lessonsStartingSoon) {
-            showStartingNotificationForLessons(lesson);
-        }
-    }
-
     private void hideNotificationsForPassedLessons(ArrayList<LessonSchedule> passedLessons) {
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = getNotificationManager(NextLessonNotificationService.this);
 
         for (LessonSchedule lesson : passedLessons) {
             manager.cancel((int) lesson.getId());
@@ -246,14 +284,15 @@ public class NextLessonNotificationService extends Service {
         if (nextStartPlannedAt == null) {
             scheduleAtNextDayMorning();
         } else {
-            scheduleNextStartAt(CalendarUtils.addMinutes(nextStartPlannedAt, -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN));
+            long ms = CalendarUtils.addMinutes(nextStartPlannedAt, -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN);
+            scheduleNextStartAt(ms, false);
         }
 
         stopSelf();
     }
 
     private void scheduleAtNextDayMorning() {
-        scheduleNextStartAt(getNextDayMorning());
+        scheduleNextStartAt(getNextDayMorning(), true);
     }
 
     private long getNextDayMorning() {
@@ -267,8 +306,9 @@ public class NextLessonNotificationService extends Service {
         return calendar.getTimeInMillis();
     }
 
-    private void scheduleNextStartAt(long ms) {
-        Intent serviceIntent = new Intent(this, NextLessonNotificationService.class);
+    private void scheduleNextStartAt(long ms, boolean isScheduledAtMorning) {
+        int starter = isScheduledAtMorning ? STARTER_ALARM_MORNING : STARTER_ALARM_LESSON;
+        Intent serviceIntent = createIntent(this, starter);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -277,7 +317,7 @@ public class NextLessonNotificationService extends Service {
         showToastIfInDebug(this, "Scheduled alarm manager to "+ CalendarUtils.formatTimestamp(ms));
     }
 
-    private void showStartingNotificationForLessons(LessonSchedule lesson) {
+    private void showNotificationForLessons(LessonSchedule lesson) {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.ic_launcher)
@@ -299,8 +339,10 @@ public class NextLessonNotificationService extends Service {
 
         notificationBuilder.setContentIntent(resultPendingIntent);
 
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = getNotificationManager(NextLessonNotificationService.this);
         manager.notify((int) lesson.getId(), notificationBuilder.build());
+
+        notificationsTracker.notifyNotificationShown(lesson.getId());
     }
 
     private ArrayList<LessonSchedule> getValidLessons(ArrayList<LessonSchedule> lessons) {
@@ -339,6 +381,38 @@ public class NextLessonNotificationService extends Service {
     public static void clearNotifications(Context context) {
         //Technically this could cancel the "Your lessons has changed" notification. However, this
         //would happen very infrequently since the changes to lesson are not performed very often
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancelAll();
+        getNotificationManager(context).cancelAll();
+
+
     }
+
+    private static NotificationManager getNotificationManager(Context context) {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    /**
+     * Removes all notification related to the passed course. This happens by retrieving all the
+     * lessons held today and removing all the possible notifications of that type.
+     * @param context needed to invoke the notification service
+     * @param course the course
+     */
+    public static void removeNotificationsOfExtraCourse(final Context context, final ExtraCourse course) {
+        Cacher.getTodaysCachedLessons(new TodaysLessonsListener() {
+            @Override
+            public void onLessonsAvailable(ArrayList<LessonSchedule> lessons) {
+                NotificationManager notificationManager = getNotificationManager(context);
+
+                for (LessonSchedule lesson : lessons) {
+                    if(course.isLessonOfCourse(lesson)){
+                        notificationManager.cancel((int) lesson.getId());
+                    }
+                }
+            }
+
+            @Override
+            public void onLessonsCouldNotBeLoaded() { /* Not used in this case*/ }
+        });
+
+    }
+
 }

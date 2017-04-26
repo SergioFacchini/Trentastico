@@ -8,5 +8,6 @@ package com.geridea.trentastico.network.request.listener;
 import com.geridea.trentastico.model.LessonSchedule;
 
 public interface LessonWithRoomFetchedListener {
-    void onLessonUpdated(LessonSchedule lesson);
+    void onUpdateSuccessful(LessonSchedule lesson);
+    void onError(LessonSchedule lesson);
 }

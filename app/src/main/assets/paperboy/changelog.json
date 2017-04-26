@@ -5,6 +5,12 @@
       {
         "type": "B",
         "title": "Corretto un errore che mostrava le notifiche per lezioni extra già rimosse"
+      }, {
+        "type": "B",
+        "title": "Risolto un problema che faceva ritornare la notifica della prossima lezione una volta che questa era già stata rimossa"
+      }, {
+        "type": "B",
+        "title": "Corretto un errore che non mostrava tutte le notifiche delle prossime lezione in caso di orari extra senza aula"
       }
     ]
   },{

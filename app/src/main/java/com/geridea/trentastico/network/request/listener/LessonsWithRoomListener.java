@@ -10,5 +10,9 @@ import com.geridea.trentastico.model.LessonSchedule;
 import java.util.ArrayList;
 
 public interface LessonsWithRoomListener {
-    void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons);
+    /**
+     * @param updatedLessons all lessons (with and without rooms)
+     * @param lessonsWithoutRooms lessons for which we could not fetch the roms
+     */
+    void onLoadingCompleted(ArrayList<LessonSchedule> updatedLessons, ArrayList<LessonSchedule> lessonsWithoutRooms);
 }

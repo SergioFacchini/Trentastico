@@ -77,7 +77,7 @@ public class ExtraLessonsFragment extends FragmentWithMenuItems {
 
     @OnItemLongClick(R.id.extra_lessons_list)
     boolean onItemLongClick(int position){
-        ExtraCourse course = (ExtraCourse) lessonsList.getItemAtPosition(position);
+        final ExtraCourse course = (ExtraCourse) lessonsList.getItemAtPosition(position);
 
         ExtraCourseDeleteDialog dialog = new ExtraCourseDeleteDialog(getActivity(), course);
         dialog.onDeleteConfirm.connect(new Listener0() {
@@ -86,6 +86,7 @@ public class ExtraLessonsFragment extends FragmentWithMenuItems {
                 initLessonsList();
 
                 //Updating notifications
+                NextLessonNotificationService.removeNotificationsOfExtraCourse(getContext(), course);
                 NextLessonNotificationService.createIntent(
                         getActivity(), NextLessonNotificationService.STARTER_EXTRA_COURSE_CHANGE
                 );

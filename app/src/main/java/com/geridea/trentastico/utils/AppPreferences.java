@@ -11,6 +11,7 @@ import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.PartitioningCase;
 import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.services.ShownNotificationsTracker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -307,5 +308,13 @@ public class AppPreferences {
         }
 
         return androidId;
+    }
+
+    public static ShownNotificationsTracker getNotificationTracker() {
+        return ShownNotificationsTracker.fromJson(get().getString("NEXT_LESSON_NOTIFICATION_TRACKER", "{}"));
+    }
+
+    public static void setNotificationTracker(ShownNotificationsTracker tracker) {
+        putString("NEXT_LESSON_NOTIFICATION_TRACKER", tracker.toJson().toString());
     }
 }
