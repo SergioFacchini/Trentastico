@@ -6,11 +6,13 @@ package com.geridea.trentastico.logger;
  */
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.utils.AppPreferences;
+import com.geridea.trentastico.utils.StringUtils;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -56,5 +58,14 @@ public class BugLogger {
 
         setStudyCourse(AppPreferences.getStudyCourse());
         setExtraCourses(AppPreferences.getExtraCourses());
+    }
+
+    public static void debug(String debugMessage) {
+        if(Config.SHOW_DEBUG_MESSAGES) {
+            Log.d("TRENTASTICO_DEBUG", debugMessage);
+
+            String stackTrace = StringUtils.implode(Thread.currentThread().getStackTrace(), "\n");
+            Log.d("TRENTASTICO_DEBUG", stackTrace);
+        }
     }
 }

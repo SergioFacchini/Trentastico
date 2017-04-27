@@ -17,6 +17,7 @@ import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.network.LessonsLoader;
+import com.geridea.trentastico.utils.UIUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.threerings.signals.Listener1;
@@ -199,7 +200,9 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
         loader.onLoadingOperationSuccessful.connect(new Listener3<LessonsSet, WeekInterval, ILoadingMessage>() {
             @Override
             public void apply(final LessonsSet lessons, final WeekInterval interval, final ILoadingMessage message) {
-                post(new Runnable() {
+                //We cannot use post() here since it's possible that the calendar is still not
+                //attached to the fragment
+                UIUtils.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
                         lessons.filterLessons();
@@ -218,7 +221,9 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
         loader.onPartiallyCachedResultsFetched.connect(new Listener1<CachedLessonsSet>() {
             @Override
             public void apply(final CachedLessonsSet lessons) {
-                post(new Runnable() {
+                //We cannot use post() here since it's possible that the calendar is still not
+                //attached to the fragment
+                UIUtils.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
                         lessons.filterLessons();

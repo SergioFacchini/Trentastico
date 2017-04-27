@@ -7,17 +7,17 @@ package com.geridea.trentastico.utils;
 
 import android.support.annotation.Nullable;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
 
-    public static String implode(Collection strings, String glue) {
+    public static String implode(Iterable items, String glue) {
         StringBuilder builder = new StringBuilder();
 
-        Iterator iterator = strings.iterator();
+        Iterator iterator = items.iterator();
         while (iterator.hasNext()){
             String stringToGlue = iterator.next().toString();
             builder.append(stringToGlue);
@@ -28,6 +28,10 @@ public class StringUtils {
         }
 
         return builder.toString();
+    }
+
+    public static <T> String implode(T[] items, String glue) {
+        return implode(Arrays.asList(items), glue);
     }
 
     @Nullable
