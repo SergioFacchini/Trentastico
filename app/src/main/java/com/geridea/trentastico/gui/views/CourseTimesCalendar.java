@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.geridea.trentastico.Config.DEBUG_MODE;
-import static com.geridea.trentastico.utils.time.CalendarUtils.getDebuggableToday;
+import static com.geridea.trentastico.utils.time.CalendarUtils.TODAY;
 
 public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
@@ -41,8 +41,8 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     private final static SimpleDateFormat DATE_FORMAT_MEDIUM = new SimpleDateFormat("EE dd/MM", Locale.ITALIAN);
     private final static SimpleDateFormat DATE_FORMAT_MEDIUM_DEBUG = new SimpleDateFormat("(w)EE dd/MM", Locale.ITALIAN);
 
-    private final static SimpleDateFormat DATE_FORMAT_SHORT  = new SimpleDateFormat("dd/MM", Locale.ITALIAN);
-    private final static SimpleDateFormat DATE_FORMAT_SHORT_DEBUG  = new SimpleDateFormat("(w)dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_SHORT = new SimpleDateFormat("dd/MM", Locale.ITALIAN);
+    private final static SimpleDateFormat DATE_FORMAT_SHORT_DEBUG = new SimpleDateFormat("(w)dd/MM", Locale.ITALIAN);
 
     private final static SimpleDateFormat DATE_FORMAT_SHORT_ONLY_DAY = new SimpleDateFormat("EE", Locale.ITALIAN);
 
@@ -86,11 +86,11 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     }
 
     private DateTimeInterpreter getDateInterpreterForNumberOfDays(int numberOfVisibleDays) {
-        if(numberOfVisibleDays <= 2){
+        if (numberOfVisibleDays <= 2) {
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = getDebuggableToday();
+                    Calendar today = CalendarUtils.getDebuggableToday();
                     if (isSameDay(today, date)) {
                         return "Oggi (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
                     }
@@ -118,11 +118,11 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     return interpretHours(hour);
                 }
             };
-        } else if(numberOfVisibleDays <= 5) {
+        } else if (numberOfVisibleDays <= 5) {
             return new DateTimeInterpreter() {
                 @Override
                 public String interpretDate(Calendar date) {
-                    Calendar today = getDebuggableToday();
+                    Calendar today = CalendarUtils.getDebuggableToday();
                     if (isSameDay(today, date)) {
                         return "Oggi";
                     }
@@ -142,8 +142,10 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                         return "Ieri";
                     }
 
-                    return (DEBUG_MODE ? DATE_FORMAT_MEDIUM_DEBUG : DATE_FORMAT_MEDIUM)
-                                .format(date.getTime());
+                    if (DEBUG_MODE)
+                        return DATE_FORMAT_MEDIUM_DEBUG.format(date.getTime());
+                    else
+                        return DATE_FORMAT_MEDIUM.format(date.getTime());
                 }
 
                 @Override
@@ -160,11 +162,15 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     lastDay.add(Calendar.WEEK_OF_MONTH, +1);
 
                     if (date.equals(firstDay) || (date.after(firstDay) && date.before(lastDay))) {
-                        return (DEBUG_MODE ? DATE_FORMAT_SHORT_DEBUG : DATE_FORMAT_SHORT_ONLY_DAY)
-                                .format(date.getTime());
+                        if (DEBUG_MODE)
+                            return DATE_FORMAT_SHORT_DEBUG.format(date.getTime());
+                        else
+                            return DATE_FORMAT_SHORT_ONLY_DAY.format(date.getTime());
                     } else {
-                        return (DEBUG_MODE ? DATE_FORMAT_SHORT_DEBUG : DATE_FORMAT_SHORT)
-                                    .format(date.getTime());
+                        if (DEBUG_MODE)
+                            return DATE_FORMAT_SHORT_DEBUG.format(date.getTime());
+                        else
+                            return DATE_FORMAT_SHORT.format(date.getTime());
                     }
                 }
 
@@ -179,7 +185,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
 
     @NonNull
     private String interpretHours(int hour) {
-        return hour + ":00";
+        return hour+"" ;
     }
 
     private void prepareLoader() {
@@ -236,8 +242,8 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
         }
     }
 
-    public void loadNearEvents() {
-        loader.loadEventsNearDay(getFirstVisibleDay());
+    public void loadEventsNearToday() {
+        loader.loadEventsNearDay(TODAY);
     }
 
     private void addEventsFromLessonsSet(LessonsSet lessons) {
@@ -268,11 +274,11 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
         ScrollDirection scrollDirection = newFirst.after(oldFirst) ? ScrollDirection.RIGHT : ScrollDirection.LEFT;
 
         CustomWeekView.DisabledDayVisibleResult disabledDays = getDisabledDaysVisibleFromDay(newFirst);
-        if(disabledDays.isFirstDayDisabled()) {
+        if (disabledDays.isFirstDayDisabled()) {
             loader.loadDaysIfNeeded(disabledDays.getFirstVisibleWeek(), scrollDirection);
         }
 
-        if(disabledDays.isLastDayDisabled()) {
+        if (disabledDays.isLastDayDisabled()) {
             loader.loadDaysIfNeeded(disabledDays.getLastVisibleWeek(), scrollDirection);
         }
     }
@@ -312,7 +318,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     }
 
     private int getNextNumberOfDaysToShow(int numberOfVisibleDays) {
-        switch(numberOfVisibleDays){
+        switch (numberOfVisibleDays) {
             case 1: return 2;
             default:
             case 2: return 3;
