@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.geridea.trentastico.BuildConfig;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
+import com.geridea.trentastico.utils.DebugUtils;
 import com.github.porokoro.paperboy.PaperboyFragment;
 
 import butterknife.BindView;
@@ -25,7 +26,6 @@ import butterknife.ButterKnife;
 public class AboutFragment extends FragmentWithMenuItems {
 
     @BindView(R.id.version_text) TextView versionText;
-    @BindView(R.id.version_code) TextView versionCode;
 
     @Nullable
     @Override
@@ -33,9 +33,7 @@ public class AboutFragment extends FragmentWithMenuItems {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         ButterKnife.bind(this, view);
 
-        versionText.setText(versionText.getText() + BuildConfig.VERSION_NAME);
-        versionCode.setText(versionCode.getText().toString() + BuildConfig.VERSION_CODE);
-
+        versionText.setText(DebugUtils.computeVersionName());
 
         PaperboyFragment paperboyFragment = PaperboyFragmentMaker.buildPaperboyFragment(getContext());
         getChildFragmentManager()

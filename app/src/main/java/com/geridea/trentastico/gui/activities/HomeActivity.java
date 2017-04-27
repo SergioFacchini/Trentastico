@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alexvasilkov.android.commons.utils.Views;
-import com.geridea.trentastico.BuildConfig;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.database.Cacher;
@@ -28,6 +27,7 @@ import com.geridea.trentastico.gui.fragments.SubmitFeedbackFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.geridea.trentastico.services.NLNStarter;
 import com.geridea.trentastico.services.NextLessonNotificationService;
+import com.geridea.trentastico.utils.DebugUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,7 +61,7 @@ public class HomeActivity extends AppCompatActivity
 
         //Showing the version
         TextView versionText = Views.find(navigationView.getHeaderView(0), R.id.version_text);
-        versionText.setText(computeVersionName());
+        versionText.setText("Versione: "+ DebugUtils.computeVersionName());
 
         //Removing debug stuff from menu
         if (!Config.DEBUG_MODE) {
@@ -81,10 +81,6 @@ public class HomeActivity extends AppCompatActivity
 
         //Setting calendar fragment as the first fragment
         switchToCalendarFragment();
-    }
-
-    private String computeVersionName() {
-        return String.format("Versione: %s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
     }
 
     @Override

@@ -28,22 +28,24 @@
         android:textSize="16sp" />
 
     <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Un sentito ringraziamento a Davide Bulbarelli, Alessandro Cervellera e Lorenzo Braccaioli per aver sofferto con me al massacrante hackathon degli ITC days 2017, luogo in qui quest'app è stata concepita."
+        android:textColor="@color/colorForeground"
+        android:paddingTop="6dp"
+        android:textStyle="italic"
+        android:textSize="14sp" />
+
+    <TextView
         android:id="@+id/version_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Versione: "
         android:textColor="@color/colorForeground"
         android:layout_marginTop="10dp"
-        android:textSize="16sp" />
-
-    <TextView
-        android:id="@+id/version_code"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Codice: "
-        android:textColor="@color/colorForeground"
-        android:layout_marginTop="10dp"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:paddingTop="5dp"/>
 
     <FrameLayout
         android:id="@+id/paperboy_fragment_frame"

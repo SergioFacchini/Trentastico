@@ -3,36 +3,39 @@
     "name": "Novità in 0.8.2",
     "items": [
       {
-        "type": "B",
-        "title": "Corretto un errore che mostrava le notifiche per lezioni extra già rimosse"
+        "type": "1",
+        "title": "Apportato qualche miglioramento grafico"
       }, {
-        "type": "B",
-        "title": "Corretto un problema che, all'apertura dell'app, non caricava le lezioni della giornata fino a quando non si scrollava."
+        "type": "2",
+        "title": "Corretto un errore che mostrava le notifiche per lezioni extra già rimosse<br><strong>Grazie a Simone Degiacomi per la segnalazione!</strong>"
       }, {
-        "type": "B",
-        "title": "Risolto un problema che faceva ritornare la notifica della prossima lezione una volta che questa era già stata rimossa"
+        "type": "2",
+        "title": "Risolto un problema che faceva ritornare la notifica della prossima lezione una volta che questa era già stata rimossa<br><strong>Grazie a Davide Bulbarelli per la segnalazione!</strong>"
       }, {
-        "type": "B",
+        "type": "2",
         "title": "Corretto un errore che non mostrava tutte le notifiche delle prossime lezione quando si avevano orari extra senza aula"
+      }, {
+        "type": "3",
+        "title": "Corretto un problema che all'apertura dell'app non faceva caricava le lezioni della giornata"
       }
     ]
   },{
     "name": "Novità in 0.8.1",
     "items": [
       {
-        "type": "F",
+        "type": "1",
         "title": "Aggiunta una sezione con la versione dell'app e gli ultimi miglioramenti apportati"
       },
       {
-        "type": "B",
+        "type": "3",
         "title": "L'app non crasha più quando si scorre il calendario a velocità folli"
       },
       {
-        "type": "E",
+        "type": "3",
         "title": "L'app è ora più stabile, specialmente sui dispositivi Samsung"
       },
       {
-        "type": "E",
+        "type": "3",
         "title": "Corretto qualche errore di battitura"
       }
     ]
@@ -41,7 +44,7 @@
     "name": "Novità in 0.8",
     "items": [
       {
-        "type": "F",
+        "type": "1",
         "title": "Rilasciata la prima beta di Trentastico!"
       }
     ]

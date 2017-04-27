@@ -36,7 +36,7 @@ public final class PaperboyFragmentMaker {
                 List<ItemType> featureTypes = new ArrayList<>();
 
                 featureTypes.add(ItemTypeBuilderKt.buildItemType(
-                        context, DefaultItemTypes.INSTANCE.getIMPROVEMENT(), "Miglioramenti", "E",
+                        context, DefaultItemTypes.INSTANCE.getIMPROVEMENT(), "Ottimo!", "3",
                         new Function1<ItemTypeBuilder, Unit>() {
                             @Override
                             public Unit invoke(ItemTypeBuilder itemTypeBuilder) {
@@ -51,7 +51,7 @@ public final class PaperboyFragmentMaker {
 
 
                 featureTypes.add(ItemTypeBuilderKt.buildItemType(
-                        context, DefaultItemTypes.INSTANCE.getBUG(), "Correzioni", "B",
+                        context, DefaultItemTypes.INSTANCE.getBUG(), "Super", "2",
                     new Function1<ItemTypeBuilder, Unit>() {
                         @Override
                         public Unit invoke(ItemTypeBuilder itemTypeBuilder) {
@@ -65,7 +65,7 @@ public final class PaperboyFragmentMaker {
                     }));
 
                 featureTypes.add(ItemTypeBuilderKt.buildItemType(
-                        context, DefaultItemTypes.INSTANCE.getFEATURE(), "Novità", "F",
+                        context, DefaultItemTypes.INSTANCE.getFEATURE(), "Wow", "1",
                     new Function1<ItemTypeBuilder, Unit>() {
                         @Override
                         public Unit invoke(ItemTypeBuilder itemTypeBuilder) {
