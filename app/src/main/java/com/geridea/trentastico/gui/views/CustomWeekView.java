@@ -96,6 +96,7 @@ public class CustomWeekView extends View {
 
     protected void addEnabledInterval(WeekInterval interval) {
         enabledIntervals.add(interval);
+        postInvalidate();
     }
 
     private enum Direction {
@@ -1314,7 +1315,7 @@ public class CustomWeekView extends View {
         this.mNumberOfVisibleDays = numberOfVisibleDays;
         mCurrentOrigin.x = 0;
         mCurrentOrigin.y = 0;
-        invalidate();
+        postInvalidate();
     }
 
     public int getNumberOfVisibleDays() {
@@ -1444,14 +1445,14 @@ public class CustomWeekView extends View {
         long todayInMillis = today.getTimeInMillis() + today.getTimeZone().getOffset(today.getTimeInMillis());
         long dateDifference = (dateInMillis/day) - (todayInMillis/day);
         mCurrentOrigin.x = - dateDifference * (mWidthPerDay + mColumnGap);
-        invalidate();
+        postInvalidate();
     }
 
     /**
      * Refreshes the view and loads the events again.
      */
     public void notifyDatasetChanged(){
-        invalidate();
+        postInvalidate();
     }
 
     /**
