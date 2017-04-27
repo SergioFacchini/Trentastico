@@ -66,7 +66,7 @@ public class CalendarFragment extends FragmentWithMenuItems {
             }
         });
 
-        calendar.loadNearEvents();
+        calendar.loadEventsNearToday();
 
         return view;
     }
