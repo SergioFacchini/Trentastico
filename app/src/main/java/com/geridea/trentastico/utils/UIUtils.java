@@ -8,6 +8,8 @@ package com.geridea.trentastico.utils;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.geridea.trentastico.Config;
@@ -38,6 +40,15 @@ public class UIUtils {
         if (Config.DEBUG_MODE) {
             showToastOnMainThread(context, message);
         }
+    }
+
+    public static int convertDpToPixels(float dp, Context context) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+    public static int convertSpToPixels(float sp, Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics);
     }
 
 }

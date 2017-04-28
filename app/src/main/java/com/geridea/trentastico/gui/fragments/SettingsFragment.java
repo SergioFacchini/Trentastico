@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -38,12 +39,19 @@ import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
+
 public class SettingsFragment extends FragmentWithMenuItems {
 
+    public static final int MIN_CALENDAR_FONT_SIZE = 7;
     /**
      * Prevents listeners from triggering unnecessarily.
      */
     boolean isLoading = true;
+
+    //Calendar
+    @BindView(R.id.font_size_seek_bar) SeekBar fontSizeSeekBar;
+    @BindView(R.id.font_preview) TextView fontSizePreview;
 
     //Study course
     @BindView(R.id.current_study_course) TextView currentStudyCourse;
@@ -65,6 +73,25 @@ public class SettingsFragment extends FragmentWithMenuItems {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
 
+        //Calendar
+        fontSizeSeekBar.setProgress(AppPreferences.getCalendarFontSize() - MIN_CALENDAR_FONT_SIZE);
+        updateCalendarFontPreview(AppPreferences.getCalendarFontSize());
+
+        fontSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateCalendarFontPreview(MIN_CALENDAR_FONT_SIZE + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                AppPreferences.setCalendarFontSize(seekBar.getProgress() + MIN_CALENDAR_FONT_SIZE);
+            }
+        });
+
         //Study courses
         StudyCourse studyCourse = AppPreferences.getStudyCourse();
         currentStudyCourse.setText(studyCourse.generateFullDescription());
@@ -80,6 +107,10 @@ public class SettingsFragment extends FragmentWithMenuItems {
         isLoading = false;
 
         return view;
+    }
+
+    private void updateCalendarFontPreview(int fontSize) {
+        fontSizePreview.setTextSize(COMPLEX_UNIT_SP, fontSize);
     }
 
     ///////////////////////////

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
 import com.geridea.trentastico.Config;
+import com.geridea.trentastico.gui.views.CustomWeekView;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.ExtraCoursesList;
@@ -109,12 +110,12 @@ public class AppPreferences {
     }
 
     public static void setCalendarNumOfDaysToShow(int numOfDays) {
-        putInt(numOfDays, "CALENDAR_NUM_OF_DAYS_TO_SHOW");
+        putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays);
     }
 
-    private static void putInt(int numOfDays, String key) {
+    private static void putInt(String key, int num) {
         SharedPreferences.Editor editor = get().edit();
-        editor.putInt(key, numOfDays);
+        editor.putInt(key, num);
         editor.apply();
     }
 
@@ -317,4 +318,13 @@ public class AppPreferences {
     public static void setNotificationTracker(ShownNotificationsTracker tracker) {
         putString("NEXT_LESSON_NOTIFICATION_TRACKER", tracker.toJson().toString());
     }
+
+    public static void setCalendarFontSize(int sizeInSp) {
+        putInt("CALENDAR_FONT_SIZE", sizeInSp);
+    }
+
+    public static int getCalendarFontSize(){
+        return get().getInt("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE);
+    }
+
 }

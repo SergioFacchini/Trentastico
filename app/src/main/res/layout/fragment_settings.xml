@@ -41,6 +41,43 @@
             android:layout_height="wrap_content"
             android:gravity="left"
             android:paddingTop="20dp"
+            android:text="Calendario"
+            android:textColor="@color/colorForeground" />
+
+        <TextView
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="Sposta lo slider qui sotto per aumentare/diminuire la dimensione del testo nel calendario"
+            android:textColor="@color/colorForeground" />
+
+        <SeekBar
+            android:id="@+id/font_size_seek_bar"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10"
+            android:progress="4"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/font_preview"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Il testo avrà questa dimensione"
+            android:paddingTop="10dp"
+            android:textColor="@color/colorAccent" />
+
+
+        <TextView
+            style="@style/TextForegroundBig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="20dp"
             android:text="Cambia corso di studi"
             android:textColor="@color/colorForeground" />
 

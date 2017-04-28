@@ -58,6 +58,7 @@ public class CalendarFragment extends FragmentWithMenuItems {
 
         //Binding calendar
         calendar.prepareForNumberOfVisibleDays(AppPreferences.getCalendarNumOfDaysToShow());
+        calendar.setEventsTextSize(AppPreferences.getCalendarFontSize());
         calendar.goToDate(CalendarUtils.getDebuggableToday());
         calendar.onLoadingOperationNotify.connect(new Listener1<ILoadingMessage>() {
             @Override

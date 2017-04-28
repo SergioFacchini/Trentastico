@@ -34,6 +34,7 @@ import android.widget.OverScroller;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.geridea.trentastico.utils.UIUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
@@ -70,6 +71,8 @@ public class CustomWeekView extends View {
     private final int mDisabledBackgroundColor = 0xFF888888;
     private final int mPastDayBackgroundColor = 0xFFD5D5D5;
 
+    public static final int DEFAULT_EVENT_FONT_SIZE = 10;
+
     private final ArrayList<WeekInterval> enabledIntervals = new ArrayList<>();
 
     private DisabledDayVisibleResult disabledDayVisibleResult = new DisabledDayVisibleResult();
@@ -96,6 +99,11 @@ public class CustomWeekView extends View {
 
     protected void addEnabledInterval(WeekInterval interval) {
         enabledIntervals.add(interval);
+        postInvalidate();
+    }
+
+    public void setEventsTextSize(int fontSizeInSP) {
+        mEventTextPaint.setTextSize(UIUtils.convertSpToPixels(fontSizeInSP, getContext()));
         postInvalidate();
     }
 
@@ -168,7 +176,7 @@ public class CustomWeekView extends View {
     private int mTodayBackgroundColor = Color.rgb(239, 247, 254);
     private int mHourSeparatorHeight = 2;
     private int mTodayHeaderTextColor = Color.rgb(39, 137, 228);
-    private int mEventTextSize = 12;
+    private int mEventTextSize = DEFAULT_EVENT_FONT_SIZE;
     private int mEventTextColor = Color.BLACK;
     private int mEventPadding = 8;
     private int mHeaderColumnBackgroundColor = Color.WHITE;
@@ -887,7 +895,7 @@ public class CustomWeekView extends View {
         SpannableStringBuilder bob = new SpannableStringBuilder();
         if (event.getName() != null) {
             bob.append(event.getName());
-            bob.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, bob.length(), 0);
+            bob.setSpan(new StyleSpan(Typeface.NORMAL), 0, bob.length(), 0);
             bob.append(' ');
         }
 
