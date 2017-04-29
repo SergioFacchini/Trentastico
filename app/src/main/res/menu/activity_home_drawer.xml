@@ -13,6 +13,11 @@
             android:title="Orari extra" />
 
         <item
+            android:id="@+id/menu_libraries"
+            android:icon="@drawable/ic_local_library_black_24dp"
+            android:title="Orari biblioteche" />
+
+        <item
             android:id="@+id/menu_settings"
             android:icon="@drawable/ic_menu_manage"
             android:title="Configurazione" />

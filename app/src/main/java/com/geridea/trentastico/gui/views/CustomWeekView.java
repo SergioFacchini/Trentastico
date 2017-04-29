@@ -669,7 +669,7 @@ public class CustomWeekView extends View {
             // Check if the day is today.
             day.setTimeInMillis(today.getTimeInMillis());
             day.add(Calendar.DATE, dayNumber - 1);
-            boolean isToday = isSameDay(day, today);
+            boolean isToday = CalendarUtils.isSameDay(day, today);
 
             // Draw background color for each day.
             float start =  (startPixel < mHeaderColumnWidth ? mHeaderColumnWidth : startPixel);
@@ -753,7 +753,7 @@ public class CustomWeekView extends View {
             // Check if the day is today.
             day.setTimeInMillis(today.getTimeInMillis());
             day.add(Calendar.DATE, dayNumber - 1);
-            boolean sameDay = isSameDay(day, today);
+            boolean sameDay = CalendarUtils.isSameDay(day, today);
 
             // Draw the day labels.
             String dayLabel = getDateTimeInterpreter().interpretDate(day);
@@ -999,7 +999,7 @@ public class CustomWeekView extends View {
             while (i < tempEvents.size()) {
                 // Collect all other events for same day.
                 CustomWeekView.EventRect eventRect2 = tempEvents.get(i);
-                if (isSameDay(eventRect1.event.getStartTime(), eventRect2.event.getStartTime())) {
+                if (CalendarUtils.isSameDay(eventRect1.event.getStartTime(), eventRect2.event.getStartTime())) {
                     tempEvents.remove(i);
                     eventRects.add(eventRect2);
                 } else {
@@ -1021,7 +1021,7 @@ public class CustomWeekView extends View {
 
         deleteRectsHavingEventWithSameId(event);
 
-        if (isSameDay(event.getStartTime(), event.getEndTime())) {
+        if (CalendarUtils.isSameDay(event.getStartTime(), event.getEndTime())) {
             mEventRects.add(new EventRect(event, event, null));
         } else {
             //Our event spans multiple days:
@@ -1037,7 +1037,7 @@ public class CustomWeekView extends View {
             // Add other days.
             Calendar otherDay = (Calendar) event.getStartTime().clone();
             otherDay.add(Calendar.DATE, 1);
-            while (!isSameDay(otherDay, event.getEndTime())) {
+            while (!CalendarUtils.isSameDay(otherDay, event.getEndTime())) {
                 Calendar overDay = (Calendar) otherDay.clone();
                 overDay.set(Calendar.HOUR_OF_DAY, 0);
                 overDay.set(Calendar.MINUTE, 0);
@@ -1553,17 +1553,6 @@ public class CustomWeekView extends View {
     //      Helper methods.
     //
     /////////////////////////////////////////////////////////////////
-
-    /**
-     * Checks if two times are on the same day.
-     * @param dayOne The first day.
-     * @param dayTwo The second day.
-     * @return Whether the times are on the same day.
-     */
-    private boolean isSameDay(Calendar dayOne, Calendar dayTwo) {
-        return dayOne.get(Calendar.YEAR)        == dayTwo.get(Calendar.YEAR) &&
-               dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
-    }
 
     /**
      * Returns a calendar instance at the start of this day

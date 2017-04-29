@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text="Orari biblioteche"
+            android:textColor="@color/colorForeground"
+            android:textSize="24sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:text="Vuoi studiare? Qui puoi trovare gli orari delle biblioteche dell'università di Trento!"
+            android:textColor="@color/colorForeground"
+            android:paddingBottom="12dp"
+            android:textSize="14sp" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/previous_day"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="#3b1629"
+                android:text="&lt;"
+                android:textColor="@color/colorForeground" />
+
+            <TextView
+                android:id="@+id/current_day_name"
+                style="button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Oggi"
+                android:textColor="@color/colorForeground" />
+
+            <Button
+                android:id="@+id/next_day"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="#3b1629"
+                android:text="&gt;"
+                android:textColor="@color/colorForeground" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/loader_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="50dp"/>
+
+            <TableLayout
+                android:id="@+id/timetables"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:padding="3dip"
+                        android:text="BUC"
+                        android:textColor="@color/colorForeground"
+                        />
+
+                    <TextView
+                        android:id="@+id/buc_times"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:paddingLeft="10dip"
+                        android:text="..."
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:padding="3dip"
+                        android:text="CIAL (Via verdi 8)"
+                        android:textColor="@color/colorForeground"
+                        />
+
+                    <TextView
+                        android:id="@+id/cial_times"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:paddingLeft="10dip"
+                        android:text="..."
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:padding="3dip"
+                        android:text="Biblioteca di Mesiano"
+                        android:textColor="@color/colorForeground"
+                        />
+
+                    <TextView
+                        android:id="@+id/mesiano_times"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:paddingLeft="10dip"
+                        android:text="..."
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:padding="3dip"
+                        android:text="Biblioteca di Povo"
+                        android:textColor="@color/colorForeground"
+                        />
+
+                    <TextView
+                        android:id="@+id/povo_times"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:paddingLeft="10dip"
+                        android:text="..."
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:padding="3dip"
+                        android:text="Biblioteca di Scienze Cognitive"
+                        android:textColor="@color/colorForeground"
+                        />
+
+                    <TextView
+                        android:id="@+id/psicologia_times"
+                        android:layout_marginRight="10dp"
+                        android:gravity="center"
+                        android:paddingLeft="10dip"
+                        android:text="..."
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+            </TableLayout>
+
+            <LinearLayout
+                android:id="@+id/error_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center"
+                    android:text="Non sono riuscito a recuperare gli orari delle bibioteche! Hai una connessione ad internet attiva? Se sì, premi qua sotto per riprovare."
+                    android:textColor="@color/colorAccent" />
+
+                <Button
+                    android:id="@+id/retry_fetch_times"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#3b1629"
+                    android:text="Riprova"
+                    android:textColor="@color/colorForeground" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</ScrollView>

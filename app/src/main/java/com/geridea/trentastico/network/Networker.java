@@ -17,6 +17,7 @@ import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.network.request.FetchRoomForLessonRequest;
 import com.geridea.trentastico.network.request.IRequest;
+import com.geridea.trentastico.network.request.LibraryOpeningTimesRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
 import com.geridea.trentastico.network.request.SendFeedbackRequest;
@@ -25,6 +26,7 @@ import com.geridea.trentastico.network.request.listener.LessonsDifferenceListene
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
 import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
 import com.geridea.trentastico.network.request.listener.LessonsWithRoomMultipleListener;
+import com.geridea.trentastico.network.request.listener.LibraryOpeningTimesListener;
 import com.geridea.trentastico.network.request.listener.ListLessonsListener;
 import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.utils.AppPreferences;
@@ -32,6 +34,7 @@ import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Networker {
 
@@ -163,5 +166,9 @@ public class Networker {
         processRequest(new SendFeedbackRequest(feedback, name, email, listener));
     }
 
+
+    public static void getLibraryOpeningTimes(Calendar day, LibraryOpeningTimesListener listener) {
+        processRequest(new LibraryOpeningTimesRequest(day, listener));
+    }
 
 }

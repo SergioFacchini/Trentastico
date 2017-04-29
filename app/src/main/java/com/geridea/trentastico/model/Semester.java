@@ -17,7 +17,7 @@ public final class Semester {
     private static final int SEMESTER2_START = 2;
     private static final int SEMESTER2_END   = 8;
 
-    private static final Semester CURRENT_SEMESTER = new Semester(CalendarUtils.TODAY);
+    private static final Semester CURRENT_SEMESTER = new Semester(CalendarUtils.getDebuggableToday());
 
     private int year;
     private int semesterNumber;

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.geridea.trentastico.Config.DEBUG_MODE;
-import static com.geridea.trentastico.utils.time.CalendarUtils.TODAY;
 
 public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
@@ -248,7 +247,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     }
 
     public void loadEventsNearToday() {
-        loader.loadEventsNearDay(TODAY);
+        loader.loadEventsNearDay(CalendarUtils.getDebuggableToday());
     }
 
     private void addEventsFromLessonsSet(LessonsSet lessons) {
@@ -313,11 +312,10 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
     }
 
     /**
-     * @deprecated do not call this method directly, but use
-     * {@link CourseTimesCalendar#prepareForNumberOfVisibleDays(int)}
+     * Note: do not call this method directly, but use
+     * {@link CourseTimesCalendar#prepareForNumberOfVisibleDays(int)} instead
      */
     @Override
-    @Deprecated
     public void setNumberOfVisibleDays(int numberOfVisibleDays) {
         super.setNumberOfVisibleDays(numberOfVisibleDays);
     }

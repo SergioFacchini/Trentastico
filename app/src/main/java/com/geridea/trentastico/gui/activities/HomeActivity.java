@@ -22,6 +22,7 @@ import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.fragments.AboutFragment;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
+import com.geridea.trentastico.gui.fragments.LibrariesFragment;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.geridea.trentastico.gui.fragments.SubmitFeedbackFragment;
 import com.geridea.trentastico.services.LessonsUpdaterService;
@@ -134,6 +135,8 @@ public class HomeActivity extends AppCompatActivity
             setCurrentFragment(new SettingsFragment());
         } else if(id == R.id.menu_extra_times) {
             setCurrentFragment(new ExtraLessonsFragment());
+        } else if(id == R.id.menu_libraries) {
+            setCurrentFragment(new LibrariesFragment());
         } else if(id == R.id.menu_feedback){
             setCurrentFragment(new SubmitFeedbackFragment());
         } else if(id == R.id.menu_changelog){

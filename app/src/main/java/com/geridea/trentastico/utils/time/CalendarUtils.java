@@ -26,8 +26,6 @@ public class CalendarUtils {
     private final static SimpleDateFormat formatEEEEDDMMMM = new SimpleDateFormat("EEEE dd MMMM", Locale.ITALIAN);
     private final static SimpleDateFormat formatHHMM = new SimpleDateFormat("HH:mm", Locale.ITALIAN);
 
-    public static final Calendar TODAY = getDebuggableToday();
-
     /**
      * @return the first day of the current week, at 00:00:00.
      */
@@ -59,10 +57,6 @@ public class CalendarUtils {
         instance.clear();
 
         return instance;
-    }
-
-    public static Calendar getCachedToday() {
-        return TODAY;
     }
 
     public static Calendar getClearCalendar(){
@@ -126,5 +120,16 @@ public class CalendarUtils {
         Calendar cal = getCalendarInitializedAs(millis);
         cal.add(Calendar.MINUTE, delta);
         return cal.getTimeInMillis();
+    }
+
+    /**
+     * Checks if two times are on the same day.
+     * @param dayOne The first day.
+     * @param dayTwo The second day.
+     * @return Whether the times are on the same day.
+     */
+    public static boolean isSameDay(Calendar dayOne, Calendar dayTwo) {
+        return dayOne.get(Calendar.YEAR)        == dayTwo.get(Calendar.YEAR) &&
+               dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
     }
 }
