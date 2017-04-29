@@ -11,6 +11,7 @@ import com.geridea.trentastico.database.TodaysLessonsListener;
 import com.geridea.trentastico.model.CourseAndYear;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
+import com.geridea.trentastico.model.LibraryOpeningTimes;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedInterval;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
@@ -21,6 +22,7 @@ import com.geridea.trentastico.network.request.LibraryOpeningTimesRequest;
 import com.geridea.trentastico.network.request.ListLessonsRequest;
 import com.geridea.trentastico.network.request.RequestSender;
 import com.geridea.trentastico.network.request.SendFeedbackRequest;
+import com.geridea.trentastico.network.request.listener.CachedLibraryOpeningTimesListener;
 import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
 import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
 import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
@@ -167,8 +169,18 @@ public class Networker {
     }
 
 
-    public static void getLibraryOpeningTimes(Calendar day, LibraryOpeningTimesListener listener) {
-        processRequest(new LibraryOpeningTimesRequest(day, listener));
+    public static void getLibraryOpeningTimes(final Calendar day, final LibraryOpeningTimesListener listener) {
+        Cacher.getCachedLibraryOpeningTimes(day, false, new CachedLibraryOpeningTimesListener(){
+            @Override
+            public void onCachedOpeningTimesFound(LibraryOpeningTimes times) {
+                listener.onOpeningTimesLoaded(times, day);
+            }
+
+            @Override
+            public void onNoCachedOpeningTimes() {
+                processRequest(new LibraryOpeningTimesRequest(day, listener));
+            }
+        });
     }
 
 }

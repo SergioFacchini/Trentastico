@@ -24,6 +24,7 @@ import com.geridea.trentastico.model.ExtraCoursesList;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.LessonsSet;
+import com.geridea.trentastico.model.LibraryOpeningTimes;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.model.cache.CachedLesson;
 import com.geridea.trentastico.model.cache.CachedLessonType;
@@ -34,6 +35,7 @@ import com.geridea.trentastico.model.cache.ExtraCourseNotCachedInterval;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
 import com.geridea.trentastico.model.cache.StudyCourseCachedInterval;
 import com.geridea.trentastico.model.cache.StudyCourseNotCachedInterval;
+import com.geridea.trentastico.network.request.listener.CachedLibraryOpeningTimesListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.StringUtils;
 import com.geridea.trentastico.utils.UIUtils;
@@ -138,6 +140,31 @@ public class Cacher {
             CLT_COLOR +           " INTEGER NOT NULL," +
             CLT_IS_EXTRA_COURSE + " INTEGER NOT NULL" +
         ")";
+
+
+    //Library opening times
+
+    public static final String CACHED_LIBRARY_TIMES_TABLE_NAME = "cached_library_times";
+
+    public static final String CLIBT_DAY          = "day";
+    public static final String CLIBT_BUC          = "buc";
+    public static final String CLIBT_CIAL         = "cial";
+    public static final String CLIBT_MESIANO      = "mesiano";
+    public static final String CLIBT_POVO         = "povo";
+    public static final String CLIBT_PSICOLOGIA   = "psicologia";
+    public static final String CLIBT_CACHED_IN_MS = "cached_in_ms";
+
+    static final String SQL_CREATE_CACHED_LIBRARY_TIMES =
+        "CREATE TABLE " + CACHED_LIBRARY_TIMES_TABLE_NAME + " (" +
+            CLIBT_DAY          + " CHAR(10) NOT NULL PRIMARY KEY, " +
+            CLIBT_BUC          + " VARCHAR(10) NOT NULL, " +
+            CLIBT_CIAL         + " VARCHAR(10) NOT NULL, " +
+            CLIBT_MESIANO      + " VARCHAR(10) NOT NULL, " +
+            CLIBT_POVO         + " VARCHAR(10) NOT NULL, " +
+            CLIBT_PSICOLOGIA   + " VARCHAR(10) NOT NULL, " +
+            CLIBT_CACHED_IN_MS + " INT NOT NULL " +
+        ")";
+
 
     public static final int PRIORITY_NORMAL = 1;
 
@@ -889,6 +916,43 @@ public class Cacher {
         writableDatabase = db;
     }
 
+    /**
+     * Saves in the cache the opening times of the library. The times are considered to be fresh
+     * and fetched right now.<br>
+     * In case there is an already cached version
+     * @param openingTimes the times to cached.
+     */
+    public static void cacheLibraryOpeningTimes(LibraryOpeningTimes openingTimes) {
+        jobQueue.addJobInBackground(new CacheLibraryOpeningTimesJob(openingTimes));
+    }
+
+    public static void getCachedLibraryOpeningTimes(Calendar day, boolean fetchDeadCacheToo, CachedLibraryOpeningTimesListener listener) {
+        jobQueue.addJobInBackground(new CachedLibraryOpeningTimesJob(day, fetchDeadCacheToo, listener));
+    }
+
+    /**
+     * @return the unix timestamp before which the cache of the opening times of the library is
+     * considered to be old.
+     */
+    private static long getLastValidLibraryCachePeriod() {
+        Calendar lastValid = CalendarUtils.getDebuggableToday();
+        lastValid.add(Calendar.DAY_OF_WEEK, -5);
+
+        return lastValid.getTimeInMillis();
+    }
+
+    @NonNull
+    private static LibraryOpeningTimes buildLibraryOpeningTimesFromCursor(Cursor cursor) {
+        LibraryOpeningTimes times = new LibraryOpeningTimes();
+        times.day             = cursor.getString(cursor.getColumnIndex(CLIBT_DAY));
+        times.timesBuc        = cursor.getString(cursor.getColumnIndex(CLIBT_BUC));
+        times.timesCial       = cursor.getString(cursor.getColumnIndex(CLIBT_CIAL));
+        times.timesMesiano    = cursor.getString(cursor.getColumnIndex(CLIBT_MESIANO));
+        times.timesPovo       = cursor.getString(cursor.getColumnIndex(CLIBT_POVO));
+        times.timesPsicologia = cursor.getString(cursor.getColumnIndex(CLIBT_PSICOLOGIA));
+        return times;
+    }
+
     private static abstract class CacheJob extends Job {
 
         protected CacheJob() {
@@ -916,7 +980,7 @@ public class Cacher {
         private final boolean fetchOldCache;
         private final LessonsSetAvailableListener listener;
 
-        public GetLessonsInFreshOrDeadCacheJob(WeekInterval intervalToLoad, ArrayList<ExtraCourse>
+        private GetLessonsInFreshOrDeadCacheJob(WeekInterval intervalToLoad, ArrayList<ExtraCourse>
                 extraCourses, boolean fetchOldCache, LessonsSetAvailableListener listener) {
 
             this.intervalToLoad = intervalToLoad;
@@ -940,7 +1004,7 @@ public class Cacher {
         private final WeekInterval interval;
         private final ExtraCourse extraCourse;
 
-        public CacheExtraLessonsSetJob(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
+        private CacheExtraLessonsSetJob(LessonsSet setToCache, WeekInterval interval, ExtraCourse extraCourse) {
             //Since the lessons set is modifiable, it's better to create a copy of what we want to
             //save before it get's changed in some way. This fixes #42 and #37
             this.lessonTypesToCache = new ArrayList<>(setToCache.getLessonTypes());
@@ -976,7 +1040,7 @@ public class Cacher {
         private final ArrayList<LessonType> lessonTypesToCache;
         private final ArrayList<LessonSchedule> lessonsToCache;
 
-        public CacheLessonsSetJob(LessonsSet setToCache, WeekInterval intervalToCache) {
+        private CacheLessonsSetJob(LessonsSet setToCache, WeekInterval intervalToCache) {
             //Since the lessons set is modifiable, it's better to create a copy of what we want to
             //save before it get's changed in some way. This fixes #42 and #37
             this.lessonTypesToCache = new ArrayList<>(setToCache.getLessonTypes());
@@ -1025,7 +1089,7 @@ public class Cacher {
     private static class RemoveExtraCoursesWithLessonType extends CacheJob {
         private final int lessonTypeId;
 
-        public RemoveExtraCoursesWithLessonType(int lessonTypeId) {
+        private RemoveExtraCoursesWithLessonType(int lessonTypeId) {
             this.lessonTypeId = lessonTypeId;
         }
 
@@ -1049,7 +1113,7 @@ public class Cacher {
         private final ArrayList<ExtraCourse> courses;
         private final NotCachedIntervalsListener notCachedIntervalsListener;
 
-        public GetNotCachedSubintervalsJob(WeekInterval interval, ArrayList<ExtraCourse> courses,
+        private GetNotCachedSubintervalsJob(WeekInterval interval, ArrayList<ExtraCourse> courses,
                                            NotCachedIntervalsListener notCachedIntervalsListener) {
             this.interval = interval;
             this.courses = courses;
@@ -1064,12 +1128,11 @@ public class Cacher {
         }
     }
 
-
     private static class GetTodaysLessonsJob extends CacheJob {
 
         private TodaysLessonsListener listener;
 
-        public GetTodaysLessonsJob(TodaysLessonsListener listener) {
+        private GetTodaysLessonsJob(TodaysLessonsListener listener) {
             this.listener = listener;
         }
 
@@ -1095,13 +1158,12 @@ public class Cacher {
 
     }
 
-
     private static class IsDayCachedJob extends CacheJob {
 
         private final WeekDayTime today;
         private final IsDayCachedListener listener;
 
-        public IsDayCachedJob(WeekDayTime today, IsDayCachedListener listener) {
+        private IsDayCachedJob(WeekDayTime today, IsDayCachedListener listener) {
             this.today = today;
             this.listener = listener;
         }
@@ -1131,6 +1193,70 @@ public class Cacher {
 
         private boolean isStudyCourseCached(WeekInterval thisWeekInterval) {
             return !loadStudyCourseCachePeriods(thisWeekInterval, true).isEmpty();
+        }
+
+    }
+
+    private static class CacheLibraryOpeningTimesJob extends CacheJob {
+        private LibraryOpeningTimes openingTimes;
+
+        private CacheLibraryOpeningTimesJob(LibraryOpeningTimes openingTimes) {
+            this.openingTimes = openingTimes;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            ContentValues values = new ContentValues();
+            values.put(CLIBT_DAY,          openingTimes.day);
+            values.put(CLIBT_BUC,          openingTimes.timesBuc);
+            values.put(CLIBT_CIAL,         openingTimes.timesCial);
+            values.put(CLIBT_MESIANO,      openingTimes.timesMesiano);
+            values.put(CLIBT_POVO,         openingTimes.timesPovo);
+            values.put(CLIBT_PSICOLOGIA,   openingTimes.timesPsicologia);
+            values.put(CLIBT_CACHED_IN_MS, CalendarUtils.getDebuggableMillis());
+
+            writableDatabase.replace(CACHED_LIBRARY_TIMES_TABLE_NAME, null, values);
+        }
+
+    }
+
+    private static class CachedLibraryOpeningTimesJob extends CacheJob {
+
+        private final Calendar day;
+        private boolean fetchDeadCacheToo;
+        private final CachedLibraryOpeningTimesListener listener;
+
+        private CachedLibraryOpeningTimesJob(Calendar day, boolean fetchDeadCacheToo, CachedLibraryOpeningTimesListener listener) {
+            this.day = day;
+            this.fetchDeadCacheToo = fetchDeadCacheToo;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onRun() throws Throwable {
+            //Querying
+            String[] columns = {
+                CLIBT_DAY, CLIBT_BUC, CLIBT_CIAL, CLIBT_MESIANO, CLIBT_POVO, CLIBT_PSICOLOGIA
+            };
+            String selection = CLIBT_DAY+" = ? AND "+CLIBT_CACHED_IN_MS+" >= ?";
+
+            String lastValidMs = Long.toString(fetchDeadCacheToo ? -1 : getLastValidLibraryCachePeriod());
+            String[] selectionArgs = {
+                    LibraryOpeningTimes.formatDay(day), lastValidMs
+            };
+
+            Cursor cursor = writableDatabase.query(
+                CACHED_LIBRARY_TIMES_TABLE_NAME, columns, selection, selectionArgs, null, null, null
+            );
+
+            if (cursor.moveToFirst()) {
+
+                listener.onCachedOpeningTimesFound(buildLibraryOpeningTimesFromCursor(cursor));
+            } else {
+                listener.onNoCachedOpeningTimes();
+            }
+
+            cursor.close();
         }
 
     }

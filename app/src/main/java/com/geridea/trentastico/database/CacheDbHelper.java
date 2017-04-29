@@ -34,6 +34,10 @@ public class CacheDbHelper extends SQLiteOpenHelper {
             //Fixing bug #57
             Cacher.removeExtraCoursesNotInList(AppPreferences.getExtraCourses());
         }
+
+        if(oldVersion < 3){
+            db.execSQL(Cacher.SQL_CREATE_CACHED_LIBRARY_TIMES);
+        }
     }
 
 }
