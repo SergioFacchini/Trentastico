@@ -5,34 +5,20 @@ package com.geridea.trentastico.network;
  */
 
 import com.geridea.trentastico.database.Cacher;
-import com.geridea.trentastico.database.LessonsSetAvailableListener;
-import com.geridea.trentastico.database.NotCachedIntervalsListener;
 import com.geridea.trentastico.database.TodaysLessonsListener;
-import com.geridea.trentastico.model.CourseAndYear;
-import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
-import com.geridea.trentastico.model.LibraryOpeningTimes;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.model.cache.CachedInterval;
-import com.geridea.trentastico.model.cache.CachedLessonsSet;
-import com.geridea.trentastico.model.cache.NotCachedInterval;
-import com.geridea.trentastico.network.request.FetchRoomForLessonRequest;
-import com.geridea.trentastico.network.request.IRequest;
-import com.geridea.trentastico.network.request.LibraryOpeningTimesRequest;
-import com.geridea.trentastico.network.request.ListLessonsRequest;
+import com.geridea.trentastico.network.controllers.LessonsController;
+import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController;
+import com.geridea.trentastico.network.controllers.SendFeedbackController;
+import com.geridea.trentastico.network.controllers.listener.FeedbackSendListener;
+import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener;
+import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener;
+import com.geridea.trentastico.network.controllers.listener.LessonsWithRoomListener;
+import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener;
+import com.geridea.trentastico.network.controllers.listener.ListLessonsListener;
+import com.geridea.trentastico.network.controllers.listener.WaitForDownloadLessonListener;
 import com.geridea.trentastico.network.request.RequestSender;
-import com.geridea.trentastico.network.request.SendFeedbackRequest;
-import com.geridea.trentastico.network.request.listener.CachedLibraryOpeningTimesListener;
-import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
-import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
-import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
-import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
-import com.geridea.trentastico.network.request.listener.LessonsWithRoomMultipleListener;
-import com.geridea.trentastico.network.request.listener.LibraryOpeningTimesListener;
-import com.geridea.trentastico.network.request.listener.ListLessonsListener;
-import com.geridea.trentastico.network.request.listener.WaitForDownloadLessonListener;
-import com.geridea.trentastico.utils.AppPreferences;
-import com.geridea.trentastico.utils.time.WeekDayTime;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
@@ -40,147 +26,96 @@ import java.util.Calendar;
 
 public class Networker {
 
-    private static RequestSender requestSender = new RequestSender();
+    //Executors
+    private static LessonsController lessonsController;
+    private static SendFeedbackController sendFeedbackController;
+    private static LibraryOpeningTimesController libraryOpeningTimes;
+
+
+    private Networker() { }
+
+    public static void init(Cacher cacher){
+        RequestSender requestSender = new RequestSender();
+
+        sendFeedbackController = new SendFeedbackController(       requestSender, cacher);
+        libraryOpeningTimes    = new LibraryOpeningTimesController(requestSender, cacher);
+        lessonsController      = new LessonsController(            requestSender, cacher);
+
+    }
+
+    //----------------------------
+    // Lessons
+    //----------------------------
 
     /**
      * Loads the lessons in the given period. Fetches all the possible lesson from the fresh cache
      * or dead cache and the remaining from internet.
+     * @param interval interval to load
+     * @param listener listener that will receive the results
+     * @param intervalListener the listener that will be dispatched once we know what intervals have
+     *                         to be loaded
      */
-    public static void loadLessons(
-            final WeekInterval intervalToLoad, final LessonsLoadingListener listener,
-            final LoadingIntervalKnownListener intervalListener) {
-
-        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
-        Cacher.getLessonsInFreshOrDeadCacheAsync(intervalToLoad, extraCourses, false, new LessonsSetAvailableListener() {
-            @Override
-            public void onLessonsSetAvailable(CachedLessonsSet cacheSet) {
-                if (cacheSet.hasMissingIntervals()) {
-                    if(cacheSet.wereSomeLessonsFoundInCache()){
-                        listener.onPartiallyCachedResultsFetched(cacheSet);
-                    } else {
-                        listener.onNothingFoundInCache();
-                    }
-
-                    for (NotCachedInterval interval: cacheSet.getMissingIntervals()) {
-                        loadInterval(interval, listener);
-                    }
-                } else {
-                    //We found everything we needed in cache
-                    listener.onLessonsLoaded(cacheSet, intervalToLoad, 0);
-                }
-
-                intervalListener.onIntervalsToLoadKnown(intervalToLoad, cacheSet.getMissingIntervals());
-            }
-        });
+    public static void loadLessons(WeekInterval interval,  LessonsLoadingListener listener, LoadingIntervalKnownListener intervalListener) {
+        lessonsController.loadLessons(interval, listener, intervalListener);
     }
 
     public static void diffLessonsInCache(final WeekInterval intervalToCheck, final LessonsDifferenceListener listener) {
-        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
-        Cacher.getLessonsInFreshOrDeadCacheAsync(intervalToCheck, extraCourses, false, new LessonsSetAvailableListener() {
-            @Override
-            public void onLessonsSetAvailable(CachedLessonsSet cacheSet) {
-                if(cacheSet.isIntervalPartiallyOrFullyCached(intervalToCheck)){
-                    ArrayList<CachedInterval> cachedIntervals = cacheSet.getCachedIntervals();
-
-                    listener.onNumberOfRequestToSendKnown(cachedIntervals.size());
-
-                    for (CachedInterval cachedInterval: cachedIntervals) {
-                        processRequest(cachedInterval.generateDiffRequest(listener));
-                    }
-                } else {
-                    listener.onNoLessonsInCache();
-                }
-            }
-        });
+        lessonsController.diffLessonsInCache(intervalToCheck, listener);
     }
 
     public static void loadAndCacheNotCachedLessons(WeekInterval interval, final WaitForDownloadLessonListener listener) {
-        ArrayList<ExtraCourse> extraCourses = AppPreferences.getExtraCourses();
-        Cacher.getNotCachedSubintervals(interval, extraCourses, new NotCachedIntervalsListener(){
-
-            public void onIntervalsKnown(ArrayList<NotCachedInterval> notCachedIntervals ){
-                if (notCachedIntervals.isEmpty()) {
-                    listener.onNothingToLoad();
-                } else {
-                    for (NotCachedInterval notCachedInterval : notCachedIntervals) {
-                        processRequest(notCachedInterval.generateOneTimeRequest(listener));
-                    }
-                }
-            }
-        });
-    }
-
-    private static void loadInterval(NotCachedInterval interval, LessonsLoadingListener listener) {
-        processRequest(interval.generateRequest(listener));
-    }
-
-    private static void processRequest(IRequest requestToSend) {
-        requestSender.processRequest(requestToSend);
+        lessonsController.loadAndCacheNotCachedLessons(interval, listener);
     }
 
     public static void loadCoursesOfStudyCourse(StudyCourse studyCourse, ListLessonsListener listener) {
-        processRequest(new ListLessonsRequest(studyCourse, listener));
+        lessonsController.loadCoursesOfStudyCourse(studyCourse, listener);
     }
 
     public static void loadTodaysLessons(final TodaysLessonsListener todaysLessonsListener) {
-        final WeekDayTime today = new WeekDayTime();
-
-        //Here we have to load all the lesson scheduled for today.
-        WeekInterval dayInterval = today.getContainingInterval();
-        loadAndCacheNotCachedLessons(dayInterval, new WaitForDownloadLessonListener() {
-            @Override
-            public void onFinish(boolean loadingSuccessful) {
-                if (loadingSuccessful) {
-                    Cacher.getTodaysCachedLessons(todaysLessonsListener);
-                } else {
-                    todaysLessonsListener.onLessonsCouldNotBeLoaded();
-                }
-            }
-        });
+        lessonsController.loadTodaysLessons(todaysLessonsListener);
     }
 
     public static void loadRoomsForLessonsIfMissing(ArrayList<LessonSchedule> lessons, final LessonsWithRoomListener listener) {
-        ArrayList<LessonSchedule> lessonsToLoad   = new ArrayList<>();
-        ArrayList<LessonSchedule> lessonsWithRoom = new ArrayList<>();
-        for (LessonSchedule lesson : lessons) {
-            if (lesson.hasRoomSpecified()) {
-                lessonsWithRoom.add(lesson);
-            } else {
-                lessonsToLoad.add(lesson);
-            }
-        }
-
-        if (lessonsToLoad.isEmpty()) {
-            listener.onLoadingCompleted(lessons, new ArrayList<LessonSchedule>());
-        } else {
-            LessonsWithRoomMultipleListener fetchRoomListener
-                    = new LessonsWithRoomMultipleListener(lessonsToLoad, lessonsWithRoom,listener);
-
-            for (LessonSchedule lesson: lessonsToLoad) {
-                CourseAndYear cay = LessonSchedule.findCourseAndYearForLesson(lesson);
-                processRequest(new FetchRoomForLessonRequest(lesson, cay, fetchRoomListener));
-            }
-
-        }
+        lessonsController.loadRoomsForLessonsIfMissing(lessons, listener);
     }
 
+    public static void getTodaysCachedLessons(TodaysLessonsListener todaysLessonsListener) {
+        lessonsController.getTodaysCachedLessons(todaysLessonsListener);
+    }
+
+    /**
+     * Removes all the extra courses and lessons having the given lesson type
+     */
+    public static void removeExtraCoursesWithLessonType(int lessonTypeId) {
+        lessonsController.removeExtraCoursesWithLessonType(lessonTypeId);
+    }
+
+    /**
+     * Deletes all the cache about lessons and lesson types.
+     */
+    public static void obliterateLessonsCache() {
+        lessonsController.obliterateAllLessonsCache();
+    }
+
+    /**
+     * Deletes all the cache about the currently chosen study course
+     */
+    public static void purgeStudyCourseCache() {
+        lessonsController.purgeStudyCourseCache();
+    }
+
+    //----------------------------
+    // Feedback
+    //----------------------------
     public static void sendFeedback(String feedback, String name, String email, FeedbackSendListener listener) {
-        processRequest(new SendFeedbackRequest(feedback, name, email, listener));
+        sendFeedbackController.sendFeedback(feedback, name, email, listener);
     }
 
-
+    //----------------------------
+    // Library opening times
+    //----------------------------
     public static void getLibraryOpeningTimes(final Calendar day, final LibraryOpeningTimesListener listener) {
-        Cacher.getCachedLibraryOpeningTimes(day, false, new CachedLibraryOpeningTimesListener(){
-            @Override
-            public void onCachedOpeningTimesFound(LibraryOpeningTimes times) {
-                listener.onOpeningTimesLoaded(times, day);
-            }
-
-            @Override
-            public void onNoCachedOpeningTimes() {
-                processRequest(new LibraryOpeningTimesRequest(day, listener));
-            }
-        });
+        libraryOpeningTimes.getLibraryOpeningTimes(day, listener);
     }
 
 }

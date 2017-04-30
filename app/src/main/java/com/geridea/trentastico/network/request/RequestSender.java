@@ -23,8 +23,6 @@ import okhttp3.ResponseBody;
 
 public class RequestSender {
 
-    private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/json");
-
     private final OkHttpClient client = new OkHttpClient();
     private final Vector<Call> callsInProgress = new Vector<>();
 

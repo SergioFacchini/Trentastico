@@ -1,7 +1,7 @@
 package com.geridea.trentastico.gui.views.requestloader;
 
 import com.geridea.trentastico.model.ExtraCourse;
-import com.geridea.trentastico.network.request.ExtraLessonsRequest;
+import com.geridea.trentastico.network.controllers.LessonsController;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
@@ -11,7 +11,7 @@ public class ExtraCoursesLoadingMessage extends AbstractTextMessage {
     private final ExtraCourse course;
     private final boolean isARetry;
 
-    public ExtraCoursesLoadingMessage(ExtraLessonsRequest request) {
+    public ExtraCoursesLoadingMessage(LessonsController.ExtraLessonsRequest request) {
         super(request.getOperationId());
 
         interval = request.getIntervalToLoad();

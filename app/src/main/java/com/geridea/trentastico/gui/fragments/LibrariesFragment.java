@@ -20,7 +20,7 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.logger.BugLogger;
 import com.geridea.trentastico.model.LibraryOpeningTimes;
 import com.geridea.trentastico.network.Networker;
-import com.geridea.trentastico.network.request.listener.LibraryOpeningTimesListener;
+import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener;
 import com.geridea.trentastico.utils.UIUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
 

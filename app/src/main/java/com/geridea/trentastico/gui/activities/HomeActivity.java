@@ -18,13 +18,13 @@ import android.widget.Toast;
 import com.alexvasilkov.android.commons.utils.Views;
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
-import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.gui.fragments.AboutFragment;
 import com.geridea.trentastico.gui.fragments.CalendarFragment;
 import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment;
 import com.geridea.trentastico.gui.fragments.LibrariesFragment;
 import com.geridea.trentastico.gui.fragments.SettingsFragment;
 import com.geridea.trentastico.gui.fragments.SubmitFeedbackFragment;
+import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.geridea.trentastico.services.NLNStarter;
 import com.geridea.trentastico.services.NextLessonNotificationService;
@@ -145,7 +145,7 @@ public class HomeActivity extends AppCompatActivity
 
             //Managing debug stuff here
             if(id == R.id.debug_menu_about){
-                Cacher.obliterateCache();
+                Networker.obliterateLessonsCache();
                 Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show();
                 switchToCalendarFragment();
             } else if(id == R.id.debug_update_courses){

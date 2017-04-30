@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.geridea.trentastico.R;
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.network.Networker;
-import com.geridea.trentastico.network.request.listener.FeedbackSendListener;
+import com.geridea.trentastico.network.controllers.listener.FeedbackSendListener;
 import com.geridea.trentastico.utils.UIUtils;
 
 import butterknife.BindView;

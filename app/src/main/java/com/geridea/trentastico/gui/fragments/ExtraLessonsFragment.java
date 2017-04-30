@@ -7,6 +7,7 @@ package com.geridea.trentastico.gui.fragments;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Network;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +32,7 @@ import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonType;
 import com.geridea.trentastico.model.StudyCourse;
 import com.geridea.trentastico.network.Networker;
-import com.geridea.trentastico.network.request.listener.ListLessonsListener;
+import com.geridea.trentastico.network.controllers.listener.ListLessonsListener;
 import com.geridea.trentastico.services.NLNStarter;
 import com.geridea.trentastico.services.NextLessonNotificationService;
 import com.geridea.trentastico.utils.AppPreferences;
@@ -163,7 +164,7 @@ public class ExtraLessonsFragment extends FragmentWithMenuItems {
         @OnClick(R.id.delete_button)
         void onDeleteButtonPressed() {
             AppPreferences.removeExtraCourse(course.getLessonTypeId());
-            Cacher.removeExtraCoursesWithLessonType(course.getLessonTypeId());
+            Networker.removeExtraCoursesWithLessonType(course.getLessonTypeId());
 
             onDeleteConfirm.dispatch();
             dismiss();

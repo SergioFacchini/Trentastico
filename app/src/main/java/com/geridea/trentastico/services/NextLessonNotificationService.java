@@ -18,13 +18,12 @@ import android.support.v4.app.NotificationCompat;
 
 import com.geridea.trentastico.Config;
 import com.geridea.trentastico.R;
-import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.database.TodaysLessonsListener;
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.network.Networker;
-import com.geridea.trentastico.network.request.listener.LessonsWithRoomListener;
+import com.geridea.trentastico.network.controllers.listener.LessonsWithRoomListener;
 import com.geridea.trentastico.utils.AppPreferences;
 import com.geridea.trentastico.utils.ArrayUtils;
 import com.geridea.trentastico.utils.time.CalendarUtils;
@@ -385,7 +384,7 @@ public class NextLessonNotificationService extends Service {
      * @param course the course
      */
     public static void removeNotificationsOfExtraCourse(final Context context, final ExtraCourse course) {
-        Cacher.getTodaysCachedLessons(new TodaysLessonsListener() {
+        Networker.getTodaysCachedLessons(new TodaysLessonsListener() {
             @Override
             public void onLessonsAvailable(ArrayList<LessonSchedule> lessons) {
                 NotificationManager notificationManager = getNotificationManager(context);

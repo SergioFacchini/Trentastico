@@ -11,7 +11,7 @@ import com.geridea.trentastico.gui.views.requestloader.TerminalMessage;
 import com.geridea.trentastico.model.LessonsSet;
 import com.geridea.trentastico.model.cache.CachedLessonsSet;
 import com.geridea.trentastico.model.cache.NotCachedInterval;
-import com.geridea.trentastico.network.request.listener.LessonsLoadingListener;
+import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener;
 import com.geridea.trentastico.utils.time.WeekInterval;
 import com.geridea.trentastico.utils.time.WeekTime;
 import com.threerings.signals.Signal1;

@@ -25,6 +25,7 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems;
 import com.geridea.trentastico.gui.views.CourseSelectorView;
 import com.geridea.trentastico.model.ExtraCourse;
 import com.geridea.trentastico.model.StudyCourse;
+import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.services.LessonsUpdaterService;
 import com.geridea.trentastico.services.NLNStarter;
 import com.geridea.trentastico.services.NextLessonNotificationService;
@@ -265,7 +266,7 @@ public class SettingsFragment extends FragmentWithMenuItems {
 
         private void clearCache(StudyCourse selectedCourse) {
             //We changed our course, let's wipe out all the cache!
-            Cacher.purgeStudyCourseCache();
+            Networker.purgeStudyCourseCache();
 
             //If we've just selected a course that we already had in our extra course, we need to
             //delete that course from cache
@@ -274,7 +275,7 @@ public class SettingsFragment extends FragmentWithMenuItems {
             );
 
             for (ExtraCourse overlappingExtraCourse : overlappingExtraCourses) {
-                Cacher.removeExtraCoursesWithLessonType(overlappingExtraCourse.getLessonTypeId());
+                Networker.removeExtraCoursesWithLessonType(overlappingExtraCourse.getLessonTypeId());
             }
         }
 

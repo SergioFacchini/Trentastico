@@ -7,9 +7,8 @@ package com.geridea.trentastico.model.cache;
 
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.StudyCourse;
-import com.geridea.trentastico.network.request.IRequest;
-import com.geridea.trentastico.network.request.StudyCourseLessonsDiffRequest;
-import com.geridea.trentastico.network.request.listener.LessonsDifferenceListener;
+import com.geridea.trentastico.network.controllers.LessonsController;
+import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener;
 import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
@@ -27,8 +26,7 @@ public class StudyCourseCachedInterval extends CachedInterval {
     }
 
     @Override
-    public IRequest generateDiffRequest(LessonsDifferenceListener listener) {
-        return new StudyCourseLessonsDiffRequest(this, studyCourse, cachedLessons, listener);
+    public void launchDiffRequest(LessonsController controller, LessonsDifferenceListener listener) {
+        controller.diffStudyCourseLessons(this, studyCourse, cachedLessons, listener);
     }
-
 }

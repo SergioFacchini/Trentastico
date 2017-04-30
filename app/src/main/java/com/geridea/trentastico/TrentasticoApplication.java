@@ -5,6 +5,7 @@ import android.app.Application;
 import com.alexvasilkov.android.commons.utils.AppContext;
 import com.geridea.trentastico.database.Cacher;
 import com.geridea.trentastico.logger.BugLogger;
+import com.geridea.trentastico.network.Networker;
 import com.geridea.trentastico.providers.DepartmentsProvider;
 import com.geridea.trentastico.utils.AppPreferences;
 
@@ -32,7 +33,9 @@ public class TrentasticoApplication extends Application {
         }
 
         AppContext.init(this);
-        Cacher.init(this);
+
+        Networker.init(new Cacher(this));
+
         AppPreferences.init(this);
         DepartmentsProvider.loadIfNeeded();
 

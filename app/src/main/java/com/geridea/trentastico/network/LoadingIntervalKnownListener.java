@@ -10,8 +10,17 @@ import com.geridea.trentastico.utils.time.WeekInterval;
 
 import java.util.ArrayList;
 
+/**
+ * Listener that dispatches a list of intervals of that are not cached (and probably will be loaded
+ * from network).
+ */
 public interface LoadingIntervalKnownListener {
 
+    /**
+     *
+     * @param originalInterval the interval that we asked to load
+     * @param intervals list of intervals that are not cached an have to be loaded
+     */
     void onIntervalsToLoadKnown(WeekInterval originalInterval, ArrayList<NotCachedInterval> intervals);
 
 }

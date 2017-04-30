@@ -28,11 +28,11 @@ public class CacheDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Cacher.setTemporaryWritableDatabase(db);
+        Cacher cacher = new Cacher(db);
 
         if (oldVersion <= 1) {
             //Fixing bug #57
-            Cacher.removeExtraCoursesNotInList(AppPreferences.getExtraCourses());
+            cacher.removeExtraCoursesNotInList(AppPreferences.getExtraCourses());
         }
 
         if(oldVersion < 3){
