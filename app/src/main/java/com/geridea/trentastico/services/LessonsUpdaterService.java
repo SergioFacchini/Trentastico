@@ -129,7 +129,7 @@ public class LessonsUpdaterService extends Service {
     }
 
     private boolean startedAppInDebugMode(int starter) {
-        return (Config.DEBUG_MODE && starter == STARTER_APP_START) || (starter == STARTER_DEBUGGER);
+        return (Config.INSTANCE.getDEBUG_MODE() && starter == STARTER_APP_START) || (starter == STARTER_DEBUGGER);
     }
 
     private boolean shouldUpdateBecauseWeGainedInternet(int starter) {
@@ -164,22 +164,22 @@ public class LessonsUpdaterService extends Service {
             //Postponing due to alarm manager approximations
             calendar = CalendarUtils.getCalendarInitializedAs(AppPreferences.getNextLessonsUpdateTime());
 
-            if(Config.DEBUG_MODE){
-                calendar.add(Calendar.SECOND, Config.DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS);
+            if(Config.INSTANCE.getDEBUG_MODE()){
+                calendar.add(Calendar.SECOND, Config.INSTANCE.getDEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS());
             } else {
-                calendar.add(Calendar.MINUTE, Config.LESSONS_REFRESH_POSTICIPATION_MINUTES);
+                calendar.add(Calendar.MINUTE, Config.INSTANCE.getLESSONS_REFRESH_POSTICIPATION_MINUTES());
             }
 
         } else {
             calendar = Calendar.getInstance();
 
-            if (Config.DEBUG_MODE && Config.QUICK_LESSON_CHECKS) {
-                int timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS;
+            if (Config.INSTANCE.getDEBUG_MODE() && Config.INSTANCE.getQUICK_LESSON_CHECKS()) {
+                int timeToAdd = Config.INSTANCE.getDEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS();
                 if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2;
 
                 calendar.add(Calendar.SECOND, timeToAdd);
             } else {
-                int timeToAdd = Config.LESSONS_REFRESH_WAITING_HOURS;
+                int timeToAdd = Config.INSTANCE.getLESSONS_REFRESH_WAITING_HOURS();
                 if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2;
 
                 calendar.add(Calendar.HOUR_OF_DAY, timeToAdd);

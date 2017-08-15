@@ -28,7 +28,7 @@ public class TrentasticoApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if(!Config.DEBUG_MODE){
+        if(!Config.INSTANCE.getDEBUG_MODE()){
             ACRA.init(this);
         }
 

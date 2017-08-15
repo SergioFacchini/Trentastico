@@ -15,7 +15,7 @@ import com.geridea.trentastico.utils.AppPreferences;
 public class CacheDbHelper extends SQLiteOpenHelper {
 
     public CacheDbHelper(Context context) {
-        super(context, Config.DATABASE_NAME, null, Config.DATABASE_VERSION);
+        super(context, Config.INSTANCE.getDATABASE_NAME(), null, Config.INSTANCE.getDATABASE_VERSION());
 
     }
 

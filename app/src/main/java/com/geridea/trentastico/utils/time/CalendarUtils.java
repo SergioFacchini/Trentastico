@@ -2,14 +2,12 @@ package com.geridea.trentastico.utils.time;
 
 import android.support.annotation.NonNull;
 
+import com.geridea.trentastico.Config;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import static com.geridea.trentastico.Config.DATE_TO_FORCE;
-import static com.geridea.trentastico.Config.DEBUG_FORCE_ANOTHER_DATE;
-import static com.geridea.trentastico.Config.DEBUG_MODE;
 
 /*
  * Created with ♥ by Slava on 12/03/2017.
@@ -99,15 +97,15 @@ public class CalendarUtils {
 
     public static Calendar getDebuggableToday() {
         Calendar aDay = Calendar.getInstance();
-        if(DEBUG_MODE && DEBUG_FORCE_ANOTHER_DATE){
-            aDay.setTimeInMillis(DATE_TO_FORCE);
+        if(Config.INSTANCE.getDEBUG_MODE() && Config.INSTANCE.getDEBUG_FORCE_ANOTHER_DATE()){
+            aDay.setTimeInMillis(Config.INSTANCE.getDATE_TO_FORCE());
         }
 
         return aDay;
     }
 
     public static long getDebuggableMillis() {
-       return DEBUG_MODE && DEBUG_FORCE_ANOTHER_DATE ? DATE_TO_FORCE : System.currentTimeMillis();
+       return Config.INSTANCE.getDEBUG_MODE() && Config.INSTANCE.getDEBUG_FORCE_ANOTHER_DATE() ? Config.INSTANCE.getDATE_TO_FORCE() : System.currentTimeMillis();
     }
 
     public static long getMillisWithMinutesDelta(int delta) {

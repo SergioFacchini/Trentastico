@@ -65,7 +65,7 @@ public class HomeActivity extends AppCompatActivity
         versionText.setText("Versione: "+ DebugUtils.computeVersionName());
 
         //Removing debug stuff from menu
-        if (!Config.DEBUG_MODE) {
+        if (!Config.INSTANCE.getDEBUG_MODE()) {
             Menu menu = navigationView.getMenu();
             for (int i = 0; i < menu.size(); i++) {
                 MenuItem item = menu.getItem(i);
@@ -141,7 +141,7 @@ public class HomeActivity extends AppCompatActivity
             setCurrentFragment(new SubmitFeedbackFragment());
         } else if(id == R.id.menu_changelog){
             setCurrentFragment(new AboutFragment());
-        } else if(Config.DEBUG_MODE){
+        } else if(Config.INSTANCE.getDEBUG_MODE()){
 
             //Managing debug stuff here
             if(id == R.id.debug_menu_about){

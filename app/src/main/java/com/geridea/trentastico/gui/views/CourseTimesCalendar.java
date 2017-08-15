@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 
 import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.geridea.trentastico.Config;
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage;
 import com.geridea.trentastico.model.LessonSchedule;
 import com.geridea.trentastico.model.LessonType;
@@ -30,8 +31,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-
-import static com.geridea.trentastico.Config.DEBUG_MODE;
 
 public class CourseTimesCalendar extends CustomWeekView implements CustomWeekView.ScrollListener {
 
@@ -110,7 +109,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                         return "Ieri (" + FORMAT_ONLY_DAY.format(date.getTime()) + ")";
                     }
 
-                    return (DEBUG_MODE ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
+                    return (Config.INSTANCE.getDEBUG_MODE() ? DATE_FORMAT_DEBUG : DATE_FORMAT).format(date.getTime());
                 }
 
                 @Override
@@ -142,7 +141,7 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                         return "Ieri";
                     }
 
-                    if (DEBUG_MODE)
+                    if (Config.INSTANCE.getDEBUG_MODE())
                         return DATE_FORMAT_MEDIUM_DEBUG.format(date.getTime());
                     else
                         return DATE_FORMAT_MEDIUM.format(date.getTime());
@@ -162,12 +161,12 @@ public class CourseTimesCalendar extends CustomWeekView implements CustomWeekVie
                     lastDay.add(Calendar.WEEK_OF_MONTH, +1);
 
                     if (date.equals(firstDay) || (date.after(firstDay) && date.before(lastDay))) {
-                        if (DEBUG_MODE)
+                        if (Config.INSTANCE.getDEBUG_MODE())
                             return DATE_FORMAT_SHORT_DEBUG.format(date.getTime());
                         else
                             return DATE_FORMAT_SHORT_ONLY_DAY.format(date.getTime());
                     } else {
-                        if (DEBUG_MODE)
+                        if (Config.INSTANCE.getDEBUG_MODE())
                             return DATE_FORMAT_SHORT_DEBUG.format(date.getTime());
                         else
                             return DATE_FORMAT_SHORT.format(date.getTime());

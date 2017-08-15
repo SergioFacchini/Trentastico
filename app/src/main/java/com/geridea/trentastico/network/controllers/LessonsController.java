@@ -92,8 +92,8 @@ public class LessonsController extends BasicController {
     }
 
     private static String buildRequestURL(long courseId, int year, CalendarInterval intervalToLoad) {
-        if(Config.DEBUG_MODE && Config.LAUNCH_REQUESTS_TO_DEBUG_SERVER){
-            return Config.DEBUG_SERVER_URL;
+        if(Config.INSTANCE.getDEBUG_MODE() && Config.INSTANCE.getLAUNCH_REQUESTS_TO_DEBUG_SERVER()){
+            return Config.INSTANCE.getDEBUG_SERVER_URL();
         }
 
         return String.format(

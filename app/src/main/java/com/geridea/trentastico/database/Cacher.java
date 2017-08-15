@@ -1024,7 +1024,7 @@ public class Cacher {
                 cacheLesson(new CachedLesson(cachedPeriodId, lesson));
             }
 
-            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()){
+            if (Config.INSTANCE.getDEBUG_MODE() && doDuplicatedRecordsExist()){
                 UIUtils.showToastIfInDebug(getApplicationContext(), "DUPLICATE RECORDS FOUND!");
             }
 
@@ -1063,7 +1063,7 @@ public class Cacher {
                 cacheLesson(new CachedLesson(cachedPeriodId, lesson));
             }
 
-            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()){
+            if (Config.INSTANCE.getDEBUG_MODE() && doDuplicatedRecordsExist()){
                 UIUtils.showToastIfInDebug(getApplicationContext(), "DUPLICATE RECORDS FOUND!");
             }
         }

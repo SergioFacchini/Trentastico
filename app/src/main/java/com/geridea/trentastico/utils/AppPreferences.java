@@ -120,7 +120,7 @@ public class AppPreferences {
     }
 
     public static int getCalendarNumOfDaysToShow() {
-        return get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW);
+        return get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.INSTANCE.getCALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW());
     }
 
     private static void setPartitioningsToHide(int lessonTypeId, ArrayList<PartitioningCase> partitioningCases) {

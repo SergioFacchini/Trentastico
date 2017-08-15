@@ -37,7 +37,7 @@ public class UIUtils {
     }
 
     public static void showToastIfInDebug(Context context, String message) {
-        if (Config.DEBUG_MODE) {
+        if (Config.INSTANCE.getDEBUG_MODE()) {
             showToastOnMainThread(context, message);
         }
     }

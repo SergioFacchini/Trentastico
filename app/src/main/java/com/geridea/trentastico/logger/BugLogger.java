@@ -20,7 +20,7 @@ import org.acra.ErrorReporter;
 public class BugLogger {
 
     public static void logBug(String reason, Throwable e) {
-        if(Config.DEBUG_MODE){
+        if(Config.INSTANCE.getDEBUG_MODE()){
             return;
         }
 
@@ -29,7 +29,7 @@ public class BugLogger {
     }
 
     public static void setStudyCourse(StudyCourse course) {
-        if(Config.DEBUG_MODE){
+        if(Config.INSTANCE.getDEBUG_MODE()){
             return;
         }
 
@@ -37,7 +37,7 @@ public class BugLogger {
     }
 
     public static void setExtraCourses(ExtraCoursesList extraCourses) {
-        if(Config.DEBUG_MODE){
+        if(Config.INSTANCE.getDEBUG_MODE()){
             return;
         }
 
@@ -50,7 +50,7 @@ public class BugLogger {
     }
 
     public static void init() {
-        if(Config.DEBUG_MODE){
+        if(Config.INSTANCE.getDEBUG_MODE()){
             return;
         }
 
@@ -61,7 +61,7 @@ public class BugLogger {
     }
 
     public static void debug(String debugMessage) {
-        if(Config.SHOW_DEBUG_MESSAGES) {
+        if(Config.INSTANCE.getSHOW_DEBUG_MESSAGES()) {
             Log.d("TRENTASTICO_DEBUG", debugMessage);
 
             String stackTrace = StringUtils.implode(Thread.currentThread().getStackTrace(), "\n");

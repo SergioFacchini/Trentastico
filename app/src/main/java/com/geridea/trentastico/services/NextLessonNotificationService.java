@@ -226,7 +226,7 @@ public class NextLessonNotificationService extends Service {
 
     @NonNull
     private ArrayList<LessonSchedule> findLessonsStartingSoon(ArrayList<LessonSchedule> lessons) {
-        long millisSoon = CalendarUtils.getMillisWithMinutesDelta(Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN);
+        long millisSoon = CalendarUtils.getMillisWithMinutesDelta(Config.INSTANCE.getNEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN());
 
         ArrayList<LessonSchedule> lessonsStartingSoon = new ArrayList<>();
         for (LessonSchedule lesson: lessons) {
@@ -271,7 +271,7 @@ public class NextLessonNotificationService extends Service {
         if (nextStartPlannedAt == null) {
             scheduleAtNextDayMorning();
         } else {
-            long ms = CalendarUtils.addMinutes(nextStartPlannedAt, -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN);
+            long ms = CalendarUtils.addMinutes(nextStartPlannedAt, -Config.INSTANCE.getNEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN());
             scheduleNextStartAt(ms, false);
         }
 

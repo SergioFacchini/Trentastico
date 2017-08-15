@@ -52,9 +52,9 @@ public class RequestSender {
     }
 
     private void waitForDebuggingIfNeeded() {
-        if (Config.DEBUG_MODE && Config.PRE_LOADING_WAITING_TIME_MS != 0) {
+        if (Config.INSTANCE.getDEBUG_MODE() && Config.INSTANCE.getPRE_LOADING_WAITING_TIME_MS() != 0) {
             try {
-                Thread.sleep(Config.PRE_LOADING_WAITING_TIME_MS);
+                Thread.sleep(Config.INSTANCE.getPRE_LOADING_WAITING_TIME_MS());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -67,7 +67,7 @@ public class RequestSender {
             public void run() {
                 processRequest(requestToSend);
             }
-        }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED);
+        }, Config.INSTANCE.getWAITING_TIME_AFTER_A_REQUEST_FAILED());
     }
 
     private class RequestCallback implements Callback {
