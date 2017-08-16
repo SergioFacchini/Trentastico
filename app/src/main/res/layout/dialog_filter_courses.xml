@@ -7,7 +7,7 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/yes_courses_text"
+        android:id="@+id/yesCoursesText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
@@ -17,7 +17,7 @@
         android:textSize="14dp" />
 
     <TextView
-        android:id="@+id/no_courses_text"
+        android:id="@+id/noCoursesText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
@@ -27,7 +27,7 @@
         android:textSize="14dp" />
 
     <ListView
-        android:id="@+id/courses_list"
+        android:id="@+id/coursesListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

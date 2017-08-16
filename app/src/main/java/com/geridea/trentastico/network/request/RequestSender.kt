@@ -1,0 +1,100 @@
+package com.geridea.trentastico.network.request
+
+
+/*
+ * Created with ♥ by Slava on 29/03/2017.
+ */
+
+import com.geridea.trentastico.Config
+
+import java.io.IOException
+import java.util.Timer
+import java.util.TimerTask
+import java.util.Vector
+
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
+
+class RequestSender {
+
+    private val client = OkHttpClient()
+    private val callsInProgress = Vector<Call>()
+
+    private val timeoutWaiter = Timer()
+
+    fun processRequest(requestToSend: IRequest) {
+        waitForDebuggingIfNeeded()
+
+        val builder = Request.Builder()
+        builder.url(requestToSend.url)
+
+        //If we have something to post, we'll get it here
+        val formBodyToSend = requestToSend.formToSend
+        if (formBodyToSend != null) {
+            builder.post(formBodyToSend)
+        }
+
+        val request = builder.build()
+
+        requestToSend.notifyOnBeforeSend()
+
+        val call = client.newCall(request)
+        call.enqueue(RequestCallback(requestToSend))
+
+
+        callsInProgress.add(call)
+    }
+
+    private fun waitForDebuggingIfNeeded() {
+        if (Config.DEBUG_MODE && Config.PRE_LOADING_WAITING_TIME_MS != 0) {
+            try {
+                Thread.sleep(Config.PRE_LOADING_WAITING_TIME_MS.toLong())
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    fun processRequestAfterTimeout(requestToSend: IRequest) {
+        timeoutWaiter.schedule(object : TimerTask() {
+            override fun run() {
+                processRequest(requestToSend)
+            }
+        }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED.toLong())
+    }
+
+    private inner class RequestCallback internal constructor(private val request: IRequest) : Callback {
+
+        override fun onFailure(call: Call, e: IOException) {
+            callsInProgress.remove(call)
+            request.notifyFailure(e, this@RequestSender)
+        }
+
+        @Throws(IOException::class)
+        override fun onResponse(call: Call, response: Response) {
+            if (response.isSuccessful) {
+                try {
+                    val responseBody = response.body()
+                    val responseStr = responseBody.string()
+                    responseBody.close()
+
+                    request.manageResponse(responseStr, this@RequestSender)
+                } catch (e: Exception) {
+                    request.notifyFailure(e, this@RequestSender)
+                }
+
+            } else {
+                request.notifyResponseUnsuccessful(response.code(), this@RequestSender)
+            }
+            callsInProgress.remove(call)
+        }
+    }
+
+}

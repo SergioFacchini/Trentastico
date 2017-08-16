@@ -1,0 +1,289 @@
+package com.geridea.trentastico.gui.fragments
+
+
+/*
+ * Created with ♥ by Slava on 26/03/2017.
+ */
+
+import android.content.Context
+import android.graphics.drawable.ColorDrawable
+import android.net.Network
+import android.os.Bundle
+import android.support.v7.app.AlertDialog
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.ListView
+import android.widget.TextView
+
+import com.alexvasilkov.android.commons.utils.Views
+import com.geridea.trentastico.R
+import com.geridea.trentastico.database.Cacher
+import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
+import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter
+import com.geridea.trentastico.gui.adapters.LessonTypesAdapter
+import com.geridea.trentastico.gui.views.CourseSelectorView
+import com.geridea.trentastico.model.ExtraCourse
+import com.geridea.trentastico.model.LessonType
+import com.geridea.trentastico.model.StudyCourse
+import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
+import com.geridea.trentastico.services.NLNStarter
+import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.utils.AppPreferences
+import com.threerings.signals.Listener0
+import com.threerings.signals.Listener1
+import com.threerings.signals.Signal0
+
+import java.util.ArrayList
+
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
+import butterknife.OnItemClick
+import butterknife.OnItemLongClick
+
+import android.view.View.GONE
+
+class ExtraLessonsFragment : FragmentWithMenuItems() {
+
+    @BindView(R.id.extra_lessons_list) internal var lessonsList: ListView? = null
+    @BindView(R.id.no_extra_courses_label) internal var noExtraCoursesLabel: TextView? = null
+
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater!!.inflate(R.layout.fragment_extra_lessons, container, false)
+        ButterKnife.bind(this, view)
+
+        initLessonsList()
+
+        return view
+    }
+
+    private fun initLessonsList() {
+        val extraCourses = AppPreferences.extraCourses
+        if (extraCourses.isEmpty()) {
+            noExtraCoursesLabel!!.visibility = View.VISIBLE
+        } else {
+            noExtraCoursesLabel!!.visibility = View.GONE
+        }
+        lessonsList!!.adapter = ExtraCoursesAdapter(activity, extraCourses)
+    }
+
+    @OnItemLongClick(R.id.extra_lessons_list)
+    internal fun onItemLongClick(position: Int): Boolean {
+        val course = lessonsList!!.getItemAtPosition(position) as ExtraCourse
+
+        val dialog = ExtraCourseDeleteDialog(activity, course)
+        dialog.onDeleteConfirm.connect {
+            initLessonsList()
+
+            //Updating notifications
+            NextLessonNotificationService.removeNotificationsOfExtraCourse(context, course)
+            NextLessonNotificationService.createIntent(
+                    activity, NLNStarter.EXTRA_COURSE_CHANGE
+            )
+        }
+        dialog.show()
+
+        return true
+    }
+
+    override val idsOfMenuItemsToMakeVisible: IntArray
+        get() = intArrayOf(R.id.menu_add_extra_lessons)
+
+    override fun bindMenuItem(item: MenuItem) {
+        if (item.itemId == R.id.menu_add_extra_lessons) {
+            item.setOnMenuItemClickListener {
+                val dialog = ExtraCourseAddDialog(activity)
+                dialog.onNewCourseAdded.connect {
+                    initLessonsList()
+
+                    //Updating notifications
+                    NextLessonNotificationService.createIntent(
+                            activity, NLNStarter.EXTRA_COURSE_CHANGE
+                    )
+                }
+                dialog.show()
+                true
+            }
+        }
+    }
+
+    internal inner class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse) : AlertDialog(context) {
+        @BindView(R.id.course_name)
+        var courseName: TextView? = null
+        @BindView(R.id.study_course_name)
+        var studyCourseName: TextView? = null
+
+        @BindView(R.id.color)
+        var color: ImageView? = null
+
+        /**
+         * Dispatched when the user has selected and added a new study course.
+         */
+        val onDeleteConfirm = Signal0()
+
+        init {
+
+            val view = Views.inflate<View>(context, R.layout.dialog_extra_course_delete)
+            ButterKnife.bind(this, view)
+
+            courseName!!.text = course.name
+            studyCourseName!!.text = course.studyCourseFullName
+            color!!.setImageDrawable(ColorDrawable(course.color))
+
+            setView(view)
+        }
+
+        @OnClick(R.id.cancel_button)
+        fun onCancelButtonPressed() {
+            dismiss()
+        }
+
+        @OnClick(R.id.delete_button)
+        fun onDeleteButtonPressed() {
+            AppPreferences.removeExtraCourse(course.lessonTypeId)
+            Networker.removeExtraCoursesWithLessonType(course.lessonTypeId)
+
+            onDeleteConfirm.dispatch()
+            dismiss()
+        }
+
+    }
+
+    internal inner class ExtraCourseAddDialog(context: Context) : AlertDialog(context) {
+
+        @BindView(R.id.cannot_select_current_study_course)
+        var cannotSelectCurrentStudyCourse: TextView? = null
+        @BindView(R.id.course_selector)
+        var courseSelector: CourseSelectorView? = null
+        @BindView(R.id.search_for_lessons)
+        var searchForLessonsButton: Button? = null
+
+        /**
+         * Dispatched when the user has selected and added a new study course.
+         */
+        val onNewCourseAdded = Signal0()
+
+        init {
+
+            val view = Views.inflate<View>(context, R.layout.dialog_extra_course_add)
+            ButterKnife.bind(this, view)
+
+            val studyCourse = AppPreferences.studyCourse
+            studyCourse.decreaseOrChangeYear()
+
+            courseSelector!!.setStudyCourse(studyCourse)
+            courseSelector!!.onCourseChanged.connect { newStudyCourse ->
+                if (newStudyCourse == AppPreferences.studyCourse) {
+                    cannotSelectCurrentStudyCourse!!.visibility = View.VISIBLE
+                    searchForLessonsButton!!.isEnabled = false
+                } else {
+                    cannotSelectCurrentStudyCourse!!.visibility = GONE
+                    searchForLessonsButton!!.isEnabled = true
+                }
+            }
+
+            setView(view)
+        }
+
+        @OnClick(R.id.search_for_lessons)
+        fun onSearchForLessonsButtonClicked() {
+            val selectedStudyCourse = courseSelector!!.selectedStudyCourse
+            if (selectedStudyCourse == AppPreferences.studyCourse) {
+                cannotSelectCurrentStudyCourse!!.visibility = View.VISIBLE
+                searchForLessonsButton!!.isEnabled = false
+                return
+            }
+
+            val dialog = ExtraCourseSearchDialog(
+                    activity, selectedStudyCourse
+            )
+            dialog.onCourseSelectedAndAdded.connect {
+                onNewCourseAdded.dispatch()
+                dismiss()
+            }
+            dialog.show()
+            dialog.searchForCourses()
+        }
+
+    }
+
+    internal inner class ExtraCourseSearchDialog(context: Context, private val studyCourse: StudyCourse) : AlertDialog(context), ListLessonsListener {
+        @BindView(R.id.searching_lessons)
+        var searchingLessons: View? = null
+        @BindView(R.id.lessons_found)
+        var lessonsFound: View? = null
+
+        @BindView(R.id.selected_course)
+        var selectedCourseTextView: TextView? = null
+        @BindView(R.id.error_while_searching)
+        var errorWhileSearching: TextView? = null
+
+        @BindView(R.id.lessons_list)
+        var lessonsList: ListView? = null
+
+        /**
+         * Dispatched when the user has selected a course and that course has been added to preferences.
+         */
+        val onCourseSelectedAndAdded = Signal0()
+
+        init {
+
+            val view = Views.inflate<View>(context, R.layout.dialog_extra_course_search)
+            ButterKnife.bind(this, view)
+
+            selectedCourseTextView!!.text = "Sto cercando le lezioni del corso da te selezionato: " + studyCourse.generateFullDescription()
+
+            lessonsFound!!.visibility = GONE
+
+            setView(view)
+        }
+
+        fun searchForCourses() {
+            Networker.loadCoursesOfStudyCourse(studyCourse, this)
+        }
+
+        @OnClick(R.id.cancel_search)
+        fun onCancelSearchButtonPressed() {
+            dismiss()
+        }
+
+        @OnItemClick(R.id.lessons_list)
+        fun onLessonSelected(position: Int) {
+            val lesson = lessonsList!!.getItemAtPosition(position) as LessonType
+
+            if (!AppPreferences.hasExtraCourseWithId(lesson.id)) {
+                AppPreferences.addExtraCourse(ExtraCourse(studyCourse, lesson))
+
+                dismiss()
+                onCourseSelectedAndAdded.dispatch()
+            }
+        }
+
+        override fun onErrorHappened(error: Exception) {
+            showErrorMessage()
+        }
+
+        private fun showErrorMessage() {
+            activity.runOnUiThread { errorWhileSearching!!.visibility = View.VISIBLE }
+        }
+
+        override fun onParsingErrorHappened(e: Exception) {
+            showErrorMessage()
+        }
+
+        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) {
+            activity.runOnUiThread {
+                lessonsList!!.adapter = LessonTypesAdapter(context, lessonTypes)
+
+                searchingLessons!!.visibility = View.GONE
+                lessonsFound!!.visibility = View.VISIBLE
+            }
+
+        }
+    }
+}
