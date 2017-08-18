@@ -11,8 +11,7 @@ import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.LessonsSet
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.time.WeekInterval
-
-import java.util.ArrayList
+import java.util.*
 
 class CachedLessonsSet : LessonsSet() {
 
@@ -34,13 +33,9 @@ class CachedLessonsSet : LessonsSet() {
         this.missingIntervals.addAll(missingIntervals)
     }
 
-    fun hasMissingIntervals(): Boolean {
-        return !missingIntervals.isEmpty()
-    }
+    fun hasMissingIntervals(): Boolean = !missingIntervals.isEmpty()
 
-    fun wereSomeLessonsFoundInCache(): Boolean {
-        return !scheduledLessons.isEmpty()
-    }
+    fun wereSomeLessonsFoundInCache(): Boolean = !scheduledLessons.isEmpty()
 
     fun isIntervalPartiallyOrFullyCached(intervalToCheck: WeekInterval): Boolean {
         for (cachedPeriod in cachedIntervals) {

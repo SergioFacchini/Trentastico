@@ -5,9 +5,7 @@ package com.geridea.trentastico.model
  * Created with ♥ by Slava on 24/03/2017.
  */
 
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashSet
+import java.util.*
 
 class Partitioning {
 
@@ -22,13 +20,9 @@ class Partitioning {
         addPartitionCase(aCase)
     }
 
-    private fun addPartitionCase(aCase: String): Boolean {
-        return cases.add(PartitioningCase(aCase, true))
-    }
+    private fun addPartitionCase(aCase: String): Boolean = cases.add(PartitioningCase(aCase, true))
 
-    private fun addPartitionCase(aCase: PartitioningCase): Boolean {
-        return cases.add(aCase)
-    }
+    private fun addPartitionCase(aCase: PartitioningCase): Boolean = cases.add(aCase)
 
     constructor(type: PartitioningType) {
         this.type = type
@@ -40,9 +34,7 @@ class Partitioning {
         }
     }
 
-    fun getCases(): Collection<PartitioningCase> {
-        return cases
-    }
+    fun getCases(): Collection<PartitioningCase> = cases
 
     val sortedCases: Collection<PartitioningCase>
         get() {
@@ -115,9 +107,7 @@ class Partitioning {
 
     }
 
-    fun hasMoreThanOneCase(): Boolean {
-        return getCases().size > 1
-    }
+    fun hasMoreThanOneCase(): Boolean = getCases().size > 1
 
     companion object {
 

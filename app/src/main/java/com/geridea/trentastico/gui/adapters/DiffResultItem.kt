@@ -60,17 +60,11 @@ abstract class DiffResultItem(private val lesson: LessonSchedule) {
 
     companion object {
 
-        fun buildAdded(lesson: LessonSchedule): DiffResultItem {
-            return AddDiffResult(lesson)
-        }
+        fun buildAdded(lesson: LessonSchedule): DiffResultItem = AddDiffResult(lesson)
 
-        fun buildRemoved(lesson: LessonSchedule): DiffResultItem {
-            return RemoveDiffResult(lesson)
-        }
+        fun buildRemoved(lesson: LessonSchedule): DiffResultItem = RemoveDiffResult(lesson)
 
-        fun buildChanged(change: LessonsDiffResult.LessonChange): DiffResultItem {
-            return ChangeDiffResult(change)
-        }
+        fun buildChanged(change: LessonsDiffResult.LessonChange): DiffResultItem = ChangeDiffResult(change)
     }
 
 

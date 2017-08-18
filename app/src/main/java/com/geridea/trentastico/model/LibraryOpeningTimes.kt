@@ -6,7 +6,7 @@ package com.geridea.trentastico.model
  */
 
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.util.*
 
 class LibraryOpeningTimes {
 
@@ -31,8 +31,6 @@ class LibraryOpeningTimes {
          * @param day the day to format
          * @return the formatted day, in yyyy-MM-dd format
          */
-        fun formatDay(day: Calendar): String {
-            return dateFormat.format(day.time)
-        }
+        fun formatDay(day: Calendar): String = dateFormat.format(day.time)
     }
 }

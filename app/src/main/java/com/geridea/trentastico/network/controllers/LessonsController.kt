@@ -57,9 +57,7 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
         }
     }
 
-    fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) {
-        cacher.getTodaysCachedLessons(todaysLessonsListener)
-    }
+    fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = cacher.getTodaysCachedLessons(todaysLessonsListener)
 
     fun loadLessons(
             intervalToLoad: WeekInterval, listener: LessonsLoadingListener,
@@ -118,9 +116,9 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
         }
     }
 
-    fun loadCoursesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
-        sender.processRequest(ListLessonsRequest(studyCourse, listener))
-    }
+    fun loadCoursesOfStudyCourse(
+            studyCourse: StudyCourse,
+            listener: ListLessonsListener) = sender.processRequest(ListLessonsRequest(studyCourse, listener))
 
     fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) {
         val today = WeekDayTime()
@@ -128,26 +126,20 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
         //Here we have to load all the lesson scheduled for today.
         val dayInterval = today.containingInterval
         loadAndCacheNotCachedLessons(dayInterval, object : WaitForDownloadLessonListener() {
-            override fun onFinish(loadingSuccessful: Boolean) {
-                if (loadingSuccessful) {
-                    cacher.getTodaysCachedLessons(todaysLessonsListener)
-                } else {
-                    todaysLessonsListener.onLessonsCouldNotBeLoaded()
-                }
+            override fun onFinish(loadingSuccessful: Boolean) = if (loadingSuccessful) {
+                cacher.getTodaysCachedLessons(todaysLessonsListener)
+            } else {
+                todaysLessonsListener.onLessonsCouldNotBeLoaded()
             }
         })
     }
 
-    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) {
-        cacher.removeExtraCoursesWithLessonType(lessonTypeId)
-    }
+    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) = cacher.removeExtraCoursesWithLessonType(lessonTypeId)
 
     fun sendExtraCourseLoadingRequest(
             interval: WeekInterval,
             course: ExtraCourse,
-            listener: LessonsLoadingListener) {
-        sender.processRequest(generateExtraLessonRequest(interval, course, listener))
-    }
+            listener: LessonsLoadingListener) = sender.processRequest(generateExtraLessonRequest(interval, course, listener))
 
     fun sendExtraCourseLoadingRequestOneTime(
             interval: WeekInterval,
@@ -166,16 +158,16 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             listener: LessonsLoadingListener
     ): ExtraLessonsRequest = ExtraLessonsRequest(interval, extraCourse, listener)
 
-    fun sendStudyCourseLoadingRequest(interval: WeekInterval, listener: LessonsLoadingListener) {
-        sender.processRequest(generateStudyCourseLessonRequest(interval, listener))
-    }
+    fun sendStudyCourseLoadingRequest(
+            interval: WeekInterval,
+            listener: LessonsLoadingListener) = sender.processRequest(generateStudyCourseLessonRequest(interval, listener))
 
     fun sendStudyCourseLoadingRequestOneTime(
             interval: WeekInterval,
             listener: LessonsLoadingListener) {
 
         val request = generateStudyCourseLessonRequest(interval, listener)
-        request.areRetrialsEnabled  = true
+        request.areRetrialsEnabled = true
         request.isCacheCheckEnabled = true
 
         sender.processRequest(request)
@@ -183,30 +175,23 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
 
     private fun generateStudyCourseLessonRequest(
             interval: WeekInterval,
-            listener: LessonsLoadingListener): StudyCourseLessonsRequest {
-        return StudyCourseLessonsRequest(interval, AppPreferences.studyCourse, listener)
-    }
+            listener: LessonsLoadingListener): StudyCourseLessonsRequest = StudyCourseLessonsRequest(interval, AppPreferences.studyCourse, listener)
 
     fun diffExtraCourseLessons(
-            interval: WeekInterval, course: ExtraCourse,
-            cachedLessons: ArrayList<LessonSchedule>, listener: LessonsDifferenceListener) {
+            interval: WeekInterval,
+            course: ExtraCourse,
+            cachedLessons: ArrayList<LessonSchedule>,
+            listener: LessonsDifferenceListener) = sender.processRequest(ExtraCourseLessonsDiffRequest(interval, course, cachedLessons, listener))
 
-        sender.processRequest(ExtraCourseLessonsDiffRequest(interval, course, cachedLessons, listener))
-    }
+    fun obliterateAllLessonsCache() = cacher.obliterateAllLessonsCache()
 
-    fun obliterateAllLessonsCache() {
-        cacher.obliterateAllLessonsCache()
-    }
-
-    fun purgeStudyCourseCache() {
-        cacher.purgeStudyCourseCache()
-    }
+    fun purgeStudyCourseCache() = cacher.purgeStudyCourseCache()
 
     fun diffStudyCourseLessons(
-            interval: WeekInterval, course: StudyCourse,
-            lessons: ArrayList<LessonSchedule>, listener: LessonsDifferenceListener) {
-        sender.processRequest(StudyCourseLessonsDiffRequest(interval, course, lessons, listener))
-    }
+            interval: WeekInterval,
+            course: StudyCourse,
+            lessons: ArrayList<LessonSchedule>,
+            listener: LessonsDifferenceListener) = sender.processRequest(StudyCourseLessonsDiffRequest(interval, course, lessons, listener))
 
     //////////////////////////////////////
     // Requests
@@ -261,38 +246,35 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             private val cay: CourseAndYear,
             private val listener: LessonWithRoomFetchedListener) : BasicLessonsRequest() {
 
-        override fun notifyFailure(e: Exception, sender: RequestSender) {
-            //In this request we just don't manage errors
-            listener.onError(lesson)
-        }
+        override fun notifyFailure(
+                e: Exception,
+                sender: RequestSender) = //In this request we just don't manage errors
+                listener.onError(lesson)
 
-        override fun manageResponse(responseToManage: String, sender: RequestSender) {
-            try {
-                val lessonsSet = parseResponse(responseToManage)
-                for (fetchedLesson in lessonsSet.scheduledLessons.values) {
-                    if (fetchedLesson.id == lesson.id) {
-                        lesson.room = fetchedLesson.room
-                        break
-                    }
+        override fun manageResponse(responseToManage: String, sender: RequestSender) = try {
+            val lessonsSet = parseResponse(responseToManage)
+            for (fetchedLesson in lessonsSet.scheduledLessons.values) {
+                if (fetchedLesson.id == lesson.id) {
+                    lesson.room = fetchedLesson.room
+                    break
                 }
-
-                //Note: here might happen that the lesson we were trying to fetch the room for is not
-                //available; actually this happens were rarely, when we try to get the lesson's room
-                //but exactly at that time the lessons gets removed. In this case we just keep the
-                //lesson as it is, even though the best way to handle this would be to not consider that
-                //lesson for further elaborations.
-                listener.onUpdateSuccessful(lesson)
-            } catch (e: JSONException) {
-                notifyFailure(e, sender)
             }
 
+            //Note: here might happen that the lesson we were trying to fetch the room for is not
+            //available; actually this happens were rarely, when we try to get the lesson's room
+            //but exactly at that time the lessons gets removed. In this case we just keep the
+            //lesson as it is, even though the best way to handle this would be to not consider that
+            //lesson for further elaborations.
+            listener.onUpdateSuccessful(lesson)
+        } catch (e: JSONException) {
+            notifyFailure(e, sender)
         }
 
-        override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) {
-            listener.onError(lesson)
-        }
+        override fun notifyResponseUnsuccessful(
+                code: Int,
+                sender: RequestSender) = listener.onError(lesson)
 
-        override fun notifyOnBeforeSend() {}
+        override fun notifyOnBeforeSend() = Unit
 
         override //For some reasons, trying to fetch too small intervals does not returns us any result!
         val calendarIntervalToLoad: CalendarInterval
@@ -311,88 +293,82 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             protected val course: StudyCourse,
             protected var listener: LessonsLoadingListener) : BasicLessonsRequest() {
 
-        var areRetrialsEnabled  = true
+        var areRetrialsEnabled = true
         var isCacheCheckEnabled = true
 
         protected var isRetrying = false
 
-        override fun notifyFailure(exception: Exception, sender: RequestSender) {
-            //We had an error trying to load the lessons from the network. We may still
-            //have some old cache to try to reuse. In case we do not have such cache, we
-            //dispatch the error and keep retrying loading
-            if (isRetrying) {
-                listener.onErrorHappened(exception, operationId)
-                resendRequestIfNeeded(sender)
-            } else if (isCacheCheckEnabled) {
-                val extraCourses = AppPreferences.extraCourses
-                cacher.getLessonsInFreshOrDeadCacheAsync(interval, extraCourses, true) { cache ->
-                    if (cache.isIntervalPartiallyOrFullyCached(interval)) {
-                        if (cache.hasMissingIntervals()) {
-                            //We found only some pieces. We still return these. To prevent the
-                            //request from fetching same events multiple time or making it merge
-                            //with maybe deleted events we will make the networker load only the
-                            //missing pieces
-                            listener.onPartiallyCachedResultsFetched(cache)
+        override fun notifyFailure(
+                exception: Exception,
+                sender: RequestSender) = //We had an error trying to load the lessons from the network. We may still
+                //have some old cache to try to reuse. In case we do not have such cache, we
+                //dispatch the error and keep retrying loading
+                if (isRetrying) {
+                    listener.onErrorHappened(exception, operationId)
+                    resendRequestIfNeeded(sender)
+                } else if (isCacheCheckEnabled) {
+                    val extraCourses = AppPreferences.extraCourses
+                    cacher.getLessonsInFreshOrDeadCacheAsync(interval, extraCourses, true) { cache ->
+                        if (cache.isIntervalPartiallyOrFullyCached(interval)) {
+                            if (cache.hasMissingIntervals()) {
+                                //We found only some pieces. We still return these. To prevent the
+                                //request from fetching same events multiple time or making it merge
+                                //with maybe deleted events we will make the networker load only the
+                                //missing pieces
+                                listener.onPartiallyCachedResultsFetched(cache)
 
-                            for (notCachedInterval in cache.missingIntervals) {
-                                notCachedInterval.launchLoading(this@LessonsController, listener)
+                                for (notCachedInterval in cache.missingIntervals) {
+                                    notCachedInterval.launchLoading(this@LessonsController, listener)
+                                }
+
+                                listener.onLoadingDelegated(operationId)
+                            } else {
+                                //We found everything we needed in the old cache
+                                listener.onLessonsLoaded(cache, interval, 0)
                             }
 
-                            listener.onLoadingDelegated(operationId)
                         } else {
-                            //We found everything we needed in the old cache
-                            listener.onLessonsLoaded(cache, interval, 0)
+                            //Nothing found in cache: we keep retrying loading
+                            listener.onErrorHappened(exception, operationId)
+                            resendRequestIfNeeded(sender)
                         }
-
-                    } else {
-                        //Nothing found in cache: we keep retrying loading
-                        listener.onErrorHappened(exception, operationId)
-                        resendRequestIfNeeded(sender)
                     }
+                } else {
+                    //Cache check disabled: we just retry to fetch
+                    listener.onErrorHappened(exception, operationId)
+                    resendRequestIfNeeded(sender)
                 }
-            } else {
-                //Cache check disabled: we just retry to fetch
-                listener.onErrorHappened(exception, operationId)
-                resendRequestIfNeeded(sender)
-            }
+
+        override fun manageResponse(response: String, sender: RequestSender) = try {
+            val lessonsSet = parseResponse(response)
+
+            //Technically we should always be fetching the latest lesson types. In some cases, however
+            //we can scroll back so much to be able to see the previous semesters' courses. We do not
+            //want to cache courses that are not actual.
+            lessonsSet.removeLessonTypesNotInCurrentSemester()
+
+            cacher.cacheLessonsSet(lessonsSet, interval)
+
+            onLessonsSetAvailable(lessonsSet)
+
+            listener.onLessonsLoaded(lessonsSet, interval, operationId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            BugLogger.logBug("Parsing study course request", e)
+
+            listener.onParsingErrorHappened(e, operationId)
+
+            resendRequestIfNeeded(sender)
         }
 
-        override fun manageResponse(response: String, sender: RequestSender) {
-            try {
-                val lessonsSet = parseResponse(response)
+        protected open fun onLessonsSetAvailable(lessonsSet: LessonsSet) = //Hook methods for elaborations
+                Unit
 
-                //Technically we should always be fetching the latest lesson types. In some cases, however
-                //we can scroll back so much to be able to see the previous semesters' courses. We do not
-                //want to cache courses that are not actual.
-                lessonsSet.removeLessonTypesNotInCurrentSemester()
-
-                cacher.cacheLessonsSet(lessonsSet, interval)
-
-                onLessonsSetAvailable(lessonsSet)
-
-                listener.onLessonsLoaded(lessonsSet, interval, operationId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                BugLogger.logBug("Parsing study course request", e)
-
-                listener.onParsingErrorHappened(e, operationId)
-
-                resendRequestIfNeeded(sender)
-            }
-
-        }
-
-        protected open fun onLessonsSetAvailable(lessonsSet: LessonsSet) {
-            //Hook methods for elaborations
-        }
-
-        internal fun resendRequestIfNeeded(sender: RequestSender) {
-            if (areRetrialsEnabled) {
-                isRetrying = true
-                sender.processRequestAfterTimeout(this)
-            } else {
-                listener.onLoadingAborted(operationId)
-            }
+        internal fun resendRequestIfNeeded(sender: RequestSender) = if (areRetrialsEnabled) {
+            isRetrying = true
+            sender.processRequestAfterTimeout(this)
+        } else {
+            listener.onLoadingAborted(operationId)
         }
 
         override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) {
@@ -402,9 +378,7 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             resendRequestIfNeeded(sender)
         }
 
-        override fun notifyOnBeforeSend() {
-            listener.onLoadingAboutToStart(LessonsLoadingMessage(operationId, interval, isRetrying))
-        }
+        override fun notifyOnBeforeSend() = listener.onLoadingAboutToStart(LessonsLoadingMessage(operationId, interval, isRetrying))
 
         override val calendarIntervalToLoad: CalendarInterval
             get() = interval.toCalendarInterval()
@@ -423,7 +397,7 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             private val differenceListener: LessonsDifferenceListener) : StudyCourseLessonsRequest(interval, course, DiffCompletedListener(differenceListener)) {
 
         init {
-            areRetrialsEnabled  = false
+            areRetrialsEnabled = false
             isCacheCheckEnabled = false
         }
 
@@ -485,38 +459,32 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             resendRequestIfNeeded(sender)
         }
 
-        override fun manageResponse(response: String, sender: RequestSender) {
-            try {
-                val lessonsSet = parseResponse(response)
-                lessonsSet.prepareForExtraCourse(extraCourse)
+        override fun manageResponse(response: String, sender: RequestSender) = try {
+            val lessonsSet = parseResponse(response)
+            lessonsSet.prepareForExtraCourse(extraCourse)
 
-                onLessonsSetAvailable(lessonsSet)
+            onLessonsSetAvailable(lessonsSet)
 
-                cacher.cacheExtraLessonsSet(lessonsSet, intervalToLoad, extraCourse)
+            cacher.cacheExtraLessonsSet(lessonsSet, intervalToLoad, extraCourse)
 
-                listener.onLessonsLoaded(lessonsSet, intervalToLoad, operationId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                BugLogger.logBug("Parsing extra lessons request", e)
+            listener.onLessonsLoaded(lessonsSet, intervalToLoad, operationId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            BugLogger.logBug("Parsing extra lessons request", e)
 
-                listener.onParsingErrorHappened(e, operationId)
+            listener.onParsingErrorHappened(e, operationId)
 
-                resendRequestIfNeeded(sender)
-            }
-
+            resendRequestIfNeeded(sender)
         }
 
-        protected open fun onLessonsSetAvailable(lessonsSet: LessonsSet) {
-            //hook method for further computations
-        }
+        protected open fun onLessonsSetAvailable(lessonsSet: LessonsSet) = //hook method for further computations
+                Unit
 
-        private fun resendRequestIfNeeded(sender: RequestSender) {
-            if (retrialsEnabled) {
-                isRetrying = true
-                sender.processRequestAfterTimeout(this)
-            } else {
-                listener.onLoadingAborted(operationId)
-            }
+        private fun resendRequestIfNeeded(sender: RequestSender) = if (retrialsEnabled) {
+            isRetrying = true
+            sender.processRequestAfterTimeout(this)
+        } else {
+            listener.onLoadingAborted(operationId)
         }
 
         override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) {
@@ -526,9 +494,7 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
             resendRequestIfNeeded(sender)
         }
 
-        override fun notifyOnBeforeSend() {
-            listener.onLoadingAboutToStart(ExtraCoursesLoadingMessage(this))
-        }
+        override fun notifyOnBeforeSend() = listener.onLoadingAboutToStart(ExtraCoursesLoadingMessage(this))
 
         override val calendarIntervalToLoad: CalendarInterval
             get() = intervalToLoad.toCalendarInterval()
@@ -551,38 +517,29 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
     inner class ListLessonsRequest(
             private val studyCourse: StudyCourse,
             private val listener: ListLessonsListener) : BasicLessonsRequest() {
-        private val weekInterval: WeekInterval
 
-        init {
-            this.weekInterval = WeekInterval(-2, +2)
+        private val weekInterval: WeekInterval = WeekInterval(-2, +2)
+
+        override fun notifyFailure(
+                e: Exception,
+                sender: RequestSender) = listener.onErrorHappened(e)
+
+        override fun manageResponse(response: String, sender: RequestSender) = try {
+            val lessonsSet = parseResponse(response)
+            listener.onLessonTypesRetrieved(lessonsSet.lessonTypes.values)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            BugLogger.logBug("Parsing lessons list request", e)
+
+            listener.onParsingErrorHappened(e)
         }
 
-        override fun notifyFailure(e: Exception, sender: RequestSender) {
-            listener.onErrorHappened(e)
+        override fun notifyResponseUnsuccessful(
+                code: Int,
+                sender: RequestSender) = listener.onErrorHappened(ResponseUnsuccessfulException(code))
 
-        }
-
-        override fun manageResponse(response: String, sender: RequestSender) {
-            try {
-                val lessonsSet = parseResponse(response)
-                listener.onLessonTypesRetrieved(lessonsSet.lessonTypes.values)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                BugLogger.logBug("Parsing lessons list request", e)
-
-                listener.onParsingErrorHappened(e)
-            }
-
-        }
-
-        override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) {
-            listener.onErrorHappened(ResponseUnsuccessfulException(code))
-
-        }
-
-        override fun notifyOnBeforeSend() {
-            //Nothing to do
-        }
+        override fun notifyOnBeforeSend() = //Nothing to do
+                Unit
 
         override val calendarIntervalToLoad: CalendarInterval
             get() = weekInterval.toCalendarInterval()
@@ -602,19 +559,16 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
         private fun buildRequestURL(
                 courseId: Long,
                 year: Int,
-                intervalToLoad: CalendarInterval): String {
-            return if (Config.DEBUG_MODE && Config.LAUNCH_REQUESTS_TO_DEBUG_SERVER) {
-                Config.DEBUG_SERVER_URL
-            } else String.format(
-                    Locale.CANADA,
-                    "http://webapps.unitn.it/Orari/it/Web/AjaxEventi/c/%d-%d/agendaWeek?_=%d&start=%d&end=%d",
-                    courseId,
-                    year,
-                    System.currentTimeMillis(),
-                    intervalToLoad.from.timeInMillis / 1000,
-                    intervalToLoad.to.timeInMillis / 1000
-            )
-
-        }
+                intervalToLoad: CalendarInterval): String = if (Config.DEBUG_MODE && Config.LAUNCH_REQUESTS_TO_DEBUG_SERVER) {
+            Config.DEBUG_SERVER_URL
+        } else String.format(
+                Locale.CANADA,
+                "http://webapps.unitn.it/Orari/it/Web/AjaxEventi/c/%d-%d/agendaWeek?_=%d&start=%d&end=%d",
+                courseId,
+                year,
+                System.currentTimeMillis(),
+                intervalToLoad.from.timeInMillis / 1000,
+                intervalToLoad.to.timeInMillis / 1000
+        )
     }
 }

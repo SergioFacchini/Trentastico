@@ -1,8 +1,7 @@
 package com.geridea.trentastico.model
 
 import com.geridea.trentastico.providers.DepartmentsProvider
-
-import java.util.Locale
+import java.util.*
 
 class StudyCourse(val departmentId: Long, val courseId: Long, year: Int) {
     var year: Int = 0
@@ -54,7 +53,5 @@ class StudyCourse(val departmentId: Long, val courseId: Long, year: Int) {
             return cay
         }
 
-    override fun toString(): String {
-        return String.format("Department: %d - Course: %d - Year %d", departmentId, courseId, year)
-    }
+    override fun toString(): String = String.format("Department: %d - Course: %d - Year %d", departmentId, courseId, year)
 }

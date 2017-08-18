@@ -11,10 +11,10 @@ class NetworkErrorMessage(messageId: Int, error: Exception) : AbstractTextMessag
 
     init {
 
-        if (error is UnknownHostException) {
-            text = "Non riesco a scaricare gli orari perché non sei connesso/a ad internet!"
+        text = if (error is UnknownHostException) {
+            "Non riesco a scaricare gli orari perché non sei connesso/a ad internet!"
         } else {
-            text = "Non sono riuscito a scaricare gli orari per un problema con internet. Riprovo..."
+            "Non sono riuscito a scaricare gli orari per un problema con internet. Riprovo..."
         }
     }
 }

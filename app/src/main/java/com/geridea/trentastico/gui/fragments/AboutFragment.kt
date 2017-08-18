@@ -10,27 +10,22 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.TextView
-
-import com.geridea.trentastico.BuildConfig
+import butterknife.BindView
+import butterknife.ButterKnife
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.utils.DebugUtils
-import com.github.porokoro.paperboy.PaperboyFragment
-
-import butterknife.BindView
-import butterknife.ButterKnife
 
 class AboutFragment : FragmentWithMenuItems() {
 
-    @BindView(R.id.version_text) internal var versionText: TextView? = null
+    @BindView(R.id.version_text)  lateinit var versionText: TextView
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater!!.inflate(R.layout.fragment_about, container, false)
         ButterKnife.bind(this, view)
 
-        versionText!!.text = DebugUtils.computeVersionName()
+        versionText.text = DebugUtils.computeVersionName()
 
         val paperboyFragment = PaperboyFragmentMaker.buildPaperboyFragment(context)
         childFragmentManager
@@ -44,8 +39,7 @@ class AboutFragment : FragmentWithMenuItems() {
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)
 
-    override fun bindMenuItem(item: MenuItem) {
-        //No menus used
-    }
+    override fun bindMenuItem(item: MenuItem) = //No menus used
+            Unit
 
 }

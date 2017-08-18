@@ -12,13 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.ExtraCourse
-
-import java.util.ArrayList
+import java.util.*
 
 class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>) : ItemsAdapter<ExtraCourse>(context) {
 
@@ -27,9 +25,7 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
         itemsList = extraCourses
     }
 
-    override fun createView(item: ExtraCourse, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_extra_course, parent, false)
-    }
+    override fun createView(item: ExtraCourse, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_extra_course, parent, false)
 
     override fun bindView(item: ExtraCourse, pos: Int, convertView: View) {
         Views.find<TextView>(convertView, R.id.course_name).text = item.name

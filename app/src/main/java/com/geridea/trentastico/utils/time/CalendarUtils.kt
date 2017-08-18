@@ -1,11 +1,8 @@
 package com.geridea.trentastico.utils.time
 
 import com.geridea.trentastico.Config
-
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 /*
  * Created with ♥ by Slava on 12/03/2017.
@@ -36,9 +33,7 @@ object CalendarUtils {
         return firstDayOfWeek
     }
 
-    fun formatDDMMYY(calendar: Calendar): String {
-        return formatDDMMYY.format(calendar.time)
-    }
+    fun formatDDMMYY(calendar: Calendar): String = formatDDMMYY.format(calendar.time)
 
     val purgedCalendarInstance: Calendar
         get() {
@@ -75,17 +70,11 @@ object CalendarUtils {
     /**
      * @return yyyy-MM-dd'T'HH:mm:ss.SSSZ
      */
-    fun formatTimestamp(millis: Long): String {
-        return formatTimestamp.format(Date(millis))
-    }
+    fun formatTimestamp(millis: Long): String = formatTimestamp.format(Date(millis))
 
-    fun formatEEEEDDMMMM(millis: Long): String {
-        return formatEEEEDDMMMM.format(Date(millis))
-    }
+    fun formatEEEEDDMMMM(millis: Long): String = formatEEEEDDMMMM.format(Date(millis))
 
-    fun formatHHMM(millis: Long): String {
-        return formatHHMM.format(Date(millis))
-    }
+    fun formatHHMM(millis: Long): String = formatHHMM.format(Date(millis))
 
     val debuggableToday: Calendar
         get() {
@@ -118,9 +107,7 @@ object CalendarUtils {
      * @param dayTwo The second day.
      * @return Whether the times are on the same day.
      */
-    fun isSameDay(dayOne: Calendar, dayTwo: Calendar): Boolean {
-        return dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR)
-    }
+    fun isSameDay(dayOne: Calendar, dayTwo: Calendar): Boolean = dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR)
 }
 /**
  * @return the first day of the current week, at 00:00:00.

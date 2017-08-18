@@ -7,6 +7,7 @@ package com.geridea.trentastico.gui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.util.TypedValue.COMPLEX_UNIT_SP
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -14,30 +15,21 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Switch
 import android.widget.TextView
-
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnCheckedChanged
+import butterknife.OnClick
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
-import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.views.CourseSelectorView
-import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
-import com.threerings.signals.Listener1
 import com.threerings.signals.Signal1
-
-import java.util.ArrayList
-
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
-import butterknife.OnClick
-
-import android.util.TypedValue.COMPLEX_UNIT_SP
 
 class SettingsFragment : FragmentWithMenuItems() {
     /**
@@ -46,19 +38,19 @@ class SettingsFragment : FragmentWithMenuItems() {
     internal var isLoading = true
 
     //Calendar
-    @BindView(R.id.font_size_seek_bar) internal var fontSizeSeekBar: SeekBar? = null
-    @BindView(R.id.font_preview) internal var fontSizePreview: TextView? = null
+    @BindView(R.id.font_size_seek_bar)  lateinit var fontSizeSeekBar: SeekBar
+    @BindView(R.id.font_preview)  lateinit var fontSizePreview: TextView
 
     //Study course
-    @BindView(R.id.current_study_course) internal var currentStudyCourse: TextView? = null
+    @BindView(R.id.current_study_course)  lateinit var currentStudyCourse: TextView
 
     //Lessons updates
-    @BindView(R.id.search_for_lesson_changes) internal var searchForLessonChanges: Switch? = null
-    @BindView(R.id.lesson_change_show_notification) internal var shownNotificationOnLessonChanges: Switch? = null
+    @BindView(R.id.search_for_lesson_changes)  lateinit var searchForLessonChanges: Switch
+    @BindView(R.id.lesson_change_show_notification)  lateinit var shownNotificationOnLessonChanges: Switch
 
     //Next lesson notification
-    @BindView(R.id.show_next_lesson_notification) internal var showNextLessonNotification: Switch? = null
-    @BindView(R.id.make_notifications_fixed) internal var makeNotificationFixedSwitch: Switch? = null
+    @BindView(R.id.show_next_lesson_notification)  lateinit var showNextLessonNotification: Switch
+    @BindView(R.id.make_notifications_fixed)  lateinit var makeNotificationFixedSwitch: Switch
 
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -68,15 +60,13 @@ class SettingsFragment : FragmentWithMenuItems() {
         ButterKnife.bind(this, view)
 
         //Calendar
-        fontSizeSeekBar!!.progress = AppPreferences.calendarFontSize - MIN_CALENDAR_FONT_SIZE
+        fontSizeSeekBar.progress = AppPreferences.calendarFontSize - MIN_CALENDAR_FONT_SIZE
         updateCalendarFontPreview(AppPreferences.calendarFontSize)
 
-        fontSizeSeekBar!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                updateCalendarFontPreview(MIN_CALENDAR_FONT_SIZE + progress)
-            }
+        fontSizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) = updateCalendarFontPreview(MIN_CALENDAR_FONT_SIZE + progress)
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 AppPreferences.calendarFontSize = seekBar.progress + MIN_CALENDAR_FONT_SIZE
@@ -85,24 +75,22 @@ class SettingsFragment : FragmentWithMenuItems() {
 
         //Study courses
         val studyCourse = AppPreferences.studyCourse
-        currentStudyCourse!!.setText(studyCourse.generateFullDescription())
+        currentStudyCourse.text = studyCourse.generateFullDescription()
 
         //Lesson changes
-        searchForLessonChanges!!.isChecked = AppPreferences.isSearchForLessonChangesEnabled
-        shownNotificationOnLessonChanges!!.isChecked = AppPreferences.isNotificationForLessonChangesEnabled
+        searchForLessonChanges.isChecked = AppPreferences.isSearchForLessonChangesEnabled
+        shownNotificationOnLessonChanges.isChecked = AppPreferences.isNotificationForLessonChangesEnabled
 
         //Next lesson notification
-        showNextLessonNotification!!.isChecked = AppPreferences.areNextLessonNotificationsEnabled()
-        makeNotificationFixedSwitch!!.isChecked = AppPreferences.areNextLessonNotificationsFixed()
+        showNextLessonNotification.isChecked = AppPreferences.areNextLessonNotificationsEnabled()
+        makeNotificationFixedSwitch.isChecked = AppPreferences.areNextLessonNotificationsFixed()
 
         isLoading = false
 
         return view
     }
 
-    private fun updateCalendarFontPreview(fontSize: Int) {
-        fontSizePreview!!.setTextSize(COMPLEX_UNIT_SP, fontSize.toFloat())
-    }
+    private fun updateCalendarFontPreview(fontSize: Int) = fontSizePreview!!.setTextSize(COMPLEX_UNIT_SP, fontSize.toFloat())
 
     ///////////////////////////
     ////LESSONS UPDATES
@@ -111,7 +99,7 @@ class SettingsFragment : FragmentWithMenuItems() {
     @OnClick(R.id.change_study_course_button)
     internal fun onChangeStudyCourseButtonPressed() {
         val dialog = ChangeStudyCourseDialog(activity)
-        dialog.onChoiceMade.connect { studyCourse -> currentStudyCourse!!.text = studyCourse.generateFullDescription() }
+        dialog.onChoiceMade.connect { studyCourse -> currentStudyCourse.text = studyCourse.generateFullDescription() }
         dialog.show()
     }
 
@@ -122,7 +110,7 @@ class SettingsFragment : FragmentWithMenuItems() {
         }
 
         AppPreferences.isSearchForLessonChangesEnabled = enabled
-        shownNotificationOnLessonChanges!!.isEnabled = enabled
+        shownNotificationOnLessonChanges.isEnabled = enabled
 
         if (enabled) {
             activity.startService(
@@ -153,7 +141,7 @@ class SettingsFragment : FragmentWithMenuItems() {
         }
 
         AppPreferences.setNextLessonNotificationsEnabled(checked)
-        makeNotificationFixedSwitch!!.isEnabled = checked
+        makeNotificationFixedSwitch.isEnabled = checked
 
         if (checked) {
             startNextLessonNotificationService()
@@ -183,9 +171,8 @@ class SettingsFragment : FragmentWithMenuItems() {
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)
 
-    override fun bindMenuItem(item: MenuItem) {
-        //Does not uses menus, nothing to bind!
-    }
+    override fun bindMenuItem(item: MenuItem) = //Does not uses menus, nothing to bind!
+            Unit
 
 
     protected inner class ChangeStudyCourseDialog(context: Context) : AlertDialog(context) {
@@ -195,21 +182,21 @@ class SettingsFragment : FragmentWithMenuItems() {
          */
         val onChoiceMade = Signal1<StudyCourse>()
 
-        @BindView(R.id.course_selector) internal var courseSelector: CourseSelectorView? = null
+        @BindView(R.id.course_selector)  lateinit var courseSelector: CourseSelectorView
 
         init {
 
             val view = Views.inflate<View>(context, R.layout.dialog_change_study_course)
             ButterKnife.bind(this, view)
 
-            courseSelector!!.setStudyCourse(AppPreferences.studyCourse)
+            courseSelector.setStudyCourse(AppPreferences.studyCourse)
 
             setView(view)
         }
 
         @OnClick(R.id.change_button)
         internal fun onChangeStudyCourseButtonClicked() {
-            val selectedCourse = courseSelector!!.selectedStudyCourse
+            val selectedCourse = courseSelector.selectedStudyCourse
             if (AppPreferences.studyCourse == selectedCourse) {
                 //We just clicked ok without changing our course...
                 onChoiceMade.dispatch(selectedCourse)
@@ -236,9 +223,7 @@ class SettingsFragment : FragmentWithMenuItems() {
             ))
         }
 
-        private fun removeOverlappingExtraCourses(selectedCourse: StudyCourse) {
-            AppPreferences.removeExtraCoursesHaving(selectedCourse.courseId, selectedCourse.year)
-        }
+        private fun removeOverlappingExtraCourses(selectedCourse: StudyCourse) = AppPreferences.removeExtraCoursesHaving(selectedCourse.courseId, selectedCourse.year)
 
         private fun clearFilters() {
             AppPreferences.removeAllHiddenCourses() //No longer need them

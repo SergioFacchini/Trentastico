@@ -19,13 +19,13 @@ val CP_CACHED_IN_MS = "cached_in_ms"
 
 internal val SQL_CREATE_CACHED_PERIOD =
      """CREATE TABLE $CACHED_PERIOD_TABLE (
-         |$CP_ID           INTEGER PRIMARY KEY AUTOINCREMENT,
-         |$CP_START_WEEK   INTEGER NOT NULL,
-         |$CP_START_YEAR   INTEGER NOT NULL,
-         |$CP_END_WEEK     INTEGER NOT NULL,
-         |$CP_END_YEAR     INTEGER NOT NULL,
-         |$CP_LESSON_TYPE  INTEGER NOT NULL,
-         |$CP_CACHED_IN_MS INTEGER NOT NULL)"""
+         $CP_ID           INTEGER PRIMARY KEY AUTOINCREMENT,
+         $CP_START_WEEK   INTEGER NOT NULL,
+         $CP_START_YEAR   INTEGER NOT NULL,
+         $CP_END_WEEK     INTEGER NOT NULL,
+         $CP_END_YEAR     INTEGER NOT NULL,
+         $CP_LESSON_TYPE  INTEGER NOT NULL,
+         $CP_CACHED_IN_MS INTEGER NOT NULL)"""
 
 
 //Cached lessons
@@ -45,17 +45,17 @@ val CL_COLOR            = "color"
 
 internal val SQL_CREATE_CACHED_LESSONS =
 """CREATE TABLE $CACHED_LESSONS_TABLE (
-        | $CL_CACHED_PERIOD_ID INTEGER NOT NULL,
-        | $CL_LESSON_ID        INTEGER NOT NULL,
-        | $CL_STARTS_AT_MS     INTEGER NOT NULL,
-        | $CL_FINISHES_AT_MS   INTEGER NOT NULL,
-        | $CL_TEACHING_ID      INTEGER NOT NULL,
-        | $CL_WEEK_NUMBER      INTEGER NOT NULL,
-        | $CL_YEAR             INTEGER NOT NULL,
-        | $CL_SUBJECT          VARCHAR(500) NOT NULL,
-        | $CL_ROOM             VARCHAR(500) NOT NULL,
-        | $CL_DESCRIPTION      VARCHAR(500) NOT NULL,
-        | $CL_COLOR            INTEGER NOT NULL )"""
+         $CL_CACHED_PERIOD_ID INTEGER NOT NULL,
+         $CL_LESSON_ID        INTEGER NOT NULL,
+         $CL_STARTS_AT_MS     INTEGER NOT NULL,
+         $CL_FINISHES_AT_MS   INTEGER NOT NULL,
+         $CL_TEACHING_ID      INTEGER NOT NULL,
+         $CL_WEEK_NUMBER      INTEGER NOT NULL,
+         $CL_YEAR             INTEGER NOT NULL,
+         $CL_SUBJECT          VARCHAR(500) NOT NULL,
+         $CL_ROOM             VARCHAR(500) NOT NULL,
+         $CL_DESCRIPTION      VARCHAR(500) NOT NULL,
+         $CL_COLOR            INTEGER NOT NULL )"""
 
 
 //Cached lesson types
@@ -68,10 +68,10 @@ val CLT_IS_EXTRA_COURSE = "is_extra_course"
 
 internal val SQL_CREATE_CACHED_LESSON_TYPES =
         """CREATE TABLE $CACHED_LESSON_TYPES_TABLE (
-            |$CLT_LESSON_TYPE_ID  INTEGER NOT NULL,
-            |$CLT_NAME            VARCHAR(500) NOT NULL,
-            |$CLT_COLOR           INTEGER NOT NULL,
-            |$CLT_IS_EXTRA_COURSE INTEGER NOT NULL)"""
+            $CLT_LESSON_TYPE_ID  INTEGER NOT NULL,
+            $CLT_NAME            VARCHAR(500) NOT NULL,
+            $CLT_COLOR           INTEGER NOT NULL,
+            $CLT_IS_EXTRA_COURSE INTEGER NOT NULL)"""
 
 
 
@@ -88,10 +88,10 @@ val CLIBT_CACHED_IN_MS = "cached_in_ms"
 
 internal val SQL_CREATE_CACHED_LIBRARY_TIMES =
     """CREATE TABLE $CACHED_LIBRARY_TIMES_TABLE_NAME (
-        |$CLIBT_DAY          CHAR(10) NOT NULL PRIMARY KEY,
-        |$CLIBT_BUC          VARCHAR(10) NOT NULL,
-        |$CLIBT_CIAL         VARCHAR(10) NOT NULL,
-        |$CLIBT_MESIANO      VARCHAR(10) NOT NULL,
-        |$CLIBT_POVO         VARCHAR(10) NOT NULL,
-        |$CLIBT_PSICOLOGIA   VARCHAR(10) NOT NULL,
-        |$CLIBT_CACHED_IN_MS INT NOT NULL )"""
+        $CLIBT_DAY          CHAR(10) NOT NULL PRIMARY KEY,
+        $CLIBT_BUC          VARCHAR(10) NOT NULL,
+        $CLIBT_CIAL         VARCHAR(10) NOT NULL,
+        $CLIBT_MESIANO      VARCHAR(10) NOT NULL,
+        $CLIBT_POVO         VARCHAR(10) NOT NULL,
+        $CLIBT_PSICOLOGIA   VARCHAR(10) NOT NULL,
+        $CLIBT_CACHED_IN_MS INT NOT NULL )"""

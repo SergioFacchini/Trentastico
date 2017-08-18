@@ -7,8 +7,6 @@ package com.geridea.trentastico.utils
 
 object NumbersUtils {
 
-    fun compare(x: Long, y: Long): Int {
-        return if (x < y) -1 else if (x == y) 0 else 1
-    }
+    fun compare(x: Long, y: Long): Int = if (x < y) -1 else if (x == y) 0 else 1
 
 }

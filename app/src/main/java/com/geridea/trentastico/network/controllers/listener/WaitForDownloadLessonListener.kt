@@ -32,36 +32,27 @@ abstract class WaitForDownloadLessonListener : LessonsLoadingListener {
         checkIfWeHaveFinished()
     }
 
-    override fun onErrorHappened(error: Exception, operationId: Int) {
-        //Managed in onLoadingAborted
-    }
+    override fun onErrorHappened(error: Exception, operationId: Int) = //Managed in onLoadingAborted
+            Unit
 
-    override fun onParsingErrorHappened(exception: Exception, operationId: Int) {
-        //Managed in onLoadingAborted
-    }
+    override fun onParsingErrorHappened(exception: Exception, operationId: Int) = //Managed in onLoadingAborted
+            Unit
 
-    override fun onLoadingDelegated(operationId: Int) {
-        //Should never happen since we do not manage loading from cache
-        BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
-    }
+    override fun onLoadingDelegated(operationId: Int) = //Should never happen since we do not manage loading from cache
+            BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
 
-    override fun onPartiallyCachedResultsFetched(lessonsSet: CachedLessonsSet) {
-        //Should never happen since we do not manage loading from cache
-        BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
-    }
+    override fun onPartiallyCachedResultsFetched(lessonsSet: CachedLessonsSet) = //Should never happen since we do not manage loading from cache
+            BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
 
-    override fun onNothingFoundInCache() {
-        //Nothing to do
-    }
+    override fun onNothingFoundInCache() = //Nothing to do
+            Unit
 
     override fun onLoadingAborted(operationId: Int) {
         numRequestsFailed++
         checkIfWeHaveFinished()
     }
 
-    fun onNothingToLoad() {
-        onFinish(true)
-    }
+    fun onNothingToLoad() = onFinish(true)
 
     private fun checkIfWeHaveFinished() {
         if (numRequestsSent == numRequestsSucceeded + numRequestsFailed) {

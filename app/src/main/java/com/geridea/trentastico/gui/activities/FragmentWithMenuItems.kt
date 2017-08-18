@@ -15,9 +15,7 @@ abstract class FragmentWithMenuItems : Fragment(), IMenuSettings {
         this.activity = activity
     }
 
-    fun goToCalendarFragment() {
-        activity!!.switchToCalendarFragment()
-    }
+    fun goToCalendarFragment() = activity!!.switchToCalendarFragment()
 
 
 }

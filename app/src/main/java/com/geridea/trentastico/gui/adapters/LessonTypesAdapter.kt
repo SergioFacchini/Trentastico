@@ -26,9 +26,7 @@ class LessonTypesAdapter(context: Context, lessonTypes: Collection<LessonType>) 
         itemsList = LessonType.getSortedLessonTypes(lessonTypes)
     }
 
-    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_lesson_type, parent, false)
-    }
+    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_lesson_type, parent, false)
 
     override fun bindView(item: LessonType, pos: Int, convertView: View) {
         Views.find<TextView>(convertView, R.id.lesson_type).text = item.name

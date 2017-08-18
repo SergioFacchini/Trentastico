@@ -32,9 +32,7 @@ class LessonType(val id: Int, val name: String, val color: Int, var isVisible: B
     fun hasAtLeastOnePartitioningVisible(): Boolean =
             partitioning.hasAtLeastOnePartitioningVisible()
 
-    fun mergePartitionings(partitioning: Partitioning) {
-        partitioning.mergePartitionCases(partitioning)
-    }
+    fun mergePartitionings(partitioning: Partitioning) = partitioning.mergePartitionCases(partitioning)
 
     companion object {
 

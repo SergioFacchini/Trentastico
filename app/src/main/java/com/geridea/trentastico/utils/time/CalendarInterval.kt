@@ -1,6 +1,6 @@
 package com.geridea.trentastico.utils.time
 
-import java.util.Calendar
+import java.util.*
 
 /*
  * Created with ♥ by Slava on 12/03/2017.
@@ -19,17 +19,11 @@ class CalendarInterval {
         this.to = CalendarUtils.getCalendarInitializedAs(to)
     }
 
-    operator fun contains(time: Calendar): Boolean {
-        return time.after(from) && time.before(to) || from == time
-    }
+    operator fun contains(time: Calendar): Boolean = time.after(from) && time.before(to) || from == time
 
-    fun matches(searchedFrom: Calendar, searchedTo: Calendar): Boolean {
-        return from == searchedFrom && to == searchedTo
-    }
+    fun matches(searchedFrom: Calendar, searchedTo: Calendar): Boolean = from == searchedFrom && to == searchedTo
 
-    override fun toString(): String {
-        return String.format("[%s-%s]", CalendarUtils.formatDDMMYY(from), CalendarUtils.formatDDMMYY(to))
-    }
+    override fun toString(): String = String.format("[%s-%s]", CalendarUtils.formatDDMMYY(from), CalendarUtils.formatDDMMYY(to))
 
     val fromMs: Long
         get() = from.timeInMillis

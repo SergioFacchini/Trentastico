@@ -5,9 +5,8 @@ package com.geridea.trentastico.utils.time
  * Created with ♥ by Slava on 15/03/2017.
  */
 
-import java.util.Calendar
-
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
+import java.util.*
 
 class WeekTime {
     var year: Int = 0
@@ -30,7 +29,7 @@ class WeekTime {
 
     constructor(milliseconds: Long) {
         val calendar = CalendarUtils.clearCalendar
-        calendar.setTimeInMillis(milliseconds)
+        calendar.timeInMillis = milliseconds
 
         initFromCalendar(calendar)
     }
@@ -45,40 +44,30 @@ class WeekTime {
     /**
      * @return true if the current week time start after the argument.
      */
-    fun after(arg: WeekTime): Boolean {
-        return if (this.year == arg.year) {
-            this.weekNumber > arg.weekNumber
-        } else
-            this.year > arg.year
-    }
+    fun after(arg: WeekTime): Boolean = if (this.year == arg.year) {
+        this.weekNumber > arg.weekNumber
+    } else
+        this.year > arg.year
 
     /**
      * @return true if the current week time start before the argument.
      */
-    fun before(arg: WeekTime): Boolean {
-        return if (this.year == arg.year) {
-            this.weekNumber < arg.weekNumber
-        } else
-            this.year < arg.year
-    }
+    fun before(arg: WeekTime): Boolean = if (this.year == arg.year) {
+        this.weekNumber < arg.weekNumber
+    } else
+        this.year < arg.year
 
-    fun hasSameWeekTime(day: WeekDayTime): Boolean {
-        return weekNumber == day.weekNumber && year == day.year
-    }
+    fun hasSameWeekTime(day: WeekDayTime): Boolean = weekNumber == day.weekNumber && year == day.year
 
-    fun before(day: WeekDayTime): Boolean {
-        return if (this.year == day.year) {
-            this.weekNumber < day.weekNumber
-        } else
-            this.year < day.year
-    }
+    fun before(day: WeekDayTime): Boolean = if (this.year == day.year) {
+        this.weekNumber < day.weekNumber
+    } else
+        this.year < day.year
 
-    fun after(day: WeekDayTime): Boolean {
-        return if (this.year == day.year) {
-            this.weekNumber > day.weekNumber
-        } else
-            this.year > day.year
-    }
+    fun after(day: WeekDayTime): Boolean = if (this.year == day.year) {
+        this.weekNumber > day.weekNumber
+    } else
+        this.year > day.year
 
 
     fun addWeeks(numWeeksToAdd: Int): WeekTime {
@@ -94,9 +83,7 @@ class WeekTime {
         return this
     }
 
-    fun copy(): WeekTime {
-        return WeekTime(year, weekNumber)
-    }
+    fun copy(): WeekTime = WeekTime(year, weekNumber)
 
     override fun equals(obj: Any?): Boolean {
         if (obj is WeekTime) {
@@ -109,20 +96,14 @@ class WeekTime {
     /**
      * True if the current week time start before or equals the argument.
      */
-    fun beforeOrEqual(weekTime: WeekTime): Boolean {
-        return before(weekTime) || equals(weekTime)
-    }
+    fun beforeOrEqual(weekTime: WeekTime): Boolean = before(weekTime) || equals(weekTime)
 
     /**
      * True if the current week time start after or equals the argument.
      */
-    fun afterOrEqual(weekTime: WeekTime): Boolean {
-        return after(weekTime) || equals(weekTime)
-    }
+    fun afterOrEqual(weekTime: WeekTime): Boolean = after(weekTime) || equals(weekTime)
 
-    override fun toString(): String {
-        return year.toString() + "/" + weekNumber
-    }
+    override fun toString(): String = year.toString() + "/" + weekNumber
 
     override fun hashCode(): Int {
         var result = year

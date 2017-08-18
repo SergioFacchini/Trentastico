@@ -9,7 +9,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-
 import com.birbit.android.jobqueue.Job
 import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.Params
@@ -17,34 +16,14 @@ import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.model.ExtraCoursesList
-import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonType
-import com.geridea.trentastico.model.LessonsSet
-import com.geridea.trentastico.model.LibraryOpeningTimes
-import com.geridea.trentastico.model.cache.CachedLesson
-import com.geridea.trentastico.model.cache.CachedLessonType
-import com.geridea.trentastico.model.cache.CachedLessonsSet
-import com.geridea.trentastico.model.cache.CachedPeriod
-import com.geridea.trentastico.model.cache.ExtraCourseCachedInterval
-import com.geridea.trentastico.model.cache.ExtraCourseNotCachedInterval
-import com.geridea.trentastico.model.cache.NotCachedInterval
-import com.geridea.trentastico.model.cache.StudyCourseCachedInterval
-import com.geridea.trentastico.model.cache.StudyCourseNotCachedInterval
+import com.geridea.trentastico.model.*
+import com.geridea.trentastico.model.cache.*
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.StringUtils
 import com.geridea.trentastico.utils.UIUtils
-import com.geridea.trentastico.utils.time.CalendarUtils
-import com.geridea.trentastico.utils.time.WeekDayTime
-import com.geridea.trentastico.utils.time.WeekInterval
-import com.geridea.trentastico.utils.time.WeekIntervalCutResult
-import com.geridea.trentastico.utils.time.WeekTime
-
-import java.util.ArrayList
-import java.util.Calendar
-import java.util.Locale
+import com.geridea.trentastico.utils.time.*
+import java.util.*
 
 /**
  * The class that deals with the caching of lessons.<br></br>
@@ -89,15 +68,13 @@ class Cacher {
     fun cacheExtraLessonsSet(
             setToCache: LessonsSet,
             interval: WeekInterval,
-            extraCourse: ExtraCourse) {
-        jobQueue.addJobInBackground(CacheExtraLessonsSetJob(setToCache, interval, extraCourse))
-    }
+            extraCourse: ExtraCourse) =
+            jobQueue.addJobInBackground(CacheExtraLessonsSetJob(setToCache, interval, extraCourse))
 
     fun cacheLessonsSet(
             setToCache: LessonsSet,
-            intervalToCache: WeekInterval) {
-        jobQueue.addJobInBackground(CacheLessonsSetJob(setToCache, intervalToCache))
-    }
+            intervalToCache: WeekInterval) =
+            jobQueue.addJobInBackground(CacheLessonsSetJob(setToCache, intervalToCache))
 
     private fun updateLessonTypesFromSet(
             containsExtraLessonTypes: Boolean,
@@ -168,7 +145,7 @@ class Cacher {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
         for (period in loadStudyCourseCachePeriods(interval, true)) {
-            val cutResult = period.interval!!.cutFromInterval(interval)
+            val cutResult = period.interval.cutFromInterval(interval)
 
             if (!cutResult.hasAnyRemainingResult()) {
                 deleteCachedPeriodWithId(period.id)
@@ -236,10 +213,10 @@ class Cacher {
 
     private fun getCachedPeriodContentValues(period: CachedPeriod): ContentValues {
         val values = ContentValues()
-        values.put(CP_START_WEEK, period.interval!!.startWeekNumber)
-        values.put(CP_START_YEAR, period.interval!!.startYear)
-        values.put(CP_END_WEEK, period.interval!!.endWeekNumber)
-        values.put(CP_END_YEAR, period.interval!!.endYear)
+        values.put(CP_START_WEEK, period.interval.startWeekNumber)
+        values.put(CP_START_YEAR, period.interval.startYear)
+        values.put(CP_END_WEEK, period.interval.endWeekNumber)
+        values.put(CP_END_YEAR, period.interval.endYear)
         values.put(CP_LESSON_TYPE, period.lesson_type)
         values.put(CP_CACHED_IN_MS, period.cached_in_ms)
         return values
@@ -253,9 +230,8 @@ class Cacher {
     private fun deleteExtraCourseLessonsInInterval(
             periodId: Long,
             interval: WeekInterval,
-            lessonTypeId: Int) {
-        deleteLessonsInIntervalInternal(periodId, interval, lessonTypeId.toLong())
-    }
+            lessonTypeId: Int) =
+            deleteLessonsInIntervalInternal(periodId, interval, lessonTypeId.toLong())
 
     private fun deleteLessonsInIntervalInternal(
             periodId: Long,
@@ -277,19 +253,14 @@ class Cacher {
 
     private fun deleteStudyCourseLessonsInInterval(
             periodId: Long,
-            interval: WeekInterval) {
-        deleteLessonsInIntervalInternal(periodId, interval, 0)
-    }
+            interval: WeekInterval) = deleteLessonsInIntervalInternal(periodId, interval, 0)
 
-    private fun deleteStudyCourseLessons(periodId: Long) {
-        deleteLessonsInIntervalInternal(periodId, null, 0)
-    }
+    private fun deleteStudyCourseLessons(periodId: Long) =
+            deleteLessonsInIntervalInternal(periodId, null, 0)
 
     private fun deleteExtraLessonsOfType(
             periodId: Long,
-            lessonTypeId: Long) {
-        deleteLessonsInIntervalInternal(periodId, null, lessonTypeId)
-    }
+            lessonTypeId: Long) = deleteLessonsInIntervalInternal(periodId, null, lessonTypeId)
 
     /**
      * WARNING: this method can load periods that are bigger than the requested one!
@@ -298,9 +269,8 @@ class Cacher {
      */
     private fun loadStudyCourseCachePeriods(
             intervalToLoad: WeekInterval,
-            fetchOldCacheToo: Boolean): ArrayList<CachedPeriod> {
-        return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, 0)
-    }
+            fetchOldCacheToo: Boolean): ArrayList<CachedPeriod> =
+            loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, 0)
 
     /**
      * WARNING: this method can load periods that are bigger than the requested one!
@@ -310,9 +280,8 @@ class Cacher {
     private fun loadExtraCourseCachePeriods(
             intervalToLoad: WeekInterval,
             fetchOldCacheToo: Boolean,
-            lessonTypeId: Int): ArrayList<CachedPeriod> {
-        return loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, lessonTypeId)
-    }
+            lessonTypeId: Int): ArrayList<CachedPeriod> =
+            loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, lessonTypeId)
 
     /**
      * WARNING: this method can load periods that are bigger than the requested one, but never
@@ -412,12 +381,9 @@ class Cacher {
             intervalToLoad: WeekInterval,
             extraCourses: ArrayList<ExtraCourse>,
             fetchOldCacheToo: Boolean,
-            listener: (CachedLessonsSet) -> Unit) {
-
-        jobQueue.addJobInBackground(
-                GetLessonsInFreshOrDeadCacheJob(intervalToLoad, extraCourses, fetchOldCacheToo, listener)
-        )
-    }
+            listener: (CachedLessonsSet) -> Unit) = jobQueue.addJobInBackground(
+                    GetLessonsInFreshOrDeadCacheJob(intervalToLoad, extraCourses, fetchOldCacheToo, listener)
+            )
 
     private fun getLessonsInFreshOrDeadCache(
             intervalToLoad: WeekInterval,
@@ -496,9 +462,8 @@ class Cacher {
         return lessons
     }
 
-    private fun loadExtraCoursesLessonTypes(): ArrayList<CachedLessonType> {
-        return loadLessonTypes(false, true)
-    }
+    private fun loadExtraCoursesLessonTypes(): ArrayList<CachedLessonType> =
+            loadLessonTypes(false, true)
 
     private fun toStudyCourseInterval(intervals: List<WeekInterval>): ArrayList<NotCachedInterval> {
         val notCachedIntervals = ArrayList<NotCachedInterval>()
@@ -522,11 +487,10 @@ class Cacher {
 
     private fun loadLessonsOfCachePeriod(
             cachePeriod: CachedPeriod,
-            intervalToLoad: WeekInterval): ArrayList<LessonSchedule> {
-        return cachedLessonsToLessonSchedule(
-                loadCachedLessonsIntersectingInterval(cachePeriod, intervalToLoad)
-        )
-    }
+            intervalToLoad: WeekInterval): ArrayList<LessonSchedule> =
+            cachedLessonsToLessonSchedule(
+                    loadCachedLessonsIntersectingInterval(cachePeriod, intervalToLoad)
+            )
 
     private fun cachedLessonsToLessonSchedule(cachedLessons: ArrayList<CachedLesson>): ArrayList<LessonSchedule> {
         val lessons = ArrayList<LessonSchedule>()
@@ -656,16 +620,13 @@ class Cacher {
     /**
      * Deletes EVERYTHING about the current study course from the cache.
      */
-    fun purgeStudyCourseCache() {
-        jobQueue.addJobInBackground(PurgeStudyCourseCacheJob())
-    }
+    fun purgeStudyCourseCache() = jobQueue.addJobInBackground(PurgeStudyCourseCacheJob())
 
     private val idsOfCachedPeriodsOfStudyCourses: ArrayList<Long>
         get() = queryForCachedPeriodIds(CP_LESSON_TYPE + " = 0")
 
-    private fun getIdsOfCachedPeriodsWithLessonType(lessonTypeId: Int): ArrayList<Long> {
-        return queryForCachedPeriodIds(CP_LESSON_TYPE + " = " + lessonTypeId)
-    }
+    private fun getIdsOfCachedPeriodsWithLessonType(lessonTypeId: Int): ArrayList<Long> =
+            queryForCachedPeriodIds(CP_LESSON_TYPE + " = " + lessonTypeId)
 
     private fun queryForCachedPeriodIds(where: String): ArrayList<Long> {
         val projection = arrayOf(CP_ID)
@@ -691,31 +652,25 @@ class Cacher {
         writableDatabase!!.delete(CACHED_LESSON_TYPES_TABLE, whereClause, null)
     }
 
-    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) {
-        jobQueue.addJobInBackground(RemoveExtraCoursesWithLessonType(lessonTypeId))
-    }
+    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) =
+            jobQueue.addJobInBackground(RemoveExtraCoursesWithLessonType(lessonTypeId))
 
     /**
      * Deletes EVERYTHING from the case.
      */
-    fun obliterateAllLessonsCache() {
-        jobQueue.addJobInBackground(ObliterateLessonsCacheJob())
-    }
+    fun obliterateAllLessonsCache() = jobQueue.addJobInBackground(ObliterateLessonsCacheJob())
 
     fun getNotCachedSubintervals(
             interval: WeekInterval,
             courses: ArrayList<ExtraCourse>,
-            listener: (ArrayList<NotCachedInterval>) -> Unit) {
-
-        jobQueue.addJobInBackground(GetNotCachedSubintervalsJob(interval, courses, listener))
-    }
+            listener: (ArrayList<NotCachedInterval>) -> Unit) =
+            jobQueue.addJobInBackground(GetNotCachedSubintervalsJob(interval, courses, listener))
 
     /**
      * Fetches all the lessons planned for today; the lessons are ordered by start ms.
      */
-    fun getTodaysCachedLessons(listener: TodaysLessonsListener) {
-        jobQueue.addJobInBackground(GetTodaysLessonsJob(listener))
-    }
+    fun getTodaysCachedLessons(listener: TodaysLessonsListener) =
+            jobQueue.addJobInBackground(GetTodaysLessonsJob(listener))
 
     /**
      * @param day the day to check
@@ -724,9 +679,8 @@ class Cacher {
      */
     fun isDayCached(
             day: WeekDayTime,
-            listener: IsDayCachedListener) {
-        jobQueue.addJobInBackground(IsDayCachedJob(day, listener))
-    }
+            listener: IsDayCachedListener) =
+            jobQueue.addJobInBackground(IsDayCachedJob(day, listener))
 
     private fun doDuplicatedRecordsExist(): Boolean {
         val cursor = writableDatabase!!.rawQuery(
@@ -739,10 +693,10 @@ class Cacher {
         )
 
         val numDuplicatedRows: Int
-        if (cursor.moveToFirst()) {
-            numDuplicatedRows = cursor.getInt(cursor.getColumnIndex("duplicated_rows"))
+        numDuplicatedRows = if (cursor.moveToFirst()) {
+            cursor.getInt(cursor.getColumnIndex("duplicated_rows"))
         } else {
-            numDuplicatedRows = 0
+            0
         }
 
         cursor.close()
@@ -787,16 +741,14 @@ class Cacher {
      * In case there is an already cached version
      * @param openingTimes the times to cached.
      */
-    fun cacheLibraryOpeningTimes(openingTimes: LibraryOpeningTimes) {
-        jobQueue.addJobInBackground(CacheLibraryOpeningTimesJob(openingTimes))
-    }
+    fun cacheLibraryOpeningTimes(openingTimes: LibraryOpeningTimes) =
+            jobQueue.addJobInBackground(CacheLibraryOpeningTimesJob(openingTimes))
 
     fun getCachedLibraryOpeningTimes(
             day: Calendar,
             fetchDeadCacheToo: Boolean,
-            listener: CachedLibraryOpeningTimesListener) {
-        jobQueue.addJobInBackground(CachedLibraryOpeningTimesJob(day, fetchDeadCacheToo, listener))
-    }
+            listener: CachedLibraryOpeningTimesListener) =
+            jobQueue.addJobInBackground(CachedLibraryOpeningTimesJob(day, fetchDeadCacheToo, listener))
 
     /**
      * @return the unix timestamp before which the cache of the opening times of the library is
@@ -807,7 +759,7 @@ class Cacher {
             val lastValid = CalendarUtils.debuggableToday
             lastValid.add(Calendar.DAY_OF_WEEK, -5)
 
-            return lastValid.getTimeInMillis()
+            return lastValid.timeInMillis
         }
 
     private fun buildLibraryOpeningTimesFromCursor(cursor: Cursor): LibraryOpeningTimes {
@@ -823,12 +775,11 @@ class Cacher {
 
     internal abstract inner class CacheJob protected constructor() : Job(Params(PRIORITY_NORMAL)) {
 
-        override fun onAdded() {}
+        override fun onAdded() = Unit
 
         override fun onCancel(
                 cancelReason: Int,
-                throwable: Throwable?) {
-        }
+                throwable: Throwable?) = Unit
 
         override fun shouldReRunOnThrowable(
                 throwable: Throwable,
@@ -848,9 +799,8 @@ class Cacher {
             private val listener: (CachedLessonsSet) -> Unit) : CacheJob() {
 
         @Throws(Throwable::class)
-        override fun onRun() {
-            listener(getLessonsInFreshOrDeadCache(intervalToLoad, extraCourses, fetchOldCache))
-        }
+        override fun onRun() =
+                listener(getLessonsInFreshOrDeadCache(intervalToLoad, extraCourses, fetchOldCache))
     }
 
     internal inner class CacheExtraLessonsSetJob internal constructor(
@@ -935,9 +885,7 @@ class Cacher {
     internal inner class RemoveExtraCoursesWithLessonType internal constructor(private val lessonTypeId: Int) : CacheJob() {
 
         @Throws(Throwable::class)
-        override fun onRun() {
-            removeExtraCoursesWithLessonTypeImpl(lessonTypeId)
-        }
+        override fun onRun() = removeExtraCoursesWithLessonTypeImpl(lessonTypeId)
     }
 
     internal inner class ObliterateLessonsCacheJob : CacheJob() {
@@ -955,9 +903,8 @@ class Cacher {
             val listener: (ArrayList<NotCachedInterval>) -> Unit) : CacheJob() {
 
         @Throws(Throwable::class)
-        override fun onRun() {
-            listener(getLessonsInFreshOrDeadCache(interval, courses, false).missingIntervals)
-        }
+        override fun onRun() =
+                listener(getLessonsInFreshOrDeadCache(interval, courses, false).missingIntervals)
     }
 
     internal inner class GetTodaysLessonsJob internal constructor(
@@ -977,7 +924,7 @@ class Cacher {
 
 
             val lessons = cachedLessonsToLessonSchedule(
-                    getLessonsInPeriod(now.getTimeInMillis(), endOfDay.timeInMillis))
+                    getLessonsInPeriod(now.timeInMillis, endOfDay.timeInMillis))
 
             listener.onLessonsAvailable(lessons)
         }

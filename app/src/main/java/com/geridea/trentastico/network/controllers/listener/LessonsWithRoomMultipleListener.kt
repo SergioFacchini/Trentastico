@@ -6,8 +6,7 @@ package com.geridea.trentastico.network.controllers.listener
  */
 
 import com.geridea.trentastico.model.LessonSchedule
-
-import java.util.ArrayList
+import java.util.*
 
 class LessonsWithRoomMultipleListener
 /**
@@ -20,16 +19,9 @@ class LessonsWithRoomMultipleListener
 (private val lessonsThatWillBeUpdated: ArrayList<LessonSchedule>, private val lessonsWithRooms: ArrayList<LessonSchedule>, private val listener: LessonsWithRoomListener) : LessonWithRoomFetchedListener {
 
     private var numOfRequestReceived: Int = 0
-    private val lessonsWithoutRooms: ArrayList<LessonSchedule>
+    private val lessonsWithoutRooms: ArrayList<LessonSchedule> = ArrayList()
 
-    init {
-
-        this.lessonsWithoutRooms = ArrayList()
-    }
-
-    override fun onUpdateSuccessful(updatedLessons: LessonSchedule) {
-        updateCounterAndCheckIfCompleted()
-    }
+    override fun onUpdateSuccessful(updatedLessons: LessonSchedule) = updateCounterAndCheckIfCompleted()
 
     private fun updateCounterAndCheckIfCompleted() {
         numOfRequestReceived++

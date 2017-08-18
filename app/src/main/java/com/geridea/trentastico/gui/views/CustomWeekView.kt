@@ -182,14 +182,14 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
             when (mCurrentScrollDirection) {
                 CustomWeekView.Direction.NONE -> {
                     // Allow scrolling only in one direction.
-                    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                    mCurrentScrollDirection = if (Math.abs(distanceX) > Math.abs(distanceY)) {
                         if (distanceX > 0) {
-                            mCurrentScrollDirection = CustomWeekView.Direction.LEFT
+                            CustomWeekView.Direction.LEFT
                         } else {
-                            mCurrentScrollDirection = CustomWeekView.Direction.RIGHT
+                            CustomWeekView.Direction.RIGHT
                         }
                     } else {
-                        mCurrentScrollDirection = CustomWeekView.Direction.VERTICAL
+                        CustomWeekView.Direction.VERTICAL
                     }
                 }
                 CustomWeekView.Direction.LEFT -> {
@@ -582,10 +582,10 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         canvas.clipRect(mHeaderColumnWidth, mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2, width.toFloat(), height.toFloat(), Region.Op.REPLACE)
 
         // Iterate through each day.
-        val oldMillis = firstVisibleDay.getTimeInMillis()
-        firstVisibleDay.setTimeInMillis(today.timeInMillis)
+        val oldMillis = firstVisibleDay.timeInMillis
+        firstVisibleDay.timeInMillis = today.timeInMillis
         firstVisibleDay.add(Calendar.DATE, -Math.round(mCurrentOrigin.x / (mWidthPerDay + mColumnGap)))
-        if (firstVisibleDay.getTimeInMillis() != oldMillis && scrollListener != null) {
+        if (firstVisibleDay.timeInMillis != oldMillis && scrollListener != null) {
             val oldFirstVisibleDay = today.clone() as Calendar
             oldFirstVisibleDay.timeInMillis = oldMillis
             scrollListener!!.onFirstVisibleDayChanged(firstVisibleDay, oldFirstVisibleDay)
@@ -607,26 +607,23 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
                     val futurePaint = if (isWeekend && mShowDistinctWeekendColor) mFutureWeekendBackgroundPaint else mFutureBackgroundPaint
                     val startY = mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mTimeTextHeight / 2 + mHeaderMarginBottom + mCurrentOrigin.y
 
-                    if (isToday) {
-                        val now = debuggableToday
-                        val beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE) / 60.0f) * mHourHeight
-                        canvas.drawRect(start, startY, startPixel + mWidthPerDay, startY + beforeNow, pastPaint!!)
-                        canvas.drawRect(start, startY + beforeNow, startPixel + mWidthPerDay, height.toFloat(), futurePaint!!)
-                    } else if (day.before(today)) {
-                        canvas.drawRect(start, startY, startPixel + mWidthPerDay, height.toFloat(), pastPaint!!)
-                    } else {
-                        canvas.drawRect(start, startY, startPixel + mWidthPerDay, height.toFloat(), futurePaint!!)
+                    when {
+                        isToday           -> {
+                            val now = debuggableToday
+                            val beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE) / 60.0f) * mHourHeight
+                            canvas.drawRect(start, startY, startPixel + mWidthPerDay, startY + beforeNow, pastPaint!!)
+                            canvas.drawRect(start, startY + beforeNow, startPixel + mWidthPerDay, height.toFloat(), futurePaint!!)
+                        }
+                        day.before(today) -> canvas.drawRect(start, startY, startPixel + mWidthPerDay, height.toFloat(), pastPaint!!)
+                        else              -> canvas.drawRect(start, startY, startPixel + mWidthPerDay, height.toFloat(), futurePaint!!)
                     }
                 } else {
                     val paintToUseForThisDay: Paint?
-                    if (isADisabledDay(day)) {
-                        paintToUseForThisDay = mDisabledBackgroundPaint
-                    } else if (day.before(today)) {
-                        paintToUseForThisDay = mPastDayBackgroundPaint
-                    } else if (isToday) {
-                        paintToUseForThisDay = mTodayBackgroundPaint
-                    } else {
-                        paintToUseForThisDay = mDayBackgroundPaint
+                    when {
+                        isADisabledDay(day) -> paintToUseForThisDay = mDisabledBackgroundPaint
+                        day.before(today)   -> paintToUseForThisDay = mPastDayBackgroundPaint
+                        isToday             -> paintToUseForThisDay = mTodayBackgroundPaint
+                        else                -> paintToUseForThisDay = mDayBackgroundPaint
                     }
 
                     canvas.drawRect(start, mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mTimeTextHeight / 2 + mHeaderMarginBottom, startPixel + mWidthPerDay, height.toFloat(), paintToUseForThisDay!!)
@@ -914,7 +911,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * @param event The event to cache.
      */
     private fun cacheEvent(event: WeekViewEvent) {
-        if (event.startTime.compareTo(event.endTime) >= 0)
+        if (event.startTime >= event.endTime)
             return
 
         deleteRectsHavingEventWithSameId(event)
@@ -985,19 +982,18 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * Sorts the events in ascending order.
      * @param events The events to be sorted.
      */
-    private fun sortEvents(events: List<WeekViewEvent>) {
-        Collections.sort(events) { event1, event2 ->
-            val start1 = event1.startTime.timeInMillis
-            val start2 = event2.startTime.timeInMillis
-            var comparator = if (start1 > start2) 1 else if (start1 < start2) -1 else 0
-            if (comparator == 0) {
-                val end1 = event1.endTime.timeInMillis
-                val end2 = event2.endTime.timeInMillis
-                comparator = if (end1 > end2) 1 else if (end1 < end2) -1 else 0
+    private fun sortEvents(events: List<WeekViewEvent>) =
+            Collections.sort(events) { event1, event2 ->
+                val start1 = event1.startTime.timeInMillis
+                val start2 = event2.startTime.timeInMillis
+                var comparator = if (start1 > start2) 1 else if (start1 < start2) -1 else 0
+                if (comparator == 0) {
+                    val end1 = event1.endTime.timeInMillis
+                    val end2 = event2.endTime.timeInMillis
+                    comparator = if (end1 > end2) 1 else if (end1 < end2) -1 else 0
+                }
+                comparator
             }
-            comparator
-        }
-    }
 
     /**
      * Calculates the left and right positions of each events. This comes handy specially if events
@@ -1104,9 +1100,8 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * @param time2 The time to check against.
      * @return true if time1 and time2 are equal or if time1 is after time2. Otherwise false.
      */
-    private fun isTimeAfterOrEquals(time1: Calendar?, time2: Calendar?): Boolean {
-        return !(time1 == null || time2 == null) && time1.timeInMillis >= time2.timeInMillis
-    }
+    private fun isTimeAfterOrEquals(time1: Calendar?, time2: Calendar?): Boolean =
+            !(time1 == null || time2 == null) && time1.timeInMillis >= time2.timeInMillis
 
     override fun invalidate() {
         super.invalidate()
@@ -1137,12 +1132,12 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
             if (mDateTimeInterpreter == null) {
                 mDateTimeInterpreter = object : DateTimeInterpreter {
                     override fun interpretDate(date: Calendar): String {
-                        try {
+                        return try {
                             val sdf = if (mDayNameLength == LENGTH_SHORT) SimpleDateFormat("EEEEE M/dd", Locale.getDefault()) else SimpleDateFormat("EEE M/dd", Locale.getDefault())
-                            return sdf.format(date.time).toUpperCase()
+                            sdf.format(date.time).toUpperCase()
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            return ""
+                            ""
                         }
 
                     }
@@ -1154,7 +1149,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
                         return try {
                             val sdf = if (DateFormat.is24HourFormat(context)) SimpleDateFormat("HH:mm", Locale.getDefault()) else SimpleDateFormat("hh a", Locale.getDefault())
-                            sdf.format(calendar.getTime())
+                            sdf.format(calendar.time)
                         } catch (e: Exception) {
                             e.printStackTrace()
                             ""
@@ -1208,18 +1203,15 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     private fun goToNearestOrigin() {
         var leftDays = (mCurrentOrigin.x / (mWidthPerDay + mColumnGap)).toDouble()
 
-        if (mCurrentFlingDirection != CustomWeekView.Direction.NONE) {
-            // snap to nearest day
-            leftDays = Math.round(leftDays).toDouble()
-        } else if (mCurrentScrollDirection == CustomWeekView.Direction.LEFT) {
-            // snap to last day
-            leftDays = Math.floor(leftDays)
-        } else if (mCurrentScrollDirection == CustomWeekView.Direction.RIGHT) {
-            // snap to next day
-            leftDays = Math.ceil(leftDays)
-        } else {
-            // snap to nearest day
-            leftDays = Math.round(leftDays).toDouble()
+        leftDays = when {
+            mCurrentFlingDirection != CustomWeekView.Direction.NONE   -> // snap to nearest day
+                Math.round(leftDays).toDouble()
+            mCurrentScrollDirection == CustomWeekView.Direction.LEFT  -> // snap to last day
+                Math.floor(leftDays)
+            mCurrentScrollDirection == CustomWeekView.Direction.RIGHT -> // snap to next day
+                Math.ceil(leftDays)
+            else                                                      -> // snap to nearest day
+                Math.round(leftDays).toDouble()
         }
 
         val nearestOrigin = (mCurrentOrigin.x - leftDays * (mWidthPerDay + mColumnGap)).toInt()
@@ -1260,14 +1252,13 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * Check if scrolling should be stopped.
      * @return true if scrolling should be stopped before reaching the end of animation.
      */
-    private fun forceFinishScroll(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            // current velocity only available since api 14
-            mScroller!!.currVelocity <= mMinimumFlingVelocity
-        } else {
-            false
-        }
-    }
+    private fun forceFinishScroll(): Boolean =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                // current velocity only available since api 14
+                mScroller!!.currVelocity <= mMinimumFlingVelocity
+            } else {
+                false
+            }
 
 
     /////////////////////////////////////////////////////////////////
@@ -1303,7 +1294,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
         val day = 1000L * 60L * 60L * 24L
         val dateInMillis = date.timeInMillis + date.timeZone.getOffset(date.timeInMillis)
-        val todayInMillis = today.getTimeInMillis() + today.getTimeZone().getOffset(today.getTimeInMillis())
+        val todayInMillis = today.timeInMillis + today.timeZone.getOffset(today.timeInMillis)
         val dateDifference = dateInMillis / day - todayInMillis / day
         mCurrentOrigin.x = -dateDifference * (mWidthPerDay + mColumnGap)
         postInvalidate()
@@ -1312,9 +1303,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     /**
      * Refreshes the view and loads the events again.
      */
-    fun notifyDatasetChanged() {
-        postInvalidate()
-    }
+    fun notifyDatasetChanged() = postInvalidate()
 
     /**
      * Vertically scroll to a specific hour in the week view.

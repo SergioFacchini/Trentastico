@@ -7,14 +7,9 @@ package com.geridea.trentastico.utils.time
 
 import org.junit.Test
 
-import java.util.Calendar
-
 class CalendarTests {
 
     @Test
     @Throws(Exception::class)
-    fun diffInMinutes() {
-
-
-    }
+    fun diffInMinutes() = Unit
 }

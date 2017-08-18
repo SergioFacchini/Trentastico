@@ -12,9 +12,8 @@ class NoMenuSettings private constructor() : IMenuSettings {
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)
 
-    override fun bindMenuItem(item: MenuItem) {
-        //Nothing to bind
-    }
+    override fun bindMenuItem(item: MenuItem) = //Nothing to bind
+            Unit
 
     companion object {
 

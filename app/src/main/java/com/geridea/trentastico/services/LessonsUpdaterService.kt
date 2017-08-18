@@ -8,12 +8,12 @@ package com.geridea.trentastico.services
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
-
 import com.birbit.android.jobqueue.Job
 import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.Params
@@ -24,22 +24,17 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.LessonsChangedActivity
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener
 import com.geridea.trentastico.network.controllers.listener.WaitForDownloadListenerToSignalAdapter
+import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ContextUtils
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
-import com.threerings.signals.Listener1
-import com.threerings.signals.Listener2
 import com.threerings.signals.Signal1
 import com.threerings.signals.Signal2
-
-import java.util.Calendar
-
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
+import java.util.*
 
 class LessonsUpdaterService : Service() {
 
@@ -53,10 +48,8 @@ class LessonsUpdaterService : Service() {
         super.onCreate()
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        //Do not allow binding
-        return null
-    }
+    override fun onBind(intent: Intent): IBinder? = //Do not allow binding
+            null
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         //Check for lessons updates if
@@ -83,16 +76,12 @@ class LessonsUpdaterService : Service() {
                 AppPreferences.hadInternetInLastCheck(true)
 
                 diffAndUpdateLessonsIfPossible(object : LessonsDiffAndUpdateListener {
-                    override fun onTerminated(successful: Boolean) {
-                        scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
-                    }
+                    override fun onTerminated(successful: Boolean) = scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
                 })
             } else if (shouldUpdateBecauseOfUpdateTimeout() || startedAppInDebugMode(starter)) {
                 UIUtils.showToastIfInDebug(this, "Checking for lessons updates...")
                 diffAndUpdateLessonsIfPossible(object : LessonsDiffAndUpdateListener {
-                    override fun onTerminated(successful: Boolean) {
-                        scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
-                    }
+                    override fun onTerminated(successful: Boolean) = scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
                 })
             } else {
                 UIUtils.showToastIfInDebug(this, "Too early to check for updates.")
@@ -105,19 +94,13 @@ class LessonsUpdaterService : Service() {
         return Service.START_NOT_STICKY
     }
 
-    private fun startedAppInDebugMode(starter: Int): Boolean {
-        return Config.DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
-    }
+    private fun startedAppInDebugMode(starter: Int): Boolean = Config.DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
 
-    private fun shouldUpdateBecauseWeGainedInternet(starter: Int): Boolean {
-        return starter == STARTER_NETWORK_BROADCAST
-                && !AppPreferences.hadInternetInLastCheck()
-                && ContextUtils.weHaveInternet(this)
-    }
+    private fun shouldUpdateBecauseWeGainedInternet(starter: Int): Boolean = starter == STARTER_NETWORK_BROADCAST
+            && !AppPreferences.hadInternetInLastCheck()
+            && ContextUtils.weHaveInternet(this)
 
-    private fun shouldUpdateBecauseOfUpdateTimeout(): Boolean {
-        return AppPreferences.nextLessonsUpdateTime <= System.currentTimeMillis()
-    }
+    private fun shouldUpdateBecauseOfUpdateTimeout(): Boolean = AppPreferences.nextLessonsUpdateTime <= System.currentTimeMillis()
 
 
     private fun scheduleNextStartAndTerminate(scheduleType: Int) {
@@ -258,10 +241,8 @@ class LessonsUpdaterService : Service() {
         }
 
         @Throws(Throwable::class)
-        override fun onRun() {
-            //Loading the current and the next week
-            Networker.diffLessonsInCache(intervalToDiff, this)
-        }
+        override fun onRun() = //Loading the current and the next week
+                Networker.diffLessonsInCache(intervalToDiff, this)
 
         override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
             BugLogger.logBug("Something bad happened when diffing lessons", throwable)
@@ -295,18 +276,14 @@ class LessonsUpdaterService : Service() {
             onCheckTerminated.dispatch(diffAccumulator, allSucceeded)
         }
 
-        override fun onNoLessonsInCache() {
-            //Nothing to diff!
-            filterDiffAndDispatchCheckTerminated(false)
-        }
+        override fun onNoLessonsInCache() = //Nothing to diff!
+                filterDiffAndDispatchCheckTerminated(false)
 
-        override fun onDiffResult(lessonsDiffResult: LessonsDiffResult) {
-            diffAccumulator.addFrom(lessonsDiffResult)
-        }
+        override fun onDiffResult(lessonsDiffResult: LessonsDiffResult) = diffAccumulator.addFrom(lessonsDiffResult)
 
-        override fun onCancel(cancelReason: Int, throwable: Throwable?) {}
+        override fun onCancel(cancelReason: Int, throwable: Throwable?) = Unit
 
-        override fun onAdded() {}
+        override fun onAdded() = Unit
     }
 
     private inner class LoadMissingLessonsJob(private val intervalToLoad: WeekInterval) : Job(Params(1)) {
@@ -314,11 +291,9 @@ class LessonsUpdaterService : Service() {
         internal val onCheckTerminated = Signal1<Boolean>()
 
         @Throws(Throwable::class)
-        override fun onRun() {
-            Networker.loadAndCacheNotCachedLessons(
-                    intervalToLoad, WaitForDownloadListenerToSignalAdapter(onCheckTerminated)
-            )
-        }
+        override fun onRun() = Networker.loadAndCacheNotCachedLessons(
+                intervalToLoad, WaitForDownloadListenerToSignalAdapter(onCheckTerminated)
+        )
 
         override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
             BugLogger.logBug("Something bad happened when loading missing lessons", throwable)
@@ -326,9 +301,9 @@ class LessonsUpdaterService : Service() {
             return RetryConstraint.CANCEL
         }
 
-        override fun onAdded() {}
+        override fun onAdded() = Unit
 
-        override fun onCancel(cancelReason: Int, throwable: Throwable?) {}
+        override fun onCancel(cancelReason: Int, throwable: Throwable?) = Unit
     }
 
     private interface LessonsDiffAndUpdateListener {

@@ -8,15 +8,13 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.LessonType
-import com.geridea.trentastico.model.Partitioning
 import com.geridea.trentastico.model.PartitioningType
 import com.threerings.signals.Signal1
-import java.util.Locale
+import java.util.*
 
 class CourseFilterAdapter(context: Context, lessons: Collection<LessonType>) : ItemsAdapter<LessonType>(context) {
 
@@ -38,9 +36,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonType>) : I
         itemsList = LessonType.getSortedLessonTypes(lessons)
     }
 
-    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_course, parent, false)
-    }
+    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_course, parent, false)
 
     override fun bindView(item: LessonType, pos: Int, convertView: View) {
         val check = Views.find<CheckBox>(convertView, R.id.checkBox)
@@ -54,7 +50,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonType>) : I
         //Adjusting partitionings
         val partitioning = item.partitioning
         val partitioningsTV = Views.find<TextView>(convertView, R.id.partitionings)
-        if (partitioning!!.type == PartitioningType.NONE) {
+        if (partitioning.type == PartitioningType.NONE) {
             partitioningsTV.visibility = View.GONE
 
             Views.find<View>(convertView, R.id.config_partitionings).visibility = View.GONE

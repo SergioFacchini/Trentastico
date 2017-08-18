@@ -20,17 +20,13 @@ class DepartmentsAdapter(context: Context) : ItemsAdapter<Department>(context) {
         itemsList = DepartmentsProvider.DEPARTMENTS
     }
 
-    override fun createView(item: Department, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_spinner, parent, false)
-    }
+    override fun createView(item: Department, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_spinner, parent, false)
 
     override fun bindView(item: Department, pos: Int, textView: View) {
         (textView.findViewById(R.id.text) as TextView).text = item.name
     }
 
-    override fun getItemId(pos: Int): Long {
-        return getItem(pos).id.toLong()
-    }
+    override fun getItemId(pos: Int): Long = getItem(pos).id.toLong()
 
 }
 

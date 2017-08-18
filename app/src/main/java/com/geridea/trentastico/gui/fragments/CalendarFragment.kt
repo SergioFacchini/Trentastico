@@ -23,6 +23,8 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.adapters.PartitioningsAdapter
+import com.geridea.trentastico.gui.views.CourseTimesCalendar
+import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
@@ -31,9 +33,11 @@ import com.geridea.trentastico.utils.time.CalendarUtils
 import com.threerings.signals.Listener1
 import com.threerings.signals.Signal1
 import java.util.*
-import kotlinx.android.synthetic.main.fragment_calendar.*
 
 class CalendarFragment : FragmentWithMenuItems() {
+
+    @BindView(R.id.calendar)   lateinit internal var calendar: CourseTimesCalendar
+    @BindView(R.id.loaderView) lateinit internal var loaderView: RequestLoaderView
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -68,7 +72,7 @@ class CalendarFragment : FragmentWithMenuItems() {
             item.setIcon(getChangeViewMenuIcon(AppPreferences.calendarNumOfDaysToShow))
 
             item.setOnMenuItemClickListener { i ->
-                val numOfDays = calendar!!.rotateNumOfDaysShown()
+                val numOfDays = calendar.rotateNumOfDaysShown()
                 i.setIcon(getChangeViewMenuIcon(numOfDays))
                 AppPreferences.calendarNumOfDaysToShow = numOfDays
 
@@ -89,13 +93,13 @@ class CalendarFragment : FragmentWithMenuItems() {
     internal inner class FilterCoursesDialog(context: Context) : AlertDialog(context) {
 
         @BindView(R.id.coursesListView)
-        var coursesListView: ListView? = null
+        lateinit var coursesListView: ListView
 
         @BindView(R.id.noCoursesText)
-        var noCoursesText: TextView? = null
+        lateinit var noCoursesText: TextView
 
         @BindView(R.id.yesCoursesText)
-        var yesCoursesText: TextView? = null
+        lateinit var yesCoursesText: TextView
 
         private val lessonTypes: Collection<LessonType>
         private val courseAdapter: CourseFilterAdapter
@@ -107,12 +111,12 @@ class CalendarFragment : FragmentWithMenuItems() {
 
             ButterKnife.bind(this, view)
 
-            lessonTypes = calendar!!.currentLessonTypes
+            lessonTypes = calendar.currentLessonTypes
 
             if (lessonTypes.isEmpty()) {
-                yesCoursesText!!.visibility = GONE
+                yesCoursesText.visibility = GONE
             } else {
-                noCoursesText!!.visibility = GONE
+                noCoursesText.visibility = GONE
             }
 
 
@@ -127,7 +131,7 @@ class CalendarFragment : FragmentWithMenuItems() {
                     NextLessonNotificationService.createIntent(context, NLNStarter.FILTERS_CHANGED)
                 }
 
-                calendar!!.notifyLessonTypeVisibilityChanged()
+                calendar.notifyLessonTypeVisibilityChanged()
             }
             courseAdapter.onConfigurePartitioningButtonClicked.connect { lessonType ->
                 val filterPartitionings = FilterPartitioningsDialog(context, lessonType)
@@ -141,11 +145,11 @@ class CalendarFragment : FragmentWithMenuItems() {
                     }
 
                     courseAdapter.notifyDataSetChanged() //Updating %d of %d shown
-                    calendar!!.notifyLessonTypeVisibilityChanged()
+                    calendar.notifyLessonTypeVisibilityChanged()
                 }
                 filterPartitionings.show()
             }
-            coursesListView!!.adapter = courseAdapter
+            coursesListView.adapter = courseAdapter
 
             setView(view)
         }
@@ -162,9 +166,7 @@ class CalendarFragment : FragmentWithMenuItems() {
         }
 
         @OnClick(R.id.dismiss_button)
-        fun onDoFilterButtonClicked() {
-            dismiss()
-        }
+        fun onDoFilterButtonClicked() = dismiss()
 
     }
 
@@ -175,9 +177,9 @@ class CalendarFragment : FragmentWithMenuItems() {
         val onPartitioningVisibilityChanged = Signal1<LessonType>()
 
         @BindView(R.id.partitionings_list)
-        var partitioningsList: ListView? = null
+        lateinit var partitioningsList: ListView
         @BindView(R.id.introduction_text)
-        var introductionText: TextView? = null
+        lateinit var introductionText: TextView
 
         init {
 
@@ -194,11 +196,11 @@ class CalendarFragment : FragmentWithMenuItems() {
             val adapter = PartitioningsAdapter(context, lessonType.partitioning)
             adapter.onPartitioningVisibilityChanged.connect(Listener1 {
                 AppPreferences.updatePartitioningsToHide(lessonType)
-                calendar!!.notifyLessonTypeVisibilityChanged()
+                calendar.notifyLessonTypeVisibilityChanged()
 
                 onPartitioningVisibilityChanged.dispatch(lessonType)
             })
-            partitioningsList!!.adapter = adapter
+            partitioningsList.adapter = adapter
         }
 
         private fun calculateIntroductionText(lessonType: LessonType) {
@@ -206,13 +208,11 @@ class CalendarFragment : FragmentWithMenuItems() {
                     "Gli studenti del corso \"%s\" sono divisi in %d gruppi.\nQui sotto puoi togliere la " + "spunta dai gruppi di cui non fai parte per nascondere il relativo orario.",
                     lessonType.name, lessonType.partitioning.partitioningCasesSize
             )
-            introductionText!!.text = introductionString
+            introductionText.text = introductionString
         }
 
         @OnClick(R.id.dismiss_button)
-        fun onDismissButtonPressed() {
-            dismiss()
-        }
+        fun onDismissButtonPressed() = dismiss()
 
     }
 

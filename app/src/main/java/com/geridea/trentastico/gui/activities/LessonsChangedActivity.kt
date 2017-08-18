@@ -9,18 +9,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
-
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.adapters.DiffResultAdapter
 import com.geridea.trentastico.network.request.LessonsDiffResult
 
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
-
 class LessonsChangedActivity : AppCompatActivity() {
 
-    @BindView(R.id.lessons_view) internal var lessonsView: ListView? = null
+    @BindView(R.id.lessons_view)  lateinit var lessonsView: ListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,14 +29,12 @@ class LessonsChangedActivity : AppCompatActivity() {
         supportActionBar!!.hide()
 
         val diffResult = intent.getSerializableExtra(EXTRA_DIFF_RESULT) as LessonsDiffResult
-        lessonsView!!.adapter = DiffResultAdapter(this, diffResult)
+        lessonsView.adapter = DiffResultAdapter(this, diffResult)
 
     }
 
     @OnClick(R.id.close_button)
-    internal fun onCloseButtonPressed() {
-        finish()
-    }
+    internal fun onCloseButtonPressed() = finish()
 
     @OnClick(R.id.show_lessons_button)
     internal fun onShowLessonsButtonPressed() {

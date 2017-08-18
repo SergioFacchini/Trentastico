@@ -1,6 +1,6 @@
 package com.geridea.trentastico.model
 
-import java.util.ArrayList
+import java.util.*
 
 /*
  * Created with ♥ by Slava on 03/03/2017.
@@ -23,7 +23,5 @@ class Department(val id: Int, val name: String) {
         throw RuntimeException("Unknown course with id: " + courseId)
     }
 
-    fun getCourseWithId(courseId: Long): Course {
-        return courses[getCoursePosition(courseId)]
-    }
+    fun getCourseWithId(courseId: Long): Course = courses[getCoursePosition(courseId)]
 }

@@ -48,7 +48,7 @@ class ExtraCourse {
     }
 
     fun toJSON(): JSONObject {
-        try {
+        return try {
             val jsonObject = JSONObject()
             jsonObject.put("lessonTypeId", lessonTypeId)
             jsonObject.put("courseId", courseId)
@@ -57,7 +57,7 @@ class ExtraCourse {
             jsonObject.put("studyCourse", studyCourseFullName)
             jsonObject.put("color", color)
 
-            return jsonObject
+            jsonObject
         } catch (e: JSONException) {
             BugLogger.logBug("Converting extra course to JSON", e)
             throw RuntimeException("Could not convert extra course to JSON")
@@ -76,14 +76,12 @@ class ExtraCourse {
     /**
      * @return true if the scheduled lesson refers to the same subject of this extra course.
      */
-    fun isLessonOfCourse(lesson: LessonSchedule): Boolean {
-        return lesson.lessonTypeId == lessonTypeId.toLong()
-    }
+    fun isLessonOfCourse(lesson: LessonSchedule): Boolean = lesson.lessonTypeId == lessonTypeId.toLong()
 
     companion object {
 
         fun fromJSON(json: JSONObject): ExtraCourse {
-            try {
+            return try {
                 val course = ExtraCourse()
                 course.lessonTypeId = json.getInt("lessonTypeId")
                 course.courseId = json.getLong("courseId")
@@ -93,7 +91,7 @@ class ExtraCourse {
                 course.studyCourseFullName = json.getString("studyCourse")
                 course.color = json.getInt("color")
 
-                return course
+                course
             } catch (e: JSONException) {
                 BugLogger.logBug("Parsing extra course", e)
                 throw RuntimeException("Could not convert JSON to extra course")

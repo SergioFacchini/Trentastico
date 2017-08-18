@@ -7,9 +7,8 @@ package com.geridea.trentastico.gui.views.requestloader
 
 abstract class AbstractTextMessage(val messageId: Int) : ILoadingMessage {
 
-    override fun process(requestLoaderView: RequestLoaderView) {
-        requestLoaderView.addOrReplaceMessage(this)
-    }
+    override fun process(requestLoaderView: RequestLoaderView) =
+            requestLoaderView.addOrReplaceMessage(this)
 
     abstract val text: String
 

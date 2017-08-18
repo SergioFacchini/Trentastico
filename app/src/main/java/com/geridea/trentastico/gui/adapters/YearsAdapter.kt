@@ -6,12 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
-
-import java.util.ArrayList
-
 import com.geridea.trentastico.R
+import java.util.*
 
 class YearsAdapter(context: Context) : ItemsAdapter<Int>(context) {
 
@@ -28,15 +25,11 @@ class YearsAdapter(context: Context) : ItemsAdapter<Int>(context) {
         itemsList = integers
     }
 
-    override fun createView(item: Int?, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_spinner, parent, false)
-    }
+    override fun createView(item: Int?, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_spinner, parent, false)
 
     override fun bindView(item: Int?, pos: Int, textView: View) {
         (textView.findViewById(R.id.text) as TextView).text = item!!.toString()
     }
 
-    override fun getItemId(pos: Int): Long {
-        return getItem(pos).toLong()
-    }
+    override fun getItemId(pos: Int): Long = getItem(pos).toLong()
 }

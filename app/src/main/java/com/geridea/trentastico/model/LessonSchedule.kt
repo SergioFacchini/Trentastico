@@ -41,26 +41,24 @@ class LessonSchedule(
             cachedLesson.teaching_id
     )
 
-    private fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean {
-        return id == that.id
-                && startsAt == that.startsAt
-                && endsAt == that.endsAt
-                && room == that.room
-                && subject == that.subject
-                && fullDescription == that.fullDescription
-    }
+    private fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean = id == that.id
+            && startsAt == that.startsAt
+            && endsAt == that.endsAt
+            && room == that.room
+            && subject == that.subject
+            && fullDescription == that.fullDescription
 
     val startCal: Calendar
         get() {
             val calendar = debuggableToday
-            calendar.setTimeInMillis(startsAt)
+            calendar.timeInMillis = startsAt
             return calendar
         }
 
     val endCal: Calendar
         get() {
             val calendar = debuggableToday
-            calendar.setTimeInMillis(endsAt)
+            calendar.timeInMillis = endsAt
             return calendar
         }
 
@@ -79,13 +77,9 @@ class LessonSchedule(
             }
         }
 
-    fun hasLessonType(lessonType: LessonType): Boolean {
-        return lessonTypeId == lessonType.id.toLong()
-    }
+    fun hasLessonType(lessonType: LessonType): Boolean = lessonTypeId == lessonType.id.toLong()
 
-    fun matchesPartitioningType(partitioningType: PartitioningType): Boolean {
-        return StringUtils.containsMatchingRegex(partitioningType.regex, fullDescription)
-    }
+    fun matchesPartitioningType(partitioningType: PartitioningType): Boolean = StringUtils.containsMatchingRegex(partitioningType.regex, fullDescription)
 
     fun matchesAnyOfPartitioningCases(partitionings: ArrayList<PartitioningCase>): Boolean {
         for (partitioning in partitionings) {
@@ -97,9 +91,7 @@ class LessonSchedule(
         return false
     }
 
-    override fun toString(): String {
-        return String.format("[id: %d lessonType: %d description: %s ]", id, lessonTypeId, fullDescription)
-    }
+    override fun toString(): String = String.format("[id: %d lessonType: %d description: %s ]", id, lessonTypeId, fullDescription)
 
     val durationInMinutes: Int
         get() = TimeUnit.MILLISECONDS.toMinutes(endsAt - startsAt).toInt()
@@ -120,17 +112,11 @@ class LessonSchedule(
                 && fullDescription == that.fullDescription
     }
 
-    fun startsBefore(currentMillis: Long): Boolean {
-        return startsAt < currentMillis
-    }
+    fun startsBefore(currentMillis: Long): Boolean = startsAt < currentMillis
 
-    fun isHeldInMilliseconds(ms: Long): Boolean {
-        return startsAt >= ms && ms <= endsAt
-    }
+    fun isHeldInMilliseconds(ms: Long): Boolean = startsAt >= ms && ms <= endsAt
 
-    fun hasRoomSpecified(): Boolean {
-        return !room!!.isEmpty()
-    }
+    fun hasRoomSpecified(): Boolean = !room!!.isEmpty()
 
     fun toExpandedCalendarInterval(typeOfTime: Int, delta: Int): CalendarInterval {
         val calFrom = CalendarUtils.getCalendarInitializedAs(startsAt)
@@ -142,9 +128,7 @@ class LessonSchedule(
         return CalendarInterval(calFrom, calTo)
     }
 
-    fun hasPartitioning(partitioningText: String): Boolean {
-        return fullDescription.contains("($partitioningText)")
-    }
+    fun hasPartitioning(partitioningText: String): Boolean = fullDescription.contains("($partitioningText)")
 
     companion object {
 
@@ -267,15 +251,13 @@ class LessonSchedule(
             }
         }
 
-        fun sortByStartDateOrId(lessons: ArrayList<LessonSchedule>) {
-            Collections.sort(lessons) { a, b ->
-                var compare = NumbersUtils.compare(a.startsAt, b.startsAt)
-                if (compare == 0) {
-                    compare = NumbersUtils.compare(a.id, b.id)
-                }
-
-                compare
+        fun sortByStartDateOrId(lessons: ArrayList<LessonSchedule>) = Collections.sort(lessons) { a, b ->
+            var compare = NumbersUtils.compare(a.startsAt, b.startsAt)
+            if (compare == 0) {
+                compare = NumbersUtils.compare(a.id, b.id)
             }
+
+            compare
         }
     }
 }

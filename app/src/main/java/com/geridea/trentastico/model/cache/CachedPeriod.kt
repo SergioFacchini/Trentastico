@@ -67,9 +67,7 @@ class CachedPeriod {
 
     operator fun contains(timeToCheck: WeekTime): Boolean = interval.contains(timeToCheck)
 
-    override fun toString(): String {
-        return "[id: $id $interval type:$lesson_type]"
-    }
+    override fun toString(): String = "[id: $id $interval type:$lesson_type]"
 
 
     val isStudyCoursePeriod: Boolean
@@ -78,28 +76,22 @@ class CachedPeriod {
     val isExtraCoursePeriod: Boolean
         get() = lesson_type != LESSON_TYPE_NONE.toLong()
 
-    fun canContainStudyLesson(lesson: LessonSchedule): Boolean {
-        return lesson_type == LESSON_TYPE_NONE.toLong() && interval!!.contains(lesson.startCal)
-    }
+    fun canContainStudyLesson(lesson: LessonSchedule): Boolean = lesson_type == LESSON_TYPE_NONE.toLong() && interval!!.contains(lesson.startCal)
 
-    fun canContainExtraLesson(lesson: LessonSchedule, extraCourse: ExtraCourse): Boolean {
-        return lesson.lessonTypeId == extraCourse.lessonTypeId.toLong() && interval!!.contains(lesson.startCal)
-    }
+    fun canContainExtraLesson(lesson: LessonSchedule, extraCourse: ExtraCourse): Boolean = lesson.lessonTypeId == extraCourse.lessonTypeId.toLong() && interval!!.contains(lesson.startCal)
 
     companion object {
 
         private val LESSON_TYPE_NONE = 0
 
-        fun fromCursor(cursor: Cursor): CachedPeriod {
-            return CachedPeriod(
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CP_ID)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CP_START_WEEK)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CP_START_YEAR)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_WEEK)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_YEAR)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CP_LESSON_TYPE)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CP_CACHED_IN_MS))
-            )
-        }
+        fun fromCursor(cursor: Cursor): CachedPeriod = CachedPeriod(
+                cursor.getLong(cursor.getColumnIndexOrThrow(CP_ID)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CP_START_WEEK)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CP_START_YEAR)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_WEEK)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_YEAR)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CP_LESSON_TYPE)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CP_CACHED_IN_MS))
+        )
     }
 }

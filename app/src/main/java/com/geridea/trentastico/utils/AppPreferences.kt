@@ -2,23 +2,15 @@ package com.geridea.trentastico.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.gui.views.CustomWeekView
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.model.ExtraCoursesList
-import com.geridea.trentastico.model.LessonType
-import com.geridea.trentastico.model.PartitioningCase
-import com.geridea.trentastico.model.StudyCourse
+import com.geridea.trentastico.model.*
 import com.geridea.trentastico.services.ShownNotificationsTracker
-
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
-import java.util.ArrayList
-import java.util.UUID
+import java.util.*
 
 object AppPreferences {
 
@@ -37,13 +29,11 @@ object AppPreferences {
         extraCourses = readExtraCourses()
     }
 
-    private fun get(): SharedPreferences {
-        return if (appContext == null) {
-            throw RuntimeException(
-                    "Preferences should be initialized by calling Preferences.init(...) method")
-        } else {
-            appContext!!.getSharedPreferences("null", Context.MODE_PRIVATE)
-        }
+    private fun get(): SharedPreferences = if (appContext == null) {
+        throw RuntimeException(
+                "Preferences should be initialized by calling Preferences.init(...) method")
+    } else {
+        appContext!!.getSharedPreferences("null", Context.MODE_PRIVATE)
     }
 
     /**
@@ -77,9 +67,7 @@ object AppPreferences {
 
             try {
                 val json = JSONArray(filteredJSON)
-                for (i in 0..json.length() - 1) {
-                    lessonTypesIds.add(json.getLong(i))
-                }
+                (0 until json.length()).mapTo(lessonTypesIds, { json.getLong(it) })
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -95,9 +83,7 @@ object AppPreferences {
             putString("FILTERED_TEACHINGS", array.toString())
         }
 
-    fun hasLessonTypeWithIdHidden(id: Long): Boolean {
-        return lessonTypesIdsToHide.contains(id)
-    }
+    fun hasLessonTypeWithIdHidden(id: Long): Boolean = lessonTypesIdsToHide.contains(id)
 
     fun removeAllHiddenCourses() {
         lessonTypesIdsToHide = ArrayList()
@@ -113,23 +99,20 @@ object AppPreferences {
         get() = get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
         set(numOfDays) = putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays)
 
-    private fun setPartitioningsToHide(lessonTypeId: Int, partitioningCases: ArrayList<PartitioningCase>) {
-        try {
-            //Building values array
-            val jsonArrayCases = JSONArray()
-            for (aCase in partitioningCases) {
-                jsonArrayCases.put(aCase.case)
-            }
-
-            //Saving partitionings
-            val partitioningJSON = partitioningsJSON
-            partitioningJSON.put(lessonTypeId.toString(), jsonArrayCases)
-
-            putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString())
-        } catch (e: JSONException) {
-            BugLogger.logBug("Saving partitionings to hide", e)
+    private fun setPartitioningsToHide(lessonTypeId: Int, partitioningCases: ArrayList<PartitioningCase>) = try {
+        //Building values array
+        val jsonArrayCases = JSONArray()
+        for (aCase in partitioningCases) {
+            jsonArrayCases.put(aCase.case)
         }
 
+        //Saving partitionings
+        val partitioningJSON = partitioningsJSON
+        partitioningJSON.put(lessonTypeId.toString(), jsonArrayCases)
+
+        putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString())
+    } catch (e: JSONException) {
+        BugLogger.logBug("Saving partitionings to hide", e)
     }
 
     private val partitioningsJSON: JSONObject
@@ -162,23 +145,19 @@ object AppPreferences {
         return partitionings
     }
 
-    fun updatePartitioningsToHide(lesson: LessonType) {
-        setPartitioningsToHide(lesson.id, lesson.findPartitioningsToHide())
-    }
+    fun updatePartitioningsToHide(lesson: LessonType) = setPartitioningsToHide(lesson.id, lesson.findPartitioningsToHide())
 
-    fun removeAllHiddenPartitionings() {
-        putString("PARTITIONINGS_TO_HIDE", "{}")
-    }
+    fun removeAllHiddenPartitionings() = putString("PARTITIONINGS_TO_HIDE", "{}")
 
     private fun readExtraCourses(): ExtraCoursesList {
         val courses = ExtraCoursesList()
 
-        try {
+        return try {
             val jsonArray = JSONArray(get().getString("EXTRA_COURSES", "[]"))
-            for (i in 0..jsonArray.length() - 1) {
+            for (i in 0 until jsonArray.length()) {
                 courses.add(ExtraCourse.fromJSON(jsonArray.getJSONObject(i)))
             }
-            return courses
+            courses
         } catch (e: JSONException) {
             BugLogger.logBug("Parsing existing extra courses", e)
             e.printStackTrace()
@@ -206,18 +185,14 @@ object AppPreferences {
         editor.apply()
     }
 
-    fun hasExtraCourseWithId(lessonTypeId: Int): Boolean {
-        return extraCourses.hasCourseWithId(lessonTypeId)
-    }
+    fun hasExtraCourseWithId(lessonTypeId: Int): Boolean = extraCourses.hasCourseWithId(lessonTypeId)
 
     fun removeExtraCoursesHaving(courseId: Long, year: Int) {
         extraCourses.removeHaving(courseId, year)
         saveExtraCourses()
     }
 
-    fun getExtraCoursesHaving(courseId: Long, year: Int): ArrayList<ExtraCourse> {
-        return extraCourses.getExtraCoursesHaving(courseId, year)
-    }
+    fun getExtraCoursesHaving(courseId: Long, year: Int): ArrayList<ExtraCourse> = extraCourses.getExtraCoursesHaving(courseId, year)
 
     fun removeExtraCourse(lessonTypeId: Int) {
         extraCourses.removeHavingLessonType(lessonTypeId)
@@ -239,13 +214,9 @@ object AppPreferences {
         get() = get().getLong("NEXT_LESSONS_UPDATE_TIME", 0)
         set(time) = putLong("NEXT_LESSONS_UPDATE_TIME", time)
 
-    fun hadInternetInLastCheck(): Boolean {
-        return get().getBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", true)
-    }
+    fun hadInternetInLastCheck(): Boolean = get().getBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", true)
 
-    fun hadInternetInLastCheck(had: Boolean) {
-        putBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", had)
-    }
+    fun hadInternetInLastCheck(had: Boolean) = putBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", had)
 
     private fun putBoolean(key: String, bool: Boolean) {
         val editor = get().edit()
@@ -261,21 +232,13 @@ object AppPreferences {
         get() = get().getBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
         set(enabled) = putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled)
 
-    fun areNextLessonNotificationsEnabled(): Boolean {
-        return get().getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
-    }
+    fun areNextLessonNotificationsEnabled(): Boolean = get().getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
 
-    fun setNextLessonNotificationsEnabled(enabled: Boolean) {
-        putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled)
-    }
+    fun setNextLessonNotificationsEnabled(enabled: Boolean) = putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled)
 
-    fun areNextLessonNotificationsFixed(): Boolean {
-        return get().getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
-    }
+    fun areNextLessonNotificationsFixed(): Boolean = get().getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
 
-    fun setNextLessonNotificationsFixed(enabled: Boolean) {
-        putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", enabled)
-    }
+    fun setNextLessonNotificationsFixed(enabled: Boolean) = putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", enabled)
 
     val androidId: String
         get() {

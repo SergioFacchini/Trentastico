@@ -26,11 +26,9 @@ object UIUtils {
     }
 
 
-    fun showToastOnMainThread(context: Context, message: String) {
-        runOnMainThread({
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-        })
-    }
+    fun showToastOnMainThread(context: Context, message: String) = runOnMainThread({
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    })
 
     fun showToastIfInDebug(context: Context, message: String) {
         if (Config.DEBUG_MODE) {
@@ -38,9 +36,7 @@ object UIUtils {
         }
     }
 
-    fun convertDpToPixels(dp: Float, context: Context): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
-    }
+    fun convertDpToPixels(dp: Float, context: Context): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
 
     fun convertSpToPixels(sp: Float, context: Context): Int {
         val displayMetrics = context.resources.displayMetrics

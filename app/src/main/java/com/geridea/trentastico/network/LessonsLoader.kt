@@ -1,13 +1,8 @@
 package com.geridea.trentastico.network
 
 import com.geridea.trentastico.gui.views.ScrollDirection
-import com.geridea.trentastico.gui.views.requestloader.FinishedLoadingFromCacheMessage
-import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
-import com.geridea.trentastico.gui.views.requestloader.LoadingFromCacheMessage
-import com.geridea.trentastico.gui.views.requestloader.NetworkErrorMessage
-import com.geridea.trentastico.gui.views.requestloader.NoOperationMessage
-import com.geridea.trentastico.gui.views.requestloader.ParsingErrorMessage
-import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
+import com.geridea.trentastico.gui.views.ScrollDirection.LEFT
+import com.geridea.trentastico.gui.views.requestloader.*
 import com.geridea.trentastico.model.LessonsSet
 import com.geridea.trentastico.model.cache.CachedLessonsSet
 import com.geridea.trentastico.model.cache.NotCachedInterval
@@ -16,12 +11,7 @@ import com.geridea.trentastico.utils.time.WeekInterval
 import com.geridea.trentastico.utils.time.WeekTime
 import com.threerings.signals.Signal1
 import com.threerings.signals.Signal3
-
-import java.util.ArrayList
-import java.util.Calendar
-import java.util.Collections
-
-import com.geridea.trentastico.gui.views.ScrollDirection.LEFT
+import java.util.*
 
 
 class LessonsLoader : LessonsLoadingListener, LoadingIntervalKnownListener {
@@ -76,15 +66,13 @@ class LessonsLoader : LessonsLoadingListener, LoadingIntervalKnownListener {
         }
     }
 
-    private fun isWeekAlreadyBeingLoaded(week: WeekTime): Boolean {
-        synchronized(loadingIntervals) {
-            for (loadingInterval in loadingIntervals) {
-                if (loadingInterval.contains(week)) {
-                    return true
-                }
+    private fun isWeekAlreadyBeingLoaded(week: WeekTime): Boolean = synchronized(loadingIntervals) {
+        for (loadingInterval in loadingIntervals) {
+            if (loadingInterval.contains(week)) {
+                return true
             }
-            return false
         }
+        return false
     }
 
     fun loadDaysIfNeeded(weekToLoad: WeekTime, direction: ScrollDirection) {
@@ -119,9 +107,7 @@ class LessonsLoader : LessonsLoadingListener, LoadingIntervalKnownListener {
         loadAndAddLessons(WeekInterval(fromWT, toWT))
     }
 
-    override fun onLoadingAboutToStart(loadingOperation: ILoadingMessage) {
-        onLoadingMessageDispatched.dispatch(loadingOperation)
-    }
+    override fun onLoadingAboutToStart(loadingOperation: ILoadingMessage) = onLoadingMessageDispatched.dispatch(loadingOperation)
 
     override fun onLessonsLoaded(lessons: LessonsSet, interval: WeekInterval, operationId: Int) {
         //We might have gotten this lessons from cache:
@@ -136,29 +122,19 @@ class LessonsLoader : LessonsLoadingListener, LoadingIntervalKnownListener {
         onLoadingOperationSuccessful.dispatch(lessons, interval, message)
     }
 
-    override fun onErrorHappened(error: Exception, operationId: Int) {
-        onLoadingMessageDispatched.dispatch(NetworkErrorMessage(operationId, error))
-    }
+    override fun onErrorHappened(error: Exception, operationId: Int) = onLoadingMessageDispatched.dispatch(NetworkErrorMessage(operationId, error))
 
-    override fun onParsingErrorHappened(exception: Exception, operationId: Int) {
-        onLoadingMessageDispatched.dispatch(ParsingErrorMessage(operationId))
-    }
+    override fun onParsingErrorHappened(exception: Exception, operationId: Int) = onLoadingMessageDispatched.dispatch(ParsingErrorMessage(operationId))
 
-    override fun onLoadingDelegated(operationId: Int) {
-        onLoadingMessageDispatched.dispatch(TerminalMessage(operationId))
-    }
+    override fun onLoadingDelegated(operationId: Int) = onLoadingMessageDispatched.dispatch(TerminalMessage(operationId))
 
     override fun onPartiallyCachedResultsFetched(cacheSet: CachedLessonsSet) {
         onLoadingMessageDispatched.dispatch(FinishedLoadingFromCacheMessage())
         onPartiallyCachedResultsFetched.dispatch(cacheSet)
     }
 
-    override fun onNothingFoundInCache() {
-        onLoadingMessageDispatched.dispatch(FinishedLoadingFromCacheMessage())
-    }
+    override fun onNothingFoundInCache() = onLoadingMessageDispatched.dispatch(FinishedLoadingFromCacheMessage())
 
-    override fun onLoadingAborted(operationId: Int) {
-        //Technically it should never happen here since each request retries infinite times
-        onLoadingMessageDispatched.dispatch(TerminalMessage(operationId))
-    }
+    override fun onLoadingAborted(operationId: Int) = //Technically it should never happen here since each request retries infinite times
+            onLoadingMessageDispatched.dispatch(TerminalMessage(operationId))
 }

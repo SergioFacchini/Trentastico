@@ -7,7 +7,6 @@ package com.geridea.trentastico.gui.views
 
 import android.content.Context
 import android.util.AttributeSet
-
 import com.alamkanak.weekview.DateTimeInterpreter
 import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.Config
@@ -20,11 +19,8 @@ import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
 import com.threerings.signals.Signal1
-
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
 class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
 
@@ -64,91 +60,89 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
     private val appropriateDateTimeInterpreter: DateTimeInterpreter
         get() = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
 
-    private fun getDateInterpreterForNumberOfDays(numberOfVisibleDays: Int): DateTimeInterpreter {
-        return if (numberOfVisibleDays <= 2) {
-            object : DateTimeInterpreter {
-                override fun interpretDate(date: Calendar): String {
-                    val today = CalendarUtils.debuggableToday
-                    if (isSameDay(today, date)) {
-                        return "Oggi (" + FORMAT_ONLY_DAY.format(date.time) + ")"
+    private fun getDateInterpreterForNumberOfDays(numberOfVisibleDays: Int): DateTimeInterpreter =
+            if (numberOfVisibleDays <= 2) {
+                object : DateTimeInterpreter {
+                    override fun interpretDate(date: Calendar): String {
+                        val today = CalendarUtils.debuggableToday
+                        if (isSameDay(today, date)) {
+                            return "Oggi (" + FORMAT_ONLY_DAY.format(date.time) + ")"
+                        }
+
+                        today.add(Calendar.DAY_OF_MONTH, +1)
+                        if (isSameDay(today, date)) {
+                            return "Domani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
+                        }
+
+                        today.add(Calendar.DAY_OF_MONTH, +1)
+                        if (isSameDay(today, date)) {
+                            return "Dopodomani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
+                        }
+
+                        today.add(Calendar.DAY_OF_MONTH, -3)
+                        return if (isSameDay(today, date)) {
+                            "Ieri (" + FORMAT_ONLY_DAY.format(date.time) + ")"
+                        } else (if (Config.DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
+
                     }
 
-                    today.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(today, date)) {
-                        return "Domani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                    }
-
-                    today.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(today, date)) {
-                        return "Dopodomani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                    }
-
-                    today.add(Calendar.DAY_OF_MONTH, -3)
-                    return if (isSameDay(today, date)) {
-                        "Ieri (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                    } else (if (Config.DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
-
+                    override fun interpretTime(hour: Int): String = interpretHours(hour)
                 }
+            } else if (numberOfVisibleDays <= 5) {
+                object : DateTimeInterpreter {
+                    override fun interpretDate(date: Calendar): String {
+                        val today = CalendarUtils.debuggableToday
+                        if (isSameDay(today, date)) {
+                            return "Oggi"
+                        }
 
-                override fun interpretTime(hour: Int): String = interpretHours(hour)
-            }
-        } else if (numberOfVisibleDays <= 5) {
-            object : DateTimeInterpreter {
-                override fun interpretDate(date: Calendar): String {
-                    val today = CalendarUtils.debuggableToday
-                    if (isSameDay(today, date)) {
-                        return "Oggi"
-                    }
+                        today.add(Calendar.DAY_OF_MONTH, +1)
+                        if (isSameDay(today, date)) {
+                            return "Domani"
+                        }
 
-                    today.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(today, date)) {
-                        return "Domani"
-                    }
+                        today.add(Calendar.DAY_OF_MONTH, +1)
+                        if (isSameDay(today, date)) {
+                            return "Dopodomani"
+                        }
 
-                    today.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(today, date)) {
-                        return "Dopodomani"
-                    }
+                        today.add(Calendar.DAY_OF_MONTH, -3)
+                        if (isSameDay(today, date)) {
+                            return "Ieri"
+                        }
 
-                    today.add(Calendar.DAY_OF_MONTH, -3)
-                    if (isSameDay(today, date)) {
-                        return "Ieri"
-                    }
-
-                    return if (Config.DEBUG_MODE)
-                        DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
-                    else
-                        DATE_FORMAT_MEDIUM.format(date.time)
-                }
-
-                override fun interpretTime(hour: Int): String = interpretHours(hour)
-            }
-        } else {
-            // > 6
-            object : DateTimeInterpreter {
-                override fun interpretDate(date: Calendar): String {
-                    val firstDay = CalendarUtils.calculateFirstDayOfWeek()
-                    val lastDay = firstDay.clone() as Calendar
-                    lastDay.add(Calendar.WEEK_OF_MONTH, +1)
-
-                    return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
-                        if (Config.DEBUG_MODE)
-                            DATE_FORMAT_SHORT_DEBUG.format(date.time)
+                        return if (Config.DEBUG_MODE)
+                            DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
                         else
-                            DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
-                    } else {
-                        if (Config.DEBUG_MODE)
-                            DATE_FORMAT_SHORT_DEBUG.format(date.time)
-                        else
-                            DATE_FORMAT_SHORT.format(date.time)
+                            DATE_FORMAT_MEDIUM.format(date.time)
                     }
+
+                    override fun interpretTime(hour: Int): String = interpretHours(hour)
                 }
+            } else {
+                // > 6
+                object : DateTimeInterpreter {
+                    override fun interpretDate(date: Calendar): String {
+                        val firstDay = CalendarUtils.calculateFirstDayOfWeek()
+                        val lastDay = firstDay.clone() as Calendar
+                        lastDay.add(Calendar.WEEK_OF_MONTH, +1)
 
-                override fun interpretTime(hour: Int): String = interpretHours(hour)
+                        return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
+                            if (Config.DEBUG_MODE)
+                                DATE_FORMAT_SHORT_DEBUG.format(date.time)
+                            else
+                                DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
+                        } else {
+                            if (Config.DEBUG_MODE)
+                                DATE_FORMAT_SHORT_DEBUG.format(date.time)
+                            else
+                                DATE_FORMAT_SHORT.format(date.time)
+                        }
+                    }
+
+                    override fun interpretTime(hour: Int): String = interpretHours(hour)
+                }
             }
-        }
-
-    }
 
     private fun interpretHours(hour: Int): String = hour.toString()
 
@@ -192,32 +186,27 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
         }
     }
 
-    fun loadEventsNearToday() {
-        loader!!.loadEventsNearDay(CalendarUtils.debuggableToday)
-    }
+    fun loadEventsNearToday() = loader!!.loadEventsNearDay(CalendarUtils.debuggableToday)
 
-    private fun addEventsFromLessonsSet(lessons: LessonsSet) {
-        addEvents(makeEventsFromLessonsSet(lessons))
-    }
+    private fun addEventsFromLessonsSet(lessons: LessonsSet) =
+            addEvents(makeEventsFromLessonsSet(lessons))
 
-    private fun isSameDay(date1: Calendar, date2: Calendar): Boolean {
-        return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
-                date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
-                date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
-    }
+    private fun isSameDay(date1: Calendar, date2: Calendar): Boolean =
+            date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
+                    date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
+                    date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
 
-    private fun makeEventsFromLessonsSet(lessonsSet: LessonsSet): List<WeekViewEvent> {
-        return lessonsSet.scheduledLessons.mapTo(ArrayList(), {
-            LessonToEventAdapter(it.value)
-        })
+    private fun makeEventsFromLessonsSet(lessonsSet: LessonsSet): List<WeekViewEvent> =
+            lessonsSet.scheduledLessons.mapTo(ArrayList(), {
+        LessonToEventAdapter(it.value)
+    })
 
-//        val events = ArrayList<LessonToEventAdapter>()
-//        for ((_, lessonSchedule) in lessonsSet.scheduledLessons) {
-//            events.add(LessonToEventAdapter(lessonSchedule))
-//        }
-//
-//        return events
-    }
+    //        val events = ArrayList<LessonToEventAdapter>()
+    //        for ((_, lessonSchedule) in lessonsSet.scheduledLessons) {
+    //            events.add(LessonToEventAdapter(lessonSchedule))
+    //        }
+    //
+    //        return events
 
     override fun onFirstVisibleDayChanged(newFirst: Calendar, oldFirst: Calendar) {
         if (isInEditMode) {

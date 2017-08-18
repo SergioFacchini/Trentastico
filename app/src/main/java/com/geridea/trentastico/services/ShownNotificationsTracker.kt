@@ -9,12 +9,9 @@ import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.utils.ArrayUtils
 import com.geridea.trentastico.utils.JsonUtils
-
 import org.json.JSONException
 import org.json.JSONObject
-
-import java.util.ArrayList
-import java.util.HashSet
+import java.util.*
 
 /**
  * Keeps track of which notification were already shown and decides what notification which
@@ -52,33 +49,26 @@ class ShownNotificationsTracker {
      * @param starter the starter of the service
      * @return true if the notification should be shown, false otherwise
      */
-    fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean {
-        return if (shownNotificationsIds.contains(lesson.id)) {
-            //We already have shown the notification to the user. Let's check if we should
-            //reshow that
-            if (didLessonGainRoom(lesson)) {
-                //We could not fetch the room of the given lesson and now we have internet. The
-                //lesson is now probably updated.
-                true
-            } else {
-                ArrayUtils.isOneOf(starter,
-                        NLNStarter.PHONE_BOOT,
-                        NLNStarter.STUDY_COURSE_CHANGE,
-                        NLNStarter.NOTIFICATIONS_SWITCHED_ON)
-            }
-        } else {
+    fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean = if (shownNotificationsIds.contains(lesson.id)) {
+        //We already have shown the notification to the user. Let's check if we should
+        //reshow that
+        if (didLessonGainRoom(lesson)) {
+            //We could not fetch the room of the given lesson and now we have internet. The
+            //lesson is now probably updated.
             true
+        } else {
+            ArrayUtils.isOneOf(starter,
+                    NLNStarter.PHONE_BOOT,
+                    NLNStarter.STUDY_COURSE_CHANGE,
+                    NLNStarter.NOTIFICATIONS_SWITCHED_ON)
         }
-
+    } else {
+        true
     }
 
-    private fun didLessonGainRoom(lesson: LessonSchedule): Boolean {
-        return lesson.hasRoomSpecified() && isLessonWithoutRoom(lesson)
-    }
+    private fun didLessonGainRoom(lesson: LessonSchedule): Boolean = lesson.hasRoomSpecified() && isLessonWithoutRoom(lesson)
 
-    private fun isLessonWithoutRoom(lesson: LessonSchedule): Boolean {
-        return roomlessLessonsIds.contains(lesson.id)
-    }
+    private fun isLessonWithoutRoom(lesson: LessonSchedule): Boolean = roomlessLessonsIds.contains(lesson.id)
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson
@@ -92,18 +82,16 @@ class ShownNotificationsTracker {
      * Removes the tracking of all the already shown notifications. Must be called when the
      * currently shown notifications are no longer valid.
      */
-    fun clear() {
-        shownNotificationsIds.clear()
-    }
+    fun clear() = shownNotificationsIds.clear()
 
     fun toJson(): JSONObject {
-        try {
+        return try {
             val json = JSONObject()
 
             json.put("shown-notifications", JsonUtils.collectionToArray(shownNotificationsIds))
             json.put("roomless-notifications", JsonUtils.collectionToArray(roomlessLessonsIds))
 
-            return json
+            json
         } catch (e: JSONException) {
             e.printStackTrace()
             BugLogger.logBug("Cannot convert notification tracker to json", e)
@@ -125,31 +113,28 @@ class ShownNotificationsTracker {
 
     companion object {
 
-        fun fromJson(jsonString: String): ShownNotificationsTracker {
+        fun fromJson(jsonString: String): ShownNotificationsTracker = if (jsonString == "{}") {
+            ShownNotificationsTracker()
+        } else {
+            try {
+                val jsonObject = JSONObject(jsonString)
 
-            return if (jsonString == "{}") {
-                ShownNotificationsTracker()
-            } else {
-                try {
-                    val jsonObject = JSONObject(jsonString)
+                val shownIds = JsonUtils.getLongHashSet(
+                        jsonObject.getJSONArray("shown-notifications")
+                )
 
-                    val shownIds = JsonUtils.getLongHashSet(
-                            jsonObject.getJSONArray("shown-notifications")
-                    )
+                val roomlessIds = JsonUtils.getLongHashSet(
+                        jsonObject.getJSONArray("roomless-notifications")
+                )
 
-                    val roomlessIds = JsonUtils.getLongHashSet(
-                            jsonObject.getJSONArray("roomless-notifications")
-                    )
+                ShownNotificationsTracker(shownIds, roomlessIds)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+                BugLogger.logBug("Cannot convert notification json to notifications tracker", e)
 
-                    ShownNotificationsTracker(shownIds, roomlessIds)
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                    BugLogger.logBug("Cannot convert notification json to notifications tracker", e)
-
-                    throw RuntimeException(e)
-                }
-
+                throw RuntimeException(e)
             }
+
         }
     }
 

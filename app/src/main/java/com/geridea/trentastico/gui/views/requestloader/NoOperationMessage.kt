@@ -7,8 +7,7 @@ package com.geridea.trentastico.gui.views.requestloader
 
 class NoOperationMessage : ILoadingMessage {
 
-    override fun process(requestLoaderView: RequestLoaderView) {
-        //Nothing to do
-    }
+    override fun process(requestLoaderView: RequestLoaderView) = //Nothing to do
+            Unit
 
 }

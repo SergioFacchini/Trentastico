@@ -16,11 +16,7 @@ class WeekIntervalCutResult @JvmOverloads constructor(
      * @return false if the the entire interval has been cut (the weeks of the cut interval were a
      * subset of the weeks of the cutter), true otherwise.
      */
-    fun hasAnyRemainingResult(): Boolean {
-        return firstRemaining != null || secondRemaining != null
-    }
+    fun hasAnyRemainingResult(): Boolean = firstRemaining != null || secondRemaining != null
 
-    fun hasOnlyOneResult(): Boolean {
-        return firstRemaining != null && secondRemaining == null
-    }
+    fun hasOnlyOneResult(): Boolean = firstRemaining != null && secondRemaining == null
 }

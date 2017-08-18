@@ -1,14 +1,10 @@
 package com.geridea.trentastico.utils.time
 
+import junit.framework.Assert.*
 import org.junit.Test
+import java.util.*
 
-import java.util.Random
-
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertNull
-import junit.framework.Assert.assertTrue
-
+@Suppress("JoinDeclarationAndAssignment")
 /*
  * Created with ♥ by Slava on 17/03/2017.
  */
@@ -77,9 +73,7 @@ class WeekIntervalTest {
         }
     }
 
-    private fun assertSecondNull(cut: WeekIntervalCutResult) {
-        assertNull(cut.secondRemaining)
-    }
+    private fun assertSecondNull(cut: WeekIntervalCutResult) = assertNull(cut.secondRemaining)
 
     private fun assertSecondIs(cut: WeekIntervalCutResult, startWeek: Int, endWeek: Int) {
         val second = cut.secondRemaining
@@ -91,12 +85,8 @@ class WeekIntervalTest {
         assertEquals(first, mkInt(startWeek, endWeek))
     }
 
-    private fun cutFromInterval(startFrom: Int, endFrom: Int, startCut: Int, endCut: Int): WeekIntervalCutResult {
-        return mkInt(startFrom, endFrom).cutFromInterval(mkInt(startCut, endCut))
-    }
+    private fun cutFromInterval(startFrom: Int, endFrom: Int, startCut: Int, endCut: Int): WeekIntervalCutResult = mkInt(startFrom, endFrom).cutFromInterval(mkInt(startCut, endCut))
 
-    private fun mkInt(startWeek: Int, endWeek: Int): WeekInterval {
-        return WeekInterval(startWeek, 2017, endWeek, 2017)
-    }
+    private fun mkInt(startWeek: Int, endWeek: Int): WeekInterval = WeekInterval(startWeek, 2017, endWeek, 2017)
 
 }

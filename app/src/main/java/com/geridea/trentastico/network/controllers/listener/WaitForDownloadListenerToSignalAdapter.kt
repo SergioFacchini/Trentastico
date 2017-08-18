@@ -9,7 +9,5 @@ import com.threerings.signals.Signal1
 
 class WaitForDownloadListenerToSignalAdapter(private val signalToNotify: Signal1<Boolean>) : WaitForDownloadLessonListener() {
 
-    override fun onFinish(withSuccess: Boolean) {
-        signalToNotify.dispatch(withSuccess)
-    }
+    override fun onFinish(withSuccess: Boolean) = signalToNotify.dispatch(withSuccess)
 }

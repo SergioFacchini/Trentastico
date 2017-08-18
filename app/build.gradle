@@ -60,7 +60,7 @@ dependencies {
 
     //Butter knife (BindView)
     compile 'com.jakewharton:butterknife:8.5.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    kapt 'com.jakewharton:butterknife-compiler:8.5.1'
 
     //Signals
     compile 'com.threerings:signals:0.3'

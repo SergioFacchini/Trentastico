@@ -12,14 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
-import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.network.request.LessonsDiffResult
-
-import java.util.ArrayList
+import java.util.*
 
 class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : ItemsAdapter<DiffResultItem>(context) {
 
@@ -41,9 +38,7 @@ class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : Items
         itemsList = items
     }
 
-    override fun createView(item: DiffResultItem, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_diff_result, parent, false)
-    }
+    override fun createView(item: DiffResultItem, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_diff_result, parent, false)
 
     override fun bindView(item: DiffResultItem, pos: Int, view: View) {
         Views.find<TextView>(view, R.id.diff_type).text = item.diffDescription

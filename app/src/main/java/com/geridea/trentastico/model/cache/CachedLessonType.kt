@@ -26,13 +26,11 @@ class CachedLessonType @JvmOverloads constructor(
 
     companion object {
 
-        fun fromLessonTypeCursor(cursor: Cursor): CachedLessonType {
-            return CachedLessonType(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CLT_LESSON_TYPE_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CLT_NAME)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CLT_COLOR)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CLT_IS_EXTRA_COURSE)) == 0
-            )
-        }
+        fun fromLessonTypeCursor(cursor: Cursor): CachedLessonType = CachedLessonType(
+                cursor.getInt(cursor.getColumnIndexOrThrow(CLT_LESSON_TYPE_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CLT_NAME)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CLT_COLOR)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CLT_IS_EXTRA_COURSE)) == 0
+        )
     }
 }

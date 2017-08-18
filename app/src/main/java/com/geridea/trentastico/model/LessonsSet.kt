@@ -107,8 +107,6 @@ open class LessonsSet {
         )
     }
 
-    fun filterLessons() {
-        LessonSchedule.filterLessons(this.scheduledLessons.values)
-    }
+    fun filterLessons() = LessonSchedule.filterLessons(this.scheduledLessons.values)
 
 }

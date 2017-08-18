@@ -6,8 +6,7 @@ package com.geridea.trentastico.model
  */
 
 import com.geridea.trentastico.utils.time.CalendarUtils
-
-import java.util.Calendar
+import java.util.*
 
 class Semester(private val year: Int, private val semesterNumber: Int) {
 
@@ -22,9 +21,8 @@ class Semester(private val year: Int, private val semesterNumber: Int) {
         return false
     }
 
-    private fun enclosesDate(date: Calendar): Boolean {
-        return year == date.get(Calendar.YEAR) && getSemesterNumber(date) == semesterNumber
-    }
+    private fun enclosesDate(date: Calendar): Boolean =
+            year == date.get(Calendar.YEAR) && getSemesterNumber(date) == semesterNumber
 
     companion object {
 
@@ -36,24 +34,14 @@ class Semester(private val year: Int, private val semesterNumber: Int) {
 
         private val CURRENT_SEMESTER = Semester(CalendarUtils.debuggableToday)
 
-        fun isInCurrentSemester(date: Calendar): Boolean {
-            return CURRENT_SEMESTER.enclosesDate(date)
-        }
+        fun isInCurrentSemester(date: Calendar): Boolean = CURRENT_SEMESTER.enclosesDate(date)
 
-        fun isInCurrentSemester(lesson: LessonSchedule): Boolean {
-            return isInCurrentSemester(lesson.startCal)
-        }
+        fun isInCurrentSemester(lesson: LessonSchedule): Boolean =
+                isInCurrentSemester(lesson.startCal)
 
-        fun getSemesterNumber(date: Calendar): Int {
-            return getSemesterNumber(date.get(Calendar.MONTH))
-        }
+        fun getSemesterNumber(date: Calendar): Int = getSemesterNumber(date.get(Calendar.MONTH))
 
-        fun getSemesterNumber(monthNumber: Int): Int {
-            return if (monthNumber >= SEMESTER2_START && monthNumber <= SEMESTER2_END) {
-                2
-            } else {
-                1
-            }
-        }
+        fun getSemesterNumber(monthNumber: Int): Int =
+                if (monthNumber in SEMESTER2_START..SEMESTER2_END) 2 else 1
     }
 }

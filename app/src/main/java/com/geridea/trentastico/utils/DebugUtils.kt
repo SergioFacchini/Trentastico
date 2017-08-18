@@ -8,7 +8,5 @@ package com.geridea.trentastico.utils
 import com.geridea.trentastico.BuildConfig
 
 object DebugUtils {
-    fun computeVersionName(): String {
-        return String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
-    }
+    fun computeVersionName(): String = String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 }

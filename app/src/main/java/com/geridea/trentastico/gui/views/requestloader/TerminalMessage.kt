@@ -7,7 +7,5 @@ package com.geridea.trentastico.gui.views.requestloader
 
 open class TerminalMessage(val messageId: Int) : ILoadingMessage {
 
-    override fun process(requestLoaderView: RequestLoaderView) {
-        requestLoaderView.removeMessage(messageId)
-    }
+    override fun process(requestLoaderView: RequestLoaderView) = requestLoaderView.removeMessage(messageId)
 }

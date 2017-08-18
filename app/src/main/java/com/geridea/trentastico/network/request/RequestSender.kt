@@ -6,20 +6,9 @@ package com.geridea.trentastico.network.request
  */
 
 import com.geridea.trentastico.Config
-
+import okhttp3.*
 import java.io.IOException
-import java.util.Timer
-import java.util.TimerTask
-import java.util.Vector
-
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.FormBody
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.ResponseBody
+import java.util.*
 
 class RequestSender {
 
@@ -62,13 +51,9 @@ class RequestSender {
         }
     }
 
-    fun processRequestAfterTimeout(requestToSend: IRequest) {
-        timeoutWaiter.schedule(object : TimerTask() {
-            override fun run() {
-                processRequest(requestToSend)
-            }
-        }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED.toLong())
-    }
+    fun processRequestAfterTimeout(requestToSend: IRequest) = timeoutWaiter.schedule(object : TimerTask() {
+        override fun run() = processRequest(requestToSend)
+    }, Config.WAITING_TIME_AFTER_A_REQUEST_FAILED.toLong())
 
     private inner class RequestCallback internal constructor(private val request: IRequest) : Callback {
 

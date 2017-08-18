@@ -13,7 +13,9 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TableLayout
 import android.widget.TextView
-
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.logger.BugLogger
@@ -22,13 +24,8 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
-
 import java.text.SimpleDateFormat
-import java.util.Calendar
-
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
+import java.util.*
 
 class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
 
@@ -36,11 +33,11 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
         LOADING, SHOWING, ERROR
     }
 
-    @BindView(R.id.loader_spinner)   internal var spinner: ProgressBar? = null
-    @BindView(R.id.timetables)       internal var timetables: TableLayout? = null
-    @BindView(R.id.error_panel)      internal var errorPanel: View? = null
+    @BindView(R.id.loader_spinner)    lateinit var spinner: ProgressBar
+    @BindView(R.id.timetables)        lateinit var timetables: TableLayout
+    @BindView(R.id.error_panel)       lateinit var errorPanel: View
 
-    @BindView(R.id.current_day_name) internal var currentDayName: TextView? = null
+    @BindView(R.id.current_day_name)  lateinit var currentDayName: TextView
 
     @BindView(R.id.buc_times)        internal lateinit var timesBuc: TextView
     @BindView(R.id.cial_times)       internal lateinit var timesCial: TextView
@@ -63,7 +60,7 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
     }
 
     private fun showCurrentDay(currentDay: Calendar) {
-        currentDayName!!.text = interpretDay(currentDay)
+        currentDayName.text = interpretDay(currentDay)
     }
 
     private fun interpretDay(currentDay: Calendar): String {
@@ -91,17 +88,15 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
         Networker.getLibraryOpeningTimes(day!!.clone() as Calendar, this)
     }
 
-    private fun showState(state: State) {
-        UIUtils.runOnMainThread {
-            spinner!!.visibility = View.GONE
-            timetables!!.visibility = View.GONE
-            errorPanel!!.visibility = View.GONE
+    private fun showState(state: State) = UIUtils.runOnMainThread {
+        spinner!!.visibility = View.GONE
+        timetables!!.visibility = View.GONE
+        errorPanel!!.visibility = View.GONE
 
-            when (state) {
-                LibrariesFragment.State.SHOWING -> timetables!!.visibility = View.VISIBLE
-                LibrariesFragment.State.ERROR -> errorPanel!!.visibility = View.VISIBLE
-                LibrariesFragment.State.LOADING -> spinner!!.visibility = View.VISIBLE
-            }
+        when (state) {
+            LibrariesFragment.State.SHOWING -> timetables!!.visibility = View.VISIBLE
+            LibrariesFragment.State.ERROR -> errorPanel!!.visibility = View.VISIBLE
+            LibrariesFragment.State.LOADING -> spinner!!.visibility = View.VISIBLE
         }
     }
 
@@ -122,16 +117,13 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
     }
 
     @OnClick(R.id.retry_fetch_times)
-    internal fun onRetryFetchTimesButtonClicked() {
-        loadOpeningTimesForDate(currentDay)
-    }
+    internal fun onRetryFetchTimesButtonClicked() = loadOpeningTimesForDate(currentDay)
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)
 
-    override fun bindMenuItem(item: MenuItem) {
-        //Nothing to bind
-    }
+    override fun bindMenuItem(item: MenuItem) = //Nothing to bind
+            Unit
 
     override fun onOpeningTimesLoaded(times: LibraryOpeningTimes, date: Calendar) {
         //We can start loading the current day, then switch to the next day.
@@ -142,21 +134,17 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
 
     }
 
-    private fun showTimes(times: LibraryOpeningTimes) {
-        UIUtils.runOnMainThread {
-            timesBuc.text        = times.timesBuc
-            timesCial.text       = times.timesCial
-            timesMesiano.text    = times.timesMesiano
-            timesPovo.text       = times.timesPovo
-            timesPsicologia.text = times.timesPsicologia
+    private fun showTimes(times: LibraryOpeningTimes) = UIUtils.runOnMainThread {
+        timesBuc.text        = times.timesBuc
+        timesCial.text       = times.timesCial
+        timesMesiano.text    = times.timesMesiano
+        timesPovo.text       = times.timesPovo
+        timesPsicologia.text = times.timesPsicologia
 
-            showState(State.SHOWING)
-        }
+        showState(State.SHOWING)
     }
 
-    override fun onOpeningTimesLoadingError() {
-        showState(State.ERROR)
-    }
+    override fun onOpeningTimesLoadingError() = showState(State.ERROR)
 
     override fun onErrorParsingResponse(e: Exception) {
         BugLogger.logBug("ERROR PARSING LIBRARY OPENING TIMES", e)

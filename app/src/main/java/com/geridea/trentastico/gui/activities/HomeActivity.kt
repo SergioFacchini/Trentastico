@@ -9,34 +9,26 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
-
+import butterknife.BindView
+import butterknife.ButterKnife
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.R
-import com.geridea.trentastico.gui.fragments.AboutFragment
-import com.geridea.trentastico.gui.fragments.CalendarFragment
-import com.geridea.trentastico.gui.fragments.ExtraLessonsFragment
-import com.geridea.trentastico.gui.fragments.LibrariesFragment
-import com.geridea.trentastico.gui.fragments.SettingsFragment
-import com.geridea.trentastico.gui.fragments.SubmitFeedbackFragment
+import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.DebugUtils
 
-import butterknife.BindView
-import butterknife.ButterKnife
-
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    @BindView(R.id.toolbar) internal var toolbar: Toolbar? = null
-    @BindView(R.id.drawer_layout) internal var drawer: DrawerLayout? = null
-    @BindView(R.id.nav_view) internal var navigationView: NavigationView? = null
+    @BindView(R.id.toolbar)       lateinit var toolbar: Toolbar
+    @BindView(R.id.drawer_layout) lateinit var drawer: DrawerLayout
+    @BindView(R.id.nav_view)      lateinit var navigationView: NavigationView
 
     private var currentFragment: Fragment? = null
     private var currentMenuSettings: IMenuSettings = NoMenuSettings.instance
@@ -47,23 +39,23 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         ButterKnife.bind(this)
 
-        toolbar!!.setTitle(R.string.app_name)
+        toolbar.setTitle(R.string.app_name)
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer!!.setDrawerListener(toggle)
+        drawer.setDrawerListener(toggle)
         toggle.syncState()
 
-        navigationView!!.setNavigationItemSelectedListener(this)
+        navigationView.setNavigationItemSelectedListener(this)
 
         //Showing the version
-        val versionText = Views.find<TextView>(navigationView!!.getHeaderView(0), R.id.version_text)
-        versionText.text = "Versione: " + DebugUtils.computeVersionName()
+        val versionText = Views.find<TextView>(navigationView.getHeaderView(0), R.id.version_text)
+        versionText.text = "Versione: ${DebugUtils.computeVersionName()}"
 
         //Removing debug stuff from menu
         if (!Config.DEBUG_MODE) {
-            val menu = navigationView!!.menu
+            val menu = navigationView.menu
             for (i in 0..menu.size() - 1) {
                 val item = menu.getItem(i)
 
@@ -107,15 +99,13 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    override fun onBackPressed() {
-        if (drawer!!.isDrawerOpen(GravityCompat.START)) {
-            drawer!!.closeDrawer(GravityCompat.START)
+    override fun onBackPressed() = if (drawer!!.isDrawerOpen(GravityCompat.START)) {
+        drawer!!.closeDrawer(GravityCompat.START)
+    } else {
+        if (currentFragment is CalendarFragment) {
+            super.onBackPressed()
         } else {
-            if (currentFragment is CalendarFragment) {
-                super.onBackPressed()
-            } else {
-                switchToCalendarFragment()
-            }
+            switchToCalendarFragment()
         }
     }
 
@@ -148,12 +138,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        drawer!!.closeDrawer(GravityCompat.START)
+        drawer.closeDrawer(GravityCompat.START)
         return true
     }
 
     fun switchToCalendarFragment() {
-        navigationView!!.setCheckedItem(R.id.menu_timetables)
+        navigationView.setCheckedItem(R.id.menu_timetables)
 
         setCurrentFragment(CalendarFragment())
     }
@@ -162,12 +152,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun setCurrentFragment(nextFragment: Fragment) {
         currentFragment = nextFragment
 
-        if (currentFragment is FragmentWithMenuItems) {
+        currentMenuSettings = if (currentFragment is FragmentWithMenuItems) {
             val currentFragment = this.currentFragment as FragmentWithMenuItems?
             currentFragment!!.setActivity(this)
-            currentMenuSettings = currentFragment
+            currentFragment
         } else {
-            currentMenuSettings = NoMenuSettings.instance
+            NoMenuSettings.instance
         }
 
         invalidateOptionsMenu()

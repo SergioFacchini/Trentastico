@@ -24,9 +24,9 @@ import com.threerings.signals.Signal1
 
 class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
 
-    @BindView(R.id.departements_spinner) internal var departmentsSpinner: Spinner? = null
-    @BindView(R.id.courses_spinner) internal var coursesSpinner: Spinner? = null
-    @BindView(R.id.year_spinner) internal var yearsSpinner: Spinner? = null
+    @BindView(R.id.departements_spinner) lateinit var departmentsSpinner: Spinner
+    @BindView(R.id.courses_spinner)      lateinit var coursesSpinner: Spinner
+    @BindView(R.id.year_spinner)         lateinit var yearsSpinner: Spinner
 
     /**
      * Due to a strange way the setOnItemSelectedListener is dispatched on department, selecting a
@@ -47,19 +47,19 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
         Views.inflateAndAttach<View>(this, R.layout.view_course_selector)
         ButterKnife.bind(this, this)
 
-        departmentsSpinner!!.adapter = DepartmentsAdapter(context)
+        departmentsSpinner.adapter = DepartmentsAdapter(context)
 
-        val selectedDepartment = departmentsSpinner!!.selectedItem as Department
-        coursesSpinner!!.adapter = CoursesAdapter(context, selectedDepartment)
+        val selectedDepartment = departmentsSpinner.selectedItem as Department
+        coursesSpinner.adapter = CoursesAdapter(context, selectedDepartment)
 
-        yearsSpinner!!.adapter = YearsAdapter(context)
+        yearsSpinner.adapter = YearsAdapter(context)
     }
 
     @OnItemSelected(R.id.departements_spinner)
     internal fun onDepartmentSelected(selectedPosition: Int) {
-        val selectedDepartment = departmentsSpinner!!.getItemAtPosition(selectedPosition) as Department
-        coursesSpinner!!.adapter = CoursesAdapter(context, selectedDepartment)
-        coursesSpinner!!.setSelection(courseToSelectPosition, false)
+        val selectedDepartment = departmentsSpinner.getItemAtPosition(selectedPosition) as Department
+        coursesSpinner.adapter = CoursesAdapter(context, selectedDepartment)
+        coursesSpinner.setSelection(courseToSelectPosition, false)
 
         courseToSelectPosition = 0
 
@@ -68,20 +68,16 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
 
 
     @OnItemSelected(R.id.courses_spinner)
-    internal fun onCoursesSelected() {
-        onCourseChanged.dispatch(selectedStudyCourse)
-    }
+    internal fun onCoursesSelected() = onCourseChanged.dispatch(selectedStudyCourse)
 
     @OnItemSelected(R.id.year_spinner)
-    internal fun onYearSelected() {
-        onCourseChanged.dispatch(selectedStudyCourse)
-    }
+    internal fun onYearSelected() = onCourseChanged.dispatch(selectedStudyCourse)
 
     val selectedStudyCourse: StudyCourse
         get() = StudyCourse(
-                departmentsSpinner!!.selectedItemId,
-                coursesSpinner!!.selectedItemId,
-                yearsSpinner!!.selectedItemPosition + 1
+                departmentsSpinner.selectedItemId,
+                coursesSpinner.selectedItemId,
+                yearsSpinner.selectedItemPosition + 1
         )
 
     fun setStudyCourse(newStudyCourse: StudyCourse) {
@@ -89,10 +85,10 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
         courseToSelectPosition = department.getCoursePosition(newStudyCourse.courseId)
 
         val depPosition = DepartmentsProvider.getDepartmentPosition(newStudyCourse.departmentId)
-        departmentsSpinner!!.setSelection(depPosition, false)
+        departmentsSpinner.setSelection(depPosition, false)
 
 
-        yearsSpinner!!.setSelection(newStudyCourse.year - 1)
+        yearsSpinner.setSelection(newStudyCourse.year - 1)
     }
 
 }

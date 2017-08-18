@@ -18,6 +18,7 @@ class CacheDbHelper(context: Context) : SQLiteOpenHelper(context, Config.DATABAS
         db.execSQL(SQL_CREATE_CACHED_PERIOD)
         db.execSQL(SQL_CREATE_CACHED_LESSON_TYPES)
         db.execSQL(SQL_CREATE_CACHED_LESSONS)
+        db.execSQL(SQL_CREATE_CACHED_LIBRARY_TIMES)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

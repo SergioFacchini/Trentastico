@@ -11,20 +11,16 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
-
-import com.alexvasilkov.android.commons.utils.Views
-import com.geridea.trentastico.R
-
-import java.util.ArrayList
-import java.util.Collections
-
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.alexvasilkov.android.commons.utils.Views
+import com.geridea.trentastico.R
+import java.util.*
 
 class RequestLoaderView : FrameLayout {
 
-    @BindView(R.id.loading_text) internal var loadingText: TextView? = null
-    @BindView(R.id.loading_progress) internal var loadingProgress: TextView? = null
+    @BindView(R.id.loading_text)  lateinit var loadingText: TextView
+    @BindView(R.id.loading_progress)  lateinit var loadingProgress: TextView
 
     private var maxMessagesSinceLastShow = 0
 
@@ -77,41 +73,38 @@ class RequestLoaderView : FrameLayout {
         postRecalculateMessageToDisplay()
     }
 
-    private fun recalculateMessagesToDisplay() {
-        synchronized(currentMessages) {
-            if (currentMessages.isEmpty()) {
-                view!!.visibility = View.GONE
+    private fun recalculateMessagesToDisplay() = synchronized(currentMessages) {
+        if (currentMessages.isEmpty()) {
+            view!!.visibility = View.GONE
+            hideAndResetCounter()
+        } else {
+            view!!.visibility = View.VISIBLE
+            if (currentMessages.size == 1 && maxMessagesSinceLastShow <= 1) { //maxMessages can be 0 too here
+                //We show the only message we have
+                showMessage(currentMessages[0])
                 hideAndResetCounter()
             } else {
-                view!!.visibility = View.VISIBLE
-                if (currentMessages.size == 1 && maxMessagesSinceLastShow <= 1) { //maxMessages can be 0 too here
-                    //We show the only message we have
-                    showMessage(currentMessages[0])
-                    hideAndResetCounter()
-                } else {
-                    //We show the first message and get the counter to show how many messages
-                    showMessage(currentMessages[0])
-                    showCounter()
-                }
+                //We show the first message and get the counter to show how many messages
+                showMessage(currentMessages[0])
+                showCounter()
             }
         }
-
     }
 
     private fun showCounter() {
         val loadedMessages = maxMessagesSinceLastShow - currentMessages.size
         val progress = (loadedMessages * 100 / maxMessagesSinceLastShow.toDouble()).toInt()
-        loadingProgress!!.text = "($progress%)"
-        loadingProgress!!.visibility = View.VISIBLE
+        loadingProgress.text = "($progress%)"
+        loadingProgress.visibility = View.VISIBLE
     }
 
     private fun hideAndResetCounter() {
-        loadingProgress!!.visibility = View.GONE
+        loadingProgress.visibility = View.GONE
         maxMessagesSinceLastShow = 0
     }
 
     private fun showMessage(message: AbstractTextMessage) {
-        loadingText!!.text = message.text
+        loadingText.text = message.text
     }
 
     @Synchronized internal fun removeMessage(messageId: Int) {
@@ -133,9 +126,7 @@ class RequestLoaderView : FrameLayout {
         post { recalculateMessagesToDisplay() }
     }
 
-    fun processMessage(message: ILoadingMessage) {
-        message.process(this)
-    }
+    fun processMessage(message: ILoadingMessage) = message.process(this)
 
     companion object {
 

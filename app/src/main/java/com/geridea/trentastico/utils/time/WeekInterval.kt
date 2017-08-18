@@ -6,8 +6,7 @@ package com.geridea.trentastico.utils.time
  */
 
 import com.geridea.trentastico.logger.BugLogger
-
-import java.util.Calendar
+import java.util.*
 
 open class WeekInterval {
 
@@ -65,22 +64,14 @@ open class WeekInterval {
         return CalendarInterval(from, to)
     }
 
-    operator fun contains(day: WeekDayTime): Boolean {
-        return start.hasSameWeekTime(day) || end.hasSameWeekTime(day)
-                || start.before(day) && end.after(day)
-    }
+    operator fun contains(day: WeekDayTime): Boolean = start.hasSameWeekTime(day) || end.hasSameWeekTime(day)
+            || start.before(day) && end.after(day)
 
-    operator fun contains(calendar: Calendar): Boolean {
-        return contains(WeekDayTime(calendar))
-    }
+    operator fun contains(calendar: Calendar): Boolean = contains(WeekDayTime(calendar))
 
-    operator fun contains(time: WeekTime): Boolean {
-        return start.beforeOrEqual(time) && end.after(time)
-    }
+    operator fun contains(time: WeekTime): Boolean = start.beforeOrEqual(time) && end.after(time)
 
-    fun copy(): WeekInterval {
-        return WeekInterval(start.copy(), end.copy())
-    }
+    fun copy(): WeekInterval = WeekInterval(start.copy(), end.copy())
 
     val isEmpty: Boolean
         get() = start == end
@@ -165,9 +156,7 @@ open class WeekInterval {
             end.addWeeks(-1)
 
             return object : Iterator<WeekTime> {
-                override fun hasNext(): Boolean {
-                    return iterator.before(end)
-                }
+                override fun hasNext(): Boolean = iterator.before(end)
 
                 override fun next(): WeekTime {
                     iterator.addWeeks(+1)
@@ -183,9 +172,7 @@ open class WeekInterval {
         return false
     }
 
-    override fun toString(): String {
-        return "[$start - $end]"
-    }
+    override fun toString(): String = "[$start - $end]"
 
 
     val startWeekNumber: Int
@@ -204,17 +191,11 @@ open class WeekInterval {
      * @return true if this interval has at least one week in common with the interval passes as
      * parameter
      */
-    fun overlaps(intervalToCheck: WeekInterval): Boolean {
-        return equals(intervalToCheck) || cutFromInterval(intervalToCheck).hasAnyRemainingResult()
-    }
+    fun overlaps(intervalToCheck: WeekInterval): Boolean = equals(intervalToCheck) || cutFromInterval(intervalToCheck).hasAnyRemainingResult()
 
-    fun spansMultipleYears(): Boolean {
-        return startYear != endYear
-    }
+    fun spansMultipleYears(): Boolean = startYear != endYear
 
-    fun intersect(interval: WeekInterval): WeekInterval {
-        return cutFromInterval(interval).cutInterval
-    }
+    fun intersect(interval: WeekInterval): WeekInterval = cutFromInterval(interval).cutInterval
 
     override fun hashCode(): Int {
         var result = start.hashCode()

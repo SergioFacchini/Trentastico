@@ -37,19 +37,16 @@ class CachedLesson(
 
     companion object {
 
-        fun fromCursor(cursor: Cursor): CachedLesson {
-            return CachedLesson(
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CL_CACHED_PERIOD_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CL_LESSON_ID)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CL_STARTS_AT_MS)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CL_FINISHES_AT_MS)),
-                    cursor.getLong(cursor.getColumnIndexOrThrow(CL_TEACHING_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CL_SUBJECT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CL_ROOM)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CL_DESCRIPTION)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CL_COLOR))
-            )
-
-        }
+        fun fromCursor(cursor: Cursor): CachedLesson = CachedLesson(
+                cursor.getLong(cursor.getColumnIndexOrThrow(CL_CACHED_PERIOD_ID)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CL_LESSON_ID)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CL_STARTS_AT_MS)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CL_FINISHES_AT_MS)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(CL_TEACHING_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_SUBJECT)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_ROOM)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_DESCRIPTION)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(CL_COLOR))
+        )
     }
 }

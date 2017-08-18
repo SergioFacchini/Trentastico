@@ -10,15 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.Partitioning
 import com.geridea.trentastico.model.PartitioningCase
 import com.threerings.signals.Signal1
-
-import java.util.ArrayList
+import java.util.*
 
 class PartitioningsAdapter(context: Context, partitionings: Partitioning) : ItemsAdapter<PartitioningCase>(context) {
 
@@ -32,9 +30,7 @@ class PartitioningsAdapter(context: Context, partitionings: Partitioning) : Item
         itemsList = ArrayList(partitionings.sortedCases)
     }
 
-    override fun createView(item: PartitioningCase, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View {
-        return inflater.inflate(R.layout.itm_partioning, parent, false)
-    }
+    override fun createView(item: PartitioningCase, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_partioning, parent, false)
 
     override fun bindView(item: PartitioningCase, pos: Int, convertView: View) {
         val checkBox = Views.find<CheckBox>(convertView, R.id.partioning_name)

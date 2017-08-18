@@ -1,13 +1,10 @@
 package com.geridea.trentastico.utils
 
-import org.junit.Test
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 import junit.framework.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.util.regex.Pattern
 
 
 /*
@@ -17,10 +14,7 @@ class StringUtilsTest {
 
     @Test
     @Throws(Exception::class)
-    fun testRegexs() {
-        assertTrue(StringUtils.containsMatchingRegex("happy", "unhappy"))
-
-    }
+    fun testRegexs() = assertTrue(StringUtils.containsMatchingRegex("happy", "unhappy"))
 
     @Test
     @Throws(Exception::class)
@@ -97,9 +91,7 @@ class StringUtilsTest {
         assertPositionFormat("Let's count: 3 2 1", "Let's count: {2} {1} {0}", 1, 2, 3)
     }
 
-    private fun assertPositionFormat(expected: String, format: String, vararg items: Any) {
-        assertEquals(expected, StringUtils.positionFormat(format, *items))
-    }
+    private fun assertPositionFormat(expected: String, format: String, vararg items: Any) = assertEquals(expected, StringUtils.positionFormat(format, *items))
 
 
 }

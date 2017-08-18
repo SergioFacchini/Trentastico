@@ -11,18 +11,10 @@ import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController
 import com.geridea.trentastico.network.controllers.SendFeedbackController
-import com.geridea.trentastico.network.controllers.listener.FeedbackSendListener
-import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener
-import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
-import com.geridea.trentastico.network.controllers.listener.LessonsWithRoomListener
-import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener
-import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
-import com.geridea.trentastico.network.controllers.listener.WaitForDownloadLessonListener
+import com.geridea.trentastico.network.controllers.listener.*
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.utils.time.WeekInterval
-
-import java.util.ArrayList
-import java.util.Calendar
+import java.util.*
 
 object Networker {
 
@@ -52,67 +44,43 @@ object Networker {
      * @param intervalListener the listener that will be dispatched once we know what intervals have
      * to be loaded
      */
-    fun loadLessons(interval: WeekInterval, listener: LessonsLoadingListener, intervalListener: LoadingIntervalKnownListener) {
-        lessonsController!!.loadLessons(interval, listener, intervalListener)
-    }
+    fun loadLessons(interval: WeekInterval, listener: LessonsLoadingListener, intervalListener: LoadingIntervalKnownListener) = lessonsController!!.loadLessons(interval, listener, intervalListener)
 
-    fun diffLessonsInCache(intervalToCheck: WeekInterval, listener: LessonsDifferenceListener) {
-        lessonsController!!.diffLessonsInCache(intervalToCheck, listener)
-    }
+    fun diffLessonsInCache(intervalToCheck: WeekInterval, listener: LessonsDifferenceListener) = lessonsController!!.diffLessonsInCache(intervalToCheck, listener)
 
-    fun loadAndCacheNotCachedLessons(interval: WeekInterval, listener: WaitForDownloadLessonListener) {
-        lessonsController!!.loadAndCacheNotCachedLessons(interval, listener)
-    }
+    fun loadAndCacheNotCachedLessons(interval: WeekInterval, listener: WaitForDownloadLessonListener) = lessonsController!!.loadAndCacheNotCachedLessons(interval, listener)
 
-    fun loadCoursesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
-        lessonsController!!.loadCoursesOfStudyCourse(studyCourse, listener)
-    }
+    fun loadCoursesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) = lessonsController!!.loadCoursesOfStudyCourse(studyCourse, listener)
 
-    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) {
-        lessonsController!!.loadTodaysLessons(todaysLessonsListener)
-    }
+    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController!!.loadTodaysLessons(todaysLessonsListener)
 
-    fun loadRoomsForLessonsIfMissing(lessons: ArrayList<LessonSchedule>, listener: LessonsWithRoomListener) {
-        lessonsController!!.loadRoomsForLessonsIfMissing(lessons, listener)
-    }
+    fun loadRoomsForLessonsIfMissing(lessons: ArrayList<LessonSchedule>, listener: LessonsWithRoomListener) = lessonsController!!.loadRoomsForLessonsIfMissing(lessons, listener)
 
-    fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) {
-        lessonsController!!.getTodaysCachedLessons(todaysLessonsListener)
-    }
+    fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController!!.getTodaysCachedLessons(todaysLessonsListener)
 
     /**
      * Removes all the extra courses and lessons having the given lesson type
      */
-    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) {
-        lessonsController!!.removeExtraCoursesWithLessonType(lessonTypeId)
-    }
+    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) = lessonsController!!.removeExtraCoursesWithLessonType(lessonTypeId)
 
     /**
      * Deletes all the cache about lessons and lesson types.
      */
-    fun obliterateLessonsCache() {
-        lessonsController!!.obliterateAllLessonsCache()
-    }
+    fun obliterateLessonsCache() = lessonsController!!.obliterateAllLessonsCache()
 
     /**
      * Deletes all the cache about the currently chosen study course
      */
-    fun purgeStudyCourseCache() {
-        lessonsController!!.purgeStudyCourseCache()
-    }
+    fun purgeStudyCourseCache() = lessonsController!!.purgeStudyCourseCache()
 
     //----------------------------
     // Feedback
     //----------------------------
-    fun sendFeedback(feedback: String, name: String, email: String, listener: FeedbackSendListener) {
-        sendFeedbackController!!.sendFeedback(feedback, name, email, listener)
-    }
+    fun sendFeedback(feedback: String, name: String, email: String, listener: FeedbackSendListener) = sendFeedbackController!!.sendFeedback(feedback, name, email, listener)
 
     //----------------------------
     // Library opening times
     //----------------------------
-    fun getLibraryOpeningTimes(day: Calendar, listener: LibraryOpeningTimesListener) {
-        libraryOpeningTimes!!.getLibraryOpeningTimes(day, listener)
-    }
+    fun getLibraryOpeningTimes(day: Calendar, listener: LibraryOpeningTimesListener) = libraryOpeningTimes!!.getLibraryOpeningTimes(day, listener)
 
 }
