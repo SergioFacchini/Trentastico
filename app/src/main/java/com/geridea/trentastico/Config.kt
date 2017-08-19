@@ -43,4 +43,7 @@ object Config {
     //Next lessons notification service
     val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
 
+    //Current study year
+    val CURRENT_STUDY_YEAR = "2017"
+
 }

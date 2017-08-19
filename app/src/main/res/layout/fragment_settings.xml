@@ -96,7 +96,8 @@
             android:layout_height="wrap_content"
             android:gravity="left"
             android:text="Nome corso di studi"
-            android:textColor="@color/colorForeground" />
+            android:textColor="@color/colorForeground"
+            android:textStyle="italic"/>
 
         <Button
             android:id="@+id/change_study_course_button"

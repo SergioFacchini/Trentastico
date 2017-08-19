@@ -1,57 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<com.geridea.trentastico.gui.views.utils.LEPView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lepView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <TextView
+    <!-- Loading -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        android:paddingTop="13dp"
-        android:text="Dipartimento"
-        android:textColor="#FFFFFF"
-        android:textSize="16dp" />
+        android:orientation="vertical">
 
-    <Spinner
-        android:id="@+id/departements_spinner"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="#FFF" />
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Sto scaricando l'elenco dei corsi..."
+            android:textColor="#FFFFFF" />
 
-    <TextView
+    </LinearLayout>
+
+    <!-- Error -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        android:paddingTop="13dp"
-        android:text="Corso di studi"
-        android:textColor="#FFFFFF"
-        android:textSize="16dp" />
+        android:orientation="vertical">
 
-    <Spinner
-        android:id="@+id/courses_spinner"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="#FFF" />
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="13dp"
+            android:text="Si è verificato un errore"
+            android:textColor="#FFFFFF" />
 
-    <TextView
+        <Button
+            android:id="@+id/retryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="#3b1629"
+            android:gravity="center"
+            android:text="Riprova a caricare"
+            android:textColor="@color/colorForeground"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <!-- Present -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        android:paddingTop="13dp"
-        android:text="Anno"
-        android:textColor="#FFFFFF"
-        android:textSize="16dp" />
+        android:orientation="vertical">
 
-    <Spinner
-        android:id="@+id/year_spinner"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="#FFF">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="13dp"
+            android:text="Corso di studio"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
-    </Spinner>
-</LinearLayout>
+        <Spinner
+            android:id="@+id/coursesSpinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="#FFF" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:paddingTop="13dp"
+            android:text="Anno e corso"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/yearSpinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="#FFF">
+
+        </Spinner>
+    </LinearLayout>
+
+</com.geridea.trentastico.gui.views.utils.LEPView>
+

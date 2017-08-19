@@ -8,28 +8,26 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.geridea.trentastico.R
-import java.util.*
+import com.geridea.trentastico.model.StudyYear
 
-class YearsAdapter(context: Context) : ItemsAdapter<Int>(context) {
-
+class YearsAdapter(context: Context, years: List<StudyYear>) : ItemsAdapter<StudyYear>(context) {
 
     init {
-
-        val integers = ArrayList<Int>()
-        integers.add(1)
-        integers.add(2)
-        integers.add(3)
-        integers.add(4)
-        integers.add(5)
-
-        itemsList = integers
+        itemsList = years
     }
 
-    override fun createView(item: Int?, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_spinner, parent, false)
+    override fun createView(
+            item: StudyYear?,
+            pos: Int,
+            parent: ViewGroup,
+            inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_spinner, parent, false)
 
-    override fun bindView(item: Int?, pos: Int, textView: View) {
-        (textView.findViewById(R.id.text) as TextView).text = item!!.toString()
+    override fun bindView(item: StudyYear, pos: Int, view: View) {
+        (view.findViewById(R.id.text) as TextView).text = item.name
     }
 
-    override fun getItemId(pos: Int): Long = getItem(pos).toLong()
+    override fun getItemId(pos: Int): Long = pos.toLong()
+
+    fun getPositionOfYearWithId(idToSearch: String): Int? =
+            (0 until itemsList.size).firstOrNull { itemsList[it].id == idToSearch }
 }

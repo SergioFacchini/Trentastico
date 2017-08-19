@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.SeekBar
 import android.widget.Switch
 import android.widget.TextView
@@ -35,25 +36,28 @@ class SettingsFragment : FragmentWithMenuItems() {
     /**
      * Prevents listeners from triggering unnecessarily.
      */
-    internal var isLoading = true
+    var isLoading = true
 
     //Calendar
-    @BindView(R.id.font_size_seek_bar)  lateinit var fontSizeSeekBar: SeekBar
-    @BindView(R.id.font_preview)  lateinit var fontSizePreview: TextView
+    @BindView(R.id.font_size_seek_bar) lateinit var fontSizeSeekBar: SeekBar
+    @BindView(R.id.font_preview) lateinit var fontSizePreview: TextView
 
     //Study course
-    @BindView(R.id.current_study_course)  lateinit var currentStudyCourse: TextView
+    @BindView(R.id.current_study_course) lateinit var currentStudyCourse: TextView
 
     //Lessons updates
-    @BindView(R.id.search_for_lesson_changes)  lateinit var searchForLessonChanges: Switch
-    @BindView(R.id.lesson_change_show_notification)  lateinit var shownNotificationOnLessonChanges: Switch
+    @BindView(R.id.search_for_lesson_changes) lateinit var searchForLessonChanges: Switch
+    @BindView(R.id.lesson_change_show_notification) lateinit var shownNotificationOnLessonChanges: Switch
 
     //Next lesson notification
-    @BindView(R.id.show_next_lesson_notification)  lateinit var showNextLessonNotification: Switch
-    @BindView(R.id.make_notifications_fixed)  lateinit var makeNotificationFixedSwitch: Switch
+    @BindView(R.id.show_next_lesson_notification) lateinit var showNextLessonNotification: Switch
+    @BindView(R.id.make_notifications_fixed) lateinit var makeNotificationFixedSwitch: Switch
 
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+            inflater: LayoutInflater?,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
         isLoading = true
 
         val view = inflater!!.inflate(R.layout.fragment_settings, container, false)
@@ -64,7 +68,10 @@ class SettingsFragment : FragmentWithMenuItems() {
         updateCalendarFontPreview(AppPreferences.calendarFontSize)
 
         fontSizeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) = updateCalendarFontPreview(MIN_CALENDAR_FONT_SIZE + progress)
+            override fun onProgressChanged(
+                    seekBar: SeekBar,
+                    progress: Int,
+                    fromUser: Boolean) = updateCalendarFontPreview(MIN_CALENDAR_FONT_SIZE + progress)
 
             override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
 
@@ -90,7 +97,7 @@ class SettingsFragment : FragmentWithMenuItems() {
         return view
     }
 
-    private fun updateCalendarFontPreview(fontSize: Int) = fontSizePreview!!.setTextSize(COMPLEX_UNIT_SP, fontSize.toFloat())
+    private fun updateCalendarFontPreview(fontSize: Int) = fontSizePreview.setTextSize(COMPLEX_UNIT_SP, fontSize.toFloat())
 
     ///////////////////////////
     ////LESSONS UPDATES
@@ -175,31 +182,40 @@ class SettingsFragment : FragmentWithMenuItems() {
             Unit
 
 
-    protected inner class ChangeStudyCourseDialog(context: Context) : AlertDialog(context) {
+    inner class ChangeStudyCourseDialog(context: Context) : AlertDialog(context) {
 
         /**
          * Dispatched when the user changed or did not change the study course and just pressed OK.
          */
         val onChoiceMade = Signal1<StudyCourse>()
 
-        @BindView(R.id.course_selector)  lateinit var courseSelector: CourseSelectorView
+        @BindView(R.id.course_selector) lateinit var courseSelector: CourseSelectorView
+        @BindView(R.id.change_button)   lateinit var changeButton: Button
 
         init {
-
             val view = Views.inflate<View>(context, R.layout.dialog_change_study_course)
             ButterKnife.bind(this, view)
 
-            courseSelector.setStudyCourse(AppPreferences.studyCourse)
+            courseSelector.selectStudyCourse(AppPreferences.studyCourse)
+
+            changeButton.visibility = View.GONE
+
+            courseSelector.onCoursesLoaded.connect {
+                changeButton.visibility = View.VISIBLE
+            }
+            courseSelector.loadCourses()
 
             setView(view)
         }
 
         @OnClick(R.id.change_button)
         internal fun onChangeStudyCourseButtonClicked() {
-            val selectedCourse = courseSelector.selectedStudyCourse
+            val selectedCourse = courseSelector.buildStudyCourse()
             if (AppPreferences.studyCourse == selectedCourse) {
                 //We just clicked ok without changing our course...
                 onChoiceMade.dispatch(selectedCourse)
+
+                dismiss()
             } else {
                 clearFilters()
                 clearCache(selectedCourse)
@@ -209,9 +225,10 @@ class SettingsFragment : FragmentWithMenuItems() {
 
                 dealWithNextLessonNotifications()
                 onChoiceMade.dispatch(selectedCourse)
+
+                dismiss()
             }
 
-            dismiss()
         }
 
         private fun dealWithNextLessonNotifications() {
@@ -223,7 +240,8 @@ class SettingsFragment : FragmentWithMenuItems() {
             ))
         }
 
-        private fun removeOverlappingExtraCourses(selectedCourse: StudyCourse) = AppPreferences.removeExtraCoursesHaving(selectedCourse.courseId, selectedCourse.year)
+        private fun removeOverlappingExtraCourses(selectedCourse: StudyCourse)
+                = AppPreferences.removeExtraCoursesOfCourse(selectedCourse)
 
         private fun clearFilters() {
             AppPreferences.removeAllHiddenCourses() //No longer need them
@@ -236,10 +254,7 @@ class SettingsFragment : FragmentWithMenuItems() {
 
             //If we've just selected a course that we already had in our extra course, we need to
             //delete that course from cache
-            val overlappingExtraCourses = AppPreferences.getExtraCoursesHaving(
-                    selectedCourse.courseId, selectedCourse.year
-            )
-
+            val overlappingExtraCourses = AppPreferences.getExtraCoursesOfCourse(selectedCourse)
             for (overlappingExtraCourse in overlappingExtraCourses) {
                 Networker.removeExtraCoursesWithLessonType(overlappingExtraCourse.lessonTypeId)
             }

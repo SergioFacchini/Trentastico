@@ -10,7 +10,7 @@ import java.util.*
 open class LessonsSet {
 
     val scheduledLessons: HashMap<Long, LessonSchedule> = HashMap()
-    val lessonTypes: HashMap<Int, LessonType> = HashMap()
+    val lessonTypes: HashMap<String, LessonType> = HashMap()
 
     fun addLessonType(lessonType: LessonType) {
         lessonTypes.put(lessonType.id, lessonType)

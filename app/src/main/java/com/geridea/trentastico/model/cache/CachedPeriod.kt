@@ -15,31 +15,36 @@ import com.geridea.trentastico.utils.time.WeekTime
 class CachedPeriod {
 
     var id: Long = 0
-    var lesson_type = LESSON_TYPE_NONE.toLong()
+
+    /**
+     * When null, it refers to standard study course; when set, it refers to an extra study course
+     */
+    var cachedPeriodType: String?
         private set
+
     var cached_in_ms: Long = 0
         private set
 
     var interval: WeekInterval
         private set
 
-    constructor(id: Long, period: WeekInterval, lesson_type: Long, cached_in_ms: Long) {
+    constructor(id: Long, period: WeekInterval, lesson_type: String?, cached_in_ms: Long) {
         this.id = id
         this.interval = period
-        this.lesson_type = lesson_type
+        this.cachedPeriodType = lesson_type
         this.cached_in_ms = cached_in_ms
     }
 
     constructor(interval: WeekInterval) {
         this.id = -1
-        this.lesson_type = LESSON_TYPE_NONE.toLong()
+        this.cachedPeriodType = null
         this.interval = interval.copy()
         this.cached_in_ms = System.currentTimeMillis()
     }
 
-    constructor(interval: WeekInterval, lesson_type: Int) {
+    constructor(interval: WeekInterval, lesson_type: String) {
         this.id = -1
-        this.lesson_type = lesson_type.toLong()
+        this.cachedPeriodType = lesson_type
         this.interval = interval.copy()
         this.cached_in_ms = System.currentTimeMillis()
     }
@@ -50,10 +55,10 @@ class CachedPeriod {
             startYear: Int,
             endWeek: Int,
             endYear: Int,
-            lesson_type: Long,
+            lesson_type: String?,
             cached_in_ms: Long) {
         this.id = id
-        this.lesson_type = lesson_type
+        this.cachedPeriodType = lesson_type
         this.cached_in_ms = cached_in_ms
 
         this.interval = WeekInterval(startWeek, startYear, endWeek, endYear)
@@ -63,26 +68,25 @@ class CachedPeriod {
         this.interval = period
     }
 
-    fun copy(): CachedPeriod = CachedPeriod(-1, interval, lesson_type, cached_in_ms)
+    fun copy(): CachedPeriod = CachedPeriod(-1, interval, cachedPeriodType, cached_in_ms)
 
     operator fun contains(timeToCheck: WeekTime): Boolean = interval.contains(timeToCheck)
 
-    override fun toString(): String = "[id: $id $interval type:$lesson_type]"
+    override fun toString(): String = "[id: $id $interval type:$cachedPeriodType]"
 
 
     val isStudyCoursePeriod: Boolean
-        get() = lesson_type == LESSON_TYPE_NONE.toLong()
+        get() = cachedPeriodType == null
 
     val isExtraCoursePeriod: Boolean
-        get() = lesson_type != LESSON_TYPE_NONE.toLong()
+        get() = cachedPeriodType != null
 
-    fun canContainStudyLesson(lesson: LessonSchedule): Boolean = lesson_type == LESSON_TYPE_NONE.toLong() && interval!!.contains(lesson.startCal)
+    fun canContainStudyLesson(lesson: LessonSchedule): Boolean = cachedPeriodType == null && interval.contains(lesson.startCal)
 
-    fun canContainExtraLesson(lesson: LessonSchedule, extraCourse: ExtraCourse): Boolean = lesson.lessonTypeId == extraCourse.lessonTypeId.toLong() && interval!!.contains(lesson.startCal)
+    fun canContainExtraLesson(lesson: LessonSchedule, extraCourse: ExtraCourse): Boolean
+            = lesson.lessonTypeId == extraCourse.lessonTypeId.toLong() && interval.contains(lesson.startCal)
 
     companion object {
-
-        private val LESSON_TYPE_NONE = 0
 
         fun fromCursor(cursor: Cursor): CachedPeriod = CachedPeriod(
                 cursor.getLong(cursor.getColumnIndexOrThrow(CP_ID)),
@@ -90,7 +94,7 @@ class CachedPeriod {
                 cursor.getInt(cursor.getColumnIndexOrThrow(CP_START_YEAR)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_WEEK)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(CP_END_YEAR)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(CP_LESSON_TYPE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CP_PERIOD_TYPE)),
                 cursor.getLong(cursor.getColumnIndexOrThrow(CP_CACHED_IN_MS))
         )
     }

@@ -20,7 +20,6 @@ import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.network.controllers.listener.LessonsWithRoomListener
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ArrayUtils
 import com.geridea.trentastico.utils.UIUtils.showToastIfInDebug
@@ -98,40 +97,21 @@ class NextLessonNotificationService : Service() {
                         //There are no lessons starting soon, however we still have some lessons to
                         //show. We're going to show the notification for the lessons starting next
                         val nextLessons = findLessonsStartingNext(validLessons)
-                        loadRoomsForLessonsIfMissing(nextLessons, object: LessonsWithRoomListener {
-                            override fun onLoadingCompleted(
-                                    updatedLessons: ArrayList<LessonSchedule>,
-                                    lessonsWithoutRooms: ArrayList<LessonSchedule>) {
+                        showNotificationsForLessonsIfNeeded(nextLessons, starter)
 
-                                showNotificationsForLessonsIfNeeded(updatedLessons, starter)
-
-                                notificationsTracker.notifyLessonsWithoutRoom(lessonsWithoutRooms)
-
-                                //Since we've already shown notifications for these lessons, we won't
-                                //consider them for the next scheduling:
-                                validLessons.removeAll(updatedLessons)
-                                scheduleForTheNextLessonAndStop(validLessons, currentLessons)
-                            }
-                        })
+                        //Since we've already shown notifications for these lessons, we won't
+                        //consider them for the next scheduling:
+                        validLessons.removeAll(nextLessons)
+                        scheduleForTheNextLessonAndStop(validLessons, currentLessons)
 
                     } else {
-                        loadRoomsForLessonsIfMissing(lessonsStartingSoon, object: LessonsWithRoomListener {
-                            override fun onLoadingCompleted(
-                                    updatedLessons: ArrayList<LessonSchedule>,
-                                    lessonsWithoutRooms: ArrayList<LessonSchedule>) {
+                        //We have to show a notification for each lesson:
+                        showNotificationsForLessonsIfNeeded(lessonsStartingSoon, starter)
 
-                                //We have to show a notification for each lesson:
-                                showNotificationsForLessonsIfNeeded(updatedLessons, starter)
-
-                                notificationsTracker.notifyLessonsWithoutRoom(lessonsWithoutRooms)
-
-                                //We have already shown notifications for the lessons starting soon. We don't
-                                //consider these for the next start calculation
-                                validLessons.removeAll(updatedLessons)
-                                scheduleForTheNextLessonAndStop(validLessons, currentLessons)
-                            }
-                        })
-
+                        //We have already shown notifications for the lessons starting soon. We don't
+                        //consider these for the next start calculation
+                        validLessons.removeAll(lessonsStartingSoon)
+                        scheduleForTheNextLessonAndStop(validLessons, currentLessons)
                     }
                 }
             }
@@ -146,8 +126,6 @@ class NextLessonNotificationService : Service() {
 
     private fun showNotificationsForLessonsIfNeeded(lessons: ArrayList<LessonSchedule>, starter: NLNStarter) = lessons.filter { notificationsTracker.shouldNotificationBeShown(it, starter) }
            .forEach { showNotificationForLessons(it) }
-
-    private fun loadRoomsForLessonsIfMissing(lessons: ArrayList<LessonSchedule>, listener: LessonsWithRoomListener) = Networker.loadRoomsForLessonsIfMissing(lessons, listener)
 
     private fun findCurrentLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
         val now = CalendarUtils.debuggableMillis

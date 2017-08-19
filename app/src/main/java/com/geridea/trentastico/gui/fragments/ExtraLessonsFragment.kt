@@ -37,11 +37,14 @@ import com.threerings.signals.Signal0
 
 class ExtraLessonsFragment : FragmentWithMenuItems() {
 
-    @BindView(R.id.extra_lessons_list)  lateinit var lessonsList: ListView
-    @BindView(R.id.no_extra_courses_label)  lateinit var noExtraCoursesLabel: TextView
+    @BindView(R.id.extra_lessons_list) lateinit var lessonsList: ListView
+    @BindView(R.id.no_extra_courses_label) lateinit var noExtraCoursesLabel: TextView
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.fragment_extra_lessons, container, false)
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_extra_lessons, container, false)
         ButterKnife.bind(this, view)
 
         initLessonsList()
@@ -100,6 +103,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
     }
 
     internal inner class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse) : AlertDialog(context) {
+
         @BindView(R.id.course_name)
         lateinit var courseName: TextView
         @BindView(R.id.study_course_name)
@@ -114,12 +118,11 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         val onDeleteConfirm = Signal0()
 
         init {
-
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_delete)
             ButterKnife.bind(this, view)
 
-            courseName.text = course.name
-            studyCourseName.text = course.studyCourseFullName
+            courseName.text = course.lessonName
+            studyCourseName.text = course.fullName
             color.setImageDrawable(ColorDrawable(course.color))
 
             setView(view)
@@ -160,17 +163,16 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_add)
             ButterKnife.bind(this, view)
 
-            val studyCourse = AppPreferences.studyCourse
-            studyCourse.decreaseOrChangeYear()
+            cannotSelectCurrentStudyCourse.visibility = GONE
 
-            courseSelector.setStudyCourse(studyCourse)
+            courseSelector.loadCourses()
             courseSelector.onCourseChanged.connect { newStudyCourse ->
                 if (newStudyCourse == AppPreferences.studyCourse) {
                     cannotSelectCurrentStudyCourse.visibility = View.VISIBLE
-                    searchForLessonsButton.isEnabled = false
+                    searchForLessonsButton.visibility = View.GONE
                 } else {
                     cannotSelectCurrentStudyCourse.visibility = GONE
-                    searchForLessonsButton.isEnabled = true
+                    searchForLessonsButton.visibility = View.VISIBLE
                 }
             }
 
@@ -179,16 +181,14 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         @OnClick(R.id.search_for_lessons)
         fun onSearchForLessonsButtonClicked() {
-            val selectedStudyCourse = courseSelector.selectedStudyCourse
+            val selectedStudyCourse = courseSelector.buildStudyCourse()
             if (selectedStudyCourse == AppPreferences.studyCourse) {
                 cannotSelectCurrentStudyCourse.visibility = View.VISIBLE
                 searchForLessonsButton.isEnabled = false
                 return
             }
 
-            val dialog = ExtraCourseSearchDialog(
-                    activity, selectedStudyCourse
-            )
+            val dialog = ExtraCourseSearchDialog(activity, selectedStudyCourse)
             dialog.onCourseSelectedAndAdded.connect {
                 onNewCourseAdded.dispatch()
                 dismiss()
@@ -199,7 +199,10 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
     }
 
-    internal inner class ExtraCourseSearchDialog(context: Context, private val studyCourse: StudyCourse) : AlertDialog(context), ListLessonsListener {
+    internal inner class ExtraCourseSearchDialog(
+            context: Context,
+            private val studyCourse: StudyCourse) : AlertDialog(context), ListLessonsListener {
+
         @BindView(R.id.searching_lessons)
         lateinit var searchingLessons: View
         @BindView(R.id.lessons_found)
@@ -223,7 +226,8 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_search)
             ButterKnife.bind(this, view)
 
-            selectedCourseTextView.text = "Sto cercando le lezioni del corso da te selezionato: " + studyCourse.generateFullDescription()
+            selectedCourseTextView.text = "Sto cercando le lezioni del corso da te selezionato: " +
+                                            studyCourse.generateFullDescription()
 
             lessonsFound.visibility = GONE
 
@@ -240,7 +244,9 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             val lesson = lessonsList.getItemAtPosition(position) as LessonType
 
             if (!AppPreferences.hasExtraCourseWithId(lesson.id)) {
-                AppPreferences.addExtraCourse(ExtraCourse(studyCourse, lesson))
+                AppPreferences.addExtraCourse(
+                    ExtraCourse(lesson.id, lesson.name, lesson.partitioningName, studyCourse, lesson.color)
+                )
 
                 dismiss()
                 onCourseSelectedAndAdded.dispatch()
@@ -249,15 +255,15 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         override fun onErrorHappened(error: Exception) = showErrorMessage()
 
-        private fun showErrorMessage() = activity.runOnUiThread { errorWhileSearching!!.visibility = View.VISIBLE }
+        private fun showErrorMessage() = activity.runOnUiThread { errorWhileSearching.visibility = View.VISIBLE }
 
         override fun onParsingErrorHappened(e: Exception) = showErrorMessage()
 
         override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = activity.runOnUiThread {
-            lessonsList!!.adapter = LessonTypesAdapter(context, lessonTypes)
+            lessonsList.adapter = LessonTypesAdapter(context, lessonTypes)
 
-            searchingLessons!!.visibility = View.GONE
-            lessonsFound!!.visibility = View.VISIBLE
+            searchingLessons.visibility = View.GONE
+            lessonsFound.visibility = View.VISIBLE
         }
     }
 }

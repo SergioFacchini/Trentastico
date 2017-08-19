@@ -20,16 +20,13 @@ import java.util.*
 class ShownNotificationsTracker {
 
     private val shownNotificationsIds: HashSet<Long>
-    private val roomlessLessonsIds: HashSet<Long>
 
-    constructor(shownIds: HashSet<Long>, roomlessIds: HashSet<Long>) {
+    constructor(shownIds: HashSet<Long>) {
         shownNotificationsIds = shownIds
-        roomlessLessonsIds = roomlessIds
     }
 
     constructor() {
         shownNotificationsIds = HashSet()
-        roomlessLessonsIds = HashSet()
     }
 
     /**
@@ -39,7 +36,6 @@ class ShownNotificationsTracker {
      *  * It's about a lesson that the user has not been notified about
      *  * We changed a setting about notifications, so all the notifications have to be
      * displayed all over again.
-     *  * The notification didn't have a room
      *
      * A lesson notification won't be shown when:
      *
@@ -49,26 +45,12 @@ class ShownNotificationsTracker {
      * @param starter the starter of the service
      * @return true if the notification should be shown, false otherwise
      */
-    fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean = if (shownNotificationsIds.contains(lesson.id)) {
-        //We already have shown the notification to the user. Let's check if we should
-        //reshow that
-        if (didLessonGainRoom(lesson)) {
-            //We could not fetch the room of the given lesson and now we have internet. The
-            //lesson is now probably updated.
-            true
-        } else {
-            ArrayUtils.isOneOf(starter,
-                    NLNStarter.PHONE_BOOT,
-                    NLNStarter.STUDY_COURSE_CHANGE,
-                    NLNStarter.NOTIFICATIONS_SWITCHED_ON)
-        }
-    } else {
-        true
-    }
-
-    private fun didLessonGainRoom(lesson: LessonSchedule): Boolean = lesson.hasRoomSpecified() && isLessonWithoutRoom(lesson)
-
-    private fun isLessonWithoutRoom(lesson: LessonSchedule): Boolean = roomlessLessonsIds.contains(lesson.id)
+    fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean =
+        if (!shownNotificationsIds.contains(lesson.id))  true
+        else ArrayUtils.isOneOf(starter,
+                                NLNStarter.PHONE_BOOT,
+                                NLNStarter.STUDY_COURSE_CHANGE,
+                                NLNStarter.NOTIFICATIONS_SWITCHED_ON)
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson
@@ -89,7 +71,6 @@ class ShownNotificationsTracker {
             val json = JSONObject()
 
             json.put("shown-notifications", JsonUtils.collectionToArray(shownNotificationsIds))
-            json.put("roomless-notifications", JsonUtils.collectionToArray(roomlessLessonsIds))
 
             json
         } catch (e: JSONException) {
@@ -99,16 +80,6 @@ class ShownNotificationsTracker {
             throw RuntimeException(e)
         }
 
-    }
-
-    /**
-     * Notifies this tracked that the lessons passed as parameter don't have rooms
-     * @param lessonsWithoutRooms the lessons without rooms
-     */
-    fun notifyLessonsWithoutRoom(lessonsWithoutRooms: ArrayList<LessonSchedule>) {
-        for (lessonsWithoutRoom in lessonsWithoutRooms) {
-            roomlessLessonsIds.add(lessonsWithoutRoom.id)
-        }
     }
 
     companion object {
@@ -123,11 +94,7 @@ class ShownNotificationsTracker {
                         jsonObject.getJSONArray("shown-notifications")
                 )
 
-                val roomlessIds = JsonUtils.getLongHashSet(
-                        jsonObject.getJSONArray("roomless-notifications")
-                )
-
-                ShownNotificationsTracker(shownIds, roomlessIds)
+                ShownNotificationsTracker(shownIds)
             } catch (e: JSONException) {
                 e.printStackTrace()
                 BugLogger.logBug("Cannot convert notification json to notifications tracker", e)

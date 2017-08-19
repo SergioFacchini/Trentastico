@@ -1,57 +1,40 @@
 package com.geridea.trentastico.model
 
-import com.geridea.trentastico.providers.DepartmentsProvider
-import java.util.*
+import org.json.JSONObject
 
-class StudyCourse(val departmentId: Long, val courseId: Long, year: Int) {
-    var year: Int = 0
-        private set
+/**
+ * Keeps track of the id of the course and a year of that course. Useful to identify a specific
+ * study course.
+ */
+data class StudyCourse(
+        var courseId: String,
+        var courseName: String,
+        var yearId: String,
+        var yearName: String) {
 
-    init {
-        this.year = year
+    fun generateFullDescription(): String = "$courseName > $yearName"
+
+    fun toJson(): JSONObject {
+        val json = JSONObject()
+        json.put("courseId", courseId)
+        json.put("courseName", courseName)
+        json.put("yearId", yearId)
+        json.put("yearName", yearName)
+
+        return json
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj is StudyCourse) {
-            val course = obj as StudyCourse?
-            return course!!.departmentId == this.departmentId &&
-                    course.courseId == this.courseId &&
-                    course.year == this.year
-        }
+    companion object {
 
-        return false
-    }
-
-    /**
-     * Tries to decrease the year if possible; if not increases it by one. Used to get the previous
-     * year's study course if possible.
-     */
-    fun decreaseOrChangeYear() {
-        if (year == 1) {
-            year++
-        } else {
-            year--
-        }
-    }
-
-    fun generateFullDescription(): String {
-        val department = DepartmentsProvider.getDepartmentWithId(departmentId)
-        val course = department.getCourseWithId(courseId)
-
-        return String.format(Locale.ITALY, "%s > %s - %d° anno",
-                department.name, course.name, year
+        fun fromJson(string: JSONObject): StudyCourse = StudyCourse(
+            courseId   = string.getString("courseId"),
+            courseName = string.getString("courseName"),
+            yearId     = string.getString("yearId"),
+            yearName   = string.getString("yearName")
         )
 
+        fun fromStringJson(string: String): StudyCourse = fromJson(JSONObject(string))
 
     }
 
-    val courseAndYear: CourseAndYear
-        get() {
-            val cay = CourseAndYear()
-            cay.courseId = courseId
-            cay.year = year
-            return cay
-        }
-
-    override fun toString(): String = String.format("Department: %d - Course: %d - Year %d", departmentId, courseId, year)
 }

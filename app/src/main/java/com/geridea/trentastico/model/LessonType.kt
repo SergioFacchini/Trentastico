@@ -1,19 +1,22 @@
 package com.geridea.trentastico.model
 
 import com.geridea.trentastico.model.cache.CachedLessonType
-import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.StringUtils
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.*
 
-class LessonType(val id: Int, val name: String, val color: Int, var isVisible: Boolean) {
+class LessonType(
+        val id: String,
+        val name: String,
+        val partitioningName: String,
+        val color: Int,
+        var isVisible: Boolean) {
 
     var partitioning: Partitioning = Partitioning.NONE
 
     constructor(cachedLessonType: CachedLessonType, isVisible: Boolean) : this(
             cachedLessonType.lesson_type_id,
             cachedLessonType.name,
+            cachedLessonType.partitioningName,
             cachedLessonType.color,
             isVisible)
 
@@ -47,14 +50,6 @@ class LessonType(val id: Int, val name: String, val color: Int, var isVisible: B
             return Partitioning.NONE
         }
 
-        @Throws(JSONException::class)
-        fun fromJson(jsonObject: JSONObject): LessonType = LessonType(
-            id        = jsonObject.getInt("IdADfisica"),
-            name      = jsonObject.getString("DescrizioneAD"),
-            color     = getColorFromCSSStyle(cssClassName = jsonObject.getString("Css")),
-            isVisible = !AppPreferences.hasLessonTypeWithIdHidden(jsonObject.getInt("IdADfisica").toLong())
-        )
-
         fun getSortedLessonTypes(lessons: Collection<LessonType>): ArrayList<LessonType> {
             val lessonTypes = ArrayList(lessons)
 
@@ -65,15 +60,15 @@ class LessonType(val id: Int, val name: String, val color: Int, var isVisible: B
 
         fun getColorFromCSSStyle(cssClassName: String): Int {
             when (cssClassName) {
-                "colore1"  -> return 0xFFFFEFAA.toInt()
-                "colore2"  -> return 0xFFFFF9AA.toInt()
-                "colore3"  -> return 0xFFFAFFAA.toInt()
-                "colore4"  -> return 0xFFF0FFAA.toInt()
-                "colore5"  -> return 0xFFE7FFAA.toInt()
-                "colore6"  -> return 0xFFDDFFAA.toInt()
-                "colore7"  -> return 0xFFD3FFAA.toInt()
-                "colore8"  -> return 0xFFC9FFAA.toInt()
-                "colore9"  -> return 0xFFBFFFAA.toInt()
+                "colore1" -> return 0xFFFFEFAA.toInt()
+                "colore2" -> return 0xFFFFF9AA.toInt()
+                "colore3" -> return 0xFFFAFFAA.toInt()
+                "colore4" -> return 0xFFF0FFAA.toInt()
+                "colore5" -> return 0xFFE7FFAA.toInt()
+                "colore6" -> return 0xFFDDFFAA.toInt()
+                "colore7" -> return 0xFFD3FFAA.toInt()
+                "colore8" -> return 0xFFC9FFAA.toInt()
+                "colore9" -> return 0xFFBFFFAA.toInt()
                 "colore10" -> return 0xFFB6FFAA.toInt()
                 "colore11" -> return 0xFFACFFAA.toInt()
                 "colore12" -> return 0xFFAAFFBD.toInt()

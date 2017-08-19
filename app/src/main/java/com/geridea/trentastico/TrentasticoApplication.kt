@@ -1,14 +1,11 @@
 package com.geridea.trentastico
 
 import android.app.Application
-
 import com.alexvasilkov.android.commons.utils.AppContext
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.providers.DepartmentsProvider
 import com.geridea.trentastico.utils.AppPreferences
-
 import org.acra.ACRA
 import org.acra.ReportingInteractionMode
 import org.acra.annotation.ReportsCrashes
@@ -32,7 +29,6 @@ class TrentasticoApplication : Application() {
         Networker.init(Cacher(this))
 
         AppPreferences.init(this)
-        DepartmentsProvider.loadIfNeeded()
 
         BugLogger.init()
 

@@ -96,11 +96,11 @@ class LessonSchedule(
     val durationInMinutes: Int
         get() = TimeUnit.MILLISECONDS.toMinutes(endsAt - startsAt).toInt()
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
 
-        val that = o as LessonSchedule?
+        val that = other as LessonSchedule?
 
         return id == that!!.id
                 && startsAt == that.startsAt
@@ -129,6 +129,17 @@ class LessonSchedule(
     }
 
     fun hasPartitioning(partitioningText: String): Boolean = fullDescription.contains("($partitioningText)")
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + (room?.hashCode() ?: 0)
+        result = 31 * result + subject.hashCode()
+        result = 31 * result + startsAt.hashCode()
+        result = 31 * result + endsAt.hashCode()
+        result = 31 * result + fullDescription.hashCode()
+        result = 31 * result + color
+        result = 31 * result + lessonTypeId.hashCode()
+        return result
+    }
 
     companion object {
 
@@ -168,16 +179,6 @@ class LessonSchedule(
             }
 
             return diffResult
-        }
-
-        fun findCourseAndYearForLesson(lesson: LessonSchedule): CourseAndYear {
-            for (extraCourse in AppPreferences.extraCourses) {
-                if (extraCourse.lessonTypeId.toLong() == lesson.lessonTypeId) {
-                    return extraCourse.courseAndYear
-                }
-            }
-
-            return AppPreferences.studyCourse.courseAndYear
         }
 
         fun getLessonsOfType(

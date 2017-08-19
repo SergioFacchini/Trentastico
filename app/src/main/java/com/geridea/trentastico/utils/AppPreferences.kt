@@ -44,18 +44,11 @@ object AppPreferences {
         set(isFirstRun) = putBoolean("IS_FIRST_RUN", isFirstRun)
 
     var studyCourse: StudyCourse
-        get() = StudyCourse(
-                get().getLong("STUDY_DEPARTMENT", 0),
-                get().getLong("STUDY_COURSE", 0),
-                get().getInt("STUDY_YEAR", 0)
+        get() = StudyCourse.fromStringJson(
+            get().getString("STUDY_COURSE", "{}")
         )
         set(course) {
-            val editor = get().edit()
-            editor.putLong("STUDY_DEPARTMENT", course.departmentId)
-            editor.putLong("STUDY_COURSE", course.courseId)
-            editor.putInt("STUDY_YEAR", course.year)
-            editor.apply()
-
+            putString("STUDY_COURSE", course.toJson().toString())
             BugLogger.setStudyCourse(course)
         }
 
@@ -99,7 +92,7 @@ object AppPreferences {
         get() = get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
         set(numOfDays) = putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays)
 
-    private fun setPartitioningsToHide(lessonTypeId: Int, partitioningCases: ArrayList<PartitioningCase>) = try {
+    private fun setPartitioningsToHide(lessonTypeId: String, partitioningCases: ArrayList<PartitioningCase>) = try {
         //Building values array
         val jsonArrayCases = JSONArray()
         for (aCase in partitioningCases) {
@@ -108,7 +101,7 @@ object AppPreferences {
 
         //Saving partitionings
         val partitioningJSON = partitioningsJSON
-        partitioningJSON.put(lessonTypeId.toString(), jsonArrayCases)
+        partitioningJSON.put(lessonTypeId, jsonArrayCases)
 
         putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString())
     } catch (e: JSONException) {
@@ -185,16 +178,17 @@ object AppPreferences {
         editor.apply()
     }
 
-    fun hasExtraCourseWithId(lessonTypeId: Int): Boolean = extraCourses.hasCourseWithId(lessonTypeId)
+    fun hasExtraCourseWithId(lessonTypeId: String): Boolean = extraCourses.hasCourseWithId(lessonTypeId)
 
-    fun removeExtraCoursesHaving(courseId: Long, year: Int) {
-        extraCourses.removeHaving(courseId, year)
+    fun removeExtraCoursesOfCourse(studyCourse: StudyCourse) {
+        extraCourses.removeHaving(studyCourse)
         saveExtraCourses()
     }
 
-    fun getExtraCoursesHaving(courseId: Long, year: Int): ArrayList<ExtraCourse> = extraCourses.getExtraCoursesHaving(courseId, year)
+    fun getExtraCoursesOfCourse(studyCourse: StudyCourse): ArrayList<ExtraCourse>
+            = extraCourses.getExtraCoursesOfCourse(studyCourse)
 
-    fun removeExtraCourse(lessonTypeId: Int) {
+    fun removeExtraCourse(lessonTypeId: String) {
         extraCourses.removeHavingLessonType(lessonTypeId)
         saveExtraCourses()
     }

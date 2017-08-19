@@ -14,6 +14,9 @@ import java.util.*
 
 class ExtraCourseCachedInterval(interval: WeekInterval, private val extraCourse: ExtraCourse, private val cachedLessons: ArrayList<LessonSchedule>) : CachedInterval(interval) {
 
-    override fun launchDiffRequest(controller: LessonsController, listener: LessonsDifferenceListener) = controller.diffExtraCourseLessons(this, extraCourse, cachedLessons, listener)
+    override fun launchDiffRequest(controller: LessonsController, listener: LessonsDifferenceListener)
+    {
+        //TODO: implement after course loading
+    }
 
 }

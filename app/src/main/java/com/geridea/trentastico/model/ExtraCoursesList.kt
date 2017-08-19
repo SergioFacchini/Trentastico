@@ -6,20 +6,12 @@ package com.geridea.trentastico.model
  */
 
 import org.json.JSONArray
-
-import java.util.ArrayList
+import java.util.*
 
 class ExtraCoursesList : ArrayList<ExtraCourse>() {
 
-    fun isAnExtraLesson(lesson: LessonSchedule): Boolean {
-        for (extraCourse in this) {
-            if (extraCourse.lessonTypeId.toLong() == lesson.lessonTypeId) {
-                return true
-            }
-        }
-
-        return false
-    }
+    fun isAnExtraLesson(lesson: LessonSchedule): Boolean =
+            this.any { it.lessonTypeId.toLong() == lesson.lessonTypeId }
 
     fun toJSON(): JSONArray {
         val jsonArray = JSONArray()
@@ -31,22 +23,14 @@ class ExtraCoursesList : ArrayList<ExtraCourse>() {
         return jsonArray
     }
 
-    fun removeHaving(courseId: Long, year: Int) {
-        removeAll(getExtraCoursesHaving(courseId, year))
+    fun removeHaving(studyCourse: StudyCourse) {
+        removeAll(getExtraCoursesOfCourse(studyCourse))
     }
 
-    fun getExtraCoursesHaving(courseId: Long, year: Int): ArrayList<ExtraCourse> {
-        val extraCourses = ArrayList<ExtraCourse>()
-        for (extraCourse in this) {
-            if (extraCourse.courseId == courseId || extraCourse.year == year) {
-                extraCourses.add(extraCourse)
-            }
-        }
+    fun getExtraCoursesOfCourse(studyCourse: StudyCourse): ArrayList<ExtraCourse> =
+            filterTo(ArrayList()) { it.isPartOfCourse(studyCourse) }
 
-        return extraCourses
-    }
-
-    fun removeHavingLessonType(lessonTypeId: Int) {
+    fun removeHavingLessonType(lessonTypeId: String) {
         val iterator = this.iterator()
         while (iterator.hasNext()) {
             val course = iterator.next()
@@ -56,12 +40,6 @@ class ExtraCoursesList : ArrayList<ExtraCourse>() {
         }
     }
 
-    fun hasCourseWithId(lessonTypeId: Int): Boolean {
-        for (extraCourse in this) {
-            if (extraCourse.lessonTypeId == lessonTypeId) {
-                return true
-            }
-        }
-        return false
-    }
+    fun hasCourseWithId(lessonTypeId: String): Boolean = any { it.lessonTypeId == lessonTypeId }
+
 }

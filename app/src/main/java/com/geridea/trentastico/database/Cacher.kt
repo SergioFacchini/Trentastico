@@ -40,7 +40,7 @@ import java.util.*
  */
 class Cacher {
 
-    private var writableDatabase: SQLiteDatabase? = null
+    private var writableDatabase: SQLiteDatabase
     private lateinit var jobQueue: JobManager
 
     constructor(context: Context) {
@@ -79,6 +79,7 @@ class Cacher {
     private fun updateLessonTypesFromSet(
             containsExtraLessonTypes: Boolean,
             lessonTypes: Collection<LessonType>) {
+
         for (lessonType in lessonTypes) {
             deleteLessonTypeWithId(lessonType.id)
             cacheLessonType(CachedLessonType(lessonType), containsExtraLessonTypes)
@@ -91,17 +92,18 @@ class Cacher {
         val values = ContentValues()
         values.put(CLT_LESSON_TYPE_ID, cachedLessonType.lesson_type_id)
         values.put(CLT_NAME, cachedLessonType.name)
+        values.put(CLT_PARTITIONING_NAME, cachedLessonType.partitioningName)
         values.put(CLT_COLOR, cachedLessonType.color)
         values.put(CLT_IS_EXTRA_COURSE, isExtraCourse)
 
-        writableDatabase!!.insert(CACHED_LESSON_TYPES_TABLE, null, values)
+        writableDatabase.insert(CACHED_LESSON_TYPES_TABLE, null, values)
     }
 
-    private fun deleteLessonTypeWithId(lessonTypeId: Int) {
+    private fun deleteLessonTypeWithId(lessonTypeId: String) {
         val selection = CLT_LESSON_TYPE_ID + " = ?"
-        val selectionArgs = arrayOf(lessonTypeId.toString())
+        val selectionArgs = arrayOf(lessonTypeId)
 
-        writableDatabase!!.delete(CACHED_LESSON_TYPES_TABLE, selection, selectionArgs)
+        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, selection, selectionArgs)
     }
 
     private fun cacheLesson(cachedLesson: CachedLesson) {
@@ -118,10 +120,12 @@ class Cacher {
         values.put(CL_DESCRIPTION, cachedLesson.description)
         values.put(CL_COLOR, cachedLesson.color)
 
-        writableDatabase!!.insert(CACHED_LESSONS_TABLE, null, values)
+        writableDatabase.insert(CACHED_LESSONS_TABLE, null, values)
     }
 
-    private fun deleteCachedExtraLessonsInInterval(interval: WeekInterval, extraCourse: ExtraCourse) {
+    private fun deleteCachedExtraLessonsInInterval(
+            interval: WeekInterval,
+            extraCourse: ExtraCourse) {
         //Trimming existing cached periods so the passed interval won't have any overlapping
         //cached interval
         for (period in loadExtraCourseCachePeriods(interval, true, extraCourse.lessonTypeId)) {
@@ -197,7 +201,7 @@ class Cacher {
         val selection = String.format(CL_CACHED_PERIOD_ID + " = ? AND (%s)", buildWeekTimeSelectionsSQL(periodToMove))
         val selectionArgs = arrayOf(originalPeriodId.toString())
 
-        writableDatabase!!.update(CACHED_LESSONS_TABLE, values, selection, selectionArgs)
+        writableDatabase.update(CACHED_LESSONS_TABLE, values, selection, selectionArgs)
     }
 
     private fun updateCachedPeriod(period: CachedPeriod) {
@@ -208,59 +212,59 @@ class Cacher {
         val selection = CP_ID + " = ?"
         val selectionArgs = arrayOf(period.id.toString())
 
-        writableDatabase!!.update(CACHED_PERIOD_TABLE, values, selection, selectionArgs)
+        writableDatabase.update(CACHED_PERIOD_TABLE, values, selection, selectionArgs)
     }
 
     private fun getCachedPeriodContentValues(period: CachedPeriod): ContentValues {
         val values = ContentValues()
-        values.put(CP_START_WEEK, period.interval.startWeekNumber)
-        values.put(CP_START_YEAR, period.interval.startYear)
-        values.put(CP_END_WEEK, period.interval.endWeekNumber)
-        values.put(CP_END_YEAR, period.interval.endYear)
-        values.put(CP_LESSON_TYPE, period.lesson_type)
+        values.put(CP_START_WEEK,   period.interval.startWeekNumber)
+        values.put(CP_START_YEAR,   period.interval.startYear)
+        values.put(CP_END_WEEK,     period.interval.endWeekNumber)
+        values.put(CP_END_YEAR,     period.interval.endYear)
+        values.put(CP_PERIOD_TYPE,  period.cachedPeriodType)
         values.put(CP_CACHED_IN_MS, period.cached_in_ms)
         return values
     }
 
     private fun deleteCachedPeriodWithId(periodId: Long) {
         val selectionArgs = arrayOf(periodId.toString())
-        writableDatabase!!.delete(CACHED_PERIOD_TABLE, CP_ID + "= ?", selectionArgs)
+        writableDatabase.delete(CACHED_PERIOD_TABLE, CP_ID + "= ?", selectionArgs)
     }
 
     private fun deleteExtraCourseLessonsInInterval(
             periodId: Long,
             interval: WeekInterval,
-            lessonTypeId: Int) =
-            deleteLessonsInIntervalInternal(periodId, interval, lessonTypeId.toLong())
+            lessonTypeId: String) =
+            deleteLessonsInIntervalInternal(periodId, interval, lessonTypeId)
 
     private fun deleteLessonsInIntervalInternal(
             periodId: Long,
             interval: WeekInterval?,
-            lessonTypeId: Long) {
+            lessonTypeId: String?) {
         var whereClause = String.format("(%s = ?) ", CL_CACHED_PERIOD_ID)
 
         if (interval != null) {
             whereClause += String.format(" AND (%s) ", buildWeekTimeSelectionsSQL(interval))
         }
 
-        if (lessonTypeId != 0L) {
+        if (lessonTypeId != null) {
             whereClause += "AND $CL_TEACHING_ID = $lessonTypeId"
         }
 
         val whereArgs = arrayOf(periodId.toString())
-        writableDatabase!!.delete(CACHED_LESSONS_TABLE, whereClause, whereArgs)
+        writableDatabase.delete(CACHED_LESSONS_TABLE, whereClause, whereArgs)
     }
 
     private fun deleteStudyCourseLessonsInInterval(
             periodId: Long,
-            interval: WeekInterval) = deleteLessonsInIntervalInternal(periodId, interval, 0)
+            interval: WeekInterval) = deleteLessonsInIntervalInternal(periodId, interval, null)
 
     private fun deleteStudyCourseLessons(periodId: Long) =
-            deleteLessonsInIntervalInternal(periodId, null, 0)
+            deleteLessonsInIntervalInternal(periodId, null, null)
 
     private fun deleteExtraLessonsOfType(
             periodId: Long,
-            lessonTypeId: Long) = deleteLessonsInIntervalInternal(periodId, null, lessonTypeId)
+            lessonTypeId: String) = deleteLessonsInIntervalInternal(periodId, null, lessonTypeId)
 
     /**
      * WARNING: this method can load periods that are bigger than the requested one!
@@ -270,7 +274,7 @@ class Cacher {
     private fun loadStudyCourseCachePeriods(
             intervalToLoad: WeekInterval,
             fetchOldCacheToo: Boolean): ArrayList<CachedPeriod> =
-            loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, 0)
+            loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, null)
 
     /**
      * WARNING: this method can load periods that are bigger than the requested one!
@@ -280,7 +284,7 @@ class Cacher {
     private fun loadExtraCourseCachePeriods(
             intervalToLoad: WeekInterval,
             fetchOldCacheToo: Boolean,
-            lessonTypeId: Int): ArrayList<CachedPeriod> =
+            lessonTypeId: String): ArrayList<CachedPeriod> =
             loadCachePeriodsInternal(intervalToLoad, fetchOldCacheToo, lessonTypeId)
 
     /**
@@ -291,8 +295,8 @@ class Cacher {
     private fun loadCachePeriodsInternal(
             interval: WeekInterval,
             fetchOldCacheToo: Boolean,
-            lessonTypeId: Int): ArrayList<CachedPeriod> {
-        val projection = arrayOf(CP_ID, CP_START_WEEK, CP_START_YEAR, CP_END_WEEK, CP_END_YEAR, CP_LESSON_TYPE, CP_CACHED_IN_MS)
+            lessonTypeId: String?): ArrayList<CachedPeriod> {
+        val projection = arrayOf(CP_ID, CP_START_WEEK, CP_START_YEAR, CP_END_WEEK, CP_END_YEAR, CP_PERIOD_TYPE, CP_CACHED_IN_MS)
 
         //Building main query:
         var query: String
@@ -315,7 +319,12 @@ class Cacher {
         }
 
         //Adding lesson type filtering
-        query += String.format(" AND %s = %d ", CP_LESSON_TYPE, lessonTypeId)
+        query += if (lessonTypeId == null) {
+            //null = standard study course (not extra)
+            " AND {$CP_PERIOD_TYPE} IS NULL "
+        } else {
+            " AND {$CP_PERIOD_TYPE} = $lessonTypeId "
+        }
 
         //Adding timing filter
         if (!fetchOldCacheToo) {
@@ -324,7 +333,7 @@ class Cacher {
             )
         }
 
-        val cursor = writableDatabase!!.query(
+        val cursor = writableDatabase.query(
                 CACHED_PERIOD_TABLE, projection, query, null, null, null, null
         )
 
@@ -371,7 +380,7 @@ class Cacher {
     private fun insertCachedPeriod(cachedPeriod: CachedPeriod): Long {
         val values = getCachedPeriodContentValues(cachedPeriod)
 
-        val id = writableDatabase!!.insert(CACHED_PERIOD_TABLE, null, values)
+        val id = writableDatabase.insert(CACHED_PERIOD_TABLE, null, values)
         cachedPeriod.id = id
 
         return id
@@ -382,8 +391,8 @@ class Cacher {
             extraCourses: ArrayList<ExtraCourse>,
             fetchOldCacheToo: Boolean,
             listener: (CachedLessonsSet) -> Unit) = jobQueue.addJobInBackground(
-                    GetLessonsInFreshOrDeadCacheJob(intervalToLoad, extraCourses, fetchOldCacheToo, listener)
-            )
+            GetLessonsInFreshOrDeadCacheJob(intervalToLoad, extraCourses, fetchOldCacheToo, listener)
+    )
 
     private fun getLessonsInFreshOrDeadCache(
             intervalToLoad: WeekInterval,
@@ -451,7 +460,7 @@ class Cacher {
         val selection = String.format("%s >= ? AND %s <= ?", CL_STARTS_AT_MS, CL_STARTS_AT_MS)
         val args = arrayOf(from.toString(), to.toString())
 
-        val cursor = writableDatabase!!.query(
+        val cursor = writableDatabase.query(
                 CACHED_LESSONS_TABLE, projection, selection, args, null, null, CL_STARTS_AT_MS
         )
 
@@ -549,7 +558,9 @@ class Cacher {
             throw IllegalArgumentException("Cannot load nothing!")
         }
 
-        val projection = arrayOf(CLT_LESSON_TYPE_ID, CLT_NAME, CLT_COLOR, CLT_IS_EXTRA_COURSE)
+        val projection = arrayOf(
+            CLT_LESSON_TYPE_ID, CLT_NAME, CLT_PARTITIONING_NAME, CLT_COLOR, CLT_IS_EXTRA_COURSE
+        )
 
         val where: String?
         val selectionArgs: Array<String>?
@@ -566,7 +577,7 @@ class Cacher {
             selectionArgs = arrayOf("1")
         }
 
-        val cursor = writableDatabase!!.query(
+        val cursor = writableDatabase.query(
                 CACHED_LESSON_TYPES_TABLE, projection, where, selectionArgs, null, null, null
         )
 
@@ -588,7 +599,7 @@ class Cacher {
 
         val selection: String
         val selectionArgs: Array<String>
-        if (cachedPeriod.lesson_type == 0L) {
+        if (cachedPeriod.cachedPeriodType == null) {
             selection = CL_CACHED_PERIOD_ID + " = ? " +
                     "AND " + CL_STARTS_AT_MS + " >= ? AND " + CL_FINISHES_AT_MS + " <= ?"
             selectionArgs = arrayOf(cachedPeriod.id.toString(), intervalToIntersect.fromMs.toString(), intervalToIntersect.toMs.toString())
@@ -596,10 +607,10 @@ class Cacher {
             //it's an extra course: we load only it's lessons
             selection = CL_CACHED_PERIOD_ID + " = ? AND " + CL_TEACHING_ID + " = ? " +
                     "AND " + CL_STARTS_AT_MS + " >= ? AND " + CL_FINISHES_AT_MS + " <= ?"
-            selectionArgs = arrayOf(cachedPeriod.id.toString(), cachedPeriod.lesson_type.toString(), intervalToIntersect.fromMs.toString(), intervalToIntersect.toMs.toString())
+            selectionArgs = arrayOf(cachedPeriod.id.toString(), cachedPeriod.cachedPeriodType.toString(), intervalToIntersect.fromMs.toString(), intervalToIntersect.toMs.toString())
         }
 
-        val cursor = writableDatabase!!.query(
+        val cursor = writableDatabase.query(
                 CACHED_LESSONS_TABLE, projection, selection, selectionArgs, null, null, null
         )
 
@@ -623,14 +634,14 @@ class Cacher {
     fun purgeStudyCourseCache() = jobQueue.addJobInBackground(PurgeStudyCourseCacheJob())
 
     private val idsOfCachedPeriodsOfStudyCourses: ArrayList<Long>
-        get() = queryForCachedPeriodIds(CP_LESSON_TYPE + " = 0")
+        get() = queryForCachedPeriodIds(CP_PERIOD_TYPE + " IS NULL")
 
-    private fun getIdsOfCachedPeriodsWithLessonType(lessonTypeId: Int): ArrayList<Long> =
-            queryForCachedPeriodIds(CP_LESSON_TYPE + " = " + lessonTypeId)
+    private fun getIdsOfCachedPeriodsWithLessonType(lessonTypeId: String): ArrayList<Long> =
+            queryForCachedPeriodIds(CP_PERIOD_TYPE + " = " + lessonTypeId.querify())
 
     private fun queryForCachedPeriodIds(where: String): ArrayList<Long> {
         val projection = arrayOf(CP_ID)
-        val query = writableDatabase!!.query(CACHED_PERIOD_TABLE, projection, where, null, null, null, null)
+        val query = writableDatabase.query(CACHED_PERIOD_TABLE, projection, where, null, null, null, null)
 
         val ids = ArrayList<Long>()
         while (query.moveToNext()) {
@@ -649,10 +660,10 @@ class Cacher {
             whereClause = CLT_IS_EXTRA_COURSE + " <> 1"
         }
 
-        writableDatabase!!.delete(CACHED_LESSON_TYPES_TABLE, whereClause, null)
+        writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, whereClause, null)
     }
 
-    fun removeExtraCoursesWithLessonType(lessonTypeId: Int) =
+    fun removeExtraCoursesWithLessonType(lessonTypeId: String) =
             jobQueue.addJobInBackground(RemoveExtraCoursesWithLessonType(lessonTypeId))
 
     /**
@@ -683,7 +694,7 @@ class Cacher {
             jobQueue.addJobInBackground(IsDayCachedJob(day, listener))
 
     private fun doDuplicatedRecordsExist(): Boolean {
-        val cursor = writableDatabase!!.rawQuery(
+        val cursor = writableDatabase.rawQuery(
                 "select count(*) AS duplicated_rows FROM ( " +
                         "select lesson_id, count(*) " +
                         "from cached_lessons " +
@@ -704,10 +715,10 @@ class Cacher {
         return numDuplicatedRows != 0
     }
 
-    private fun removeExtraCoursesWithLessonTypeImpl(lessonTypeId: Int) {
+    private fun removeExtraCoursesWithLessonTypeImpl(lessonTypeId: String) {
         for (cachedExtraId in getIdsOfCachedPeriodsWithLessonType(lessonTypeId)) {
             deleteLessonTypeWithId(lessonTypeId)
-            deleteExtraLessonsOfType(cachedExtraId, lessonTypeId.toLong())
+            deleteExtraLessonsOfType(cachedExtraId, lessonTypeId)
             deleteCachedPeriodWithId(cachedExtraId)
         }
     }
@@ -882,7 +893,7 @@ class Cacher {
 
     }
 
-    internal inner class RemoveExtraCoursesWithLessonType internal constructor(private val lessonTypeId: Int) : CacheJob() {
+    internal inner class RemoveExtraCoursesWithLessonType internal constructor(private val lessonTypeId: String) : CacheJob() {
 
         @Throws(Throwable::class)
         override fun onRun() = removeExtraCoursesWithLessonTypeImpl(lessonTypeId)
@@ -891,9 +902,9 @@ class Cacher {
     internal inner class ObliterateLessonsCacheJob : CacheJob() {
         @Throws(Throwable::class)
         override fun onRun() {
-            writableDatabase!!.delete(CACHED_PERIOD_TABLE, null, null)
-            writableDatabase!!.delete(CACHED_LESSONS_TABLE, null, null)
-            writableDatabase!!.delete(CACHED_LESSON_TYPES_TABLE, null, null)
+            writableDatabase.delete(CACHED_PERIOD_TABLE, null, null)
+            writableDatabase.delete(CACHED_LESSONS_TABLE, null, null)
+            writableDatabase.delete(CACHED_LESSON_TYPES_TABLE, null, null)
         }
     }
 
@@ -977,7 +988,7 @@ class Cacher {
             values.put(CLIBT_PSICOLOGIA, openingTimes.timesPsicologia)
             values.put(CLIBT_CACHED_IN_MS, CalendarUtils.debuggableMillis)
 
-            writableDatabase!!.replace(CACHED_LIBRARY_TIMES_TABLE_NAME, null, values)
+            writableDatabase.replace(CACHED_LIBRARY_TIMES_TABLE_NAME, null, values)
         }
 
     }
@@ -996,7 +1007,7 @@ class Cacher {
             val lastValidMs = java.lang.Long.toString(if (fetchDeadCacheToo) -1 else lastValidLibraryCachePeriod)
             val selectionArgs = arrayOf(LibraryOpeningTimes.formatDay(day), lastValidMs)
 
-            val cursor = writableDatabase!!.query(
+            val cursor = writableDatabase.query(
                     CACHED_LIBRARY_TIMES_TABLE_NAME, columns, selection, selectionArgs, null, null, null
             )
 
@@ -1041,3 +1052,5 @@ class Cacher {
     }
 
 }
+
+private fun String.querify(): String = "\"$this\""

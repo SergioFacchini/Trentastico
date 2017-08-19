@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.Button
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -13,8 +14,8 @@ import com.geridea.trentastico.utils.AppPreferences
 
 class WelcomeActivity : AppCompatActivity() {
 
-    @BindView(R.id.course_selector)
-    lateinit var courseSelector: CourseSelectorView
+    @BindView(R.id.course_selector) lateinit var courseSelector: CourseSelectorView
+    @BindView(R.id.start_button)    lateinit var startButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,16 +25,24 @@ class WelcomeActivity : AppCompatActivity() {
         supportActionBar!!.hide()
 
         ButterKnife.bind(this)
+
+        startButton.visibility = View.GONE
+
+        courseSelector.onCoursesLoaded.connect { startButton.visibility = View.VISIBLE }
+        courseSelector.loadCourses()
     }
 
     @OnClick(R.id.start_button)
-    fun onStartButtonPressed(view: View) {
-        AppPreferences.studyCourse = courseSelector.selectedStudyCourse
-        AppPreferences.isFirstRun = false
+    fun onStartButtonPressed() {
+        val selectedStudyCourse = courseSelector.buildStudyCourse()
+        if (selectedStudyCourse != null) {
+            AppPreferences.studyCourse = selectedStudyCourse
+            AppPreferences.isFirstRun = false
 
-        startActivity(Intent(this, HomeActivity::class.java))
+            startActivity(Intent(this, HomeActivity::class.java))
 
-        finish()
+            finish()
+        }
     }
 
 }

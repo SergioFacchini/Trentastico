@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Da qui è possibile cambiare il corso di studi che avevi selezionato in precedenza. Gli orari del nuovo corso di studi verranno automaticamente scaricati."
+            android:text="Da qui è possibile cambiare il corso di studi che avevi selezionato in precedenza. Gli orari del nuovo corso di studi verranno scaricati automaticamente."
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
@@ -41,13 +41,15 @@
             android:id="@+id/course_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"/>
 
         <Button
             android:id="@+id/change_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:background="#3b1629"
             android:screenOrientation="portrait"
             android:text="Cambia!"

@@ -14,7 +14,7 @@ val CP_START_WEEK   = "start_week"
 val CP_START_YEAR   = "start_year"
 val CP_END_WEEK     = "end_week"
 val CP_END_YEAR     = "end_year"
-val CP_LESSON_TYPE  = "lesson_type"
+val CP_PERIOD_TYPE  = "cached_period_type"
 val CP_CACHED_IN_MS = "cached_in_ms"
 
 internal val SQL_CREATE_CACHED_PERIOD =
@@ -24,7 +24,7 @@ internal val SQL_CREATE_CACHED_PERIOD =
          $CP_START_YEAR   INTEGER NOT NULL,
          $CP_END_WEEK     INTEGER NOT NULL,
          $CP_END_YEAR     INTEGER NOT NULL,
-         $CP_LESSON_TYPE  INTEGER NOT NULL,
+         $CP_PERIOD_TYPE  INTEGER NOT NULL,
          $CP_CACHED_IN_MS INTEGER NOT NULL)"""
 
 
@@ -61,17 +61,19 @@ internal val SQL_CREATE_CACHED_LESSONS =
 //Cached lesson types
 val CACHED_LESSON_TYPES_TABLE = "cached_lesson_types"
 
-val CLT_LESSON_TYPE_ID  = "lesson_type_id"
-val CLT_NAME            = "name"
-val CLT_COLOR           = "color"
-val CLT_IS_EXTRA_COURSE = "is_extra_course"
+val CLT_LESSON_TYPE_ID    = "lesson_type_id"
+val CLT_NAME              = "name"
+val CLT_PARTITIONING_NAME = "partitioning_name"
+val CLT_COLOR             = "color"
+val CLT_IS_EXTRA_COURSE   = "is_extra_course"
 
 internal val SQL_CREATE_CACHED_LESSON_TYPES =
         """CREATE TABLE $CACHED_LESSON_TYPES_TABLE (
-            $CLT_LESSON_TYPE_ID  INTEGER NOT NULL,
-            $CLT_NAME            VARCHAR(500) NOT NULL,
-            $CLT_COLOR           INTEGER NOT NULL,
-            $CLT_IS_EXTRA_COURSE INTEGER NOT NULL)"""
+            $CLT_LESSON_TYPE_ID    VARCHAR(200) NOT NULL,
+            $CLT_NAME              VARCHAR(500) NOT NULL,
+            $CLT_PARTITIONING_NAME VARCHAR(500) NOT NULL,
+            $CLT_COLOR             INTEGER NOT NULL,
+            $CLT_IS_EXTRA_COURSE   INTEGER NOT NULL)"""
 
 
 
