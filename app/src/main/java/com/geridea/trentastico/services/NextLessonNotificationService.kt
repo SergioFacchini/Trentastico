@@ -275,10 +275,12 @@ class NextLessonNotificationService : Service() {
 
         notificationBuilder.setContentIntent(resultPendingIntent)
 
-        val manager = getNotificationManager(this@NextLessonNotificationService)
-        manager.notify(lesson.id.toInt(), notificationBuilder.build())
-
-        notificationsTracker.notifyNotificationShown(lesson.id)
+        //TODO: rework notificatons
+//        val manager = getNotificationManager(this@NextLessonNotificationService)
+//        manager.notify(lesson.id.toInt(), notificationBuilder.build())
+//
+//
+//        notificationsTracker.notifyNotificationShown(lesson.id)
     }
 
     private fun getValidLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {

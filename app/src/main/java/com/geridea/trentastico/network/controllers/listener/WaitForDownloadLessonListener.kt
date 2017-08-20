@@ -6,10 +6,8 @@ package com.geridea.trentastico.network.controllers.listener
  */
 
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
-import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.LessonsSet
-import com.geridea.trentastico.model.cache.CachedLessonsSet
-import com.geridea.trentastico.utils.time.WeekInterval
+import com.geridea.trentastico.model.LessonSchedule
+import com.geridea.trentastico.model.LessonTypeNew
 
 abstract class WaitForDownloadLessonListener : LessonsLoadingListener {
 
@@ -27,22 +25,16 @@ abstract class WaitForDownloadLessonListener : LessonsLoadingListener {
         numRequestsSent++
     }
 
-    override fun onLessonsLoaded(lessonsSet: LessonsSet, interval: WeekInterval, operationId: Int) {
+    override fun onLessonsLoaded(lessonsSet: List<LessonSchedule>, interval: List<LessonTypeNew>, operationId: Int) {
         numRequestsSucceeded++
         checkIfWeHaveFinished()
     }
 
-    override fun onErrorHappened(error: Exception, operationId: Int) = //Managed in onLoadingAborted
+    override fun onNetworkErrorHappened(error: Exception, operationId: Int) = //Managed in onLoadingAborted
             Unit
 
     override fun onParsingErrorHappened(exception: Exception, operationId: Int) = //Managed in onLoadingAborted
             Unit
-
-    override fun onLoadingDelegated(operationId: Int) = //Should never happen since we do not manage loading from cache
-            BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
-
-    override fun onPartiallyCachedResultsFetched(lessonsSet: CachedLessonsSet) = //Should never happen since we do not manage loading from cache
-            BugLogger.logBug("Cache used when shouldn't", RuntimeException("Cache used when shouldn't"))
 
     override fun onNothingFoundInCache() = //Nothing to do
             Unit

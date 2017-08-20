@@ -28,7 +28,7 @@ open class WeekInterval {
         this.end = end
     }
 
-    constructor(fromWhen: Calendar, toWhen: Calendar) : this(WeekTime(fromWhen), WeekTime(toWhen))
+    constructor(fromWhen: Calendar, toWhen: Calendar) : this(WeekTime(fromWhen), WeekTime(toWhen).addWeeks(1))
 
     constructor(
             startWeek: Int,

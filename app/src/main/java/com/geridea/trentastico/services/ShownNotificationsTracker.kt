@@ -7,7 +7,6 @@ package com.geridea.trentastico.services
 
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.utils.ArrayUtils
 import com.geridea.trentastico.utils.JsonUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -46,11 +45,12 @@ class ShownNotificationsTracker {
      * @return true if the notification should be shown, false otherwise
      */
     fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean =
-        if (!shownNotificationsIds.contains(lesson.id))  true
-        else ArrayUtils.isOneOf(starter,
-                                NLNStarter.PHONE_BOOT,
-                                NLNStarter.STUDY_COURSE_CHANGE,
-                                NLNStarter.NOTIFICATIONS_SWITCHED_ON)
+            true //TODO: rework notifications
+//        if (!shownNotificationsIds.contains(lesson.id)) true
+//        else ArrayUtils.isOneOf(starter,
+//                                NLNStarter.PHONE_BOOT,
+//                                NLNStarter.STUDY_COURSE_CHANGE,
+//                                NLNStarter.NOTIFICATIONS_SWITCHED_ON)
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson

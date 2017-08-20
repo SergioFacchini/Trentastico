@@ -12,8 +12,7 @@ import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonType
-import com.geridea.trentastico.model.LessonsSet
+import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.network.LessonsLoader
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
@@ -21,8 +20,9 @@ import com.geridea.trentastico.utils.time.WeekInterval
 import com.threerings.signals.Signal1
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
-class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
+class CourseTimesCalendar : CustomWeekView {
 
     //Signals
     /**
@@ -32,33 +32,19 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
      */
     val onLoadingOperationNotify = Signal1<ILoadingMessage>()
 
+    val currentLessonTypes: MutableSet<LessonTypeNew> = mutableSetOf()
+
     //Data
-    private val currentlyShownLessonsSet = LessonsSet()
-    private var loader: LessonsLoader? = null
+    private lateinit var loader: LessonsLoader
 
-    constructor(context: Context) : super(context) {
-        initCalendar()
-    }
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        initCalendar()
-    }
-
-    constructor(
-            context: Context,
-            attrs: AttributeSet,
-            defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        initCalendar()
-    }
-
-    private fun initCalendar() {
+    init {
         prepareLoader()
-        dateTimeInterpreter = appropriateDateTimeInterpreter
-        scrollListener = this
+        dateTimeInterpreter = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
     }
-
-    private val appropriateDateTimeInterpreter: DateTimeInterpreter
-        get() = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
 
     private fun getDateInterpreterForNumberOfDays(numberOfVisibleDays: Int): DateTimeInterpreter =
             if (numberOfVisibleDays <= 2) {
@@ -148,47 +134,41 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
 
     private fun prepareLoader() {
         loader = LessonsLoader()
-        loader!!.onLoadingMessageDispatched.connect { message -> onLoadingOperationNotify.dispatch(message) }
-        loader!!.onLoadingOperationSuccessful.connect { lessons, interval, message ->
+        loader.onLoadingMessageDispatched  .connect { message -> onLoadingOperationNotify.dispatch(message) }
+        loader.onLoadingOperationSuccessful.connect { scheduledLessons, lessonTypes, message ->
+
             //We cannot use post() here since it's possible that the calendar is still not
             //attached to the fragment
             UIUtils.runOnMainThread {
-                lessons.filterLessons()
+                if (scheduledLessons.isNotEmpty()) {
+                    //If empty, the covered interval calculation will fail
+                    addEnabledInterval(calculateCoveredInterval(scheduledLessons))
+                    addEventsFromLessonsSet(scheduledLessons)
+                }
 
-                currentlyShownLessonsSet.mergeWith(lessons)
-
-                addEnabledInterval(interval)
-                addEventsFromLessonsSet(lessons)
+                currentLessonTypes.addAll(lessonTypes)
 
                 onLoadingOperationNotify.dispatch(message)
             }
         }
-
-        loader!!.onPartiallyCachedResultsFetched.connect { lessons ->
-            //We cannot use post() here since it's possible that the calendar is still not
-            //attached to the fragment
-            UIUtils.runOnMainThread {
-                lessons.filterLessons()
-
-                currentlyShownLessonsSet.mergeWith(lessons)
-
-                val cachedIntervals = lessons.cachedWeekIntervals
-                addEnabledIntervals(cachedIntervals)
-
-                addEventsFromLessonsSet(lessons)
-            }
-        }
     }
 
-    private fun addEnabledIntervals(intervals: ArrayList<WeekInterval>) {
-        for (interval in intervals) {
-            addEnabledInterval(interval)
-        }
+    /**
+     * @return the [WeekInterval] that starts with the earliest lesson and ends with the latest one
+     */
+    private fun calculateCoveredInterval(scheduledLessons: List<LessonSchedule>): WeekInterval {
+        val minTime = scheduledLessons.map { it.startsAt }.min()
+        val maxTime = scheduledLessons.map { it.endsAt   }.max()
+
+        return WeekInterval(
+            CalendarUtils.getCalendarWithMillis(minTime!!),
+            CalendarUtils.getCalendarWithMillis(maxTime!!)
+        )
     }
 
-    fun loadEventsNearToday() = loader!!.loadEventsNearDay(CalendarUtils.debuggableToday)
+    fun loadEvents() = loader.loadAndAddLessons()
 
-    private fun addEventsFromLessonsSet(lessons: LessonsSet) =
+    private fun addEventsFromLessonsSet(lessons: List<LessonSchedule>) =
             addEvents(makeEventsFromLessonsSet(lessons))
 
     private fun isSameDay(date1: Calendar, date2: Calendar): Boolean =
@@ -196,42 +176,15 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
                     date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
                     date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
 
-    private fun makeEventsFromLessonsSet(lessonsSet: LessonsSet): List<WeekViewEvent> =
-            lessonsSet.scheduledLessons.mapTo(ArrayList(), {
-        LessonToEventAdapter(it.value)
-    })
-
-    //        val events = ArrayList<LessonToEventAdapter>()
-    //        for ((_, lessonSchedule) in lessonsSet.scheduledLessons) {
-    //            events.add(LessonToEventAdapter(lessonSchedule))
-    //        }
-    //
-    //        return events
-
-    override fun onFirstVisibleDayChanged(newFirst: Calendar, oldFirst: Calendar) {
-        if (isInEditMode) {
-            return
-        }
-
-        val scrollDirection = if (newFirst.after(oldFirst)) ScrollDirection.RIGHT else ScrollDirection.LEFT
-
-        val disabledDays = getDisabledDaysVisibleFromDay(newFirst)
-        if (disabledDays.isFirstDayDisabled) {
-            loader!!.loadDaysIfNeeded(disabledDays.firstVisibleWeek!!, scrollDirection)
-        }
-
-        if (disabledDays.isLastDayDisabled) {
-            loader!!.loadDaysIfNeeded(disabledDays.lastVisibleWeek!!, scrollDirection)
-        }
-    }
-
-    val currentLessonTypes: Collection<LessonType>
-        get() = currentlyShownLessonsSet.lessonTypes.values
+    private fun makeEventsFromLessonsSet(lessons: List<LessonSchedule>): List<WeekViewEvent> =
+            lessons.mapTo(ArrayList()){
+                LessonToEventAdapter(it)
+            }
 
     fun notifyLessonTypeVisibilityChanged() {
         clear()
 
-        loader!!.loadEventsNearDay(firstVisibleDay)
+        loader.loadAndAddLessons()
     }
 
     fun rotateNumOfDaysShown(): Int {
@@ -243,7 +196,7 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
 
     fun prepareForNumberOfVisibleDays(numOfDaysToShow: Int) {
         numberOfVisibleDays = numOfDaysToShow
-        dateTimeInterpreter = appropriateDateTimeInterpreter
+        dateTimeInterpreter = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
         goToDate(firstVisibleDay) //Fixes #47
         invalidate()
     }
@@ -267,13 +220,17 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.ScrollListener {
         }
 
     class LessonToEventAdapter(val lesson: LessonSchedule) : WeekViewEvent(
-            lesson.id,
-            lesson.fullDescription,
-            lesson.startCal,
-            lesson.endCal) {
+            nextId, lesson.eventDescription, lesson.startCal, lesson.endCal
+    ) {
 
         init {
             this.color = lesson.color
+        }
+
+        companion object {
+            var nextId = 1L
+              get() = field++
+              private set
         }
 
     }

@@ -59,7 +59,7 @@ class RequestSender {
 
         override fun onFailure(call: Call, e: IOException) {
             callsInProgress.remove(call)
-            request.notifyFailure(e, this@RequestSender)
+            request.notifyNetworkProblem(e, this@RequestSender)
         }
 
         @Throws(IOException::class)
@@ -73,11 +73,11 @@ class RequestSender {
                     request.manageResponse(responseStr, this@RequestSender)
                 } catch (e: Exception) {
                     e.printStackTrace() //TODO: toglimi
-                    request.notifyFailure(e, this@RequestSender)
+                    request.notifyResponseProcessingFailure(e, this@RequestSender)
                 }
 
             } else {
-                request.notifyResponseUnsuccessful(response.code(), this@RequestSender)
+                request.notifyNetworkProblem(ResponseUnsuccessfulException(response.code()), this@RequestSender)
             }
             callsInProgress.remove(call)
         }

@@ -59,7 +59,7 @@ object CalendarUtils {
         return instance
     }
 
-    fun getCalendarInitializedAs(millis: Long): Calendar {
+    fun getCalendarWithMillis(millis: Long): Calendar {
         val instance = Calendar.getInstance()
         instance.clear()
         instance.firstDayOfWeek = Calendar.MONDAY
@@ -96,7 +96,7 @@ object CalendarUtils {
     }
 
     fun addMinutes(millis: Long, delta: Int): Long {
-        val cal = getCalendarInitializedAs(millis)
+        val cal = getCalendarWithMillis(millis)
         cal.add(Calendar.MINUTE, delta)
         return cal.timeInMillis
     }

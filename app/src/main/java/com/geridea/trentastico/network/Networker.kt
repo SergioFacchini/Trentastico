@@ -13,6 +13,7 @@ import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController
 import com.geridea.trentastico.network.controllers.SendFeedbackController
 import com.geridea.trentastico.network.controllers.listener.*
 import com.geridea.trentastico.network.request.RequestSender
+import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.time.WeekInterval
 import java.util.*
 
@@ -38,18 +39,8 @@ object Networker {
     // Lessons
     //----------------------------
 
-    /**
-     * Loads the lessons in the given period. Fetches all the possible lesson from the fresh cache
-     * or dead cache and the remaining from internet.
-     * @param interval interval to load
-     * @param listener listener that will receive the results
-     * @param intervalListener the listener that will be dispatched once we know what intervals have
-     * to be loaded
-     */
-    fun loadLessons(
-            interval: WeekInterval,
-            listener: LessonsLoadingListener,
-            intervalListener: LoadingIntervalKnownListener) = lessonsController.loadLessons(interval, listener, intervalListener)
+    fun loadLessons(listener: LessonsLoadingListener) =
+            lessonsControllerNew.loadLessons(listener, AppPreferences.studyCourse)
 
     fun diffLessonsInCache(
             intervalToCheck: WeekInterval,

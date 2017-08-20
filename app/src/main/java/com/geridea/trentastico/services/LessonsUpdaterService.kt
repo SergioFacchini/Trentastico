@@ -121,7 +121,7 @@ class LessonsUpdaterService : Service() {
         val calendar: Calendar
         if (scheduleType == SCHEDULE_MISSING) {
             //Postponing due to alarm manager approximations
-            calendar = CalendarUtils.getCalendarInitializedAs(AppPreferences.nextLessonsUpdateTime)
+            calendar = CalendarUtils.getCalendarWithMillis(AppPreferences.nextLessonsUpdateTime)
 
             if (Config.DEBUG_MODE) {
                 calendar.add(Calendar.SECOND, Config.DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS)

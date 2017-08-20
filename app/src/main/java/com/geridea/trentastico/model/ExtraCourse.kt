@@ -42,7 +42,7 @@ class ExtraCourse(
     /**
      * @return true if the scheduled lesson refers to the same subject of this extra course.
      */
-    fun isLessonOfCourse(lesson: LessonSchedule): Boolean = lesson.lessonTypeId == lessonTypeId.toLong()
+    fun isLessonOfCourse(lesson: LessonSchedule): Boolean = lesson.lessonTypeId == lessonTypeId
 
     companion object {
 

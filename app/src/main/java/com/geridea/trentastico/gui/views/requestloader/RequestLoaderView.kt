@@ -128,9 +128,4 @@ class RequestLoaderView : FrameLayout {
 
     fun processMessage(message: ILoadingMessage) = message.process(this)
 
-    companion object {
-
-        val LOADING_FROM_CACHE_OPERATION_ID = -1
-    }
-
 }

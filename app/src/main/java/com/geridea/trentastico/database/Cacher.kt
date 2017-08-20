@@ -109,16 +109,16 @@ class Cacher {
     private fun cacheLesson(cachedLesson: CachedLesson) {
         val values = ContentValues()
         values.put(CL_CACHED_PERIOD_ID, cachedLesson.cached_period_id)
-        values.put(CL_LESSON_ID, cachedLesson.lesson_id)
-        values.put(CL_STARTS_AT_MS, cachedLesson.starts_at_ms)
-        values.put(CL_FINISHES_AT_MS, cachedLesson.finishes_at_ms)
-        values.put(CL_WEEK_NUMBER, cachedLesson.weekTime.weekNumber)
-        values.put(CL_YEAR, cachedLesson.weekTime.year)
-        values.put(CL_TEACHING_ID, cachedLesson.teaching_id)
-        values.put(CL_SUBJECT, cachedLesson.subject)
-        values.put(CL_ROOM, cachedLesson.room)
-        values.put(CL_DESCRIPTION, cachedLesson.description)
-        values.put(CL_COLOR, cachedLesson.color)
+        values.put(CL_LESSON_ID,        cachedLesson.lesson_id)
+        values.put(CL_STARTS_AT_MS,     cachedLesson.starts_at_ms)
+        values.put(CL_FINISHES_AT_MS,   cachedLesson.finishes_at_ms)
+        values.put(CL_WEEK_NUMBER,      cachedLesson.weekTime.weekNumber)
+        values.put(CL_YEAR,             cachedLesson.weekTime.year)
+        values.put(CL_TEACHING_ID,      cachedLesson.teaching_id)
+        values.put(CL_TEACHERS_NAMES,   cachedLesson.teacher_names)
+        values.put(CL_SUBJECT,          cachedLesson.subject)
+        values.put(CL_ROOM,             cachedLesson.room)
+        values.put(CL_COLOR,            cachedLesson.color)
 
         writableDatabase.insert(CACHED_LESSONS_TABLE, null, values)
     }
@@ -455,7 +455,17 @@ class Cacher {
     private fun getLessonsInPeriod(
             from: Long,
             to: Long): ArrayList<CachedLesson> {
-        val projection = arrayOf(CL_CACHED_PERIOD_ID, CL_LESSON_ID, CL_STARTS_AT_MS, CL_FINISHES_AT_MS, CL_TEACHING_ID, CL_WEEK_NUMBER, CL_YEAR, CL_SUBJECT, CL_ROOM, CL_DESCRIPTION, CL_COLOR)
+        val projection = arrayOf(
+                CL_CACHED_PERIOD_ID,
+                CL_LESSON_ID,
+                CL_STARTS_AT_MS,
+                CL_FINISHES_AT_MS,
+                CL_TEACHING_ID,
+                CL_WEEK_NUMBER,
+                CL_YEAR,
+                CL_SUBJECT,
+                CL_ROOM,
+                CL_COLOR)
 
         val selection = String.format("%s >= ? AND %s <= ?", CL_STARTS_AT_MS, CL_STARTS_AT_MS)
         val args = arrayOf(from.toString(), to.toString())
@@ -593,7 +603,19 @@ class Cacher {
     private fun loadCachedLessonsIntersectingInterval(
             cachedPeriod: CachedPeriod,
             interval: WeekInterval): ArrayList<CachedLesson> {
-        val projection = arrayOf(CL_CACHED_PERIOD_ID, CL_LESSON_ID, CL_STARTS_AT_MS, CL_FINISHES_AT_MS, CL_TEACHING_ID, CL_WEEK_NUMBER, CL_YEAR, CL_SUBJECT, CL_ROOM, CL_DESCRIPTION, CL_COLOR)
+
+        val projection = arrayOf(
+                CL_CACHED_PERIOD_ID,
+                CL_LESSON_ID,
+                CL_STARTS_AT_MS,
+                CL_FINISHES_AT_MS,
+                CL_TEACHING_ID,
+                CL_WEEK_NUMBER,
+                CL_YEAR,
+                CL_SUBJECT,
+                CL_ROOM,
+                CL_COLOR
+        )
 
         val intervalToIntersect = interval.toCalendarInterval()
 

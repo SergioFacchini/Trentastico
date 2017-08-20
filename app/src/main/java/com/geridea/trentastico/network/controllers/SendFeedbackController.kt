@@ -18,16 +18,17 @@ class SendFeedbackController(sender: RequestSender, cacher: Cacher) : BasicContr
     fun sendFeedback(feedback: String, name: String, email: String, listener: FeedbackSendListener) = sender.processRequest(SendFeedbackRequest(feedback, name, email, listener))
 
     protected class SendFeedbackRequest(private val feedback: String, private val name: String, private val email: String, private val listener: FeedbackSendListener) : IRequest {
+        override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+            listener.onErrorHappened()
+        }
 
-        override fun notifyFailure(e: Exception, sender: RequestSender) = listener.onErrorHappened()
+        override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) = listener.onErrorHappened()
 
         override fun manageResponse(string: String, sender: RequestSender) = if (string == "OK") {
             listener.onFeedbackSent()
         } else {
             listener.onErrorHappened()
         }
-
-        override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) = listener.onErrorHappened()
 
         override fun notifyOnBeforeSend() = //Nothing to do
                 Unit

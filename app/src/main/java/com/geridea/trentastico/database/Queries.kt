@@ -36,25 +36,25 @@ val CL_LESSON_ID        = "lesson_id"
 val CL_STARTS_AT_MS     = "starts_at_ms"
 val CL_FINISHES_AT_MS   = "finishes_at_ms"
 val CL_TEACHING_ID      = "teaching_id"
+val CL_TEACHERS_NAMES   = "teachers_names"
 val CL_WEEK_NUMBER      = "week_number"
 val CL_YEAR             = "year"
 val CL_SUBJECT          = "subject"
 val CL_ROOM             = "room"
-val CL_DESCRIPTION      = "description"
 val CL_COLOR            = "color"
 
 internal val SQL_CREATE_CACHED_LESSONS =
 """CREATE TABLE $CACHED_LESSONS_TABLE (
          $CL_CACHED_PERIOD_ID INTEGER NOT NULL,
-         $CL_LESSON_ID        INTEGER NOT NULL,
+         $CL_LESSON_ID        VARCHAR(100) NOT NULL,
          $CL_STARTS_AT_MS     INTEGER NOT NULL,
          $CL_FINISHES_AT_MS   INTEGER NOT NULL,
-         $CL_TEACHING_ID      INTEGER NOT NULL,
+         $CL_TEACHING_ID      VARCHAR(100) NOT NULL,
+         $CL_TEACHERS_NAMES   VARCHAR(200) NOT NULL,
          $CL_WEEK_NUMBER      INTEGER NOT NULL,
          $CL_YEAR             INTEGER NOT NULL,
          $CL_SUBJECT          VARCHAR(500) NOT NULL,
          $CL_ROOM             VARCHAR(500) NOT NULL,
-         $CL_DESCRIPTION      VARCHAR(500) NOT NULL,
          $CL_COLOR            INTEGER NOT NULL )"""
 
 

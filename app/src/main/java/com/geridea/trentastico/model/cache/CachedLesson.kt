@@ -12,13 +12,13 @@ import com.geridea.trentastico.utils.time.WeekTime
 
 class CachedLesson(
         val cached_period_id: Long,
-        val lesson_id: Long,
+        val lesson_id: String,
         val starts_at_ms: Long,
         val finishes_at_ms: Long,
-        val teaching_id: Long,
+        val teaching_id: String,
+        val teacher_names: String,
         val subject: String,
-        val room: String?,
-        val description: String,
+        val room: String,
         val color: Int) {
 
     val weekTime: WeekTime = WeekTime(starts_at_ms)
@@ -29,24 +29,24 @@ class CachedLesson(
             lesson.startsAt,
             lesson.endsAt,
             lesson.lessonTypeId,
+            lesson.teachersNames,
             lesson.subject,
             lesson.room,
-            lesson.fullDescription,
             lesson.color
     )
 
     companion object {
 
         fun fromCursor(cursor: Cursor): CachedLesson = CachedLesson(
-                cursor.getLong(cursor.getColumnIndexOrThrow(CL_CACHED_PERIOD_ID)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(CL_LESSON_ID)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(CL_STARTS_AT_MS)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(CL_FINISHES_AT_MS)),
-                cursor.getLong(cursor.getColumnIndexOrThrow(CL_TEACHING_ID)),
+                cursor.getLong(  cursor.getColumnIndexOrThrow(CL_CACHED_PERIOD_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_LESSON_ID)),
+                cursor.getLong(  cursor.getColumnIndexOrThrow(CL_STARTS_AT_MS)),
+                cursor.getLong(  cursor.getColumnIndexOrThrow(CL_FINISHES_AT_MS)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_TEACHING_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_TEACHERS_NAMES)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CL_SUBJECT)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CL_ROOM)),
-                cursor.getString(cursor.getColumnIndexOrThrow(CL_DESCRIPTION)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(CL_COLOR))
+                cursor.getInt(   cursor.getColumnIndexOrThrow(CL_COLOR))
         )
     }
 }

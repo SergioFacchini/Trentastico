@@ -84,7 +84,7 @@ class CachedPeriod {
     fun canContainStudyLesson(lesson: LessonSchedule): Boolean = cachedPeriodType == null && interval.contains(lesson.startCal)
 
     fun canContainExtraLesson(lesson: LessonSchedule, extraCourse: ExtraCourse): Boolean
-            = lesson.lessonTypeId == extraCourse.lessonTypeId.toLong() && interval.contains(lesson.startCal)
+            = lesson.lessonTypeId == extraCourse.lessonTypeId && interval.contains(lesson.startCal)
 
     companion object {
 

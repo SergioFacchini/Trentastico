@@ -52,15 +52,15 @@ object AppPreferences {
             BugLogger.setStudyCourse(course)
         }
 
-    var lessonTypesIdsToHide: ArrayList<Long>
+    var lessonTypesIdsToHide: ArrayList<String>
         get() {
-            val lessonTypesIds = ArrayList<Long>()
+            val lessonTypesIds = ArrayList<String>()
 
             val filteredJSON = get().getString("FILTERED_TEACHINGS", "[]")
 
             try {
                 val json = JSONArray(filteredJSON)
-                (0 until json.length()).mapTo(lessonTypesIds, { json.getLong(it) })
+                (0 until json.length()).mapTo(lessonTypesIds, { json.getString(it) })
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -76,7 +76,7 @@ object AppPreferences {
             putString("FILTERED_TEACHINGS", array.toString())
         }
 
-    fun hasLessonTypeWithIdHidden(id: Long): Boolean = lessonTypesIdsToHide.contains(id)
+    fun hasLessonTypeWithIdHidden(id: String): Boolean = lessonTypesIdsToHide.contains(id)
 
     fun removeAllHiddenCourses() {
         lessonTypesIdsToHide = ArrayList()
@@ -121,11 +121,11 @@ object AppPreferences {
 
         }
 
-    fun getHiddenPartitionings(lessonTypeId: Long): ArrayList<String> {
+    fun getHiddenPartitionings(lessonTypeId: String): ArrayList<String> {
         val partitionings = ArrayList<String>()
 
         try {
-            val hiddenPartitioningsArray = partitioningsJSON.optJSONArray(lessonTypeId.toString())
+            val hiddenPartitioningsArray = partitioningsJSON.optJSONArray(lessonTypeId)
             if (hiddenPartitioningsArray != null) {
                 for (i in 0..hiddenPartitioningsArray.length() - 1) {
                     partitionings.add(hiddenPartitioningsArray.getString(i))

@@ -15,8 +15,8 @@ class CalendarInterval {
     }
 
     constructor(from: Long, to: Long) {
-        this.from = CalendarUtils.getCalendarInitializedAs(from)
-        this.to = CalendarUtils.getCalendarInitializedAs(to)
+        this.from = CalendarUtils.getCalendarWithMillis(from)
+        this.to = CalendarUtils.getCalendarWithMillis(to)
     }
 
     operator fun contains(time: Calendar): Boolean = time.after(from) && time.before(to) || from == time

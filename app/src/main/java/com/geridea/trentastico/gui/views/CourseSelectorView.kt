@@ -17,7 +17,6 @@ import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.model.StudyYear
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.CoursesLoadingListener
-import com.geridea.trentastico.network.request.ServerResponseParsingException
 import com.geridea.trentastico.utils.UIUtils.runOnMainThread
 import com.threerings.signals.Signal0
 import com.threerings.signals.Signal1
@@ -133,7 +132,7 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
                 )
             }
 
-            override fun onParsingError(exception: ServerResponseParsingException) {
+            override fun onParsingError(exception: Exception) {
                 showErrorMessage(
                         "Si è verificato un errore nel recupero dei corsi. Provare a " +
                                 "ricaricare. Se il problema persiste, riprovare dopo qualche ora " +

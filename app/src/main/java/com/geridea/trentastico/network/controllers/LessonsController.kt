@@ -9,7 +9,6 @@ import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.StudyCourse
-import com.geridea.trentastico.network.LoadingIntervalKnownListener
 import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener
 import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
 import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
@@ -21,11 +20,9 @@ class LessonsController(sender: RequestSender, cacher: Cacher) : BasicController
 
     fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = cacher.getTodaysCachedLessons(todaysLessonsListener)
 
-    fun loadLessons(
-            intervalToLoad: WeekInterval, listener: LessonsLoadingListener,
-            intervalListener: LoadingIntervalKnownListener) {
-
+    fun loadLessons(listener: LessonsLoadingListener) {
         //TODO: implement after courses loading
+
     }
 
     fun diffLessonsInCache(intervalToCheck: WeekInterval, listener: LessonsDifferenceListener) {

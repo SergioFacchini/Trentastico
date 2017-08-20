@@ -27,8 +27,13 @@ class LibraryOpeningTimesController(sender: RequestSender, cacher: Cacher) : Bas
 
 
     protected inner class LibraryOpeningTimesRequest(private val date: Calendar, private val listener: LibraryOpeningTimesListener) : IRequest {
+        override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+            listener.onOpeningTimesLoadingError()
 
-        override fun notifyFailure(e: Exception, sender: RequestSender) {
+            tryToFetchTimesFromDeadCache()
+        }
+
+        override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
             listener.onOpeningTimesLoadingError()
 
             tryToFetchTimesFromDeadCache()
@@ -79,12 +84,6 @@ class LibraryOpeningTimesController(sender: RequestSender, cacher: Cacher) : Bas
                 } catch (e: Exception) {
                     listener.onErrorParsingResponse(e)
                 }
-
-        override fun notifyResponseUnsuccessful(code: Int, sender: RequestSender) {
-            listener.onOpeningTimesLoadingError()
-
-            tryToFetchTimesFromDeadCache()
-        }
 
         private fun tryToFetchTimesFromDeadCache() = //We can't get fresh data right now. Let's try to fetch it from from dead cache.
                 cacher.getCachedLibraryOpeningTimes(date, true, object : CachedLibraryOpeningTimesListener {

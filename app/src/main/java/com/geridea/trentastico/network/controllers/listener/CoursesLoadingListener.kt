@@ -1,7 +1,6 @@
 package com.geridea.trentastico.network.controllers.listener
 
 import com.geridea.trentastico.model.Course
-import com.geridea.trentastico.network.request.ServerResponseParsingException
 
 
 /*
@@ -26,6 +25,6 @@ interface CoursesLoadingListener {
     /**
      * Dispatched when a network-related error happens.
      */
-    fun onParsingError(exception: ServerResponseParsingException)
+    fun onParsingError(exception: Exception)
 
 }

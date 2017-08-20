@@ -8,10 +8,8 @@ package com.geridea.trentastico.network.request
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableMillis
-
 import java.io.Serializable
-import java.util.ArrayList
-
+import java.util.*
 
 
 class LessonsDiffResult : Serializable {
@@ -111,9 +109,9 @@ class LessonsDiffResult : Serializable {
                     descriptionDetailsChanged = true
                 }
 
-                if (!descriptionDetailsChanged && original.fullDescription != changed.fullDescription) {
+                if (!descriptionDetailsChanged && original.eventDescription != changed.eventDescription) {
                     differences.add(
-                            "I dettagli della lezione sono cambiati:-------------\n " + changed.fullDescription
+                            "I dettagli della lezione sono cambiati:-------------\n " + changed.eventDescription
                     )
                 }
 
