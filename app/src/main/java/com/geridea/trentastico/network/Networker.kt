@@ -63,7 +63,7 @@ object Networker {
             interval: WeekInterval,
             listener: WaitForDownloadLessonListener) = lessonsController.loadAndCacheNotCachedLessons(interval, listener)
 
-    fun loadCoursesOfStudyCourse(
+    fun loadLessonTypesOfStudyCourse(
             studyCourse: StudyCourse,
             listener: ListLessonsListener) = lessonsControllerNew.loadLessonTypesOfStudyCourse(studyCourse, listener)
 

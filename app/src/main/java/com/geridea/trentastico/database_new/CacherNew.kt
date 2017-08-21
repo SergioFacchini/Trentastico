@@ -42,22 +42,31 @@ class CacherNew(context: Context) {
         + Current extra courses scheduled lessons
         * Current extra courses lesson types
      */
-    private var writableDatabase: SQLiteDatabase = CacheDbHelper(context).writableDatabase
+    private val writableDatabase: SQLiteDatabase = CacheDbHelper(context).writableDatabase
 
-    private var jobQueue: JobManager = JobManager(
+    private val jobQueue: JobManager = JobManager(
             Configuration.Builder(context)
                     .minConsumerCount(1)
                     .maxConsumerCount(1)
                     .build()
     )
 
+    private fun runJobInBackground(jobToRun: () -> Unit){
+        jobQueue.addJobInBackground(object: CacheJob() {
+            override fun onRun() {
+                jobToRun()
+            }
+        })
+    }
+
     //-------------------
     // Lesson schedules
     //-------------------
-    /**
-     * Searches for cached lesson schedules of the standard study course.
-     */
-    fun getStandardLessonSchedulesCacheIfAny(): List<LessonSchedule> = fetchStandardScheduledLesson()
+    fun getStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonTypeNew>) -> Unit) {
+        runJobInBackground {
+            callback(fetchStandardScheduledLesson(), fetchStandardLessonTypes())
+        }
+    }
 
     private fun fetchStandardScheduledLesson(): List<LessonSchedule> {
         val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns, "$SL_is_extra = 0")
@@ -66,17 +75,22 @@ class CacherNew(context: Context) {
     }
 
     fun cacheStandardScheduledLessons(lessons: Collection<LessonSchedule>) {
-        purgeStandardScheduledLessons()
+        runJobInBackground {
+            purgeStandardScheduledLessons()
 
-        lessons.forEach { cacheScheduledLesson(it, false) }
+            lessons.forEach { cacheScheduledLesson(it, false) }
+        }
     }
 
     fun cacheExtraScheduledLessons(lessons: Collection<LessonSchedule>) {
-        if (lessons.isNotEmpty()) {
-            purgeExtraScheduledLessons(lessons.first().lessonTypeId)
+        runJobInBackground {
+            if (lessons.isNotEmpty()) {
+                purgeExtraScheduledLessons(lessons.first().lessonTypeId)
 
-            lessons.forEach { cacheScheduledLesson(it, true) }
+                lessons.forEach { cacheScheduledLesson(it, true) }
+            }
         }
+
     }
 
     private fun cacheScheduledLesson(lesson: LessonSchedule, isExtra: Boolean) {
@@ -104,12 +118,14 @@ class CacherNew(context: Context) {
         writableDatabase.delete(SL_TABLE_NAME, SL_lessonTypeId+"= ?", arrayOf(lessonTypeId))
     }
 
-    fun fetchExtraScheduledLessons(lessonTypeId: String): List<LessonSchedule> {
-        val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns,
-                "$SL_is_extra = 1 AND $SL_lessonTypeId = ? ", arrayOf(lessonTypeId)
-        )
+    fun fetchExtraScheduledLessons(lessonTypeId: String, callback: (lessons: List<LessonSchedule>) -> Unit) {
+        runJobInBackground {
+            val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns,
+                    "$SL_is_extra = 1 AND $SL_lessonTypeId = ? ", arrayOf(lessonTypeId)
+            )
 
-        return fetchScheduledLessonsFromCursor(cursor)
+            callback(fetchScheduledLessonsFromCursor(cursor))
+        }
     }
 
     private fun fetchScheduledLessonsFromCursor(cursor: Cursor): List<LessonSchedule> {
@@ -135,7 +151,6 @@ class CacherNew(context: Context) {
     //-------------------
     // Lesson types
     //-------------------
-    fun getStandardLessonTypesCacheIfAny(): List<LessonTypeNew> = fetchStandardLessonTypes()
 
     /**
      * Fetches standard lesson types, if any
@@ -161,9 +176,11 @@ class CacherNew(context: Context) {
     }
 
     fun cacheStandardLessonTypes(lessonTypeNew: Collection<LessonTypeNew>){
-        purgeStandardLessonTypes()
+        runJobInBackground {
+            purgeStandardLessonTypes()
 
-        lessonTypeNew.forEach { cacheLessonType(it) }
+            lessonTypeNew.forEach { cacheLessonType(it) }
+        }
     }
 
     private fun purgeStandardLessonTypes() {
@@ -184,7 +201,7 @@ class CacherNew(context: Context) {
 }
 
 //Cache Jobs
-internal abstract class CacheJob protected constructor() : Job(Params(Cacher.PRIORITY_NORMAL)) {
+abstract class CacheJob: Job(Params(Cacher.PRIORITY_NORMAL)) {
 
     override fun onAdded() = Unit
 

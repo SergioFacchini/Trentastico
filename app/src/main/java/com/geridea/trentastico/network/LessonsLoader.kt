@@ -31,7 +31,7 @@ class LessonsLoader : LessonsLoadingListener {
         Networker.loadExtraCourses(this)
     }
 
-    override fun onLoadingAboutToStart(operation: ILoadingMessage)
+    override fun onLoadingMessageDispatched(operation: ILoadingMessage)
             = onLoadingMessageDispatched.dispatch(operation)
 
     override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int) {

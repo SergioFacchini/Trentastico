@@ -21,7 +21,7 @@ abstract class WaitForDownloadLessonListener : LessonsLoadingListener {
         this.numRequestsFailed = 0
     }
 
-    override fun onLoadingAboutToStart(operation: ILoadingMessage) {
+    override fun onLoadingMessageDispatched(operation: ILoadingMessage) {
         numRequestsSent++
     }
 

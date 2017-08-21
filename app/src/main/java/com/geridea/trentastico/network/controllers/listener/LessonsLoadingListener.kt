@@ -10,7 +10,7 @@ import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 
 interface LessonsLoadingListener {
-    fun onLoadingAboutToStart(operation: ILoadingMessage)
+    fun onLoadingMessageDispatched(operation: ILoadingMessage)
     fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int)
     fun onNetworkErrorHappened(error: Exception, operationId: Int)
     fun onParsingErrorHappened(exception: Exception, operationId: Int)

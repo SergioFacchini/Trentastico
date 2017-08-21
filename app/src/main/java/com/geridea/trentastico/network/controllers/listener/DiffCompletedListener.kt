@@ -11,7 +11,7 @@ import com.geridea.trentastico.model.LessonTypeNew
 
 class DiffCompletedListener(private val differenceListener: LessonsDifferenceListener) : LessonsLoadingListener {
 
-    override fun onLoadingAboutToStart(operation: ILoadingMessage) = //Nothing to do
+    override fun onLoadingMessageDispatched(operation: ILoadingMessage) = //Nothing to do
             Unit
 
     override fun onLessonsLoaded(lessonsSet: List<LessonSchedule>, interval: List<LessonTypeNew>, operationId: Int) = differenceListener.onRequestCompleted()

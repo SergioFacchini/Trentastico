@@ -2,6 +2,8 @@ package com.geridea.trentastico.network.controllers
 
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.database_new.CacherNew
+import com.geridea.trentastico.gui.views.requestloader.CacheLessonsLoadingMessage
+import com.geridea.trentastico.gui.views.requestloader.CacheLoadingFinishedMessage
 import com.geridea.trentastico.gui.views.requestloader.ExtraLessonsLoadingMessage
 import com.geridea.trentastico.gui.views.requestloader.StandardLessonsLoadingMessage
 import com.geridea.trentastico.model.*
@@ -35,32 +37,41 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
     }
 
     fun loadStandardLessons(listener: LessonsLoadingListener, studyCourse: StudyCourse) {
-        val cachedLessons = cacher.getStandardLessonSchedulesCacheIfAny()
-        val cachedTypes   = cacher.getStandardLessonTypesCacheIfAny()
+        val operation = CacheLessonsLoadingMessage()
+        listener.onLoadingMessageDispatched(operation)
 
-        if (cachedLessons.isNotEmpty() && cachedTypes.isNotEmpty()) {
-            listener.onLessonsLoaded(cachedLessons, cachedTypes, -1)
-        } else {
-            //No cache available, we have to download the data
-            sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener, cacher))
-        }
+        cacher.getStandardLessonsAndTypes({ cachedLessons, cachedTypes ->
+            listener.onLoadingMessageDispatched(CacheLoadingFinishedMessage(operation.messageId))
+
+            if (cachedLessons.isNotEmpty() && cachedTypes.isNotEmpty()) {
+                listener.onLessonsLoaded(cachedLessons, cachedTypes, -1)
+            } else {
+                //No cache available, we have to download the data
+                sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener, cacher))
+            }
+        })
     }
 
     fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
         sender.processRequest(LessonTypesOfStudyCourseRequest(studyCourse, listener))
     }
 
-    fun loadExtraCourseLessons(lessonsLoader: LessonsLoadingListener, extraCourse: ExtraCourse) {
-        val cachedLessons = cacher.fetchExtraScheduledLessons(extraCourse.lessonTypeId)
-        if (cachedLessons.isNotEmpty()) {
-            val lessonType = LessonTypeNew(extraCourse, !AppPreferences.isLessonTypeToHide(extraCourse.lessonTypeId))
+    fun loadExtraCourseLessons(listener: LessonsLoadingListener, extraCourse: ExtraCourse) {
+        val operation = CacheLessonsLoadingMessage()
+        listener.onLoadingMessageDispatched(operation)
 
-            lessonsLoader.onLessonsLoaded(cachedLessons, arrayListOf(lessonType), -1)
-        } else {
-            //No cache
-            sender.processRequest(LessonOfExtraCourseRequest(extraCourse, lessonsLoader, cacher))
+        cacher.fetchExtraScheduledLessons(extraCourse.lessonTypeId) { cachedLessons ->
+            listener.onLoadingMessageDispatched(CacheLoadingFinishedMessage(operation.messageId))
+
+            if (cachedLessons.isNotEmpty()) {
+                val lessonType = LessonTypeNew(extraCourse, !AppPreferences.isLessonTypeToHide(extraCourse.lessonTypeId))
+                listener.onLessonsLoaded(cachedLessons, arrayListOf(lessonType), -1)
+            } else {
+                //No cache
+                sender.processRequest(LessonOfExtraCourseRequest(extraCourse, listener, cacher))
+            }
+
         }
-
     }
 
 }
@@ -166,9 +177,9 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
                 val studyYears = parseStudyYears(courseJson.getJSONArray("elenco_anni"))
 
                 Course(
-                    id         = courseJson.getString("valore"),
-                    name       = courseJson.getString("label"),
-                    studyYears = studyYears
+                        id = courseJson.getString("valore"),
+                        name = courseJson.getString("label"),
+                        studyYears = studyYears
                 )
             }
 
@@ -184,8 +195,8 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
             val yearJson = yearsJson[it] as JSONObject
 
             StudyYear(
-                id   = yearJson.getString("valore"),
-                name = yearJson.getString("label")
+                    id = yearJson.getString("valore"),
+                    name = yearJson.getString("label")
             )
         })
     }
@@ -197,7 +208,7 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
                 ?: throw ServerResponseParsingException("Cannot find current year JSON!")
     }
 
-    override fun notifyOnBeforeSend() { ; }
+    override fun notifyOnBeforeSend() {; }
 
 }
 
@@ -205,7 +216,7 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
  * Basic request that downloads a list of lesson schedules and lesson types.
  * To be notified of the results of the request override [BasicLessonRequest.onTeachingsAndLessonsLoaded]
  */
-internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicRequest() {
+internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : BasicRequest() {
 
     /**
      * The colors are assigned sequentially: that means that the first lesson type picks the first
@@ -274,7 +285,9 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
     /**
      * Hook function that notifies that the loading has been completed
      */
-    abstract fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>)
+    abstract fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            lessons: List<LessonSchedule>)
 
     private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
         var colorProgressive = 0
@@ -293,22 +306,24 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
                     val teachingName = it.getString("nome_insegnamento")
                     val partitioningName = calculatePartitioningName(teachingName)
                     LessonTypeNew(
-                        id               = lessonTypeId,
-                        name             = calculateTeachingWithoutPartitioning(teachingName),
-                        teachersNames    = it.getString("docente").orIfBlank("(insegnate non specificato)"),
-                        partitioningName = partitioningName,
-                        color            = teachingsColors[colorProgressive++],
-                        isVisible        = !AppPreferences.isLessonTypeToHide(lessonTypeId)
+                            id = lessonTypeId,
+                            name = calculateTeachingWithoutPartitioning(teachingName),
+                            teachersNames = it.getString("docente").orIfBlank("(insegnate non specificato)"),
+                            partitioningName = partitioningName,
+                            color = teachingsColors[colorProgressive++],
+                            isVisible = !AppPreferences.isLessonTypeToHide(lessonTypeId)
                     )
                 }
-                .sortedBy { it.name}
+                .sortedBy { it.name }
     }
 
     /**
      * @param json the json to parse
      * @param teachingsColors the mapping teaching-id to color
      */
-    private fun parseLessons(json: JSONObject, teachingsColors: Map<String, Int>): List<LessonSchedule> {
+    private fun parseLessons(
+            json: JSONObject,
+            teachingsColors: Map<String, Int>): List<LessonSchedule> {
         val numLessons = json.getInt("contains_data")
 
         return (0 until numLessons).map {
@@ -324,20 +339,20 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
             //difference the starting and ending time
             val startTimestamp = lessonJson.getLong("timestamp") * 1000 - TimeUnit.HOURS.toMillis(2)
             val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
-            val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
+            val endingMins = convertToMinutes(lessonJson.getString("ora_fine"))
 
             val teachingName = lessonJson.getString("nome_insegnamento")
 
             LessonSchedule(
-                    id               = id,
-                    lessonTypeId     = lessonJson.getString("codice_insegnamento"),
-                    teachersNames    = lessonJson.getString("docente"),
-                    room             = lessonJson.getString("aula"),
-                    subject          = calculateTeachingWithoutPartitioning(teachingName),
+                    id = id,
+                    lessonTypeId = lessonJson.getString("codice_insegnamento"),
+                    teachersNames = lessonJson.getString("docente"),
+                    room = lessonJson.getString("aula"),
+                    subject = calculateTeachingWithoutPartitioning(teachingName),
                     partitioningName = calculatePartitioningName(teachingName),
-                    color            = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
-                    startsAt         = startTimestamp,
-                    endsAt           = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
+                    color = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
+                    startsAt = startTimestamp,
+                    endsAt = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
     }
@@ -354,7 +369,10 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
         return if (partitioningName == "nessun partizionamento") null else partitioningName
     }
 
-    private fun calculdateEndTimeOfLesson( startTimestamp: Long, endingMins: Int, startingMins: Int): Long {
+    private fun calculdateEndTimeOfLesson(
+            startTimestamp: Long,
+            endingMins: Int,
+            startingMins: Int): Long {
         val endingCalendar = Calendar.getInstance()
         endingCalendar.timeInMillis = startTimestamp
         endingCalendar.add(Calendar.MINUTE, endingMins - startingMins)
@@ -368,10 +386,10 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
     private fun convertToMinutes(string: String): Int {
         val matcher = Pattern.compile("([0-9][0-9]?):([0-9][0-9])").matcher(string)
         if (matcher.find()) {
-            val hours   = matcher.group(1).toInt()
+            val hours = matcher.group(1).toInt()
             val minutes = matcher.group(2).toInt()
 
-            return hours*60 + minutes
+            return hours * 60 + minutes
         } else {
             throw IllegalArgumentException("The minutes to convert must be in \"hh:mm\" format!")
         }
@@ -383,8 +401,8 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
     override val formToSend: FormBody?
         get() = FormBody.Builder()
                 .add("form-type", "corso")
-                .add("aa",    Config.CURRENT_STUDY_YEAR)
-                .add("anno",  Config.CURRENT_STUDY_YEAR)
+                .add("aa", Config.CURRENT_STUDY_YEAR)
+                .add("anno", Config.CURRENT_STUDY_YEAR)
                 .add("corso", studyCourse.courseId)
                 .add("anno2", studyCourse.yearId)
                 .build()
@@ -398,9 +416,11 @@ internal class LoadStandardLessonsRequest(
         studyCourse: StudyCourse,
         val listener: LessonsLoadingListener,
         val cacher: CacherNew
-): BasicLessonRequest(studyCourse) {
+) : BasicLessonRequest(studyCourse) {
 
-    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+    override fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            lessons: List<LessonSchedule>) {
         cacher.cacheStandardLessonTypes(lessonTypes)
         cacher.cacheStandardScheduledLessons(lessons)
 
@@ -416,7 +436,7 @@ internal class LoadStandardLessonsRequest(
     }
 
     override fun notifyOnBeforeSend() {
-        listener.onLoadingAboutToStart(StandardLessonsLoadingMessage(operationId, isARetry = false))
+        listener.onLoadingMessageDispatched(StandardLessonsLoadingMessage(operationId, isARetry = false))
     }
 
 }
@@ -435,7 +455,9 @@ internal class LessonTypesOfStudyCourseRequest(
 
     override fun notifyOnBeforeSend() { ; }
 
-    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+    override fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            lessons: List<LessonSchedule>) {
         listener.onLessonTypesRetrieved(lessonTypes)
     }
 
@@ -445,7 +467,7 @@ internal class LessonOfExtraCourseRequest(
         private val extraCourse: ExtraCourse,
         val listener: LessonsLoadingListener,
         val cacher: CacherNew
-): BasicLessonRequest(extraCourse.studyCourse) {
+) : BasicLessonRequest(extraCourse.studyCourse) {
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
         listener.onParsingErrorHappened(e, operationId)
@@ -456,12 +478,14 @@ internal class LessonOfExtraCourseRequest(
     }
 
     override fun notifyOnBeforeSend() {
-        listener.onLoadingAboutToStart(ExtraLessonsLoadingMessage(extraCourse, operationId))
+        listener.onLoadingMessageDispatched(ExtraLessonsLoadingMessage(extraCourse, operationId))
     }
 
-    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+    override fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            lessons: List<LessonSchedule>) {
         val searchedExtraLessons = lessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
-        val searchedLessonType        = lessonTypes.first { it.id == extraCourse.lessonTypeId }
+        val searchedLessonType = lessonTypes.first { it.id == extraCourse.lessonTypeId }
 
         cacher.cacheExtraScheduledLessons(searchedExtraLessons)
 

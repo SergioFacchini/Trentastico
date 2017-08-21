@@ -246,7 +246,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             setView(view)
         }
 
-        fun searchForCourses() = Networker.loadCoursesOfStudyCourse(studyCourse, this)
+        fun searchForCourses() = Networker.loadLessonTypesOfStudyCourse(studyCourse, this)
 
         @OnClick(R.id.cancel_search)
         fun onCancelSearchButtonPressed() = dismiss()
