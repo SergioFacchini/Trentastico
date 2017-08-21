@@ -52,7 +52,7 @@ object AppPreferences {
             BugLogger.setStudyCourse(course)
         }
 
-    var lessonTypesIdsToHide: ArrayList<String>
+    var lessonTypesToHideIds: ArrayList<String>
         get() {
             val lessonTypesIds = ArrayList<String>()
 
@@ -76,10 +76,14 @@ object AppPreferences {
             putString("FILTERED_TEACHINGS", array.toString())
         }
 
-    fun hasLessonTypeWithIdHidden(id: String): Boolean = lessonTypesIdsToHide.contains(id)
+    /**
+     * @return true if the passes lesson type is among the ones that were hidden (set not visible) by the user,
+     * false otherwise
+     */
+    fun isLessonTypeToHide(lessonTypeId: String): Boolean = lessonTypesToHideIds.contains(lessonTypeId)
 
     fun removeAllHiddenCourses() {
-        lessonTypesIdsToHide = ArrayList()
+        lessonTypesToHideIds = ArrayList()
     }
 
     private fun putInt(key: String, num: Int) {

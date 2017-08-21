@@ -7,6 +7,7 @@ import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
+import com.geridea.trentastico.utils.AppPreferences
 import com.threerings.signals.Signal1
 import com.threerings.signals.Signal3
 
@@ -34,7 +35,11 @@ class LessonsLoader : LessonsLoadingListener {
             = onLoadingMessageDispatched.dispatch(operation)
 
     override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int) {
-        onLoadingOperationSuccessful.dispatch(lessons, teachings, TerminalMessage(operationId))
+        //Filtering lessons that should not be shown
+        val visibleLessons =
+                lessons.filterNot { AppPreferences.lessonTypesToHideIds.contains(it.lessonTypeId) }
+
+        onLoadingOperationSuccessful.dispatch(visibleLessons, teachings, TerminalMessage(operationId))
     }
 
     override fun onNetworkErrorHappened(error: Exception, operationId: Int) =

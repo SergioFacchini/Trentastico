@@ -11,6 +11,7 @@ import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
 import com.geridea.trentastico.network.request.IRequest
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.network.request.ServerResponseParsingException
+import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.orIfBlank
 import okhttp3.FormBody
 import org.json.JSONArray
@@ -272,11 +273,13 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
                 .map { json[it.toString()] as JSONObject }
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
+                    val lessonTypeId = it.getString("codice_insegnamento")
                     LessonTypeNew(
-                        id            = it.getString("codice_insegnamento"),
+                        id            = lessonTypeId,
                         name          = it.getString("nome_insegnamento"),
                         teachersNames = it.getString("docente").orIfBlank("(insegnate non specificato)"),
-                        color         = teachingsColors[colorProgressive++]
+                        color         = teachingsColors[colorProgressive++],
+                        isVisible     = !AppPreferences.isLessonTypeToHide(lessonTypeId)
                     )
                 }
                 .sortedBy { it.name}

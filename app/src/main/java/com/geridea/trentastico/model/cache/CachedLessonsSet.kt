@@ -23,8 +23,7 @@ class CachedLessonsSet : LessonsSet() {
 
     fun addCachedLessonTypes(cachedLessonTypes: ArrayList<CachedLessonType>) {
         for (cachedLessonType in cachedLessonTypes) {
-
-            val isVisible = !AppPreferences.hasLessonTypeWithIdHidden(cachedLessonType.lesson_type_id)
+            val isVisible = !AppPreferences.isLessonTypeToHide(cachedLessonType.lesson_type_id)
             addLessonType(LessonType(cachedLessonType, isVisible))
         }
     }

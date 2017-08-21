@@ -285,7 +285,7 @@ class NextLessonNotificationService : Service() {
 
     private fun getValidLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
         val lessonsToKeep = ArrayList<LessonSchedule>()
-        val typesToHide = AppPreferences.lessonTypesIdsToHide
+        val typesToHide = AppPreferences.lessonTypesToHideIds
 
         for (lesson in lessons) {
             //Is it filtered by the lesson type or the lessons already passed?

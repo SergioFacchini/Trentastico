@@ -104,6 +104,8 @@ class CalendarFragment : FragmentWithMenuItems() {
         private val lessonTypes: Collection<LessonTypeNew>
         private val courseAdapter: CourseFilterAdapter
 
+        private var wasSomeVisibilityChanged = false
+
         init {
 
             //Inflating the view
@@ -122,7 +124,7 @@ class CalendarFragment : FragmentWithMenuItems() {
             courseAdapter = CourseFilterAdapter(context, lessonTypes)
             courseAdapter.onLessonTypeVisibilityChanged.connect { lesson ->
 
-                AppPreferences.lessonTypesIdsToHide = calculateLessonTypesToHide()
+                AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
 //                if (lesson.applyVisibilityToPartitionings()) {
 //                    AppPreferences.updatePartitioningsToHide(lesson)
 //                    courseAdapter.notifyDataSetChanged() //Updating %d of %d shown
@@ -131,7 +133,7 @@ class CalendarFragment : FragmentWithMenuItems() {
 //                    NextLessonNotificationService.createIntent(context, NLNStarter.FILTERS_CHANGED)
 //                }
 
-                calendar.notifyLessonTypeVisibilityChanged()
+                wasSomeVisibilityChanged = true
             }
 
             courseAdapter.onConfigurePartitioningButtonClicked.connect { lessonType ->
@@ -140,10 +142,10 @@ class CalendarFragment : FragmentWithMenuItems() {
 //                filterPartitionings.onPartitioningVisibilityChanged.connect { affectedLessonType ->
 //                    if (affectedLessonType.hasAllPartitioningsInvisible()) {
 //                        affectedLessonType.isVisible = false
-//                        AppPreferences.lessonTypesIdsToHide = calculateLessonTypesToHide()
+//                        AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
 //                    } else if (affectedLessonType.hasAtLeastOnePartitioningVisible()) {
 //                        affectedLessonType.isVisible = true
-//                        AppPreferences.lessonTypesIdsToHide = calculateLessonTypesToHide()
+//                        AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
 //                    }
 //
 //                    courseAdapter.notifyDataSetChanged() //Updating %d of %d shown
@@ -154,6 +156,11 @@ class CalendarFragment : FragmentWithMenuItems() {
             coursesListView.adapter = courseAdapter
 
             setView(view)
+            setOnDismissListener {
+                if (wasSomeVisibilityChanged) {
+                    calendar.notifyLessonTypeVisibilityChanged()
+                }
+            }
         }
 
         private fun calculateLessonTypesToHide(): ArrayList<String> {
