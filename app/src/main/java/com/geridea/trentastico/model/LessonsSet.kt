@@ -65,7 +65,6 @@ open class LessonsSet {
         recalculatePartitionings()
     }
 
-
     /**
      * Removes all lessons and lesson types not matching the lesson type passed in the
      * parameter.

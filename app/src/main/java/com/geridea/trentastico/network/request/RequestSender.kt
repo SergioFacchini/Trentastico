@@ -72,7 +72,6 @@ class RequestSender {
 
                     request.manageResponse(responseStr, this@RequestSender)
                 } catch (e: Exception) {
-                    e.printStackTrace() //TODO: toglimi
                     request.notifyResponseProcessingFailure(e, this@RequestSender)
                 }
 

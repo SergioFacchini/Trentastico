@@ -8,6 +8,7 @@ data class LessonTypeNew(
         val id: String,
         val name: String,
         val teachersNames: String,
+        val partitioningName: String?,
         val color: Int,
         var isVisible: Boolean = true) {
 

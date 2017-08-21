@@ -274,12 +274,15 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     val lessonTypeId = it.getString("codice_insegnamento")
+                    val teachingName = it.getString("nome_insegnamento")
+                    val partitioningName = calculatePartitioningName(teachingName)
                     LessonTypeNew(
-                        id            = lessonTypeId,
-                        name          = it.getString("nome_insegnamento"),
-                        teachersNames = it.getString("docente").orIfBlank("(insegnate non specificato)"),
-                        color         = teachingsColors[colorProgressive++],
-                        isVisible     = !AppPreferences.isLessonTypeToHide(lessonTypeId)
+                        id               = lessonTypeId,
+                        name             = calculateTeachingWithoutPartitioning(teachingName),
+                        teachersNames    = it.getString("docente").orIfBlank("(insegnate non specificato)"),
+                        partitioningName = partitioningName,
+                        color            = teachingsColors[colorProgressive++],
+                        isVisible        = !AppPreferences.isLessonTypeToHide(lessonTypeId)
                     )
                 }
                 .sortedBy { it.name}
@@ -307,22 +310,32 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
             val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
             val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
 
-            //The name of the partitioning is contained in the name of the course and is always
-            //preceded by a dash "-".
-            val partitoningName = lessonJson.getString("nome_insegnamento").takeLastWhile { it != '-' }.trim()
+            val teachingName = lessonJson.getString("nome_insegnamento")
 
             LessonSchedule(
                     id               = id,
                     lessonTypeId     = lessonJson.getString("codice_insegnamento"),
                     teachersNames    = lessonJson.getString("docente"),
                     room             = lessonJson.getString("aula"),
-                    subject          = lessonJson.getString("nome_insegnamento"),
-                    partitioningName = partitoningName,
+                    subject          = calculateTeachingWithoutPartitioning(teachingName),
+                    partitioningName = calculatePartitioningName(teachingName),
                     color            = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
                     startsAt         = startTimestamp,
                     endsAt           = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
+    }
+
+    private fun calculateTeachingWithoutPartitioning(teachingName: String): String =
+            //The name of the partitioning is contained in the name of the course and is always
+            //preceded by a dash with spaces " - ".
+            teachingName.take(teachingName.lastIndexOf(" - "))
+
+    private fun calculatePartitioningName(teachingName: String): String? {
+        //The name of the partitioning is contained in the name of the course and is always
+        //preceded by a dash with spaces " - ".
+        val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
+        return if (partitioningName == "nessun partizionamento") null else partitioningName
     }
 
     private fun calculdateEndTimeOfLesson( startTimestamp: Long, endingMins: Int, startingMins: Int): Long {

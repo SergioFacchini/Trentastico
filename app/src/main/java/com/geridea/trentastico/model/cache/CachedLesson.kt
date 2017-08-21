@@ -16,7 +16,7 @@ class CachedLesson(
         val starts_at_ms: Long,
         val finishes_at_ms: Long,
         val teaching_id: String,
-        val partitioning_name: String,
+        val partitioning_name: String?,
         val teacher_names: String,
         val subject: String,
         val room: String, val color: Int) {
@@ -32,7 +32,8 @@ class CachedLesson(
             lesson.partitioningName,
             lesson.teachersNames,
             lesson.subject,
-            lesson.room, lesson.color
+            lesson.room,
+            lesson.color
     )
 
     companion object {

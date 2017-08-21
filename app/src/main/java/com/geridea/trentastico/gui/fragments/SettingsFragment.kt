@@ -245,7 +245,6 @@ class SettingsFragment : FragmentWithMenuItems() {
 
         private fun clearFilters() {
             AppPreferences.removeAllHiddenCourses() //No longer need them
-            AppPreferences.removeAllHiddenPartitionings() //No longer need them
         }
 
         private fun clearCache(selectedCourse: StudyCourse) {

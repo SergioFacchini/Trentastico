@@ -5,11 +5,12 @@ import android.content.SharedPreferences
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.gui.views.CustomWeekView
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.*
+import com.geridea.trentastico.model.ExtraCourse
+import com.geridea.trentastico.model.ExtraCoursesList
+import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.services.ShownNotificationsTracker
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 import java.util.*
 
 object AppPreferences {
@@ -95,56 +96,6 @@ object AppPreferences {
     var calendarNumOfDaysToShow: Int
         get() = get().getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
         set(numOfDays) = putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays)
-
-    private fun setPartitioningsToHide(lessonTypeId: String, partitioningCases: ArrayList<PartitioningCase>) = try {
-        //Building values array
-        val jsonArrayCases = JSONArray()
-        for (aCase in partitioningCases) {
-            jsonArrayCases.put(aCase.case)
-        }
-
-        //Saving partitionings
-        val partitioningJSON = partitioningsJSON
-        partitioningJSON.put(lessonTypeId, jsonArrayCases)
-
-        putString("PARTITIONINGS_TO_HIDE", partitioningJSON.toString())
-    } catch (e: JSONException) {
-        BugLogger.logBug("Saving partitionings to hide", e)
-    }
-
-    private val partitioningsJSON: JSONObject
-        get() {
-            try {
-                return JSONObject(get().getString("PARTITIONINGS_TO_HIDE", "{}"))
-            } catch (e: JSONException) {
-                BugLogger.logBug("Getting partitionings from JSON", e)
-                e.printStackTrace()
-
-                throw RuntimeException("Error reading partitionings JSON.")
-            }
-
-        }
-
-    fun getHiddenPartitionings(lessonTypeId: String): ArrayList<String> {
-        val partitionings = ArrayList<String>()
-
-        try {
-            val hiddenPartitioningsArray = partitioningsJSON.optJSONArray(lessonTypeId)
-            if (hiddenPartitioningsArray != null) {
-                for (i in 0..hiddenPartitioningsArray.length() - 1) {
-                    partitionings.add(hiddenPartitioningsArray.getString(i))
-                }
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-
-        return partitionings
-    }
-
-    fun updatePartitioningsToHide(lesson: LessonType) = setPartitioningsToHide(lesson.id, lesson.findPartitioningsToHide())
-
-    fun removeAllHiddenPartitionings() = putString("PARTITIONINGS_TO_HIDE", "{}")
 
     private fun readExtraCourses(): ExtraCoursesList {
         val courses = ExtraCoursesList()

@@ -33,6 +33,13 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
         Views.find<TextView>(convertView, R.id.study_course_name).text = item.fullName
         Views.find<TextView>(convertView, R.id.teacher_name).text = item.teachersNames
 
+        if (item.partitioningName != null) {
+            Views.find<TextView>(convertView, R.id.partitioning_name).text = item.partitioningName
+            Views.find<TextView>(convertView, R.id.partitioning_name).visibility = View.VISIBLE
+        } else {
+            Views.find<TextView>(convertView, R.id.partitioning_name).visibility = View.GONE
+        }
+
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
     }

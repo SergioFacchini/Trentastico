@@ -22,15 +22,11 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
-import com.geridea.trentastico.gui.adapters.PartitioningsAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
-import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.time.CalendarUtils
-import com.threerings.signals.Listener1
-import com.threerings.signals.Signal1
 import java.util.*
 
 class CalendarFragment : FragmentWithMenuItems() {
@@ -102,60 +98,29 @@ class CalendarFragment : FragmentWithMenuItems() {
         lateinit var yesCoursesText: TextView
 
         private val lessonTypes: Collection<LessonTypeNew>
-        private val courseAdapter: CourseFilterAdapter
 
         private var wasSomeVisibilityChanged = false
 
         init {
+            lessonTypes = calendar.currentLessonTypes
 
             //Inflating the view
             val view = Views.inflate<View>(context, R.layout.dialog_filter_courses)
-
             ButterKnife.bind(this, view)
+            setView(view)
 
-            lessonTypes = calendar.currentLessonTypes
+            //Setting up the view
+            (if (lessonTypes.isEmpty()) yesCoursesText else noCoursesText).visibility = GONE
 
-            if (lessonTypes.isEmpty()) {
-                yesCoursesText.visibility = GONE
-            } else {
-                noCoursesText.visibility = GONE
-            }
-
-            courseAdapter = CourseFilterAdapter(context, lessonTypes)
+            //Setting up adapter
+            val courseAdapter = CourseFilterAdapter(context, lessonTypes)
             courseAdapter.onLessonTypeVisibilityChanged.connect { lesson ->
-
                 AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
-//                if (lesson.applyVisibilityToPartitionings()) {
-//                    AppPreferences.updatePartitioningsToHide(lesson)
-//                    courseAdapter.notifyDataSetChanged() //Updating %d of %d shown
-//
-//                    Updating notifications
-//                    NextLessonNotificationService.createIntent(context, NLNStarter.FILTERS_CHANGED)
-//                }
-
                 wasSomeVisibilityChanged = true
-            }
-
-            courseAdapter.onConfigurePartitioningButtonClicked.connect { lessonType ->
-                //TODO: implement partitionings
-//                val filterPartitionings = FilterPartitioningsDialog(context, lessonType)
-//                filterPartitionings.onPartitioningVisibilityChanged.connect { affectedLessonType ->
-//                    if (affectedLessonType.hasAllPartitioningsInvisible()) {
-//                        affectedLessonType.isVisible = false
-//                        AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
-//                    } else if (affectedLessonType.hasAtLeastOnePartitioningVisible()) {
-//                        affectedLessonType.isVisible = true
-//                        AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
-//                    }
-//
-//                    courseAdapter.notifyDataSetChanged() //Updating %d of %d shown
-//                    calendar.notifyLessonTypeVisibilityChanged()
-//                }
-//                filterPartitionings.show()
             }
             coursesListView.adapter = courseAdapter
 
-            setView(view)
+
             setOnDismissListener {
                 if (wasSomeVisibilityChanged) {
                     calendar.notifyLessonTypeVisibilityChanged()
@@ -173,52 +138,5 @@ class CalendarFragment : FragmentWithMenuItems() {
         fun onDoFilterButtonClicked() = dismiss()
 
     }
-
-    internal inner class FilterPartitioningsDialog(
-            context: Context,
-            lessonType: LessonType) : AlertDialog(context) {
-
-        val onPartitioningVisibilityChanged = Signal1<LessonType>()
-
-        @BindView(R.id.partitionings_list)
-        lateinit var partitioningsList: ListView
-        @BindView(R.id.introduction_text)
-        lateinit var introductionText: TextView
-
-        init {
-
-            val view = Views.inflate<View>(context, R.layout.dialog_filter_partition)
-            ButterKnife.bind(this, view)
-
-            calculateIntroductionText(lessonType)
-            bindAdapter(context, lessonType)
-
-            setView(view)
-        }
-
-        private fun bindAdapter(context: Context, lessonType: LessonType) {
-            val adapter = PartitioningsAdapter(context, lessonType.partitioning)
-            adapter.onPartitioningVisibilityChanged.connect(Listener1 {
-                AppPreferences.updatePartitioningsToHide(lessonType)
-                calendar.notifyLessonTypeVisibilityChanged()
-
-                onPartitioningVisibilityChanged.dispatch(lessonType)
-            })
-            partitioningsList.adapter = adapter
-        }
-
-        private fun calculateIntroductionText(lessonType: LessonType) {
-            val introductionString = String.format(Locale.CANADA,
-                    "Gli studenti del corso \"%s\" sono divisi in %d gruppi.\nQui sotto puoi togliere la " + "spunta dai gruppi di cui non fai parte per nascondere il relativo orario.",
-                    lessonType.name, lessonType.partitioning.partitioningCasesSize
-            )
-            introductionText.text = introductionString
-        }
-
-        @OnClick(R.id.dismiss_button)
-        fun onDismissButtonPressed() = dismiss()
-
-    }
-
 
 }

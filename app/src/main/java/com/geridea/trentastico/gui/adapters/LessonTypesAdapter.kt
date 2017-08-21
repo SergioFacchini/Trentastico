@@ -31,6 +31,14 @@ class LessonTypesAdapter(context: Context, lessonTypes: Collection<LessonTypeNew
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
         Views.find<TextView> (convertView, R.id.lesson_type).text    = item.name
         Views.find<TextView> (convertView, R.id.teachers_names).text = item.teachersNames
+
+        if (item.partitioningName != null) {
+            Views.find<TextView> (convertView, R.id.partitoning_name).text = item.partitioningName
+            Views.find<TextView> (convertView, R.id.partitoning_name).visibility = View.VISIBLE
+        } else {
+            Views.find<TextView> (convertView, R.id.partitoning_name).visibility = View.GONE
+        }
+
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
         if (AppPreferences.hasExtraCourseWithId(item.id)) {

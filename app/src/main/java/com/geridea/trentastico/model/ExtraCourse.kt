@@ -13,6 +13,7 @@ class ExtraCourse(
         val lessonTypeId: String,
         val lessonName: String,
         val teachersNames: String,
+        val partitioningName: String?,
         val studyCourse: StudyCourse,
         val color: Int) {
 
@@ -28,6 +29,7 @@ class ExtraCourse(
             jsonObject.put("lessonTypeId", lessonTypeId)
             jsonObject.put("lessonName", lessonName)
             jsonObject.put("teachersNames", teachersNames)
+            jsonObject.put("partitioningName", partitioningName)
             jsonObject.put("studyCourse", studyCourse.toJson())
             jsonObject.put("color", color)
 
@@ -51,7 +53,8 @@ class ExtraCourse(
                  return ExtraCourse(
                     lessonTypeId     = json.getString("lessonTypeId"),
                     lessonName       = json.getString("lessonName"),
-                    teachersNames = json.getString("teachersNames"),
+                    teachersNames    = json.getString("teachersNames"),
+                    partitioningName = json.getString("partitioningName"),
                     studyCourse      = StudyCourse.fromStringJson(json.getString("studyCourse")),
                     color            = json.getInt("color")
                 )

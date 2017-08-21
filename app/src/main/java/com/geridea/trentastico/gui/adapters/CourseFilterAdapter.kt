@@ -24,12 +24,6 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
      */
     val onLessonTypeVisibilityChanged = Signal1<LessonTypeNew>()
 
-    /**
-     * Dispatched when the user clicks the button of configuration of a partitioning. The dispatched
-     * item is the LessonType of which to check the partition.
-     */
-    val onConfigurePartitioningButtonClicked = Signal1<LessonTypeNew>()
-
     init {
         itemsList = lessons.sortedWith(Comparator { a, b ->  a.name.compareTo(b.name)})
     }
@@ -38,35 +32,30 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
             = inflater.inflate(R.layout.itm_course, parent, false)
 
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
+        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
+
+        Views.find<TextView>(convertView, R.id.lesson_type).text    = item.name
+        Views.find<TextView>(convertView, R.id.teachers_names).text = item.teachersNames
+
+        val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitoning_name)
+        if (item.partitioningName != null) {
+            partitioningNameTV.text = item.partitioningName
+            partitioningNameTV.visibility = View.VISIBLE
+        } else {
+            partitioningNameTV.visibility = View.GONE
+        }
+
         val check = Views.find<CheckBox>(convertView, R.id.checkBox)
-        check.text = item.name + "\n" + item.teachersNames
+        check.setOnCheckedChangeListener {  _, isChecked: Boolean -> Unit }
+
         check.isChecked = item.isVisible
-        check.setOnClickListener {
+        check.setOnCheckedChangeListener { _, isChecked: Boolean ->
             item.isVisible = check.isChecked
             onLessonTypeVisibilityChanged.dispatch(item)
         }
 
-        //Adjusting partitionings
-        //TODO: implement partitionings
-//        val partitioning = item.partitioning
-        val partitioningsTV = Views.find<TextView>(convertView, R.id.partitionings)
-//        if (partitioning.type == PartitioningType.NONE) {
-            partitioningsTV.visibility = View.GONE
-
-            Views.find<View>(convertView, R.id.config_partitionings).visibility = View.GONE
-//        } else {
-//            val size = partitioning.partitioningCasesSize
-//            val numVisible = partitioning.numVisiblePartitioningCases
-//
-//            partitioningsTV.text = String.format(Locale.ITALIAN, "Mostrati %d gruppi su %s", numVisible, size)
-//            partitioningsTV.visibility = View.VISIBLE
-//
-//            val configPartitionsButton = Views.find<ImageView>(convertView, R.id.config_partitionings)
-//            configPartitionsButton.visibility = View.VISIBLE
-//            configPartitionsButton.setOnClickListener { onConfigurePartitioningButtonClicked.dispatch(item) }
-
-//        }
-
-        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
+        convertView.setOnClickListener {
+            check.toggle()
+        }
     }
 }

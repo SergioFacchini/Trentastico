@@ -251,7 +251,9 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
             if (!AppPreferences.hasExtraCourseWithId(lesson.id)) {
                 AppPreferences.addExtraCourse(
-                        ExtraCourse(lesson.id, lesson.name, lesson.teachersNames, studyCourse, lesson.color)
+                    ExtraCourse(
+                            lesson.id, lesson.name, lesson.teachersNames,
+                            lesson.partitioningName, studyCourse, lesson.color)
                 )
 
                 dismiss()

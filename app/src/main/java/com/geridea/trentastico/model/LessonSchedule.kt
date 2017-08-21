@@ -20,7 +20,10 @@ data class LessonSchedule(
         var room: String,
         var teachersNames: String,
         val subject: String,
-        val partitioningName: String,
+        /**
+         * The name of the partitioning. Is null when there are no partitionings
+         */
+        val partitioningName: String?,
         val startsAt: Long,
         val endsAt: Long,
         val color: Int,
@@ -74,7 +77,12 @@ data class LessonSchedule(
         }
 
     val eventDescription: String
-        get() = "${subject.toUpperCase()}\n$teachersNames\n$room"
+        get() {
+            return "${subject.toUpperCase()}\n" +
+                    "$teachersNames\n" +
+                    (if(partitioningName != null) "$partitioningName\n" else "") +
+                    room
+        }
 
     val durationInMinutes: Int
         get() = TimeUnit.MILLISECONDS.toMinutes(endsAt - startsAt).toInt()

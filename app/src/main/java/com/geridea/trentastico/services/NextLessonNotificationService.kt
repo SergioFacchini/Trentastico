@@ -290,19 +290,13 @@ class NextLessonNotificationService : Service() {
         for (lesson in lessons) {
             //Is it filtered by the lesson type or the lessons already passed?
             if (!typesToHide.contains(lesson.lessonTypeId)) {
-                //Checking if we're filtering this lessons because of partitionings
-                if (!isFilteredByPartitionings(lesson)) {
-                    lessonsToKeep.add(lesson)
-                }
+                lessonsToKeep.add(lesson)
             }
 
         }
 
         return lessonsToKeep
     }
-
-    private fun isFilteredByPartitionings(lesson: LessonSchedule): Boolean =
-            AppPreferences.getHiddenPartitionings(lesson.lessonTypeId).any { lesson.hasPartitioning(it) }
 
     companion object {
 
