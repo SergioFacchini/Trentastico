@@ -12,7 +12,7 @@ import org.json.JSONObject
 class ExtraCourse(
         val lessonTypeId: String,
         val lessonName: String,
-        val partitioningName: String,
+        val teachersNames: String,
         val studyCourse: StudyCourse,
         val color: Int) {
 
@@ -20,14 +20,14 @@ class ExtraCourse(
      * The complete name of the extra course (name of the course + lesson name)
      */
     val fullName
-      get() = "$studyCourse > $lessonName"
+      get() = "${studyCourse.courseName} > ${studyCourse.yearName}"
 
     fun toJSON(): JSONObject {
         try {
             val jsonObject = JSONObject()
             jsonObject.put("lessonTypeId", lessonTypeId)
             jsonObject.put("lessonName", lessonName)
-            jsonObject.put("partitioningName", partitioningName)
+            jsonObject.put("teachersNames", teachersNames)
             jsonObject.put("studyCourse", studyCourse.toJson())
             jsonObject.put("color", color)
 
@@ -51,7 +51,7 @@ class ExtraCourse(
                  return ExtraCourse(
                     lessonTypeId     = json.getString("lessonTypeId"),
                     lessonName       = json.getString("lessonName"),
-                    partitioningName = json.getString("partitioningName"),
+                    teachersNames = json.getString("teachersNames"),
                     studyCourse      = StudyCourse.fromStringJson(json.getString("studyCourse")),
                     color            = json.getInt("color")
                 )

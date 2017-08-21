@@ -16,10 +16,10 @@ class CachedLesson(
         val starts_at_ms: Long,
         val finishes_at_ms: Long,
         val teaching_id: String,
+        val partitioning_name: String,
         val teacher_names: String,
         val subject: String,
-        val room: String,
-        val color: Int) {
+        val room: String, val color: Int) {
 
     val weekTime: WeekTime = WeekTime(starts_at_ms)
 
@@ -29,10 +29,10 @@ class CachedLesson(
             lesson.startsAt,
             lesson.endsAt,
             lesson.lessonTypeId,
+            lesson.partitioningName,
             lesson.teachersNames,
             lesson.subject,
-            lesson.room,
-            lesson.color
+            lesson.room, lesson.color
     )
 
     companion object {
@@ -43,10 +43,10 @@ class CachedLesson(
                 cursor.getLong(  cursor.getColumnIndexOrThrow(CL_STARTS_AT_MS)),
                 cursor.getLong(  cursor.getColumnIndexOrThrow(CL_FINISHES_AT_MS)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CL_TEACHING_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_PARTITIONING_NAME)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CL_TEACHERS_NAMES)),
                 cursor.getString(cursor.getColumnIndexOrThrow(CL_SUBJECT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(CL_ROOM)),
-                cursor.getInt(   cursor.getColumnIndexOrThrow(CL_COLOR))
+                cursor.getString(cursor.getColumnIndexOrThrow(CL_ROOM)), cursor.getInt(   cursor.getColumnIndexOrThrow(CL_COLOR))
         )
     }
 }

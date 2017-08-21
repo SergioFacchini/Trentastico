@@ -5,12 +5,12 @@ package com.geridea.trentastico.network.controllers.listener
  * Created with ♥ by Slava on 29/03/2017.
  */
 
-import com.geridea.trentastico.model.LessonType
+import com.geridea.trentastico.model.LessonTypeNew
 
 interface ListLessonsListener {
     fun onErrorHappened(error: Exception)
 
     fun onParsingErrorHappened(e: Exception)
 
-    fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>)
+    fun onLessonTypesRetrieved(lessonTypes: Collection<LessonTypeNew>)
 }

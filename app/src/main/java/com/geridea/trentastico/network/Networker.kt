@@ -42,6 +42,12 @@ object Networker {
     fun loadLessons(listener: LessonsLoadingListener) =
             lessonsControllerNew.loadLessons(listener, AppPreferences.studyCourse)
 
+    fun loadExtraCourses(lessonsLoader: LessonsLoadingListener) {
+        AppPreferences.extraCourses.forEach {
+            lessonsControllerNew.loadExtraCourseLessons(lessonsLoader, it)
+        }
+    }
+
     fun diffLessonsInCache(
             intervalToCheck: WeekInterval,
             listener: LessonsDifferenceListener) = lessonsController.diffLessonsInCache(intervalToCheck, listener)
@@ -52,7 +58,7 @@ object Networker {
 
     fun loadCoursesOfStudyCourse(
             studyCourse: StudyCourse,
-            listener: ListLessonsListener) = lessonsController.loadCoursesOfStudyCourse(studyCourse, listener)
+            listener: ListLessonsListener) = lessonsControllerNew.loadLessonTypesOfStudyCourse(studyCourse, listener)
 
     fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController.loadTodaysLessons(todaysLessonsListener)
 

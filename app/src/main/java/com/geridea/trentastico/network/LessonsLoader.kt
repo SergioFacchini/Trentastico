@@ -27,6 +27,7 @@ class LessonsLoader : LessonsLoadingListener {
 
     fun loadAndAddLessons() {
         Networker.loadLessons(this)
+        Networker.loadExtraCourses(this)
     }
 
     override fun onLoadingAboutToStart(operation: ILoadingMessage)

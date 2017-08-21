@@ -49,3 +49,6 @@ object StringUtils {
         return format
     }
 }
+
+fun String.orIfBlank(alternative: String): String =
+        if (this.isBlank()) alternative else this

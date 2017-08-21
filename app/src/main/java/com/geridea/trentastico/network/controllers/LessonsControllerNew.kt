@@ -2,13 +2,16 @@ package com.geridea.trentastico.network.controllers
 
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.database.Cacher
-import com.geridea.trentastico.gui.views.requestloader.LessonsLoadingMessage
+import com.geridea.trentastico.gui.views.requestloader.ExtraLessonsLoadingMessage
+import com.geridea.trentastico.gui.views.requestloader.StandardLessonsLoadingMessage
 import com.geridea.trentastico.model.*
 import com.geridea.trentastico.network.controllers.listener.CoursesLoadingListener
 import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
+import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
 import com.geridea.trentastico.network.request.IRequest
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.network.request.ServerResponseParsingException
+import com.geridea.trentastico.utils.orIfBlank
 import okhttp3.FormBody
 import org.json.JSONArray
 import org.json.JSONObject
@@ -31,14 +34,23 @@ class LessonsControllerNew(sender: RequestSender, cacher: Cacher) : BasicControl
     }
 
     fun loadLessons( listener: LessonsLoadingListener, studyCourse: StudyCourse) {
-        sender.processRequest(LoadStandardLessonsRequest(listener, studyCourse))
+        sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener))
+    }
+
+    fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
+        sender.processRequest(LessonTypesOfStudyCourseRequest(studyCourse, listener))
+    }
+
+    fun loadExtraCourseLessons(lessonsLoader: LessonsLoadingListener, extraCourse: ExtraCourse) {
+        sender.processRequest(LessonOfExtraCourseRequest(extraCourse, lessonsLoader))
     }
 
 }
 
+
 internal abstract class BasicRequest : IRequest {
 
-    internal val requestId = nextAvailableId
+    internal val operationId = nextAvailableId
 
     companion object {
         private var nextAvailableId = 1
@@ -171,121 +183,16 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
 
 }
 
-
 /**
- * Requests that load the lessons of the current StudyCourse
+ * Basic request that downloads a list of lesson schedules and lesson types.
+ * To be notified of the results of the request override [BasicLessonRequest.onTeachingsAndLessonsLoaded]
  */
-internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, val studyCourse: StudyCourse): BasicRequest() {
+internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicRequest() {
 
     /**
      * The colors are assigned sequentially: that means that the first lesson type picks the first
      * color, the second picks the seconds.. and so on.
      */
-    private val colors = arrayOf(
-            0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(), 0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(),
-            0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(), 0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(),
-            0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(), 0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(),
-            0xFF80D886.toInt(), 0xFFA6E2FF.toInt(), 0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(),
-            0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(), 0xFFDC8080.toInt(), 0xFFFFB480.toInt(),
-            0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(), 0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(),
-            0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(), 0xFF56C878.toInt(), 0xFFE9D6B2.toInt(),
-            0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(), 0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(),
-            0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(), 0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(),
-            0xFFBFCFCF.toInt(), 0xFF59B726.toInt(), 0xFFDE7083.toInt(), 0xFF68BBD9.toInt(),
-            0xFFFF8147.toInt(), 0xFF87D21E.toInt(), 0xFF44D36F.toInt(), 0xFFCA9D00.toInt(),
-            0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(), 0xFF00BD09.toInt(), 0xFF4EC300.toInt(),
-            0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(), 0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(),
-            0xFFFF8D01.toInt(), 0xFFCAC300.toInt(), 0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(),
-            0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(), 0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(),
-            0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(), 0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(),
-            0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(), 0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(),
-            0xFF29D984.toInt(), 0xFF99FF99.toInt(), 0xFF9999FF.toInt(), 0xFF47BAAD.toInt(),
-            0xFFFF9FFA.toInt(), 0xFF00C161.toInt(), 0xFFB093FF.toInt(), 0xFF57B3FF.toInt(),
-            0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(), 0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(),
-            0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(), 0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(),
-            0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(), 0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(),
-            0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(), 0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(),
-            0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(), 0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(),
-            0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(), 0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(),
-            0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(), 0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(),
-            0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(), 0xFF80D886.toInt(), 0xFFA6E2FF.toInt(),
-            0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(), 0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(),
-            0xFFDC8080.toInt(), 0xFFFFB480.toInt(), 0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(),
-            0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(), 0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(),
-            0xFF56C878.toInt(), 0xFFE9D6B2.toInt(), 0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(),
-            0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(), 0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(),
-            0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(), 0xFFBFCFCF.toInt(), 0xFF59B726.toInt(),
-            0xFFDE7083.toInt(), 0xFF68BBD9.toInt(), 0xFFFF8147.toInt(), 0xFF87D21E.toInt(),
-            0xFF44D36F.toInt(), 0xFFCA9D00.toInt(), 0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(),
-            0xFF00BD09.toInt(), 0xFF4EC300.toInt(), 0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(),
-            0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(), 0xFFFF8D01.toInt(), 0xFFCAC300.toInt(),
-            0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(), 0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(),
-            0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(), 0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(),
-            0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(), 0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(),
-            0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(), 0xFF29D984.toInt(), 0xFF99FF99.toInt(),
-            0xFF9999FF.toInt(), 0xFF47BAAD.toInt(), 0xFFFF9FFA.toInt(), 0xFF00C161.toInt(),
-            0xFFB093FF.toInt(), 0xFF57B3FF.toInt(), 0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(),
-            0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(), 0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(),
-            0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(), 0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(),
-            0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(), 0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(),
-            0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(), 0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(),
-            0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(), 0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(),
-            0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(), 0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(),
-            0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(), 0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(),
-            0xFF80D886.toInt(), 0xFFA6E2FF.toInt(), 0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(),
-            0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(), 0xFFDC8080.toInt(), 0xFFFFB480.toInt(),
-            0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(), 0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(),
-            0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(), 0xFF56C878.toInt(), 0xFFE9D6B2.toInt(),
-            0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(), 0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(),
-            0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(), 0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(),
-            0xFFBFCFCF.toInt(), 0xFF59B726.toInt(), 0xFFDE7083.toInt(), 0xFF68BBD9.toInt(),
-            0xFFFF8147.toInt(), 0xFF87D21E.toInt(), 0xFF44D36F.toInt(), 0xFFCA9D00.toInt(),
-            0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(), 0xFF00BD09.toInt(), 0xFF4EC300.toInt(),
-            0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(), 0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(),
-            0xFFFF8D01.toInt(), 0xFFCAC300.toInt(), 0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(),
-            0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(), 0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(),
-            0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(), 0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(),
-            0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(), 0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(),
-            0xFF29D984.toInt(), 0xFF99FF99.toInt(), 0xFF9999FF.toInt(), 0xFF47BAAD.toInt(),
-            0xFFFF9FFA.toInt(), 0xFF00C161.toInt(), 0xFFB093FF.toInt(), 0xFF57B3FF.toInt(),
-            0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(), 0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(),
-            0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(), 0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(),
-            0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(), 0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(),
-            0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(), 0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(),
-            0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(), 0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(),
-            0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(), 0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(),
-            0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(), 0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(),
-            0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(), 0xFF80D886.toInt(), 0xFFA6E2FF.toInt(),
-            0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(), 0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(),
-            0xFFDC8080.toInt(), 0xFFFFB480.toInt(), 0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(),
-            0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(), 0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(),
-            0xFF56C878.toInt(), 0xFFE9D6B2.toInt(), 0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(),
-            0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(), 0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(),
-            0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(), 0xFFBFCFCF.toInt(), 0xFF59B726.toInt(),
-            0xFFDE7083.toInt(), 0xFF68BBD9.toInt(), 0xFFFF8147.toInt(), 0xFF87D21E.toInt(),
-            0xFF44D36F.toInt(), 0xFFCA9D00.toInt(), 0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(),
-            0xFF00BD09.toInt(), 0xFF4EC300.toInt(), 0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(),
-            0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(), 0xFFFF8D01.toInt(), 0xFFCAC300.toInt(),
-            0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(), 0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(),
-            0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(), 0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(),
-            0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(), 0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(),
-            0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(), 0xFF29D984.toInt(), 0xFF99FF99.toInt(),
-            0xFF9999FF.toInt(), 0xFF47BAAD.toInt(), 0xFFFF9FFA.toInt(), 0xFF00C161.toInt(),
-            0xFFB093FF.toInt(), 0xFF57B3FF.toInt(), 0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(),
-            0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(), 0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(),
-            0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(), 0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(),
-            0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(), 0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(),
-            0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(), 0xFFFFA3FF.toInt()
-    )
-
-
-    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
-        listener.onNetworkErrorHappened(error, requestId)
-    }
-
-    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
-        listener.onParsingErrorHappened(e, requestId)
-    }
 
     override fun manageResponse(responseToManage: String, sender: RequestSender) {
         /* Sample response:
@@ -339,11 +246,18 @@ internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, 
         val json = JSONObject(responseToManage)
         val teachings = parseTeachings(json)
         val teachingsColorMapping = mapOf(
-            *teachings.map { Pair(it.id, it.color) }.toTypedArray()
+                *teachings.map { Pair(it.id, it.color) }.toTypedArray()
         )
 
-        listener.onLessonsLoaded(parseLessons(json, teachingsColorMapping), teachings, requestId)
+        val lessons = parseLessons(json, teachingsColorMapping)
+
+        onTeachingsAndLessonsLoaded(teachings, lessons)
     }
+
+    /**
+     * Hook function that notifies that the loading has been completed
+     */
+    abstract fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>)
 
     private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
         var colorProgressive = 0
@@ -359,9 +273,10 @@ internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, 
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     LessonTypeNew(
-                            id = it.getString("codice_insegnamento"),
-                            name = it.getString("nome_insegnamento"),
-                            color = colors[colorProgressive++]
+                        id            = it.getString("codice_insegnamento"),
+                        name          = it.getString("nome_insegnamento"),
+                        teachersNames = it.getString("docente").orIfBlank("(insegnate non specificato)"),
+                        color         = teachingsColors[colorProgressive++]
                     )
                 }
                 .sortedBy { it.name}
@@ -386,19 +301,23 @@ internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, 
             //In order to get the ending of the lesson, we need to sum to the timestamp the
             //difference the starting and ending time
             val startTimestamp = lessonJson.getLong("timestamp") * 1000 - TimeUnit.HOURS.toMillis(2)
-
             val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
-            val endingMins = convertToMinutes(lessonJson.getString("ora_fine"))
+            val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
+
+            //The name of the partitioning is contained in the name of the course and is always
+            //preceded by a dash "-".
+            val partitoningName = lessonJson.getString("nome_insegnamento").takeLastWhile { it != '-' }.trim()
 
             LessonSchedule(
-                    id            = id,
-                    lessonTypeId  = lessonJson.getString("codice_insegnamento"),
-                    teachersNames = lessonJson.getString("docente"),
-                    room          = lessonJson.getString("aula"),
-                    subject       = lessonJson.getString("nome_insegnamento"),
-                    color         = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
-                    startsAt      = startTimestamp,
-                    endsAt        = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
+                    id               = id,
+                    lessonTypeId     = lessonJson.getString("codice_insegnamento"),
+                    teachersNames    = lessonJson.getString("docente"),
+                    room             = lessonJson.getString("aula"),
+                    subject          = lessonJson.getString("nome_insegnamento"),
+                    partitioningName = partitoningName,
+                    color            = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
+                    startsAt         = startTimestamp,
+                    endsAt           = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
     }
@@ -426,10 +345,6 @@ internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, 
         }
     }
 
-    override fun notifyOnBeforeSend() {
-        listener.onLoadingAboutToStart(LessonsLoadingMessage(requestId, isARetry = false))
-    }
-
     override val url: String
         get() = "https://easyroom.unitn.it/Orario/list_call.php"
 
@@ -444,4 +359,170 @@ internal class LoadStandardLessonsRequest(val listener: LessonsLoadingListener, 
 
 }
 
+/**
+ * Requests that load the lessons of the current StudyCourse
+ */
+internal class LoadStandardLessonsRequest(
+        studyCourse: StudyCourse,
+        val listener: LessonsLoadingListener): BasicLessonRequest(studyCourse) {
 
+    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+        listener.onLessonsLoaded(lessons, teachings, operationId)
+    }
+
+    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+        listener.onNetworkErrorHappened(error, operationId)
+    }
+
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        listener.onParsingErrorHappened(e, operationId)
+    }
+
+    override fun notifyOnBeforeSend() {
+        listener.onLoadingAboutToStart(StandardLessonsLoadingMessage(operationId, isARetry = false))
+    }
+
+}
+
+internal class LessonTypesOfStudyCourseRequest(
+        studyCourse: StudyCourse,
+        val listener: ListLessonsListener) : BasicLessonRequest(studyCourse) {
+
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        listener.onParsingErrorHappened(e)
+    }
+
+    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+        listener.onErrorHappened(error)
+    }
+
+    override fun notifyOnBeforeSend() { ; }
+
+    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+        listener.onLessonTypesRetrieved(teachings)
+    }
+
+}
+
+internal class LessonOfExtraCourseRequest(
+        private val extraCourse: ExtraCourse,
+        val listener: LessonsLoadingListener
+): BasicLessonRequest(extraCourse.studyCourse) {
+
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        listener.onParsingErrorHappened(e, operationId)
+    }
+
+    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+        listener.onNetworkErrorHappened(error, operationId)
+    }
+
+    override fun notifyOnBeforeSend() {
+        listener.onLoadingAboutToStart(ExtraLessonsLoadingMessage(extraCourse, operationId))
+    }
+
+    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+        val searchedExtraLessons = lessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
+        val searchedLessonType   = teachings.first { it.id == extraCourse.lessonTypeId }
+        
+        listener.onLessonsLoaded(searchedExtraLessons, listOf(searchedLessonType), operationId)
+    }
+
+}
+
+private val teachingsColors = arrayOf(
+        0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(), 0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(),
+        0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(), 0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(),
+        0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(), 0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(),
+        0xFF80D886.toInt(), 0xFFA6E2FF.toInt(), 0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(),
+        0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(), 0xFFDC8080.toInt(), 0xFFFFB480.toInt(),
+        0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(), 0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(),
+        0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(), 0xFF56C878.toInt(), 0xFFE9D6B2.toInt(),
+        0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(), 0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(),
+        0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(), 0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(),
+        0xFFBFCFCF.toInt(), 0xFF59B726.toInt(), 0xFFDE7083.toInt(), 0xFF68BBD9.toInt(),
+        0xFFFF8147.toInt(), 0xFF87D21E.toInt(), 0xFF44D36F.toInt(), 0xFFCA9D00.toInt(),
+        0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(), 0xFF00BD09.toInt(), 0xFF4EC300.toInt(),
+        0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(), 0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(),
+        0xFFFF8D01.toInt(), 0xFFCAC300.toInt(), 0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(),
+        0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(), 0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(),
+        0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(), 0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(),
+        0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(), 0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(),
+        0xFF29D984.toInt(), 0xFF99FF99.toInt(), 0xFF9999FF.toInt(), 0xFF47BAAD.toInt(),
+        0xFFFF9FFA.toInt(), 0xFF00C161.toInt(), 0xFFB093FF.toInt(), 0xFF57B3FF.toInt(),
+        0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(), 0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(),
+        0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(), 0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(),
+        0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(), 0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(),
+        0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(), 0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(),
+        0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(), 0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(),
+        0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(), 0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(),
+        0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(), 0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(),
+        0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(), 0xFF80D886.toInt(), 0xFFA6E2FF.toInt(),
+        0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(), 0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(),
+        0xFFDC8080.toInt(), 0xFFFFB480.toInt(), 0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(),
+        0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(), 0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(),
+        0xFF56C878.toInt(), 0xFFE9D6B2.toInt(), 0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(),
+        0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(), 0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(),
+        0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(), 0xFFBFCFCF.toInt(), 0xFF59B726.toInt(),
+        0xFFDE7083.toInt(), 0xFF68BBD9.toInt(), 0xFFFF8147.toInt(), 0xFF87D21E.toInt(),
+        0xFF44D36F.toInt(), 0xFFCA9D00.toInt(), 0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(),
+        0xFF00BD09.toInt(), 0xFF4EC300.toInt(), 0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(),
+        0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(), 0xFFFF8D01.toInt(), 0xFFCAC300.toInt(),
+        0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(), 0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(),
+        0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(), 0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(),
+        0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(), 0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(),
+        0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(), 0xFF29D984.toInt(), 0xFF99FF99.toInt(),
+        0xFF9999FF.toInt(), 0xFF47BAAD.toInt(), 0xFFFF9FFA.toInt(), 0xFF00C161.toInt(),
+        0xFFB093FF.toInt(), 0xFF57B3FF.toInt(), 0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(),
+        0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(), 0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(),
+        0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(), 0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(),
+        0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(), 0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(),
+        0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(), 0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(),
+        0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(), 0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(),
+        0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(), 0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(),
+        0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(), 0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(),
+        0xFF80D886.toInt(), 0xFFA6E2FF.toInt(), 0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(),
+        0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(), 0xFFDC8080.toInt(), 0xFFFFB480.toInt(),
+        0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(), 0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(),
+        0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(), 0xFF56C878.toInt(), 0xFFE9D6B2.toInt(),
+        0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(), 0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(),
+        0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(), 0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(),
+        0xFFBFCFCF.toInt(), 0xFF59B726.toInt(), 0xFFDE7083.toInt(), 0xFF68BBD9.toInt(),
+        0xFFFF8147.toInt(), 0xFF87D21E.toInt(), 0xFF44D36F.toInt(), 0xFFCA9D00.toInt(),
+        0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(), 0xFF00BD09.toInt(), 0xFF4EC300.toInt(),
+        0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(), 0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(),
+        0xFFFF8D01.toInt(), 0xFFCAC300.toInt(), 0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(),
+        0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(), 0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(),
+        0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(), 0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(),
+        0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(), 0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(),
+        0xFF29D984.toInt(), 0xFF99FF99.toInt(), 0xFF9999FF.toInt(), 0xFF47BAAD.toInt(),
+        0xFFFF9FFA.toInt(), 0xFF00C161.toInt(), 0xFFB093FF.toInt(), 0xFF57B3FF.toInt(),
+        0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(), 0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(),
+        0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(), 0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(),
+        0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(), 0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(),
+        0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(), 0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(),
+        0xFFFFA3FF.toInt(), 0xFFC5FFB1.toInt(), 0xFFFFFCB1.toInt(), 0xFFFFE6BB.toInt(),
+        0xFFB9F4FF.toInt(), 0xFFF3BAF5.toInt(), 0xFFF1D0D0.toInt(), 0xFFD5FFA4.toInt(),
+        0xFFFDCBFE.toInt(), 0xFFA0F3A2.toInt(), 0xFFFFE8A4.toInt(), 0xFFFFC6A4.toInt(),
+        0xFFEEC0C0.toInt(), 0xFFA7C7D3.toInt(), 0xFF80D886.toInt(), 0xFFA6E2FF.toInt(),
+        0xFFDDFF75.toInt(), 0xFFFFBFCF.toInt(), 0xFF8CB1FF.toInt(), 0xFFFEE080.toInt(),
+        0xFFDC8080.toInt(), 0xFFFFB480.toInt(), 0xFFA9F580.toInt(), 0xFFA6F9A2.toInt(),
+        0xFFC6DBE1.toInt(), 0xFFF99ECD.toInt(), 0xFFC5C6FC.toInt(), 0xFFFDC100.toInt(),
+        0xFF56C878.toInt(), 0xFFE9D6B2.toInt(), 0xFFFFA100.toInt(), 0xFFDBBEC9.toInt(),
+        0xFFDB7BAE.toInt(), 0xFFFFFF72.toInt(), 0xFFF2CDA5.toInt(), 0xFFCABD00.toInt(),
+        0xFFA9D8B9.toInt(), 0xFFEBB2BB.toInt(), 0xFFBFCFCF.toInt(), 0xFF59B726.toInt(),
+        0xFFDE7083.toInt(), 0xFF68BBD9.toInt(), 0xFFFF8147.toInt(), 0xFF87D21E.toInt(),
+        0xFF44D36F.toInt(), 0xFFCA9D00.toInt(), 0xFF5D94E1.toInt(), 0xFFCB78CE.toInt(),
+        0xFF00BD09.toInt(), 0xFF4EC300.toInt(), 0xFFF99A9A.toInt(), 0xFFFFFF72.toInt(),
+        0xFFC175D6.toInt(), 0xFF6BBAFF.toInt(), 0xFFFF8D01.toInt(), 0xFFCAC300.toInt(),
+        0xFF5AA800.toInt(), 0xFFFF8F2E.toInt(), 0xFF3EC1A7.toInt(), 0xFFFF9C39.toInt(),
+        0xFFE7698F.toInt(), 0xFFD9AC1A.toInt(), 0xFF3BCA8C.toInt(), 0xFFE06E96.toInt(),
+        0xFFE9AF5D.toInt(), 0xFF6699CC.toInt(), 0xFFFF99CC.toInt(), 0xFF99CCFF.toInt(),
+        0xFFDCB02C.toInt(), 0xFFFF7F5B.toInt(), 0xFF29D984.toInt(), 0xFF99FF99.toInt(),
+        0xFF9999FF.toInt(), 0xFF47BAAD.toInt(), 0xFFFF9FFA.toInt(), 0xFF00C161.toInt(),
+        0xFFB093FF.toInt(), 0xFF57B3FF.toInt(), 0xFFCAFF7A.toInt(), 0xFFEDE053.toInt(),
+        0xFF5ECCB1.toInt(), 0xFF5AB8D2.toInt(), 0xFF7A95FF.toInt(), 0xFFFFD83D.toInt(),
+        0xFFFF6A34.toInt(), 0xFF5AE09B.toInt(), 0xFFE4CA95.toInt(), 0xFF66C5BA.toInt(),
+        0xFFCC7E7E.toInt(), 0xFFE6AFEE.toInt(), 0xFF8DD7B1.toInt(), 0xFFDE8EB6.toInt(),
+        0xFFFFA3A3.toInt(), 0xFFFFD1A3.toInt(), 0xFFFFA3FF.toInt()
+)

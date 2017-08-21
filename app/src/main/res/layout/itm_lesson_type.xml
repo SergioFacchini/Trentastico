@@ -30,9 +30,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_toLeftOf="@+id/color"
                 android:gravity="center_vertical|left"
                 android:text="text"
+                style="@style/TextForegroundMedium" />
+
+            <TextView
+                android:id="@+id/teachers_names"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|left"
+                android:text="text"
+                android:textStyle="italic"
                 style="@style/TextForegroundMedium" />
 
             <TextView

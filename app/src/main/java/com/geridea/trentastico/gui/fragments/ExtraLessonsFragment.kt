@@ -26,7 +26,7 @@ import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter
 import com.geridea.trentastico.gui.views.CourseSelectorView
 import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.model.LessonType
+import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
@@ -102,7 +102,9 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         }
     }
 
-    internal inner class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse) : AlertDialog(context) {
+    internal inner class ExtraCourseDeleteDialog(
+            context: Context,
+            private val course: ExtraCourse) : AlertDialog(context) {
 
         @BindView(R.id.course_name)
         lateinit var courseName: TextView
@@ -210,8 +212,12 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         @BindView(R.id.selected_course)
         lateinit var selectedCourseTextView: TextView
+
         @BindView(R.id.error_while_searching)
         lateinit var errorWhileSearching: TextView
+
+        @BindView(R.id.lessons_found_text)
+        lateinit var lessonsFoundText: TextView
 
         @BindView(R.id.lessons_list)
         lateinit var lessonsList: ListView
@@ -227,7 +233,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             ButterKnife.bind(this, view)
 
             selectedCourseTextView.text = "Sto cercando le lezioni del corso da te selezionato: " +
-                                            studyCourse.generateFullDescription()
+                    studyCourse.generateFullDescription()
 
             lessonsFound.visibility = GONE
 
@@ -241,11 +247,11 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         @OnItemClick(R.id.lessons_list)
         fun onLessonSelected(position: Int) {
-            val lesson = lessonsList.getItemAtPosition(position) as LessonType
+            val lesson = lessonsList.getItemAtPosition(position) as LessonTypeNew
 
             if (!AppPreferences.hasExtraCourseWithId(lesson.id)) {
                 AppPreferences.addExtraCourse(
-                    ExtraCourse(lesson.id, lesson.name, lesson.partitioningName, studyCourse, lesson.color)
+                        ExtraCourse(lesson.id, lesson.name, lesson.teachersNames, studyCourse, lesson.color)
                 )
 
                 dismiss()
@@ -255,15 +261,23 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         override fun onErrorHappened(error: Exception) = showErrorMessage()
 
-        private fun showErrorMessage() = activity.runOnUiThread { errorWhileSearching.visibility = View.VISIBLE }
+        private fun showErrorMessage() = activity.runOnUiThread {
+            errorWhileSearching.visibility = View.VISIBLE
+        }
 
         override fun onParsingErrorHappened(e: Exception) = showErrorMessage()
 
-        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = activity.runOnUiThread {
-            lessonsList.adapter = LessonTypesAdapter(context, lessonTypes)
+        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonTypeNew>) = activity.runOnUiThread {
+            if (lessonTypes.isEmpty()) {
+                lessonsFoundText.text = "Non vi sono lezioni nel corso di studi selezionato; probabilmente le lezioni non sono ancora state pianificate dall'universita. Se pensi che sia un errore, torna indietro e controlla di aver selezionato il corso corretto."
+            } else {
+                lessonsFoundText.text = "Ho trovato le seguenti lezioni. Premi sulla lezione che ti interessa seguire per aggiungerla al calendario."
+
+                lessonsList.adapter = LessonTypesAdapter(context, lessonTypes)
+            }
 
             searchingLessons.visibility = View.GONE
-            lessonsFound.visibility = View.VISIBLE
+            lessonsFound.visibility     = View.VISIBLE
         }
     }
 }

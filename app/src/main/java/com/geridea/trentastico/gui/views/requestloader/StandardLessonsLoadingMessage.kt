@@ -1,6 +1,6 @@
 package com.geridea.trentastico.gui.views.requestloader
 
-class LessonsLoadingMessage(operationId: Int, private val isARetry: Boolean):
+class StandardLessonsLoadingMessage(operationId: Int, private val isARetry: Boolean):
         AbstractTextMessage(operationId) {
 
     override val text: String

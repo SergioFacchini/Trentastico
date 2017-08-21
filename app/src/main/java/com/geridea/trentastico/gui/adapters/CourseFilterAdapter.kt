@@ -34,11 +34,12 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
         itemsList = lessons.sortedWith(Comparator { a, b ->  a.name.compareTo(b.name)})
     }
 
-    override fun createView(item: LessonTypeNew, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_course, parent, false)
+    override fun createView(item: LessonTypeNew, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View
+            = inflater.inflate(R.layout.itm_course, parent, false)
 
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
         val check = Views.find<CheckBox>(convertView, R.id.checkBox)
-        check.text = item.name
+        check.text = item.name + "\n" + item.teachersNames
         check.isChecked = item.isVisible
         check.setOnClickListener {
             item.isVisible = check.isChecked

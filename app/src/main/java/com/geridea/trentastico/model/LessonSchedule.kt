@@ -10,7 +10,6 @@ import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
 
 data class LessonSchedule(
@@ -21,6 +20,7 @@ data class LessonSchedule(
         var room: String,
         var teachersNames: String,
         val subject: String,
+        val partitioningName: String,
         val startsAt: Long,
         val endsAt: Long,
         val color: Int,
@@ -31,6 +31,7 @@ data class LessonSchedule(
             cachedLesson.room,
             cachedLesson.teacher_names,
             cachedLesson.subject,
+            cachedLesson.partitioning_name,
             cachedLesson.starts_at_ms,
             cachedLesson.finishes_at_ms,
             cachedLesson.color,
@@ -96,8 +97,6 @@ data class LessonSchedule(
     fun startsBefore(currentMillis: Long): Boolean = startsAt < currentMillis
 
     fun isHeldInMilliseconds(ms: Long): Boolean = startsAt >= ms && ms <= endsAt
-
-    fun hasRoomSpecified(): Boolean = !room.isEmpty()
 
     fun toExpandedCalendarInterval(typeOfTime: Int, delta: Int): CalendarInterval {
         val calFrom = CalendarUtils.getCalendarWithMillis(startsAt)
@@ -169,23 +168,6 @@ data class LessonSchedule(
 
         fun filterLessons(lessonsToFilter: MutableCollection<LessonSchedule>) {
             //TODO implement partitonings
-        }
-
-        private fun getSubjectFromTitle(titleToParse: String): String {
-            val pattern = Pattern.compile("^(.+)\\n")
-            val matcher = pattern.matcher(titleToParse)
-            matcher.find()
-            return matcher.group(1)
-        }
-
-        private fun getRoomFromTitle(titleToParse: String): String {
-            val pattern = Pattern.compile("\\[(.+)\\]$")
-            val matcher = pattern.matcher(titleToParse)
-            return if (matcher.find()) {
-                matcher.group(1)
-            } else {
-                ""
-            }
         }
 
         fun sortByStartDateOrId(lessons: ArrayList<LessonSchedule>) = Collections.sort(lessons) { a, b ->

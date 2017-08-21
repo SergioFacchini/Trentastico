@@ -25,11 +25,13 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
         itemsList = extraCourses
     }
 
-    override fun createView(item: ExtraCourse, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_extra_course, parent, false)
+    override fun createView(item: ExtraCourse, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View
+            = inflater.inflate(R.layout.itm_extra_course, parent, false)
 
     override fun bindView(item: ExtraCourse, pos: Int, convertView: View) {
         Views.find<TextView>(convertView, R.id.course_name).text = item.lessonName
         Views.find<TextView>(convertView, R.id.study_course_name).text = item.fullName
+        Views.find<TextView>(convertView, R.id.teacher_name).text = item.teachersNames
 
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
