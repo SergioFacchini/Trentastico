@@ -41,7 +41,7 @@
             android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/partitoning_name"
+            android:id="@+id/partitioning_name"
             style="@style/TextForegroundMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

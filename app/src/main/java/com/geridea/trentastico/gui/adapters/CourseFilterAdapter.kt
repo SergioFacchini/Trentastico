@@ -37,7 +37,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
         Views.find<TextView>(convertView, R.id.lesson_type).text    = item.name
         Views.find<TextView>(convertView, R.id.teachers_names).text = item.teachersNames
 
-        val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitoning_name)
+        val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitioning_name)
         if (item.partitioningName != null) {
             partitioningNameTV.text = item.partitioningName
             partitioningNameTV.visibility = View.VISIBLE

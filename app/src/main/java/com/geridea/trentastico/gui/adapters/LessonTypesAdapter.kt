@@ -33,10 +33,10 @@ class LessonTypesAdapter(context: Context, lessonTypes: Collection<LessonTypeNew
         Views.find<TextView> (convertView, R.id.teachers_names).text = item.teachersNames
 
         if (item.partitioningName != null) {
-            Views.find<TextView> (convertView, R.id.partitoning_name).text = item.partitioningName
-            Views.find<TextView> (convertView, R.id.partitoning_name).visibility = View.VISIBLE
+            Views.find<TextView> (convertView, R.id.partitioning_name).text = item.partitioningName
+            Views.find<TextView> (convertView, R.id.partitioning_name).visibility = View.VISIBLE
         } else {
-            Views.find<TextView> (convertView, R.id.partitoning_name).visibility = View.GONE
+            Views.find<TextView> (convertView, R.id.partitioning_name).visibility = View.GONE
         }
 
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))

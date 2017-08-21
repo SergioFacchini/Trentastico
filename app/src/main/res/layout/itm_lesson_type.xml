@@ -45,13 +45,13 @@
                 style="@style/TextForegroundMedium" />
 
             <TextView
-                android:id="@+id/partitoning_name"
+                android:id="@+id/partitioning_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center_vertical|left"
                 android:text="text"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorAccentLight"
                 style="@style/TextForegroundMedium" />
 
             <TextView

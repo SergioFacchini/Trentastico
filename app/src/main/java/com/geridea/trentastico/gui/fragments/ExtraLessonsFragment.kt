@@ -102,17 +102,14 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         }
     }
 
-    internal inner class ExtraCourseDeleteDialog(
-            context: Context,
-            private val course: ExtraCourse) : AlertDialog(context) {
+    internal inner class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse): AlertDialog(context) {
 
-        @BindView(R.id.course_name)
-        lateinit var courseName: TextView
-        @BindView(R.id.study_course_name)
-        lateinit var studyCourseName: TextView
+        @BindView(R.id.course_name)       lateinit var courseName: TextView
+        @BindView(R.id.teacher_name)      lateinit var teacherName: TextView
+        @BindView(R.id.partitioning_name) lateinit var partitioningName: TextView
+        @BindView(R.id.study_course_name) lateinit var studyCourseName: TextView
 
-        @BindView(R.id.color)
-        lateinit var color: ImageView
+        @BindView(R.id.color) lateinit var color: ImageView
 
         /**
          * Dispatched when the user has selected and added a new study course.
@@ -123,12 +120,21 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_delete)
             ButterKnife.bind(this, view)
 
-            courseName.text = course.lessonName
+            courseName     .text = course.lessonName
             studyCourseName.text = course.fullName
+            teacherName    .text = course.teachersNames
+
+            if (course.partitioningName != null) {
+                partitioningName.text = course.partitioningName
+            } else {
+                partitioningName.visibility = View.GONE
+            }
+
             color.setImageDrawable(ColorDrawable(course.color))
 
             setView(view)
         }
+
 
         @OnClick(R.id.cancel_button)
         fun onCancelButtonPressed() = dismiss()
