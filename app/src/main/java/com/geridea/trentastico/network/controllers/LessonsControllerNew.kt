@@ -429,6 +429,8 @@ internal class LoadStandardLessonsRequest(
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
         listener.onNetworkErrorHappened(error, operationId)
+
+        sender.processRequestAfterTimeout(this)
     }
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
@@ -475,6 +477,8 @@ internal class LessonOfExtraCourseRequest(
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
         listener.onNetworkErrorHappened(error, operationId)
+
+        sender.processRequestAfterTimeout(this)
     }
 
     override fun notifyOnBeforeSend() {
