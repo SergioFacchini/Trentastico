@@ -435,6 +435,8 @@ internal class LoadStandardLessonsRequest(
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
         listener.onParsingErrorHappened(e, operationId)
+
+        sender.processRequestAfterTimeout(this)
     }
 
     override fun notifyOnBeforeSend() {
@@ -473,6 +475,8 @@ internal class LessonOfExtraCourseRequest(
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
         listener.onParsingErrorHappened(e, operationId)
+
+        sender.processRequestAfterTimeout(this)
     }
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
