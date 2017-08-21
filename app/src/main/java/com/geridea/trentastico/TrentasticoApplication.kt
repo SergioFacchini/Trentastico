@@ -3,6 +3,7 @@ package com.geridea.trentastico
 import android.app.Application
 import com.alexvasilkov.android.commons.utils.AppContext
 import com.geridea.trentastico.database.Cacher
+import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
@@ -25,7 +26,7 @@ class TrentasticoApplication : Application() {
 
         AppContext.init(this)
 
-        Networker.init(Cacher(this))
+        Networker.init(Cacher(this), CacherNew(this))
 
         AppPreferences.init(this)
 

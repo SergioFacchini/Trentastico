@@ -17,8 +17,8 @@ data class LessonSchedule(
          * @return the unique identifier of the lesson
          */
         val id: String,
-        var room: String,
-        var teachersNames: String,
+        val room: String,
+        val teachersNames: String,
         val subject: String,
         /**
          * The name of the partitioning. Is null when there are no partitionings

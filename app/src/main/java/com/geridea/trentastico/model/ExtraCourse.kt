@@ -54,7 +54,7 @@ class ExtraCourse(
                     lessonTypeId     = json.getString("lessonTypeId"),
                     lessonName       = json.getString("lessonName"),
                     teachersNames    = json.getString("teachersNames"),
-                    partitioningName = json.getString("partitioningName"),
+                    partitioningName = json.optString("partitioningName", null),
                     studyCourse      = StudyCourse.fromStringJson(json.getString("studyCourse")),
                     color            = json.getInt("color")
                 )

@@ -6,6 +6,7 @@ package com.geridea.trentastico.network
 
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
+import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LessonsControllerNew
@@ -25,22 +26,28 @@ object Networker {
     private lateinit var sendFeedbackController: SendFeedbackController
     private lateinit var libraryOpeningTimes: LibraryOpeningTimesController
 
-    fun init(cacher: Cacher) {
+    fun init( cacher: Cacher, cacherNew: CacherNew) {
         val requestSender = RequestSender()
 
         sendFeedbackController = SendFeedbackController(requestSender, cacher)
         libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacher)
         lessonsController      = LessonsController(requestSender, cacher)
-        lessonsControllerNew   = LessonsControllerNew(requestSender, cacher)
+        lessonsControllerNew   = LessonsControllerNew(requestSender, cacherNew)
 
     }
+
+    //----------------------------
+    // Study courses
+    //----------------------------
+    fun loadStudyCourses(listener: CoursesLoadingListener) =
+            lessonsControllerNew.loadStudyCourses(listener)
 
     //----------------------------
     // Lessons
     //----------------------------
 
     fun loadLessons(listener: LessonsLoadingListener) =
-            lessonsControllerNew.loadLessons(listener, AppPreferences.studyCourse)
+            lessonsControllerNew.loadStandardLessons(listener, AppPreferences.studyCourse)
 
     fun loadExtraCourses(lessonsLoader: LessonsLoadingListener) {
         AppPreferences.extraCourses.forEach {
@@ -94,8 +101,5 @@ object Networker {
     fun getLibraryOpeningTimes(
             day: Calendar,
             listener: LibraryOpeningTimesListener) = libraryOpeningTimes.getLibraryOpeningTimes(day, listener)
-
-    fun loadStudyCourses(listener: CoursesLoadingListener) =
-            lessonsControllerNew.loadStudyCourses(listener)
 
 }

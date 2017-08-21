@@ -1,7 +1,7 @@
 package com.geridea.trentastico.network.controllers
 
 import com.geridea.trentastico.Config
-import com.geridea.trentastico.database.Cacher
+import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.gui.views.requestloader.ExtraLessonsLoadingMessage
 import com.geridea.trentastico.gui.views.requestloader.StandardLessonsLoadingMessage
 import com.geridea.trentastico.model.*
@@ -25,7 +25,7 @@ import java.util.regex.Pattern
  * Created with ♥ by Slava on 18/08/2017.
  */
 
-class LessonsControllerNew(sender: RequestSender, cacher: Cacher) : BasicController(sender, cacher) {
+class LessonsControllerNew(private val sender: RequestSender, private val cacher: CacherNew) {
 
     /**
      * Loads from the website all the study courses and returns them through the listener
@@ -34,8 +34,16 @@ class LessonsControllerNew(sender: RequestSender, cacher: Cacher) : BasicControl
         sender.processRequest(LoadStudyCoursesRequest(listener))
     }
 
-    fun loadLessons( listener: LessonsLoadingListener, studyCourse: StudyCourse) {
-        sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener))
+    fun loadStandardLessons(listener: LessonsLoadingListener, studyCourse: StudyCourse) {
+        val cachedLessons = cacher.getStandardLessonSchedulesCacheIfAny()
+        val cachedTypes   = cacher.getStandardLessonTypesCacheIfAny()
+
+        if (cachedLessons.isNotEmpty() && cachedTypes.isNotEmpty()) {
+            listener.onLessonsLoaded(cachedLessons, cachedTypes, -1)
+        } else {
+            //No cache available, we have to download the data
+            sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener, cacher))
+        }
     }
 
     fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
@@ -43,7 +51,16 @@ class LessonsControllerNew(sender: RequestSender, cacher: Cacher) : BasicControl
     }
 
     fun loadExtraCourseLessons(lessonsLoader: LessonsLoadingListener, extraCourse: ExtraCourse) {
-        sender.processRequest(LessonOfExtraCourseRequest(extraCourse, lessonsLoader))
+        val cachedLessons = cacher.fetchExtraScheduledLessons(extraCourse.lessonTypeId)
+        if (cachedLessons.isNotEmpty()) {
+            val lessonType = LessonTypeNew(extraCourse, !AppPreferences.isLessonTypeToHide(extraCourse.lessonTypeId))
+
+            lessonsLoader.onLessonsLoaded(cachedLessons, arrayListOf(lessonType), -1)
+        } else {
+            //No cache
+            sender.processRequest(LessonOfExtraCourseRequest(extraCourse, lessonsLoader, cacher))
+        }
+
     }
 
 }
@@ -194,7 +211,6 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
      * The colors are assigned sequentially: that means that the first lesson type picks the first
      * color, the second picks the seconds.. and so on.
      */
-
     override fun manageResponse(responseToManage: String, sender: RequestSender) {
         /* Sample response:
         {
@@ -258,7 +274,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
     /**
      * Hook function that notifies that the loading has been completed
      */
-    abstract fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>)
+    abstract fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>)
 
     private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
         var colorProgressive = 0
@@ -380,10 +396,15 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse): BasicR
  */
 internal class LoadStandardLessonsRequest(
         studyCourse: StudyCourse,
-        val listener: LessonsLoadingListener): BasicLessonRequest(studyCourse) {
+        val listener: LessonsLoadingListener,
+        val cacher: CacherNew
+): BasicLessonRequest(studyCourse) {
 
-    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
-        listener.onLessonsLoaded(lessons, teachings, operationId)
+    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+        cacher.cacheStandardLessonTypes(lessonTypes)
+        cacher.cacheStandardScheduledLessons(lessons)
+
+        listener.onLessonsLoaded(lessons, lessonTypes, operationId)
     }
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
@@ -414,15 +435,16 @@ internal class LessonTypesOfStudyCourseRequest(
 
     override fun notifyOnBeforeSend() { ; }
 
-    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
-        listener.onLessonTypesRetrieved(teachings)
+    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+        listener.onLessonTypesRetrieved(lessonTypes)
     }
 
 }
 
 internal class LessonOfExtraCourseRequest(
         private val extraCourse: ExtraCourse,
-        val listener: LessonsLoadingListener
+        val listener: LessonsLoadingListener,
+        val cacher: CacherNew
 ): BasicLessonRequest(extraCourse.studyCourse) {
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
@@ -437,10 +459,12 @@ internal class LessonOfExtraCourseRequest(
         listener.onLoadingAboutToStart(ExtraLessonsLoadingMessage(extraCourse, operationId))
     }
 
-    override fun onTeachingsAndLessonsLoaded(teachings: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
+    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, lessons: List<LessonSchedule>) {
         val searchedExtraLessons = lessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
-        val searchedLessonType   = teachings.first { it.id == extraCourse.lessonTypeId }
-        
+        val searchedLessonType        = lessonTypes.first { it.id == extraCourse.lessonTypeId }
+
+        cacher.cacheExtraScheduledLessons(searchedExtraLessons)
+
         listener.onLessonsLoaded(searchedExtraLessons, listOf(searchedLessonType), operationId)
     }
 

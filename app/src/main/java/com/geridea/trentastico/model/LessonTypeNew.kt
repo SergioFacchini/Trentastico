@@ -12,6 +12,15 @@ data class LessonTypeNew(
         val color: Int,
         var isVisible: Boolean = true) {
 
+    constructor(extraCourse: ExtraCourse, isVisible: Boolean): this(
+            extraCourse.lessonTypeId,
+            extraCourse.lessonName,
+            extraCourse.teachersNames,
+            extraCourse.partitioningName,
+            extraCourse.color,
+            isVisible
+    )
+
     override fun equals(other: Any?): Boolean =
             //There were some problems with original equals due to the fact that lesson types might
             //be set visible or not. This caused one visible and one hidden lesson type to be
