@@ -13,9 +13,7 @@ import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.StringUtils
 
-import org.acra.ACRA
-import org.acra.ErrorReporter
-
+//TODO: reenable ACRA
 object BugLogger {
 
     fun logBug(reason: String, e: Throwable) {
@@ -23,8 +21,8 @@ object BugLogger {
             return
         }
 
-        errorReporter.putCustomData("REPORT-REASON", reason)
-        errorReporter.handleSilentException(e)
+        //errorReporter.putCustomData("REPORT-REASON", reason)
+        //errorReporter.handleSilentException(e)
     }
 
     fun setStudyCourse(course: StudyCourse) {
@@ -32,7 +30,7 @@ object BugLogger {
             return
         }
 
-        errorReporter.putCustomData("STUDY-COURSE", course.toString())
+        //errorReporter.putCustomData("STUDY-COURSE", course.toString())
     }
 
     fun setExtraCourses(extraCourses: ExtraCoursesList) {
@@ -40,18 +38,18 @@ object BugLogger {
             return
         }
 
-        errorReporter.putCustomData("EXTRA-COURSES", extraCourses.toJSON().toString())
+        //errorReporter.putCustomData("EXTRA-COURSES", extraCourses.toJSON().toString())
     }
 
-    private val errorReporter: ErrorReporter
-        get() = ACRA.getErrorReporter()
+    //private val errorReporter: ErrorReporter
+    //    get() = ACRA.getErrorReporter()
 
     fun init() {
         if (Config.DEBUG_MODE) {
             return
         }
 
-        errorReporter.putCustomData("android-id", AppPreferences.androidId)
+        //errorReporter.putCustomData("android-id", AppPreferences.androidId)
 
         setStudyCourse(AppPreferences.studyCourse)
         setExtraCourses(AppPreferences.extraCourses)

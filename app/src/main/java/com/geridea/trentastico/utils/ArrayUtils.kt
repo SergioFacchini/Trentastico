@@ -28,3 +28,8 @@ object ArrayUtils {
     }
 
 }
+
+/**
+ * @return an element of the array, chosen randomly
+ */
+fun <T> Array<T>.random(): T = get((size * Math.random()).toInt())
