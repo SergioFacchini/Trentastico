@@ -19,7 +19,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 6
-        versionName "0.9.0 - Closed Alpha"
+        versionName "0.9.5 - Pre-release"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
