@@ -63,14 +63,15 @@ class LessonsUpdaterService : Service() {
         //    We reschedule the check and check on the connectivity change broadcast.
         // 3) The check was unsuccessful:
         //    Reschedule at a slower rate.
+
+        val starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN)
         if (updateAlreadyInProgress) {
             //The service is already started and it's doing something
             UIUtils.showToastIfInDebug(this, "Update already in progress... ignoring update.")
             return Service.START_NOT_STICKY
-        } else if (AppPreferences.isSearchForLessonChangesEnabled) {
+        } else if (shouldSearchForLessonServiceStart(starter)) {
             updateAlreadyInProgress = true
 
-            val starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN)
             if (shouldUpdateBecauseWeGainedInternet(starter)) {
                 UIUtils.showToastIfInDebug(this, "Updating lessons because of internet refresh state...")
                 AppPreferences.hadInternetInLastCheck(true)
@@ -93,6 +94,10 @@ class LessonsUpdaterService : Service() {
 
         return Service.START_NOT_STICKY
     }
+
+    private fun shouldSearchForLessonServiceStart(starter: Int) =
+            AppPreferences.isSearchForLessonChangesEnabled || starter == STARTER_APP_START //#86
+
 
     private fun startedAppInDebugMode(starter: Int): Boolean = Config.DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
 
