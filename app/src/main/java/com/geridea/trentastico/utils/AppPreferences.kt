@@ -45,9 +45,14 @@ object AppPreferences {
         set(isFirstRun) = putBoolean("IS_FIRST_RUN", isFirstRun)
 
     var studyCourse: StudyCourse
-        get() = StudyCourse.fromStringJson(
-            get().getString("STUDY_COURSE", "{}")
-        )
+        get() {
+            val studyCourseJson = getStudyCourseJSON()
+            if (studyCourseJson != null) {
+                return StudyCourse.fromStringJson(studyCourseJson)
+            } else {
+                throw RuntimeException("Cannot ask for study course until it's initialized!")
+            }
+        }
         set(course) {
             putString("STUDY_COURSE", course.toJson().toString())
             BugLogger.setStudyCourse(course)
@@ -149,9 +154,9 @@ object AppPreferences {
     }
 
     val isStudyCourseSet: Boolean
-        get() = get().getLong("STUDY_DEPARTMENT", 0) != 0L &&
-                get().getLong("STUDY_COURSE", 0) != 0L &&
-                get().getInt("STUDY_YEAR", 0) != 0
+        get() = getStudyCourseJSON() != null
+
+    private fun getStudyCourseJSON():String? = get().getString("STUDY_COURSE", null)
 
     private fun putLong(key: String, time: Long) {
         val editor = get().edit()

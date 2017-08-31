@@ -50,8 +50,9 @@ object BugLogger {
         }
 
         //errorReporter.putCustomData("android-id", AppPreferences.androidId)
-
-        setStudyCourse(AppPreferences.studyCourse)
+        if (AppPreferences.isStudyCourseSet) {
+            setStudyCourse(AppPreferences.studyCourse)
+        }
         setExtraCourses(AppPreferences.extraCourses)
     }
 
