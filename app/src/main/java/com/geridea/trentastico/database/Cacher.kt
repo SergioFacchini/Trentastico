@@ -14,12 +14,12 @@ import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.Params
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
-import com.geridea.trentastico.Config
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.*
 import com.geridea.trentastico.model.cache.*
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.StringUtils
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.*
@@ -859,7 +859,7 @@ class Cacher {
                 cacheLesson(CachedLesson(cachedPeriodId, lesson))
             }
 
-            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()) {
+            if (IS_IN_DEBUG_MODE && doDuplicatedRecordsExist()) {
                 UIUtils.showToastIfInDebug(applicationContext, "DUPLICATE RECORDS FOUND!")
             }
 
@@ -894,7 +894,7 @@ class Cacher {
                 cacheLesson(CachedLesson(cachedPeriodId, lesson))
             }
 
-            if (Config.DEBUG_MODE && doDuplicatedRecordsExist()) {
+            if (IS_IN_DEBUG_MODE && doDuplicatedRecordsExist()) {
                 UIUtils.showToastIfInDebug(applicationContext, "DUPLICATE RECORDS FOUND!")
             }
         }

@@ -7,6 +7,7 @@ import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 
 /*
  * Created with ♥ by Slava on 03/03/2017.
@@ -19,7 +20,7 @@ class TrentasticoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        if (!Config.DEBUG_MODE) {
+        if (!IS_IN_DEBUG_MODE) {
             //TODO: reenable ACRA
             //ACRA.init(this)
         }

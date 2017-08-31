@@ -29,6 +29,7 @@ import com.geridea.trentastico.network.controllers.listener.WaitForDownloadListe
 import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ContextUtils
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
@@ -99,7 +100,7 @@ class LessonsUpdaterService : Service() {
             AppPreferences.isSearchForLessonChangesEnabled || starter == STARTER_APP_START //#86
 
 
-    private fun startedAppInDebugMode(starter: Int): Boolean = Config.DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
+    private fun startedAppInDebugMode(starter: Int): Boolean = IS_IN_DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
 
     private fun shouldUpdateBecauseWeGainedInternet(starter: Int): Boolean = starter == STARTER_NETWORK_BROADCAST
             && !AppPreferences.hadInternetInLastCheck()
@@ -128,7 +129,7 @@ class LessonsUpdaterService : Service() {
             //Postponing due to alarm manager approximations
             calendar = CalendarUtils.getCalendarWithMillis(AppPreferences.nextLessonsUpdateTime)
 
-            if (Config.DEBUG_MODE) {
+            if (IS_IN_DEBUG_MODE) {
                 calendar.add(Calendar.SECOND, Config.DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS)
             } else {
                 calendar.add(Calendar.MINUTE, Config.LESSONS_REFRESH_POSTICIPATION_MINUTES)
@@ -137,7 +138,7 @@ class LessonsUpdaterService : Service() {
         } else {
             calendar = Calendar.getInstance()
 
-            if (Config.DEBUG_MODE && Config.QUICK_LESSON_CHECKS) {
+            if (IS_IN_DEBUG_MODE && Config.QUICK_LESSON_CHECKS) {
                 var timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS
                 if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2
 

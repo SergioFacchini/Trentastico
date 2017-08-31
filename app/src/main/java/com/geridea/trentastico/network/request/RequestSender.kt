@@ -6,6 +6,7 @@ package com.geridea.trentastico.network.request
  */
 
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import okhttp3.*
 import java.io.IOException
 import java.util.*
@@ -41,7 +42,7 @@ class RequestSender {
     }
 
     private fun waitForDebuggingIfNeeded() {
-        if (Config.DEBUG_MODE && Config.PRE_LOADING_WAITING_TIME_MS != 0) {
+        if (IS_IN_DEBUG_MODE && Config.PRE_LOADING_WAITING_TIME_MS != 0) {
             try {
                 Thread.sleep(Config.PRE_LOADING_WAITING_TIME_MS.toLong())
             } catch (e: InterruptedException) {

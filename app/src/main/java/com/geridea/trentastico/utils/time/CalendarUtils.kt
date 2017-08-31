@@ -1,6 +1,7 @@
 package com.geridea.trentastico.utils.time
 
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -79,7 +80,7 @@ object CalendarUtils {
     val debuggableToday: Calendar
         get() {
             val aDay = Calendar.getInstance()
-            if (Config.DEBUG_MODE && Config.DEBUG_FORCE_ANOTHER_DATE) {
+            if (IS_IN_DEBUG_MODE && Config.DEBUG_FORCE_ANOTHER_DATE) {
                 aDay.timeInMillis = Config.DATE_TO_FORCE
             }
 
@@ -87,7 +88,7 @@ object CalendarUtils {
         }
 
     val debuggableMillis: Long
-        get() = if (Config.DEBUG_MODE && Config.DEBUG_FORCE_ANOTHER_DATE) Config.DATE_TO_FORCE else System.currentTimeMillis()
+        get() = if (IS_IN_DEBUG_MODE && Config.DEBUG_FORCE_ANOTHER_DATE) Config.DATE_TO_FORCE else System.currentTimeMillis()
 
     fun getMillisWithMinutesDelta(delta: Int): Long {
         val now = debuggableToday

@@ -11,8 +11,6 @@ import android.os.Looper
 import android.util.TypedValue
 import android.widget.Toast
 
-import com.geridea.trentastico.Config
-
 object UIUtils {
 
     /**
@@ -31,7 +29,7 @@ object UIUtils {
     })
 
     fun showToastIfInDebug(context: Context, message: String) {
-        if (Config.DEBUG_MODE) {
+        if (IS_IN_DEBUG_MODE) {
             showToastOnMainThread(context, message)
         }
     }

@@ -15,7 +15,6 @@ import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.alexvasilkov.android.commons.utils.Views
-import com.geridea.trentastico.Config
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.network.Networker
@@ -23,6 +22,7 @@ import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.DebugUtils
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -54,7 +54,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         versionText.text = "Versione: ${DebugUtils.computeVersionName()}"
 
         //Removing debug stuff from menu
-        if (!Config.DEBUG_MODE) {
+        if (!IS_IN_DEBUG_MODE) {
             val menu = navigationView.menu
             for (i in 0..menu.size() - 1) {
                 val item = menu.getItem(i)
@@ -124,7 +124,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setCurrentFragment(SubmitFeedbackFragment())
         } else if (id == R.id.menu_changelog) {
             setCurrentFragment(AboutFragment())
-        } else if (Config.DEBUG_MODE) {
+        } else if (IS_IN_DEBUG_MODE) {
 
             //Managing debug stuff here
             if (id == R.id.debug_menu_about) {

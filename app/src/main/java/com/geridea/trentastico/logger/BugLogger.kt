@@ -11,13 +11,14 @@ import com.geridea.trentastico.Config
 import com.geridea.trentastico.model.ExtraCoursesList
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.StringUtils
 
 //TODO: reenable ACRA
 object BugLogger {
 
     fun logBug(reason: String, e: Throwable) {
-        if (Config.DEBUG_MODE) {
+        if (IS_IN_DEBUG_MODE) {
             return
         }
 
@@ -26,7 +27,7 @@ object BugLogger {
     }
 
     fun setStudyCourse(course: StudyCourse) {
-        if (Config.DEBUG_MODE) {
+        if (IS_IN_DEBUG_MODE) {
             return
         }
 
@@ -34,7 +35,7 @@ object BugLogger {
     }
 
     fun setExtraCourses(extraCourses: ExtraCoursesList) {
-        if (Config.DEBUG_MODE) {
+        if (IS_IN_DEBUG_MODE) {
             return
         }
 
@@ -45,7 +46,7 @@ object BugLogger {
     //    get() = ACRA.getErrorReporter()
 
     fun init() {
-        if (Config.DEBUG_MODE) {
+        if (IS_IN_DEBUG_MODE) {
             return
         }
 

@@ -9,11 +9,11 @@ import android.content.Context
 import android.util.AttributeSet
 import com.alamkanak.weekview.DateTimeInterpreter
 import com.alamkanak.weekview.WeekViewEvent
-import com.geridea.trentastico.Config
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.network.LessonsLoader
+import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
@@ -68,7 +68,7 @@ class CourseTimesCalendar : CustomWeekView {
                         today.add(Calendar.DAY_OF_MONTH, -3)
                         return if (isSameDay(today, date)) {
                             "Ieri (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                        } else (if (Config.DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
+                        } else (if (IS_IN_DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
 
                     }
 
@@ -97,7 +97,7 @@ class CourseTimesCalendar : CustomWeekView {
                             return "Ieri"
                         }
 
-                        return if (Config.DEBUG_MODE)
+                        return if (IS_IN_DEBUG_MODE)
                             DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
                         else
                             DATE_FORMAT_MEDIUM.format(date.time)
@@ -114,12 +114,12 @@ class CourseTimesCalendar : CustomWeekView {
                         lastDay.add(Calendar.WEEK_OF_MONTH, +1)
 
                         return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
-                            if (Config.DEBUG_MODE)
+                            if (IS_IN_DEBUG_MODE)
                                 DATE_FORMAT_SHORT_DEBUG.format(date.time)
                             else
                                 DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
                         } else {
-                            if (Config.DEBUG_MODE)
+                            if (IS_IN_DEBUG_MODE)
                                 DATE_FORMAT_SHORT_DEBUG.format(date.time)
                             else
                                 DATE_FORMAT_SHORT.format(date.time)

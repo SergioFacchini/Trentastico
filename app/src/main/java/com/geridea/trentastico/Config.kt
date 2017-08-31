@@ -8,7 +8,6 @@ package com.geridea.trentastico
 object Config {
 
     //Debug
-    val DEBUG_MODE = BuildConfig.DEBUG
     val PRE_LOADING_WAITING_TIME_MS = 0
 
     var SHOW_DEBUG_MESSAGES = true
