@@ -80,7 +80,9 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
         }
     }
 
-    fun diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp: Long? = null, listener: DiffLessonsListener) {
+    fun diffStudyCourseLessonsWithCachedOnes(
+            lastValidTimestamp: Long? = null,
+            listener: DiffLessonsListener) {
         cacher.getStandardLessonsAndTypes({ cachedLessons, cachedTypes ->
             //Is there any cached lesson?
             if (cachedLessons.isEmpty() || cachedTypes.isEmpty()) {
@@ -94,7 +96,10 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
         })
     }
 
-    fun diffExtraCourseLessonsWithCachedOnes(course: ExtraCourse, lastValidTimestamp: Long? = null, listener: DiffLessonsListener) {
+    fun diffExtraCourseLessonsWithCachedOnes(
+            course: ExtraCourse,
+            lastValidTimestamp: Long? = null,
+            listener: DiffLessonsListener) {
         cacher.fetchExtraScheduledLessons(course.lessonTypeId) { cachedLessons ->
             if (cachedLessons.isEmpty()) {
                 listener.onNoCachedLessons()
@@ -138,8 +143,11 @@ internal abstract class BasicRequest : IRequest {
 /////////////////
 /**
  * Requests that load all the available courses
+ * @param removeAllCoursesOption remove from the courses list the "all-courses" option
  */
-internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : IRequest {
+internal class LoadStudyCoursesRequest(
+        val listener: CoursesLoadingListener,
+        val removeAllCoursesOption: Boolean = true) : IRequest {
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
         listener.onLoadingError()
@@ -159,8 +167,7 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
 
     override fun manageResponse(responseToManage: String, sender: RequestSender) {
         /* The response is a huge javascript file having about ten variables initialized with
-           json data. We want the json associated to the "elenco_corsi" variable
-         */
+           json data. We want the json associated to the "elenco_corsi" variable */
         val matcher = jsonRegex.matcher(responseToManage)
         if (matcher.find()) {
             val foundJson = matcher.group(1)
@@ -220,18 +227,19 @@ internal class LoadStudyCoursesRequest(val listener: CoursesLoadingListener) : I
 
             //The currentYearJson contains the information about the courses of the current year
             //we have to parse it
-            val courses = List(currentYearCourses.length()) {
+
+            listener.onCoursesFetched(List(currentYearCourses.length()) {
                 val courseJson = currentYearCourses[it] as JSONObject
-                val studyYears = parseStudyYears(courseJson.getJSONArray("elenco_anni"))
+                var studyYears = parseStudyYears(courseJson.getJSONArray("elenco_anni"))
+
+                if (removeAllCoursesOption) studyYears = studyYears.filterNot { it.name.contains("Tutti gli anni") }
 
                 Course(
                         id = courseJson.getString("valore"),
                         name = courseJson.getString("label"),
                         studyYears = studyYears
                 )
-            }
-
-            listener.onCoursesFetched(courses)
+            })
 
         } else {
             throw ServerResponseParsingException("The data javascript is not properly formatted!")
@@ -333,7 +341,9 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     /**
      * Hook function that notifies that the loading has been completed
      */
-    abstract fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, loadedLessons: List<LessonSchedule>)
+    abstract fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            loadedLessons: List<LessonSchedule>)
 
     private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
         var colorProgressive = 0
@@ -444,7 +454,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     @Suppress("ConstantConditionIf")
     override val url: String
         get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
-                else "https://easyroom.unitn.it/Orario/list_call.php"
+        else "https://easyroom.unitn.it/Orario/list_call.php"
 
     override val formToSend: FormBody?
         get() = FormBody.Builder()
@@ -455,7 +465,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                 .add("anno2", studyCourse.yearId)
                 .build()
 
-    override fun notifyOnBeforeSend() { ; }
+    override fun notifyOnBeforeSend() {; }
 }
 
 /**
@@ -506,7 +516,7 @@ internal class LessonTypesOfStudyCourseRequest(
         listener.onErrorHappened(error)
     }
 
-    override fun notifyOnBeforeSend() { ; }
+    override fun notifyOnBeforeSend() {; }
 
     override fun onTeachingsAndLessonsLoaded(
             lessonTypes: List<LessonTypeNew>,
@@ -524,12 +534,14 @@ internal abstract class BasicExtraLessonRequest(val extraCourse: ExtraCourse) : 
             loadedLessons: List<LessonSchedule>) {
 
         val searchedExtraLessons = loadedLessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
-        val searchedLessonType        = lessonTypes.first   { it.id            == extraCourse.lessonTypeId }
+        val searchedLessonType = lessonTypes.first { it.id == extraCourse.lessonTypeId }
 
         onExtraCourseLessonsLoaded(searchedExtraLessons, searchedLessonType)
     }
 
-    abstract fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew)
+    abstract fun onExtraCourseLessonsLoaded(
+            loadedLessons: List<LessonSchedule>,
+            lessonType: LessonTypeNew)
 }
 
 internal class LessonsOfExtraCourseRequest(
@@ -554,7 +566,9 @@ internal class LessonsOfExtraCourseRequest(
         listener.onLoadingMessageDispatched(ExtraLessonsLoadingMessage(extraCourse, operationId))
     }
 
-    override fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew) {
+    override fun onExtraCourseLessonsLoaded(
+            loadedLessons: List<LessonSchedule>,
+            lessonType: LessonTypeNew) {
         cacher.cacheExtraScheduledLessons(loadedLessons)
 
         listener.onLessonsLoaded(loadedLessons, listOf(lessonType), operationId)
@@ -571,7 +585,7 @@ internal class LessonsOfExtraCourseRequest(
 internal class DiffStudyCourseRequest(
         course: StudyCourse,
         private val listener: DiffLessonsListener,
-        private val cachedLessons:  List<LessonSchedule>,
+        private val cachedLessons: List<LessonSchedule>,
         private val cacher: CacherNew,
         private val lastValidTimestamp: Long?) : BasicLessonRequest(course) {
 
@@ -585,7 +599,9 @@ internal class DiffStudyCourseRequest(
         listener.onLessonsLoadingError()
     }
 
-    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, loadedLessons: List<LessonSchedule>) {
+    override fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            loadedLessons: List<LessonSchedule>) {
         //caching results
         cacher.cacheStandardLessonTypes(lessonTypes)
         cacher.cacheStandardScheduledLessons(loadedLessons)
@@ -623,7 +639,9 @@ internal class DiffExtraCourseRequest(
         listener.onLessonsLoadingError()
     }
 
-    override fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew) {
+    override fun onExtraCourseLessonsLoaded(
+            loadedLessons: List<LessonSchedule>,
+            lessonType: LessonTypeNew) {
         //caching results
         cacher.cacheExtraScheduledLessons(loadedLessons)
 
