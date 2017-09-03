@@ -19,7 +19,10 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.utils.AppPreferences
 
-class LessonTypesAdapter(context: Context, lessonTypes: Collection<LessonTypeNew>) : ItemsAdapter<LessonTypeNew>(context) {
+class LessonTypesAdapter(
+        context: Context,
+        lessonTypes: Collection<LessonTypeNew>,
+        private val alreadyTakenLessons: List<LessonTypeNew>) : ItemsAdapter<LessonTypeNew>(context) {
 
     init {
         itemsList = lessonTypes.sortedBy { it.name }
@@ -41,7 +44,7 @@ class LessonTypesAdapter(context: Context, lessonTypes: Collection<LessonTypeNew
 
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
-        if (AppPreferences.hasExtraCourseWithId(item.id)) {
+        if (AppPreferences.hasExtraCourseWithId(item.id) || alreadyTakenLessons.any { it.id == item.id }) {
             Views.find<View>(convertView, R.id.course_already_selected).visibility = View.VISIBLE
         } else {
             Views.find<View>(convertView, R.id.course_already_selected).visibility = View.GONE

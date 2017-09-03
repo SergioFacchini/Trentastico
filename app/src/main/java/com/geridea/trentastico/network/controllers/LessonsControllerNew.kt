@@ -54,6 +54,10 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
         })
     }
 
+    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
+        cacher.fetchLessonTypes(callback)
+    }
+
     fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
         sender.processRequest(LessonTypesOfStudyCourseRequest(studyCourse, listener))
     }

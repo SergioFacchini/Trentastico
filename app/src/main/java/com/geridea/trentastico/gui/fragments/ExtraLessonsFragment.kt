@@ -229,6 +229,12 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         lateinit var lessonsList: ListView
 
         /**
+         * List of lessons of the actually selected standard course. The user should be not able to
+         * add a lesson that he/she is already taking
+         */
+        var lessonTypesOfCourse: List<LessonTypeNew>? = null
+
+        /**
          * Dispatched when the user has selected a course and that course has been added to preferences.
          */
         val onCourseSelectedAndAdded = Signal0()
@@ -246,7 +252,13 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             setView(view)
         }
 
-        fun searchForCourses() = Networker.loadLessonTypesOfStudyCourse(studyCourse, this)
+        fun searchForCourses() {
+            Networker.loadCachedLessonTypes { lessonTypes ->
+                lessonTypesOfCourse = lessonTypes
+
+                Networker.loadLessonTypesOfStudyCourse(studyCourse, this@ExtraCourseSearchDialog)
+            }
+        }
 
         @OnClick(R.id.cancel_search)
         fun onCancelSearchButtonPressed() = dismiss()
@@ -255,7 +267,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         fun onLessonSelected(position: Int) {
             val lesson = lessonsList.getItemAtPosition(position) as LessonTypeNew
 
-            if (!AppPreferences.hasExtraCourseWithId(lesson.id)) {
+            if (canLessonTypeBeSelected(lesson)) {
                 AppPreferences.addExtraCourse(
                     ExtraCourse(
                             lesson.id, lesson.name, lesson.teachersNames,
@@ -266,6 +278,10 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
                 onCourseSelectedAndAdded.dispatch()
             }
         }
+
+        private fun canLessonTypeBeSelected(lesson: LessonTypeNew) =
+                !AppPreferences.hasExtraCourseWithId(lesson.id) &&
+                        lessonTypesOfCourse!!.none { it.id == lesson.id }
 
         override fun onErrorHappened(error: Exception) = showErrorMessage()
 
@@ -281,7 +297,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             } else {
                 lessonsFoundText.text = "Ho trovato le seguenti lezioni. Premi sulla lezione che ti interessa seguire per aggiungerla al calendario."
 
-                lessonsList.adapter = LessonTypesAdapter(context, lessonTypes)
+                lessonsList.adapter = LessonTypesAdapter(context, lessonTypes, lessonTypesOfCourse!!)
             }
 
             searchingLessons.visibility = View.GONE

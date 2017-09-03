@@ -177,6 +177,13 @@ class CacherNew(context: Context) {
         }
     }
 
+    fun fetchLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
+        runJobInBackground {
+            callback(fetchStandardLessonTypes())
+        }
+    }
+
+
     private fun purgeStandardLessonTypes() {
         writableDatabase.delete(LT_TABLE_NAME, null, null)
     }
@@ -222,6 +229,19 @@ class CacherNew(context: Context) {
         }
     }
 
+}
+
+interface LessonTypeListener {
+
+    /**
+     * Dispatched when no lesson types has been found in cache
+     */
+    fun onNoCachedLessonTypes()
+
+    /**
+     * Dispatched when cached lesson types has been found in cache
+     */
+    fun onCachedLessonTypesFound(lessonTypes: List<LessonTypeNew>)
 }
 
 //Cache Jobs

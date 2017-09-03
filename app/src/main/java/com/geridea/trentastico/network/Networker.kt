@@ -8,6 +8,7 @@ import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.model.ExtraCourse
+import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LessonsControllerNew
@@ -69,6 +70,14 @@ object Networker {
             listener: DiffLessonsListener) {
 
         lessonsControllerNew.diffExtraCourseLessonsWithCachedOnes(extraCourse, lastValidTimestamp, listener)
+    }
+
+    /**
+     * Loads lesson types that are currently cached. The list of the callback is empty if there are
+     * no cached lesson types.
+     */
+    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
+        lessonsControllerNew.loadCachedLessonTypes(callback)
     }
 
     fun diffLessonsInCache(
