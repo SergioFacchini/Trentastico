@@ -3,6 +3,7 @@ package com.geridea.trentastico.gui.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.AdapterView
 import android.widget.FrameLayout
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -39,7 +40,7 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
      * The study course that is currently selected. Can be null if the loading of the courses
      * is still not completed.
      */
-    private var selectedStudyCourse: StudyCourse? = null
+    private var studyCourseToSelect: StudyCourse? = null
 
     /**
      * Due to a strange way the setOnItemSelectedListener is dispatched on department, selecting a
@@ -49,9 +50,8 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
      */
     private var yearToSelect: String? = null
 
-
     fun selectStudyCourse(studyCourse: StudyCourse) {
-        selectedStudyCourse = studyCourse
+        studyCourseToSelect = studyCourse
         yearToSelect        = studyCourse.yearId
 
         if (isLoadingCompleted) {
@@ -78,19 +78,23 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
     init {
         Views.inflateAndAttach<View>(this, R.layout.view_course_selector)
         ButterKnife.bind(this, this)
-    }
 
-    @OnItemSelected(R.id.coursesSpinner)
-    internal fun onDepartmentSelected(selectedPosition: Int) {
-        val selectedCourse = coursesSpinner.selectedItem as Course
+        coursesSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
 
-        val adapter = YearsAdapter(context, selectedCourse.studyYears)
-        yearSpinner.adapter = adapter
-        if(yearToSelect != null){
-            yearSpinner.setSelection(adapter.getPositionOfYearWithId(yearToSelect!!)?:0, false)
+            override fun onNothingSelected(parent: AdapterView<*>?) { ; }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedCourse = coursesSpinner.selectedItem as Course
+
+                val adapter = YearsAdapter(context, selectedCourse.studyYears)
+                yearSpinner.adapter = adapter
+                if(yearToSelect != null){
+                    yearSpinner.setSelection(adapter.getPositionOfYearWithId(yearToSelect!!)?:0, false)
+                }
+
+                onCourseChanged.dispatch(buildStudyCourse())
+            }
         }
-
-        onCourseChanged.dispatch(buildStudyCourse())
     }
 
     @OnItemSelected(R.id.yearSpinner)
@@ -113,10 +117,10 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
                     coursesSpinner.adapter = CoursesAdapter(context, courses)
                     yearSpinner.adapter    = YearsAdapter(context, courses.first().studyYears)
 
-                    if (selectedStudyCourse != null) {
+                    if (studyCourseToSelect != null) {
                         //The selected study course has been set while the loading was still not
                         //performed. Once we finish loading, we have to choose the set study course
-                        selectStudyCourse(selectedStudyCourse!!)
+                        selectStudyCourse(studyCourseToSelect!!)
                     }
 
                     lepView.currentView = LEPState.PRESENT
