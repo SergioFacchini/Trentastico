@@ -168,9 +168,9 @@ object AppPreferences {
         get() = get().getLong("NEXT_LESSONS_UPDATE_TIME", 0)
         set(time) = putLong("NEXT_LESSONS_UPDATE_TIME", time)
 
-    fun hadInternetInLastCheck(): Boolean = get().getBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", true)
-
-    fun hadInternetInLastCheck(had: Boolean) = putBoolean("HAD_INTERNET_DURING_LAST_LESSON_UPDATE", had)
+    var wasLastTimesCheckSuccessful: Boolean
+      get() = get().getBoolean("WAS_LAST_TIMES_CHECK_SUCCESSFUL", true)
+      set(value) = putBoolean("WAS_LAST_TIMES_CHECK_SUCCESSFUL", value)
 
     private fun putBoolean(key: String, bool: Boolean) {
         val editor = get().edit()

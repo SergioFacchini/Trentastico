@@ -1,5 +1,7 @@
 package com.geridea.trentastico
 
+import java.util.concurrent.TimeUnit
+
 
 /*
  * Created with ♥ by Slava on 13/03/2017.
@@ -21,7 +23,7 @@ object Config {
      */
     val WAITING_TIME_AFTER_A_REQUEST_FAILED = 5000
 
-    val LAUNCH_REQUESTS_TO_DEBUG_SERVER = false
+    val LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER = true
     val DEBUG_SERVER_URL = "http://ideagenesi.com/trentastico/lessons.json"
 
     //Database
@@ -32,8 +34,17 @@ object Config {
     val CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 3
 
     //Lessons update service
-    val LESSONS_REFRESH_WAITING_HOURS = 4
+    val LESSONS_REFRESH_WAITING_REGULAR = 4
+    val LESSONS_REFRESH_WAITING_AFTER_ERROR = 2
     val LESSONS_REFRESH_POSTICIPATION_MINUTES = 5
+
+    /**
+     * During diff of the cached times and the fresh ones, what is the last valid time to consider
+     * for a notification? The times that are changed after the current_ms + anticipation_ms will
+     * not be reported to the user (we don't want the user to be notified when a lesson scheduled
+     * more than a month later changes).
+     */
+    val LESSONS_CHANGED_ANTICIPATION_MS = TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)
 
     val QUICK_LESSON_CHECKS = false
     val DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30

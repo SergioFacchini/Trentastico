@@ -7,6 +7,7 @@ package com.geridea.trentastico.network
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.database_new.CacherNew
+import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LessonsControllerNew
@@ -55,13 +56,24 @@ object Networker {
         }
     }
 
+    fun diffStudyCourseLessonsWithCachedOnes(
+            lastValidTimestamp: Long,
+            listener: DiffLessonsListener) {
+
+        lessonsControllerNew.diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp, listener)
+    }
+
+    fun diffExtraCourseLessonsWithCachedOnes(
+            extraCourse: ExtraCourse,
+            lastValidTimestamp: Long? = null,
+            listener: DiffLessonsListener) {
+
+        lessonsControllerNew.diffExtraCourseLessonsWithCachedOnes(extraCourse, lastValidTimestamp, listener)
+    }
+
     fun diffLessonsInCache(
             intervalToCheck: WeekInterval,
             listener: LessonsDifferenceListener) = lessonsController.diffLessonsInCache(intervalToCheck, listener)
-
-    fun loadAndCacheNotCachedLessons(
-            interval: WeekInterval,
-            listener: WaitForDownloadLessonListener) = lessonsController.loadAndCacheNotCachedLessons(interval, listener)
 
     fun loadLessonTypesOfStudyCourse(
             studyCourse: StudyCourse,

@@ -7,7 +7,6 @@ package com.geridea.trentastico.network.request
 
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.utils.time.CalendarUtils
-import com.geridea.trentastico.utils.time.CalendarUtils.debuggableMillis
 import java.io.Serializable
 import java.util.*
 
@@ -40,38 +39,36 @@ class LessonsDiffResult : Serializable {
     val isEmpty: Boolean
         get() = addedLessons.isEmpty() && removedLessons.isEmpty() && changedLessons.isEmpty()
 
+    val hasSomeDifferences: Boolean
+        get() = !isEmpty
+
     val numTotalDifferences: Int
         get() = addedLessons.size + removedLessons.size + changedLessons.size
 
-    fun discardPastLessons() {
-        discardPastLessons(addedLessons)
-        discardPastLessons(removedLessons)
-        discardPastLessonsChanges(changedLessons)
+    fun discardPassedChanges() {
+        val currentMillis = System.currentTimeMillis()
+
+        addedLessons.removeAll {   it.startsBefore(currentMillis)}
+        removedLessons.removeAll { it.startsBefore(currentMillis)}
+        changedLessons.removeAll { it.changed.startsBefore(currentMillis)}
     }
 
-    private fun discardPastLessonsChanges(lessons: ArrayList<LessonChange>) {
-        val currentMillis = debuggableMillis
-
-        val iterator = lessons.iterator()
-        while (iterator.hasNext()) {
-            val lesson = iterator.next()
-            if (lesson.original.startsBefore(currentMillis)) {
-                iterator.remove()
-            }
-        }
+    /**
+     * Removes all the changes that occurs after the passed timestamp
+     */
+    fun discardChangesAfterTimestamp(timestamp: Long) {
+        discardChangesAfterTimestamp(timestamp, addedLessons)
+        discardChangesAfterTimestamp(timestamp, removedLessons)
+        discardPastLessonsChanges(timestamp, changedLessons)
     }
 
-    private fun discardPastLessons(lessons: ArrayList<LessonSchedule>) {
-        val currentMillis = debuggableMillis
+    private fun discardPastLessonsChanges(timestamp: Long, lessons: ArrayList<LessonChange>) =
+        lessons.removeAll { it.original.startsAfter(timestamp) && it.changed.startsAfter(timestamp) }
 
-        val iterator = lessons.iterator()
-        while (iterator.hasNext()) {
-            val lesson = iterator.next()
-            if (lesson.startsBefore(currentMillis)) {
-                iterator.remove()
-            }
-        }
-    }
+
+    private fun discardChangesAfterTimestamp(timestamp: Long, lessons: ArrayList<LessonSchedule>) =
+        lessons.removeAll { it.startsAfter(timestamp) }
+
 
     inner class LessonChange(val original: LessonSchedule, val changed: LessonSchedule) : Serializable {
 

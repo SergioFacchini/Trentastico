@@ -8,6 +8,7 @@ import com.geridea.trentastico.gui.views.requestloader.ExtraLessonsLoadingMessag
 import com.geridea.trentastico.gui.views.requestloader.StandardLessonsLoadingMessage
 import com.geridea.trentastico.model.*
 import com.geridea.trentastico.network.controllers.listener.CoursesLoadingListener
+import com.geridea.trentastico.network.controllers.listener.DiffLessonsListener
 import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
 import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
 import com.geridea.trentastico.network.request.IRequest
@@ -21,6 +22,7 @@ import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 
 
 /*
@@ -68,9 +70,36 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
                 listener.onLessonsLoaded(cachedLessons, arrayListOf(lessonType), -1)
             } else {
                 //No cache
-                sender.processRequest(LessonOfExtraCourseRequest(extraCourse, listener, cacher))
+                sender.processRequest(LessonsOfExtraCourseRequest(extraCourse, listener, cacher))
             }
 
+        }
+    }
+
+    fun diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp: Long? = null, listener: DiffLessonsListener) {
+        cacher.getStandardLessonsAndTypes({ cachedLessons, cachedTypes ->
+            //Is there any cached lesson?
+            if (cachedLessons.isEmpty() || cachedTypes.isEmpty()) {
+                listener.onNoCachedLessons()
+                return@getStandardLessonsAndTypes
+            }
+
+            sender.processRequest(DiffStudyCourseRequest(
+                    AppPreferences.studyCourse, listener, cachedLessons, cacher, lastValidTimestamp
+            ))
+        })
+    }
+
+    fun diffExtraCourseLessonsWithCachedOnes(course: ExtraCourse, lastValidTimestamp: Long? = null, listener: DiffLessonsListener) {
+        cacher.fetchExtraScheduledLessons(course.lessonTypeId) { cachedLessons ->
+            if (cachedLessons.isEmpty()) {
+                listener.onNoCachedLessons()
+                return@fetchExtraScheduledLessons
+            } else {
+                sender.processRequest(DiffExtraCourseRequest(
+                        course, listener, cachedLessons, cacher, lastValidTimestamp
+                ))
+            }
         }
     }
 
@@ -88,6 +117,9 @@ internal abstract class BasicRequest : IRequest {
 
 }
 
+//////////////////
+/// Study courses
+/////////////////
 /**
  * Requests that load all the available courses
  */
@@ -285,9 +317,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     /**
      * Hook function that notifies that the loading has been completed
      */
-    abstract fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
-            lessons: List<LessonSchedule>)
+    abstract fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, loadedLessons: List<LessonSchedule>)
 
     private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
         var colorProgressive = 0
@@ -395,8 +425,10 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         }
     }
 
+    @Suppress("ConstantConditionIf")
     override val url: String
-        get() = "https://easyroom.unitn.it/Orario/list_call.php"
+        get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
+                else "https://easyroom.unitn.it/Orario/combo_call.php"
 
     override val formToSend: FormBody?
         get() = FormBody.Builder()
@@ -407,6 +439,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                 .add("anno2", studyCourse.yearId)
                 .build()
 
+    override fun notifyOnBeforeSend() { ; }
 }
 
 /**
@@ -415,16 +448,16 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
 internal class LoadStandardLessonsRequest(
         studyCourse: StudyCourse,
         val listener: LessonsLoadingListener,
-        val cacher: CacherNew
+        private val cacher: CacherNew
 ) : BasicLessonRequest(studyCourse) {
 
     override fun onTeachingsAndLessonsLoaded(
             lessonTypes: List<LessonTypeNew>,
-            lessons: List<LessonSchedule>) {
+            loadedLessons: List<LessonSchedule>) {
         cacher.cacheStandardLessonTypes(lessonTypes)
-        cacher.cacheStandardScheduledLessons(lessons)
+        cacher.cacheStandardScheduledLessons(loadedLessons)
 
-        listener.onLessonsLoaded(lessons, lessonTypes, operationId)
+        listener.onLessonsLoaded(loadedLessons, lessonTypes, operationId)
     }
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
@@ -461,17 +494,33 @@ internal class LessonTypesOfStudyCourseRequest(
 
     override fun onTeachingsAndLessonsLoaded(
             lessonTypes: List<LessonTypeNew>,
-            lessons: List<LessonSchedule>) {
+            loadedLessons: List<LessonSchedule>) {
         listener.onLessonTypesRetrieved(lessonTypes)
     }
 
 }
 
-internal class LessonOfExtraCourseRequest(
-        private val extraCourse: ExtraCourse,
-        val listener: LessonsLoadingListener,
-        val cacher: CacherNew
-) : BasicLessonRequest(extraCourse.studyCourse) {
+
+internal abstract class BasicExtraLessonRequest(val extraCourse: ExtraCourse) : BasicLessonRequest(extraCourse.studyCourse) {
+
+    final override fun onTeachingsAndLessonsLoaded(
+            lessonTypes: List<LessonTypeNew>,
+            loadedLessons: List<LessonSchedule>) {
+
+        val searchedExtraLessons = loadedLessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
+        val searchedLessonType        = lessonTypes.first   { it.id            == extraCourse.lessonTypeId }
+
+        onExtraCourseLessonsLoaded(searchedExtraLessons, searchedLessonType)
+    }
+
+    abstract fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew)
+}
+
+internal class LessonsOfExtraCourseRequest(
+        extraCourse: ExtraCourse,
+        private val listener: LessonsLoadingListener,
+        private val cacher: CacherNew
+) : BasicExtraLessonRequest(extraCourse) {
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
         listener.onParsingErrorHappened(e, operationId)
@@ -489,15 +538,90 @@ internal class LessonOfExtraCourseRequest(
         listener.onLoadingMessageDispatched(ExtraLessonsLoadingMessage(extraCourse, operationId))
     }
 
-    override fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
-            lessons: List<LessonSchedule>) {
-        val searchedExtraLessons = lessons.filter { it.lessonTypeId == extraCourse.lessonTypeId }
-        val searchedLessonType = lessonTypes.first { it.id == extraCourse.lessonTypeId }
+    override fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew) {
+        cacher.cacheExtraScheduledLessons(loadedLessons)
 
-        cacher.cacheExtraScheduledLessons(searchedExtraLessons)
+        listener.onLessonsLoaded(loadedLessons, listOf(lessonType), operationId)
+    }
 
-        listener.onLessonsLoaded(searchedExtraLessons, listOf(searchedLessonType), operationId)
+}
+
+/**
+ * Requests the lessons from the network and tries to find differences between the fetched lesson
+ * and the cached ones.
+ * @param lastValidTimestamp the changes occurring after this date will not be dispatched to the
+ * listener
+ */
+internal class DiffStudyCourseRequest(
+        course: StudyCourse,
+        private val listener: DiffLessonsListener,
+        private val cachedLessons:  List<LessonSchedule>,
+        private val cacher: CacherNew,
+        private val lastValidTimestamp: Long?) : BasicLessonRequest(course) {
+
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        listener.onBeforeRequestFinished()
+        listener.onLessonsLoadingError()
+    }
+
+    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+        listener.onBeforeRequestFinished()
+        listener.onLessonsLoadingError()
+    }
+
+    override fun onTeachingsAndLessonsLoaded(lessonTypes: List<LessonTypeNew>, loadedLessons: List<LessonSchedule>) {
+        //caching results
+        cacher.cacheStandardLessonTypes(lessonTypes)
+        cacher.cacheStandardScheduledLessons(loadedLessons)
+
+        //performing the diff
+        val loadedList = ArrayList<LessonSchedule>(loadedLessons)
+        val cachedList = ArrayList<LessonSchedule>(cachedLessons)
+
+        val diffedLessons = LessonSchedule.diffLessons(cachedList, loadedList)
+        diffedLessons.discardPassedChanges()
+        if (lastValidTimestamp != null) {
+            diffedLessons.discardChangesAfterTimestamp(lastValidTimestamp)
+        }
+
+        listener.onBeforeRequestFinished()
+        listener.onLessonsDiffed(diffedLessons)
+    }
+
+}
+
+internal class DiffExtraCourseRequest(
+        course: ExtraCourse,
+        val listener: DiffLessonsListener,
+        private val cachedLessons: List<LessonSchedule>,
+        private val cacher: CacherNew,
+        private val lastValidTimestamp: Long?) : BasicExtraLessonRequest(course) {
+
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        listener.onBeforeRequestFinished()
+        listener.onLessonsLoadingError()
+    }
+
+    override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
+        listener.onBeforeRequestFinished()
+        listener.onLessonsLoadingError()
+    }
+
+    override fun onExtraCourseLessonsLoaded(loadedLessons: List<LessonSchedule>, lessonType: LessonTypeNew) {
+        //caching results
+        cacher.cacheExtraScheduledLessons(loadedLessons)
+
+        //performing the diff
+        val loadedList = ArrayList<LessonSchedule>(loadedLessons)
+        val cachedList = ArrayList<LessonSchedule>(cachedLessons)
+
+        val diffedLessons = LessonSchedule.diffLessons(cachedList, loadedList)
+        if (lastValidTimestamp != null) {
+            diffedLessons.discardChangesAfterTimestamp(lastValidTimestamp)
+        }
+
+        listener.onBeforeRequestFinished()
+        listener.onLessonsDiffed(diffedLessons)
     }
 
 }

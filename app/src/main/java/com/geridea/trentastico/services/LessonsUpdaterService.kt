@@ -14,43 +14,44 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
-import com.birbit.android.jobqueue.Job
-import com.birbit.android.jobqueue.JobManager
-import com.birbit.android.jobqueue.Params
-import com.birbit.android.jobqueue.RetryConstraint
-import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.LessonsChangedActivity
-import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.network.controllers.listener.LessonsDifferenceListener
-import com.geridea.trentastico.network.controllers.listener.WaitForDownloadListenerToSignalAdapter
+import com.geridea.trentastico.network.controllers.listener.DiffLessonsListener
 import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ContextUtils
-import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
-import com.geridea.trentastico.utils.time.WeekInterval
-import com.threerings.signals.Signal1
-import com.threerings.signals.Signal2
 import java.util.*
+
+private enum class ScheduleType {
+    /**
+     * We actually fetched all the lessons and diffed them and all was ok
+     */
+    CHECK_PERFORMED,
+
+    /**
+     * We got a network error while trying to fetch lessons
+     */
+    NETWORK_ERROR,
+
+    /**
+     * The update did not happen because it was called too soon (the waiting time still did not
+     * expire)
+     */
+    CALLED_TOO_EARLY
+}
 
 class LessonsUpdaterService : Service() {
 
-    private var jobManager: JobManager? = null
+    private var numRequestsToSend   = 0
+    private var numRequestsFinished = 0
 
     private var updateAlreadyInProgress = false
 
-    override fun onCreate() {
-        jobManager = JobManager(Configuration.Builder(this).build())
-
-        super.onCreate()
-    }
-
-    override fun onBind(intent: Intent): IBinder? = //Do not allow binding
-            null
+    override fun onBind(intent: Intent): IBinder? = null //Do not allow binding
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         //Check for lessons updates if
@@ -64,53 +65,46 @@ class LessonsUpdaterService : Service() {
         //    We reschedule the check and check on the connectivity change broadcast.
         // 3) The check was unsuccessful:
         //    Reschedule at a slower rate.
-
         val starter = intent.getIntExtra(EXTRA_STARTER, STARTER_UNKNOWN)
         if (updateAlreadyInProgress) {
             //The service is already started and it's doing something
-            UIUtils.showToastIfInDebug(this, "Update already in progress... ignoring update.")
+            debug("Update already in progress... ignoring update.")
             return Service.START_NOT_STICKY
         } else if (shouldSearchForLessonServiceStart(starter)) {
             updateAlreadyInProgress = true
 
-            if (shouldUpdateBecauseWeGainedInternet(starter)) {
-                UIUtils.showToastIfInDebug(this, "Updating lessons because of internet refresh state...")
-                AppPreferences.hadInternetInLastCheck(true)
-
-                diffAndUpdateLessonsIfPossible(object : LessonsDiffAndUpdateListener {
-                    override fun onTerminated(successful: Boolean) = scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
-                })
-            } else if (shouldUpdateBecauseOfUpdateTimeout() || startedAppInDebugMode(starter)) {
-                UIUtils.showToastIfInDebug(this, "Checking for lessons updates...")
-                diffAndUpdateLessonsIfPossible(object : LessonsDiffAndUpdateListener {
-                    override fun onTerminated(successful: Boolean) = scheduleNextStartAndTerminate(if (successful) SCHEDULE_SLOW else SCHEDULE_QUICK)
-                })
+            if (didWeJustGainInternet(starter) || isUpdateTimeoutElapsed() || isServiceStartForced(starter)) {
+                debug("Updating lessons...")
+                diffAndUpdateLessonsIfPossible()
             } else {
-                UIUtils.showToastIfInDebug(this, "Too early to check for updates.")
-                scheduleNextStartAndTerminate(SCHEDULE_MISSING)
+                debug("Too early to check for updates.")
+                rescheduleAndTerminate(ScheduleType.CALLED_TOO_EARLY)
             }
         } else {
-            UIUtils.showToastIfInDebug(this, "Searching for lesson updates is disabled!")
+            debug("Searching for lesson updates is disabled!")
         }
 
         return Service.START_NOT_STICKY
     }
 
+    private fun isServiceStartForced(starter: Int): Boolean = starter == STARTER_DEBUGGER
+
     private fun shouldSearchForLessonServiceStart(starter: Int) =
             AppPreferences.isSearchForLessonChangesEnabled || starter == STARTER_APP_START //#86
 
 
-    private fun startedAppInDebugMode(starter: Int): Boolean = IS_IN_DEBUG_MODE && starter == STARTER_APP_START || starter == STARTER_DEBUGGER
+    private fun didWeJustGainInternet(starter: Int): Boolean =
+            starter == STARTER_NETWORK_BROADCAST
+                    && !AppPreferences.wasLastTimesCheckSuccessful
+                    && ContextUtils.weHaveInternet(this)
 
-    private fun shouldUpdateBecauseWeGainedInternet(starter: Int): Boolean = starter == STARTER_NETWORK_BROADCAST
-            && !AppPreferences.hadInternetInLastCheck()
-            && ContextUtils.weHaveInternet(this)
-
-    private fun shouldUpdateBecauseOfUpdateTimeout(): Boolean = AppPreferences.nextLessonsUpdateTime <= System.currentTimeMillis()
+    private fun isUpdateTimeoutElapsed(): Boolean = AppPreferences.nextLessonsUpdateTime <= System.currentTimeMillis()
 
 
-    private fun scheduleNextStartAndTerminate(scheduleType: Int) {
+    private fun rescheduleAndTerminate(scheduleType: ScheduleType) {
         val calendar = calculateAndSaveNextSchedule(scheduleType)
+
+        AppPreferences.nextLessonsUpdateTime = calendar.timeInMillis
 
         val intent = createIntent(this, STARTER_ALARM_MANAGER)
         val pendingIntent = PendingIntent.getService(this, 0, intent, FLAG_UPDATE_CURRENT)
@@ -118,206 +112,131 @@ class LessonsUpdaterService : Service() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.set(AlarmManager.RTC, calendar.timeInMillis, pendingIntent)
 
-        UIUtils.showToastIfInDebug(this, "Scheduled alarm manager to " + CalendarUtils.formatTimestamp(calendar.timeInMillis))
+        debug("Scheduled alarm manager to " + CalendarUtils.formatTimestamp(calendar.timeInMillis))
 
         stopSelf()
     }
 
-    private fun calculateAndSaveNextSchedule(scheduleType: Int): Calendar {
-        val calendar: Calendar
-        if (scheduleType == SCHEDULE_MISSING) {
-            //Postponing due to alarm manager approximations
-            calendar = CalendarUtils.getCalendarWithMillis(AppPreferences.nextLessonsUpdateTime)
-
-            if (IS_IN_DEBUG_MODE) {
-                calendar.add(Calendar.SECOND, Config.DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS)
-            } else {
-                calendar.add(Calendar.MINUTE, Config.LESSONS_REFRESH_POSTICIPATION_MINUTES)
+    private fun calculateAndSaveNextSchedule(scheduleType: ScheduleType): Calendar =
+        when (scheduleType) {
+            ScheduleType.CHECK_PERFORMED -> {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.HOUR_OF_DAY, Config.LESSONS_REFRESH_WAITING_REGULAR)
+                calendar
             }
 
+            ScheduleType.NETWORK_ERROR -> {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.HOUR_OF_DAY, Config.LESSONS_REFRESH_WAITING_AFTER_ERROR)
+                calendar
+            }
+
+            ScheduleType.CALLED_TOO_EARLY ->
+                CalendarUtils.getCalendarWithMillis(AppPreferences.nextLessonsUpdateTime)
+        }
+
+    private fun diffAndUpdateLessonsIfPossible() {
+        //No internet: cannot diff
+        if(!ContextUtils.weHaveInternet(this)){
+            debug("No internet. Cannot check for updates.")
+
+            AppPreferences.wasLastTimesCheckSuccessful = false
+            rescheduleAndTerminate(ScheduleType.NETWORK_ERROR)
+            return
         } else {
-            calendar = Calendar.getInstance()
-
-            if (IS_IN_DEBUG_MODE && Config.QUICK_LESSON_CHECKS) {
-                var timeToAdd = Config.DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS
-                if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2
-
-                calendar.add(Calendar.SECOND, timeToAdd)
-            } else {
-                var timeToAdd = Config.LESSONS_REFRESH_WAITING_HOURS
-                if (scheduleType == SCHEDULE_QUICK) timeToAdd /= 2
-
-                calendar.add(Calendar.HOUR_OF_DAY, timeToAdd)
-            }
-
-            AppPreferences.nextLessonsUpdateTime = calendar.timeInMillis
-        }
-        return calendar
-    }
-
-    private fun diffAndUpdateLessonsIfPossible(listener: LessonsDiffAndUpdateListener) {
-        if (ContextUtils.weHaveInternet(this)) {
-            if (AppPreferences.isStudyCourseSet) {
-                //The current and next week
-                val intervalToCheck = WeekInterval(0, +1)
-
-                diffLessons(intervalToCheck).connect { diffResult, diffSuccessful ->
-                    if (diffResult.isEmpty) {
-                        UIUtils.showToastIfInDebug(this@LessonsUpdaterService, "No lesson differences found.")
-                    } else {
-                        showLessonsChangedNotification(diffResult)
-                    }
-
-                    //We've tracked all the updates. Now we have to fetch the eventually missing
-                    //schedules so we can be notified if they change in the future.
-                    loadMissingLesson(intervalToCheck).connect { updateSuccessful -> listener.onTerminated(diffSuccessful!! && updateSuccessful!!) }
-                }
-            } else {
-                //The user has just run the app or reset it's settings. We currently do not have any
-                //study course to fetch lessons from, so we just re-plan the check to the next time.
-                listener.onTerminated(false)
-            }
-        } else {
-            UIUtils.showToastIfInDebug(this, "No internet. Cannot check for updates.")
-            AppPreferences.hadInternetInLastCheck(false)
-            listener.onTerminated(false)
-        }
-    }
-
-    private fun showLessonsChangedNotification(diffResult: LessonsDiffResult) {
-        if (AppPreferences.isNotificationForLessonChangesEnabled) {
-            val numDifferences = diffResult.numTotalDifferences
-
-            var message = "È cambiato l'orario di una lezione!"
-            if (numDifferences > 1) {
-                message = "Sono cambiati gli orari di $numDifferences lezioni!"
-            }
-
-
-            val notificationBuilder = NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_launcher)
-                    .setContentTitle(message)
-                    .setContentText("Premi qui per i dettagli")
-                    .setColor(resources.getColor(R.color.colorNotification))
-                    .setAutoCancel(true)
-
-
-            val intent = Intent(this, LessonsChangedActivity::class.java)
-            intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult)
-
-            val resultPendingIntent = PendingIntent.getActivity(
-                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-            )
-
-            notificationBuilder.setContentIntent(resultPendingIntent)
-
-            val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            mNotificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, notificationBuilder.build())
-        }
-    }
-
-    private fun loadMissingLesson(intervalToCheck: WeekInterval): Signal1<Boolean> {
-        val job = LoadMissingLessonsJob(intervalToCheck)
-        jobManager!!.addJobInBackground(job)
-        return job.onCheckTerminated
-    }
-
-    private fun diffLessons(intervalToDiff: WeekInterval): Signal2<LessonsDiffResult, Boolean> {
-        val job = DiffLessonsJob(intervalToDiff)
-        jobManager!!.addJobInBackground(job)
-        return job.onCheckTerminated
-    }
-
-    private inner class DiffLessonsJob internal constructor(private val intervalToDiff: WeekInterval) : Job(Params(1)), LessonsDifferenceListener {
-
-        internal val onCheckTerminated = Signal2<LessonsDiffResult, Boolean>()
-        private val diffAccumulator: LessonsDiffResult
-
-        private var numRequestsSent: Int = 0
-        private var numRequestsSucceeded: Int = 0
-        private var numRequestsFailed: Int = 0
-
-        init {
-
-            this.numRequestsSent = 0
-            this.numRequestsSucceeded = 0
-            this.numRequestsFailed = 0
-
-            this.diffAccumulator = LessonsDiffResult()
+            AppPreferences.wasLastTimesCheckSuccessful = true
         }
 
-        @Throws(Throwable::class)
-        override fun onRun() = //Loading the current and the next week
-                Networker.diffLessonsInCache(intervalToDiff, this)
-
-        override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
-            BugLogger.logBug("Something bad happened when diffing lessons", throwable)
-            filterDiffAndDispatchCheckTerminated(false)
-            return RetryConstraint.CANCEL
+        //No study course set: cannot diff
+        if (!AppPreferences.isStudyCourseSet) {
+            //The user has just run the app or reset it's settings. We currently do not have any
+            //study course to fetch lessons from, so we just re-plan the check to the next time.
+            rescheduleAndTerminate(ScheduleType.CHECK_PERFORMED)
+            return
         }
 
-        override fun onRequestCompleted() {
-            numRequestsSucceeded++
-            checkIfWeHaveFinished()
-        }
+        //Performing the diff
+        numRequestsToSend = AppPreferences.extraCourses.size + 1
 
-        override fun onLoadingError() {
-            numRequestsFailed++
-            checkIfWeHaveFinished()
-        }
-
-        override fun onNumberOfRequestToSendKnown(numRequests: Int) {
-            numRequestsSent = numRequests
-        }
-
-        fun checkIfWeHaveFinished() {
-            if (numRequestsSent == numRequestsFailed + numRequestsSucceeded) {
-                val allSucceeded = numRequestsSent == numRequestsSucceeded
-                filterDiffAndDispatchCheckTerminated(allSucceeded)
-            }
-        }
-
-        private fun filterDiffAndDispatchCheckTerminated(allSucceeded: Boolean) {
-            diffAccumulator.discardPastLessons()
-            onCheckTerminated.dispatch(diffAccumulator, allSucceeded)
-        }
-
-        override fun onNoLessonsInCache() = //Nothing to diff!
-                filterDiffAndDispatchCheckTerminated(false)
-
-        override fun onDiffResult(lessonsDiffResult: LessonsDiffResult) = diffAccumulator.addFrom(lessonsDiffResult)
-
-        override fun onCancel(cancelReason: Int, throwable: Throwable?) = Unit
-
-        override fun onAdded() = Unit
-    }
-
-    private inner class LoadMissingLessonsJob(private val intervalToLoad: WeekInterval) : Job(Params(1)) {
-
-        internal val onCheckTerminated = Signal1<Boolean>()
-
-        @Throws(Throwable::class)
-        override fun onRun() = Networker.loadAndCacheNotCachedLessons(
-                intervalToLoad, WaitForDownloadListenerToSignalAdapter(onCheckTerminated)
+        //Study course
+        val courseName = AppPreferences.studyCourse.courseName
+        val lastValidTimestamp = CalendarUtils.debuggableMillis + Config.LESSONS_CHANGED_ANTICIPATION_MS
+        Networker.diffStudyCourseLessonsWithCachedOnes(
+                lastValidTimestamp, getDiffLessonsListener(courseName)
         )
 
-        override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
-            BugLogger.logBug("Something bad happened when loading missing lessons", throwable)
-            onCheckTerminated.dispatch(false)
-            return RetryConstraint.CANCEL
+        //Extra courses
+        AppPreferences.extraCourses.forEach {
+            Networker.diffExtraCourseLessonsWithCachedOnes(
+                    it, lastValidTimestamp, getDiffLessonsListener(it.lessonName)
+            )
         }
-
-        override fun onAdded() = Unit
-
-        override fun onCancel(cancelReason: Int, throwable: Throwable?) = Unit
     }
 
-    private interface LessonsDiffAndUpdateListener {
-        fun onTerminated(successful: Boolean)
+    private fun getDiffLessonsListener(courseNameToDisplay: String): DiffLessonsListener {
+        return object : DiffLessonsListener {
+
+            override fun onBeforeRequestFinished() {
+                numRequestsFinished++
+            }
+
+            override fun onLessonsDiffed(result: LessonsDiffResult) {
+                if (result.hasSomeDifferences && AppPreferences.isNotificationForLessonChangesEnabled) {
+                    showLessonsChangedNotification(result, courseNameToDisplay)
+                }
+
+                rescheduleAndTerminateIfRequestsFinished(ScheduleType.CHECK_PERFORMED)
+            }
+
+            override fun onLessonsLoadingError() {
+                AppPreferences.wasLastTimesCheckSuccessful = false
+                rescheduleAndTerminateIfRequestsFinished(ScheduleType.NETWORK_ERROR)
+            }
+
+            override fun onNoCachedLessons() {
+                rescheduleAndTerminateIfRequestsFinished(ScheduleType.CHECK_PERFORMED)
+            }
+        }
+    }
+
+    private fun rescheduleAndTerminateIfRequestsFinished(scheduleType: ScheduleType) {
+        if (numRequestsFinished == numRequestsToSend) {
+            rescheduleAndTerminate(scheduleType)
+        }
+    }
+
+    private fun debug(message: String) {
+        UIUtils.showToastIfInDebug(this, message)
+    }
+
+    private fun showLessonsChangedNotification(diffResult: LessonsDiffResult, courseName: String) {
+        val message = when (diffResult.numTotalDifferences) {
+            1    -> "È cambiato l'orario di una lezione!"
+            else -> "Sono cambiati gli orari di ${diffResult.numTotalDifferences} lezioni!"
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(message)
+                .setContentText(courseName)
+                .setColor(resources.getColor(R.color.colorNotification))
+                .setAutoCancel(true)
+
+
+        val intent = Intent(this, LessonsChangedActivity::class.java)
+        intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult)
+
+        val resultPendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        notificationBuilder.setContentIntent(resultPendingIntent)
+
+        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mNotificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, notificationBuilder.build())
     }
 
     companion object {
-
         val EXTRA_STARTER = "EXTRA_STARTER"
 
         val STARTER_UNKNOWN = 0
@@ -328,9 +247,6 @@ class LessonsUpdaterService : Service() {
         val STARTER_SETTING_CHANGED = 5
         val STARTER_DEBUGGER = 6
 
-        val SCHEDULE_SLOW = 1
-        val SCHEDULE_QUICK = 2
-        val SCHEDULE_MISSING = 3
         val NOTIFICATION_LESSONS_CHANGED_ID = 1000
 
         fun createIntent(context: Context, starter: Int): Intent {

@@ -41,11 +41,18 @@ data class LessonSchedule(
             cachedLesson.teaching_id
     )
 
-    private fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean = id == that.id
-            && startsAt == that.startsAt
-            && endsAt == that.endsAt
-            && room == that.room
-            && subject == that.subject
+
+    /**
+     * Returns true if both the lessons probably refer to the exactly same lesson
+     */
+    fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean =
+               id               == that.id
+            && startsAt         == that.startsAt
+            && endsAt           == that.endsAt
+            && room             == that.room
+            && partitioningName == that.partitioningName
+            && teachersNames    == that.teachersNames
+            && subject          == that.subject
 
     val startCal: Calendar
         get() {
@@ -104,6 +111,8 @@ data class LessonSchedule(
 
     fun startsBefore(currentMillis: Long): Boolean = startsAt < currentMillis
 
+    fun startsAfter(currentMillis: Long): Boolean = startsAt > currentMillis
+
     fun isHeldInMilliseconds(ms: Long): Boolean = startsAt >= ms && ms <= endsAt
 
     fun toExpandedCalendarInterval(typeOfTime: Int, delta: Int): CalendarInterval {
@@ -136,6 +145,7 @@ data class LessonSchedule(
         fun diffLessons(
                 cachedLessons: ArrayList<LessonSchedule>,
                 fetchedLessons: ArrayList<LessonSchedule>): LessonsDiffResult {
+
             val diffResult = LessonsDiffResult()
 
             sortByStartDateOrId(fetchedLessons)

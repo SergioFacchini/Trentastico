@@ -25,7 +25,7 @@ object UIUtils {
 
 
     fun showToastOnMainThread(context: Context, message: String) = runOnMainThread({
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     })
 
     fun showToastIfInDebug(context: Context, message: String) {
