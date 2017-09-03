@@ -20,15 +20,30 @@
         android:orientation="vertical"
         android:layout_weight="1">
 
-
-        <TextView
-            android:id="@+id/lesson_type"
-            style="@style/TextForegroundMedium"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_vertical|left"
-            android:text="text" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/is_extra_course"
+                style="@style/TextForegroundMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|top"
+                android:textColor="@color/colorAccent"
+                android:text="* " />
+
+            <TextView
+                android:id="@+id/lesson_type"
+                style="@style/TextForegroundMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|left"
+                android:text="text" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/teachers_names"

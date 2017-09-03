@@ -12,6 +12,7 @@ import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.utils.AppPreferences
 import com.threerings.signals.Signal1
 import java.util.*
 
@@ -32,11 +33,21 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
             = inflater.inflate(R.layout.itm_course, parent, false)
 
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
+        //Color on the left
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
+        //Texts
         Views.find<TextView>(convertView, R.id.lesson_type).text    = item.name
         Views.find<TextView>(convertView, R.id.teachers_names).text = item.teachersNames
 
+        //Extra courses have a red * near course name
+        if(AppPreferences.hasExtraCourseWithId(item.id)){
+            Views.find<TextView>(convertView, R.id.is_extra_course).visibility = View.VISIBLE
+        } else {
+            Views.find<TextView>(convertView, R.id.is_extra_course).visibility = View.GONE
+        }
+
+        //Showing the partitioning if any
         val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitioning_name)
         if (item.partitioningName != null) {
             partitioningNameTV.text = item.partitioningName
@@ -45,6 +56,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
             partitioningNameTV.visibility = View.GONE
         }
 
+        //Preparing checkbox and reacting to the item click
         val check = Views.find<CheckBox>(convertView, R.id.checkBox)
         check.setOnCheckedChangeListener {  _, isChecked: Boolean -> Unit }
 

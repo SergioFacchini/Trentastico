@@ -97,6 +97,9 @@ class CalendarFragment : FragmentWithMenuItems() {
         @BindView(R.id.yesCoursesText)
         lateinit var yesCoursesText: TextView
 
+        @BindView(R.id.extra_course)
+        lateinit var extraCourseDescription: View
+
         private val lessonTypes: Collection<LessonTypeNew>
 
         private var wasSomeVisibilityChanged = false
@@ -120,7 +123,12 @@ class CalendarFragment : FragmentWithMenuItems() {
             }
             coursesListView.adapter = courseAdapter
 
+            //Show extra lessons description if there is any in the list
+            if (lessonTypes.none { AppPreferences.extraCourses.hasCourseWithId(it.id) }) {
+                extraCourseDescription.visibility = View.GONE
+            }
 
+            //Update calendar on visibility changes
             setOnDismissListener {
                 if (wasSomeVisibilityChanged) {
                     calendar.notifyLessonTypeVisibilityChanged()
