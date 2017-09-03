@@ -36,12 +36,6 @@ import com.geridea.trentastico.utils.*
  */
 class CacherNew(context: Context) {
 
-    /* What should be cached:
-        + Current scheduled lessons
-        * Current lesson types
-        + Current extra courses scheduled lessons
-        * Current extra courses lesson types
-     */
     private val writableDatabase: SQLiteDatabase = CacheDbHelper(context).writableDatabase
 
     private val jobQueue: JobManager = JobManager(
@@ -115,7 +109,7 @@ class CacherNew(context: Context) {
     }
 
     private fun purgeExtraScheduledLessons(lessonTypeId: String) {
-        writableDatabase.delete(SL_TABLE_NAME, SL_lessonTypeId+"= ?", arrayOf(lessonTypeId))
+        writableDatabase.delete(SL_TABLE_NAME, SL_lessonTypeId+"= ? AND is_extra = 1", arrayOf(lessonTypeId))
     }
 
     fun fetchExtraScheduledLessons(lessonTypeId: String, callback: (lessons: List<LessonSchedule>) -> Unit) {
@@ -196,6 +190,36 @@ class CacherNew(context: Context) {
             values.put(LT_color,            lessonTypeNew.color)
 
             writableDatabase.insert(LT_TABLE_NAME, null, values)
+    }
+
+    //-------------------
+    // General
+    //-------------------
+    /**
+     * Deletes everything we have in cache about the current study course (lessons and types)
+     */
+    fun purgeStudyCourseCache() {
+        runJobInBackground {
+            purgeStandardLessonTypes()
+            purgeStandardScheduledLessons()
+        }
+    }
+
+    fun removeExtraCoursesWithLessonType(lessonTypeId: String) {
+        runJobInBackground {
+            purgeExtraScheduledLessons(lessonTypeId)
+        }
+    }
+
+    fun obliterateCache() {
+        runJobInBackground {
+            purgeStandardLessonTypes()
+            purgeStandardScheduledLessons()
+
+            AppPreferences.extraCourses.forEach {
+                purgeExtraScheduledLessons(it.lessonTypeId)
+            }
+        }
     }
 
 }

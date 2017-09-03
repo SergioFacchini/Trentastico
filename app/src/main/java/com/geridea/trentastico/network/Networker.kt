@@ -84,19 +84,19 @@ object Networker {
     fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController.getTodaysCachedLessons(todaysLessonsListener)
 
     /**
-     * Removes all the extra courses and lessons having the given lesson type
+     * Removes all the cached extra lessons of the lesson type having the given id
      */
-    fun removeExtraCoursesWithLessonType(lessonTypeId: String) = lessonsController.removeExtraCoursesWithLessonType(lessonTypeId)
+    fun purgeExtraCourse(lessonTypeId: String) = lessonsControllerNew.removeExtraCoursesWithLessonType(lessonTypeId)
 
     /**
      * Deletes all the cache about lessons and lesson types.
      */
-    fun obliterateLessonsCache() = lessonsController.obliterateAllLessonsCache()
+    fun obliterateCache() = lessonsControllerNew.obliterateCache()
 
     /**
      * Deletes all the cache about the currently chosen study course
      */
-    fun purgeStudyCourseCache() = lessonsController.purgeStudyCourseCache()
+    fun purgeStudyCourseCache() = lessonsControllerNew.purgeStudyCourseCache()
 
     //----------------------------
     // Feedback

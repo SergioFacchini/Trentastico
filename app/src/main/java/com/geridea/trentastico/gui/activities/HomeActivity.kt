@@ -128,7 +128,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             //Managing debug stuff here
             if (id == R.id.debug_menu_about) {
-                Networker.obliterateLessonsCache()
+                Networker.obliterateCache()
                 Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show()
                 switchToCalendarFragment()
             } else if (id == R.id.debug_update_courses) {

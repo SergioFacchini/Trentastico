@@ -73,6 +73,9 @@ class RequestSender {
 
                     request.manageResponse(responseStr, this@RequestSender)
                 } catch (e: Exception) {
+                    if (IS_IN_DEBUG_MODE) {
+                        e.printStackTrace()
+                    }
                     request.notifyResponseProcessingFailure(e, this@RequestSender)
                 }
 

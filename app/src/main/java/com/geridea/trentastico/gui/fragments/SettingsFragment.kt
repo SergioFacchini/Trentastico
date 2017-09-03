@@ -253,9 +253,8 @@ class SettingsFragment : FragmentWithMenuItems() {
 
             //If we've just selected a course that we already had in our extra course, we need to
             //delete that course from cache
-            val overlappingExtraCourses = AppPreferences.getExtraCoursesOfCourse(selectedCourse)
-            for (overlappingExtraCourse in overlappingExtraCourses) {
-                Networker.removeExtraCoursesWithLessonType(overlappingExtraCourse.lessonTypeId)
+            for (overlappingExtras in AppPreferences.getExtraCoursesOfCourse(selectedCourse)) {
+                Networker.purgeExtraCourse(overlappingExtras.lessonTypeId)
             }
         }
 

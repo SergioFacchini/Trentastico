@@ -142,7 +142,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         @OnClick(R.id.delete_button)
         fun onDeleteButtonPressed() {
             AppPreferences.removeExtraCourse(course.lessonTypeId)
-            Networker.removeExtraCoursesWithLessonType(course.lessonTypeId)
+            Networker.purgeExtraCourse(course.lessonTypeId)
 
             onDeleteConfirm.dispatch()
             dismiss()
