@@ -1,6 +1,7 @@
 package com.geridea.trentastico.network.controllers
 
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.gui.views.requestloader.CacheLessonsLoadingMessage
 import com.geridea.trentastico.gui.views.requestloader.CacheLoadingFinishedMessage
@@ -52,6 +53,13 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
                 sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener, cacher))
             }
         })
+    }
+
+    /**
+     * Loads standard and extra lessons that are held today
+     */
+    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) {
+        cacher.loadTodaysLessons(todaysLessonsListener)
     }
 
     fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {

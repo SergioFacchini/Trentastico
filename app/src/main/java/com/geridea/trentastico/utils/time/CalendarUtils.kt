@@ -109,6 +109,23 @@ object CalendarUtils {
      * @return Whether the times are on the same day.
      */
     fun isSameDay(dayOne: Calendar, dayTwo: Calendar): Boolean = dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR)
+
+    /**
+     * @return a [Pair] containing the milliseconds of when the day starts and ends
+     */
+    fun getTodaysStartAndEndMs(): Pair<Long, Long> {
+        val start = debuggableToday
+        start.set(Calendar.SECOND, 0)
+        start.set(Calendar.MINUTE, 0)
+        start.set(Calendar.HOUR,   0)
+
+        val end = debuggableToday
+        end.set(Calendar.SECOND, 59)
+        end.set(Calendar.MINUTE, 59)
+        end.set(Calendar.HOUR,   23)
+
+        return Pair(start.timeInMillis, end.timeInMillis)
+    }
 }
 /**
  * @return the first day of the current week, at 00:00:00.

@@ -88,7 +88,7 @@ object Networker {
             studyCourse: StudyCourse,
             listener: ListLessonsListener) = lessonsControllerNew.loadLessonTypesOfStudyCourse(studyCourse, listener)
 
-    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController.loadTodaysLessons(todaysLessonsListener)
+    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsControllerNew.loadTodaysLessons(todaysLessonsListener)
 
     fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController.getTodaysCachedLessons(todaysLessonsListener)
 

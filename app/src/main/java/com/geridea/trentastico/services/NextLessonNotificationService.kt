@@ -47,6 +47,12 @@ class NextLessonNotificationService : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val starter = intent.getSerializableExtra(EXTRA_STARTER) as NLNStarter
 
+        if (!AppPreferences.areNextLessonNotificationsEnabled()) {
+            //The notifications are disabled: nothing to do!
+            stopSelf()
+            return Service.START_NOT_STICKY
+        }
+
         if (ArrayUtils.isOneOf(starter, NLNStarter.ALARM_MORNING, NLNStarter.STUDY_COURSE_CHANGE)) {
             //We're at the morning of the day. No notifications of the day shown so far. We can
             //clear the tracker.
@@ -60,12 +66,6 @@ class NextLessonNotificationService : Service() {
             return Service.START_NOT_STICKY
         }
 
-        if (!AppPreferences.areNextLessonNotificationsEnabled()) {
-            //The notifications are disabled: nothing to do!
-            stopSelf()
-            return Service.START_NOT_STICKY
-        }
-
         //How this should work:
         //1) Always show notifications of the next lessons
         //2) Keep the notification shown until 15 minutes before the start of the next lesson. After
@@ -75,7 +75,7 @@ class NextLessonNotificationService : Service() {
         //4) Reschedule the service to start 15 min before the start of the next lesson
         Networker.loadTodaysLessons(object : TodaysLessonsListener {
 
-            override fun onLessonsAvailable(lessons: ArrayList<LessonSchedule>) {
+            override fun onLessonsAvailable(lessons: List<LessonSchedule>) {
                 //Finding passed lessons to hide the notifications of the past lessons
                 val passedLessons = findPassedLessons(lessons)
                 val currentLessons = findCurrentLessons(lessons)
@@ -83,7 +83,7 @@ class NextLessonNotificationService : Service() {
                 hideNotificationsForPassedLessons(passedLessons)
 
                 //Calculating lessons that will possibly be shown
-                val validLessons = getValidLessons(lessons)
+                val validLessons = getShownLessons(lessons)
                 validLessons.removeAll(passedLessons)
 
                 if (validLessons.isEmpty()) {
@@ -124,68 +124,37 @@ class NextLessonNotificationService : Service() {
         return Service.START_NOT_STICKY
     }
 
-    private fun showNotificationsForLessonsIfNeeded(lessons: ArrayList<LessonSchedule>, starter: NLNStarter) = lessons.filter { notificationsTracker.shouldNotificationBeShown(it, starter) }
-           .forEach { showNotificationForLessons(it) }
+    private fun showNotificationsForLessonsIfNeeded(lessons: ArrayList<LessonSchedule>, starter: NLNStarter) =
+            lessons.filter { notificationsTracker.shouldNotificationBeShown(it, starter) }
+                   .forEach { showNotificationForLessons(it) }
 
-    private fun findCurrentLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
+    private fun findCurrentLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val now = CalendarUtils.debuggableMillis
-
-        val currentLessons = ArrayList<LessonSchedule>()
-        for (lesson in lessons) {
-            if (lesson.isHeldInMilliseconds(now)) {
-                currentLessons.add(lesson)
-            }
-        }
-        return currentLessons
+        return lessons.filterTo(ArrayList()) { it.isHeldInMilliseconds(now) }
     }
 
     /**
      * Finds all the next lessons starting at the same time
      */
     private fun findLessonsStartingNext(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
-        val lessonsStartingNext = ArrayList<LessonSchedule>()
-
         //Here we suppose that the ordering of the lessons didn't change:
         val nextTimeLessonStating = lessons[0].startsAt
-        for (lesson in lessons) {
-            if (lesson.startsAt == nextTimeLessonStating) {
-                lessonsStartingNext.add(lesson)
-            }
-        }
-
-        return lessonsStartingNext
+        return lessons.filterTo(ArrayList()) { it.startsAt == nextTimeLessonStating }
     }
 
     private fun hideNotificationsForPassedLessons(passedLessons: ArrayList<LessonSchedule>) {
         val manager = getNotificationManager(this@NextLessonNotificationService)
-
-        for (lesson in passedLessons) {
-            manager.cancel(lesson.id.toInt())
-        }
+        passedLessons.forEach { (id) -> manager.cancel(id.toInt()) }
     }
 
-    private fun findPassedLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
-        val passedLessons = ArrayList<LessonSchedule>()
-
+    private fun findPassedLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val now = CalendarUtils.debuggableMillis
-        for (lesson in lessons) {
-            if (lesson.startsAt <= now) {
-                passedLessons.add(lesson)
-            }
-        }
-        return passedLessons
+        return lessons.filterTo(ArrayList()) { it.startsAt <= now }
     }
 
     private fun findLessonsStartingSoon(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
         val millisSoon = CalendarUtils.getMillisWithMinutesDelta(Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN)
-
-        val lessonsStartingSoon = ArrayList<LessonSchedule>()
-        for (lesson in lessons) {
-            if (lesson.startsBefore(millisSoon)) {
-                lessonsStartingSoon.add(lesson)
-            }
-        }
-        return lessonsStartingSoon
+        return lessons.filterTo(ArrayList()) { it.startsBefore(millisSoon) }
     }
 
     private fun scheduleForTheNextLessonAndStop(lessons: ArrayList<LessonSchedule>, currentLessons: ArrayList<LessonSchedule>) {
@@ -255,6 +224,7 @@ class NextLessonNotificationService : Service() {
     }
 
     private fun showNotificationForLessons(lesson: LessonSchedule) {
+        //Creating notification
         val notificationBuilder = NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle(lesson.subject)
@@ -266,36 +236,28 @@ class NextLessonNotificationService : Service() {
             notificationBuilder.setOngoing(true)
         }
 
-
+        //Appending an intend to the notification
         val intent = Intent(this, FirstActivityChooserActivity::class.java)
-
         val resultPendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
         )
-
         notificationBuilder.setContentIntent(resultPendingIntent)
 
-        //TODO: rework notificatons
-//        val manager = getNotificationManager(this@NextLessonNotificationService)
-//        manager.notify(lesson.id.toInt(), notificationBuilder.build())
-//
-//
-//        notificationsTracker.notifyNotificationShown(lesson.id)
+        //Launching the notification
+        val notificationId = lesson.id.hashCode().toLong()
+
+        val manager = getNotificationManager(this@NextLessonNotificationService)
+        manager.notify(notificationId.toInt(), notificationBuilder.build())
+
+        notificationsTracker.notifyNotificationShown(notificationId)
     }
 
-    private fun getValidLessons(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
-        val lessonsToKeep = ArrayList<LessonSchedule>()
+    private fun getShownLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val typesToHide = AppPreferences.lessonTypesToHideIds
 
-        for (lesson in lessons) {
-            //Is it filtered by the lesson type or the lessons already passed?
-            if (!typesToHide.contains(lesson.lessonTypeId)) {
-                lessonsToKeep.add(lesson)
-            }
-
+        return lessons.filterNotTo(ArrayList()) { //Is it filtered by the lesson type or the lessons already passed?
+            typesToHide.contains(it.lessonTypeId)
         }
-
-        return lessonsToKeep
     }
 
     companion object {
@@ -322,14 +284,11 @@ class NextLessonNotificationService : Service() {
          * @param course the course
          */
         fun removeNotificationsOfExtraCourse(context: Context, course: ExtraCourse) = Networker.getTodaysCachedLessons(object : TodaysLessonsListener {
-            override fun onLessonsAvailable(lessons: ArrayList<LessonSchedule>) {
+            override fun onLessonsAvailable(lessons: List<LessonSchedule>) {
                 val notificationManager = getNotificationManager(context)
 
-                for (lesson in lessons) {
-                    if (course.isLessonOfCourse(lesson)) {
-                        notificationManager.cancel(lesson.id.toInt())
-                    }
-                }
+                lessons.filter { course.isLessonOfCourse(it) }
+                       .forEach { notificationManager.cancel(it.id.toInt()) }
             }
 
             override fun onLessonsCouldNotBeLoaded() = /* Not used in this case*/Unit

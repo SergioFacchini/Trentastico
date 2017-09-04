@@ -11,10 +11,12 @@ import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.database.CacheDbHelper
 import com.geridea.trentastico.database.Cacher
+import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.utils.*
+import com.geridea.trentastico.utils.time.CalendarUtils
 
 
 /*
@@ -58,11 +60,11 @@ class CacherNew(context: Context) {
     //-------------------
     fun getStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonTypeNew>) -> Unit) {
         runJobInBackground {
-            callback(fetchStandardScheduledLesson(), fetchStandardLessonTypes())
+            callback(_fetchStandardScheduledLesson(), fetchStandardLessonTypes())
         }
     }
 
-    private fun fetchStandardScheduledLesson(): List<LessonSchedule> {
+    private fun _fetchStandardScheduledLesson(): MutableList<LessonSchedule> {
         val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns, "$SL_is_extra = 0")
 
         return fetchScheduledLessonsFromCursor(cursor)
@@ -114,15 +116,19 @@ class CacherNew(context: Context) {
 
     fun fetchExtraScheduledLessons(lessonTypeId: String, callback: (lessons: List<LessonSchedule>) -> Unit) {
         runJobInBackground {
-            val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns,
-                    "$SL_is_extra = 1 AND $SL_lessonTypeId = ? ", arrayOf(lessonTypeId)
-            )
-
-            callback(fetchScheduledLessonsFromCursor(cursor))
+            callback(_fetchExtraScheduledLessons(lessonTypeId))
         }
     }
 
-    private fun fetchScheduledLessonsFromCursor(cursor: Cursor): List<LessonSchedule> {
+    private fun _fetchExtraScheduledLessons(lessonTypeId: String): List<LessonSchedule> {
+        val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns,
+                "$SL_is_extra = 1 AND $SL_lessonTypeId = ? ", arrayOf(lessonTypeId)
+        )
+
+        return fetchScheduledLessonsFromCursor(cursor)
+    }
+
+    private fun fetchScheduledLessonsFromCursor(cursor: Cursor): MutableList<LessonSchedule> {
         val lessons = mutableListOf<LessonSchedule>()
         while (cursor.moveToNext()) {
             lessons.add(LessonSchedule(
@@ -140,6 +146,25 @@ class CacherNew(context: Context) {
 
         cursor.close()
         return lessons
+    }
+
+    fun loadTodaysLessons(listener: TodaysLessonsListener) {
+        runJobInBackground {
+            //Fetching standard and extra courses
+            val lessons = _fetchStandardScheduledLesson()
+            lessons.addAll(
+                    AppPreferences.extraCourses
+                            .map { _fetchExtraScheduledLessons(it.lessonTypeId) }
+                            .flatten()
+            )
+
+            //Removing lessons that are not held today
+            val (start, end) = CalendarUtils.getTodaysStartAndEndMs()
+            lessons.removeAll { it.startsBefore(start) || it.startsAfter(end) }
+            lessons.sortBy { it.startsAt }
+
+            listener.onLessonsAvailable(lessons)
+        }
     }
 
     //-------------------

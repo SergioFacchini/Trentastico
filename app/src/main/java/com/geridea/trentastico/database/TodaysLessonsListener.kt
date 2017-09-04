@@ -7,9 +7,7 @@ package com.geridea.trentastico.database
 
 import com.geridea.trentastico.model.LessonSchedule
 
-import java.util.ArrayList
-
 interface TodaysLessonsListener {
-    fun onLessonsAvailable(lessons: ArrayList<LessonSchedule>)
+    fun onLessonsAvailable(lessons: List<LessonSchedule>)
     fun onLessonsCouldNotBeLoaded()
 }
