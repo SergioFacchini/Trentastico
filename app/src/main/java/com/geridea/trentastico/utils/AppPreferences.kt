@@ -101,9 +101,7 @@ object AppPreferences {
 
         return try {
             val jsonArray = JSONArray(sharedPreferences.getString("EXTRA_COURSES", "[]"))
-            for (i in 0 until jsonArray.length()) {
-                courses.add(ExtraCourse.fromJSON(jsonArray.getJSONObject(i)))
-            }
+            (0 until jsonArray.length()).mapTo(courses) { ExtraCourse.fromJSON(jsonArray.getJSONObject(it)) }
             courses
         } catch (e: JSONException) {
             BugLogger.logBug("Parsing existing extra courses", e)
@@ -182,11 +180,7 @@ object AppPreferences {
 
     fun areNextLessonNotificationsEnabled(): Boolean = sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
 
-    fun setNextLessonNotificationsEnabled(enabled: Boolean) = putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled)
-
     fun areNextLessonNotificationsFixed(): Boolean = sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
-
-    fun setNextLessonNotificationsFixed(enabled: Boolean) = putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", enabled)
 
     val androidId: String
         get() {

@@ -23,17 +23,10 @@ class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : Items
     init {
 
         val items = ArrayList<DiffResultItem>(diffResult.numTotalDifferences)
-        for (lesson in diffResult.addedLessons) {
-            items.add(DiffResultItem.buildAdded(lesson))
-        }
 
-        for (lesson in diffResult.removedLessons) {
-            items.add(DiffResultItem.buildRemoved(lesson))
-        }
-
-        for (change in diffResult.changedLessons) {
-            items.add(DiffResultItem.buildChanged(change))
-        }
+        diffResult.addedLessons  .mapTo(items) { DiffResultItem  .buildAdded(it) }
+        diffResult.removedLessons.mapTo(items) { DiffResultItem.buildRemoved(it) }
+        diffResult.changedLessons.mapTo(items) { DiffResultItem.buildChanged(it) }
 
         itemsList = items
     }

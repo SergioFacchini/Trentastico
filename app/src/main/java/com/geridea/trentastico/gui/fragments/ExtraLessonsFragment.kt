@@ -232,7 +232,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
          * List of lessons of the actually selected standard course. The user should be not able to
          * add a lesson that he/she is already taking
          */
-        var lessonTypesOfCourse: List<LessonTypeNew>? = null
+        private var lessonTypesOfCourse: List<LessonTypeNew>? = null
 
         /**
          * Dispatched when the user has selected a course and that course has been added to preferences.

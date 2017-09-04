@@ -10,12 +10,6 @@ import java.util.*
  */
 object CalendarUtils {
 
-    val SECONDS_MS = 1000
-    val MINUTE_MS = 60 * SECONDS_MS
-    val HOUR_MS = 60 * MINUTE_MS
-    val DAY_MS = 24 * HOUR_MS
-
-    private val formatDDMMYY = SimpleDateFormat("dd MM yyyy", Locale.ITALIAN)
     private val formatTimestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN)
     private val formatEEEEDDMMMM = SimpleDateFormat("EEEE dd MMMM", Locale.ITALIAN)
     private val formatHHMM = SimpleDateFormat("HH:mm", Locale.ITALIAN)
@@ -34,16 +28,6 @@ object CalendarUtils {
         return firstDayOfWeek
     }
 
-    fun formatDDMMYY(calendar: Calendar): String = formatDDMMYY.format(calendar.time)
-
-    val purgedCalendarInstance: Calendar
-        get() {
-            val instance = Calendar.getInstance()
-            instance.clear()
-
-            return instance
-        }
-
     val clearCalendar: Calendar
         get() {
             val instance = Calendar.getInstance()
@@ -51,14 +35,6 @@ object CalendarUtils {
             instance.firstDayOfWeek = Calendar.MONDAY
             return instance
         }
-
-    fun getCalendarInitializedAs(calendar: Calendar): Calendar {
-        val instance = Calendar.getInstance()
-        instance.clear()
-        instance.firstDayOfWeek = Calendar.MONDAY
-        instance.time = calendar.time
-        return instance
-    }
 
     fun getCalendarWithMillis(millis: Long): Calendar {
         val instance = Calendar.getInstance()

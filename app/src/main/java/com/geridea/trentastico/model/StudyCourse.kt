@@ -26,7 +26,7 @@ data class StudyCourse(
 
     companion object {
 
-        fun fromJson(string: JSONObject): StudyCourse = StudyCourse(
+        private fun fromJson(string: JSONObject): StudyCourse = StudyCourse(
             courseId   = string.getString("courseId"),
             courseName = string.getString("courseName"),
             yearId     = string.getString("yearId"),

@@ -7,7 +7,6 @@ package com.geridea.trentastico.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 
 object ContextUtils {
 

@@ -1,10 +1,7 @@
 package com.geridea.trentastico.model
 
-import com.geridea.trentastico.model.cache.CachedLesson
 import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.utils.NumbersUtils
-import com.geridea.trentastico.utils.time.CalendarInterval
-import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -28,19 +25,6 @@ data class LessonSchedule(
         val endsAt: Long,
         val color: Int,
         val lessonTypeId: String) : Serializable {
-
-    constructor(cachedLesson: CachedLesson) : this(
-            cachedLesson.lesson_id,
-            cachedLesson.room,
-            cachedLesson.teacher_names,
-            cachedLesson.subject,
-            cachedLesson.partitioning_name,
-            cachedLesson.starts_at_ms,
-            cachedLesson.finishes_at_ms,
-            cachedLesson.color,
-            cachedLesson.teaching_id
-    )
-
 
     /**
      * Returns true if both the lessons probably refer to the exactly same lesson
@@ -115,18 +99,6 @@ data class LessonSchedule(
 
     fun isHeldInMilliseconds(ms: Long): Boolean = startsAt >= ms && ms <= endsAt
 
-    fun toExpandedCalendarInterval(typeOfTime: Int, delta: Int): CalendarInterval {
-        val calFrom = CalendarUtils.getCalendarWithMillis(startsAt)
-        calFrom.add(typeOfTime, -delta)
-
-        val calTo = CalendarUtils.getCalendarWithMillis(endsAt)
-        calTo.add(typeOfTime, delta)
-
-        return CalendarInterval(calFrom, calTo)
-    }
-
-    fun hasPartitioning(partitioningText: String): Boolean = false //TODO: implement partitionings
-
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + room.hashCode()
@@ -181,14 +153,7 @@ data class LessonSchedule(
             return diffResult
         }
 
-        fun getLessonsOfType( lessonType: LessonTypeNew, lessons: Collection<LessonSchedule>): ArrayList<LessonSchedule> =
-                lessons.filterTo(ArrayList()) { it.lessonTypeId == lessonType.id }
-
-        fun filterLessons(lessonsToFilter: MutableCollection<LessonSchedule>) {
-            //TODO implement partitonings
-        }
-
-        fun sortByStartDateOrId(lessons: ArrayList<LessonSchedule>) = Collections.sort(lessons) { a, b ->
+        private fun sortByStartDateOrId(lessons: ArrayList<LessonSchedule>) = Collections.sort(lessons) { a, b ->
             var compare = NumbersUtils.compare(a.startsAt, b.startsAt)
             if (compare == 0) {
                 compare = a.id.compareTo(b.id)

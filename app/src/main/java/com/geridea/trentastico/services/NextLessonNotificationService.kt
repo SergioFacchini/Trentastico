@@ -73,7 +73,7 @@ class NextLessonNotificationService : Service() {
         //3) If you've just finished the last, show until the end of the lesson +15 min that
         //   there are no more lessons today.
         //4) Reschedule the service to start 15 min before the start of the next lesson
-        Networker.loadTodaysLessons(object : TodaysLessonsListener {
+        Networker.loadTodaysCachedLessons(object : TodaysLessonsListener {
 
             override fun onLessonsAvailable(lessons: List<LessonSchedule>) {
                 //Finding passed lessons to hide the notifications of the past lessons
@@ -223,6 +223,7 @@ class NextLessonNotificationService : Service() {
         showToastIfInDebug(this, "Scheduled alarm manager to " + CalendarUtils.formatTimestamp(ms))
     }
 
+    @Suppress("DEPRECATION")
     private fun showNotificationForLessons(lesson: LessonSchedule) {
         //Creating notification
         val notificationBuilder = NotificationCompat.Builder(this)
@@ -283,7 +284,7 @@ class NextLessonNotificationService : Service() {
          * @param context needed to invoke the notification service
          * @param course the course
          */
-        fun removeNotificationsOfExtraCourse(context: Context, course: ExtraCourse) = Networker.getTodaysCachedLessons(object : TodaysLessonsListener {
+        fun removeNotificationsOfExtraCourse(context: Context, course: ExtraCourse) = Networker.loadTodaysCachedLessons(object : TodaysLessonsListener {
             override fun onLessonsAvailable(lessons: List<LessonSchedule>) {
                 val notificationManager = getNotificationManager(context)
 

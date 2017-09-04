@@ -18,7 +18,6 @@ import android.widget.Switch
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
@@ -26,7 +25,6 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.views.CourseSelectorView
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -36,7 +34,7 @@ class SettingsFragment : FragmentWithMenuItems() {
     /**
      * Prevents listeners from triggering unnecessarily.
      */
-    var isLoading = true
+    private var isLoading = true
 
     //Calendar
     @BindView(R.id.font_size_seek_bar) lateinit var fontSizeSeekBar: SeekBar
@@ -110,70 +108,9 @@ class SettingsFragment : FragmentWithMenuItems() {
         dialog.show()
     }
 
-    @OnCheckedChanged(R.id.search_for_lesson_changes)
-    internal fun onSearchForLessonsSwitchChanged(enabled: Boolean) {
-        if (isLoading) {
-            return
-        }
-
-        AppPreferences.isSearchForLessonChangesEnabled = enabled
-        shownNotificationOnLessonChanges.isEnabled = enabled
-
-        if (enabled) {
-            activity.startService(
-                    LessonsUpdaterService.createIntent(activity, LessonsUpdaterService.STARTER_SETTING_CHANGED)
-            )
-        } else {
-            LessonsUpdaterService.cancelSchedules(activity, LessonsUpdaterService.STARTER_SETTING_CHANGED)
-        }
-    }
-
-    @OnCheckedChanged(R.id.search_for_lesson_changes)
-    internal fun onShowLessonChangeNotificationSwitchChanged(checked: Boolean) {
-        if (isLoading) {
-            return
-        }
-
-        AppPreferences.isNotificationForLessonChangesEnabled = checked
-    }
-
     ///////////////////////////
     ////NEXT LESSON NOTIFICATION
     ///////////////////////////
-
-    @OnCheckedChanged(R.id.show_next_lesson_notification)
-    internal fun onShowNextLessonNotificationSwitchChanged(checked: Boolean) {
-        if (isLoading) {
-            return
-        }
-
-        AppPreferences.setNextLessonNotificationsEnabled(checked)
-        makeNotificationFixedSwitch.isEnabled = checked
-
-        if (checked) {
-            startNextLessonNotificationService()
-        } else {
-            NextLessonNotificationService.clearNotifications(activity)
-        }
-    }
-
-    private fun startNextLessonNotificationService() {
-        activity.startService(NextLessonNotificationService.createIntent(
-                activity, NLNStarter.NOTIFICATIONS_SWITCHED_ON)
-        )
-    }
-
-    @OnCheckedChanged(R.id.make_notifications_fixed)
-    internal fun onMakeNotificationsFixedSwitchChanged(checked: Boolean) {
-        if (isLoading) {
-            return
-        }
-
-        AppPreferences.setNextLessonNotificationsFixed(checked)
-
-        //If we have any notification, we have to update them:
-        startNextLessonNotificationService()
-    }
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)

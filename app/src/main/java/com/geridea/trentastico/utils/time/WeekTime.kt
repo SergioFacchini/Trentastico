@@ -5,13 +5,12 @@ package com.geridea.trentastico.utils.time
  * Created with ♥ by Slava on 15/03/2017.
  */
 
-import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
 import java.util.*
 
 class WeekTime {
-    var year: Int = 0
+    private var year: Int = 0
         private set
-    var weekNumber: Int = 0
+    private var weekNumber: Int = 0
         private set
 
     constructor(year: Int, weekNumber: Int) {
@@ -19,25 +18,8 @@ class WeekTime {
         this.weekNumber = weekNumber
     }
 
-    constructor() {
-        initFromCalendar(debuggableToday)
-    }
-
     constructor(calendar: Calendar) {
-        initFromCalendar(calendar)
-    }
-
-    constructor(milliseconds: Long) {
-        val calendar = CalendarUtils.clearCalendar
-        calendar.timeInMillis = milliseconds
-
-        initFromCalendar(calendar)
-    }
-
-    constructor(weekDayTime: WeekDayTime) : this(weekDayTime.year, weekDayTime.weekNumber) {}
-
-    fun initFromCalendar(calendar: Calendar) {
-        year = calendar.get(Calendar.YEAR)
+        year       = calendar.get(Calendar.YEAR)
         weekNumber = calendar.get(Calendar.WEEK_OF_YEAR)
     }
 
@@ -78,16 +60,17 @@ class WeekTime {
         dummy.set(Calendar.WEEK_OF_YEAR, weekNumber)
         dummy.add(Calendar.WEEK_OF_YEAR, numWeeksToAdd)
 
-        initFromCalendar(dummy)
+        year = dummy.get(Calendar.YEAR)
+        weekNumber = dummy.get(Calendar.WEEK_OF_YEAR)
 
         return this
     }
 
     fun copy(): WeekTime = WeekTime(year, weekNumber)
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj is WeekTime) {
-            val time = obj as WeekTime?
+    override fun equals(other: Any?): Boolean {
+        if (other is WeekTime) {
+            val time = other as WeekTime?
             return time!!.weekNumber == weekNumber && time.year == year
         }
         return false
@@ -97,11 +80,6 @@ class WeekTime {
      * True if the current week time start before or equals the argument.
      */
     fun beforeOrEqual(weekTime: WeekTime): Boolean = before(weekTime) || equals(weekTime)
-
-    /**
-     * True if the current week time start after or equals the argument.
-     */
-    fun afterOrEqual(weekTime: WeekTime): Boolean = after(weekTime) || equals(weekTime)
 
     override fun toString(): String = year.toString() + "/" + weekNumber
 

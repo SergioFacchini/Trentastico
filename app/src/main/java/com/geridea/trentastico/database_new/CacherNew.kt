@@ -10,13 +10,15 @@ import com.birbit.android.jobqueue.Params
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.database.CacheDbHelper
-import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LibraryOpeningTimes
+import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.*
 import com.geridea.trentastico.utils.time.CalendarUtils
+import java.util.*
 
 
 /*
@@ -225,7 +227,7 @@ class CacherNew(context: Context) {
     }
 
     //-------------------
-    // General
+    // General - Lessons and types
     //-------------------
     /**
      * Deletes everything we have in cache about the current study course (lessons and types)
@@ -254,23 +256,75 @@ class CacherNew(context: Context) {
         }
     }
 
-}
 
-interface LessonTypeListener {
-
-    /**
-     * Dispatched when no lesson types has been found in cache
-     */
-    fun onNoCachedLessonTypes()
+    //-------------------
+    // Library opening times
+    //-------------------
 
     /**
-     * Dispatched when cached lesson types has been found in cache
+     * @return the unix timestamp before which the cache of the opening times of the library is
+     * considered to be old.
      */
-    fun onCachedLessonTypesFound(lessonTypes: List<LessonTypeNew>)
+    private fun calculateLastValidLibraryCachePeriod(): Long {
+        val lastValid = CalendarUtils.debuggableToday
+        lastValid.add(Calendar.DAY_OF_WEEK, -5)
+
+        return lastValid.timeInMillis
+    }
+
+    fun getCachedLibraryOpeningTimes(day: Calendar, fetchDeadCacheToo: Boolean, listener: CachedLibraryOpeningTimesListener){
+        //Querying
+        val selection = "$CLIBT_DAY = ? AND $CLIBT_CACHED_IN_MS >= ?"
+
+        val lastValidMs = (if (fetchDeadCacheToo) -1 else calculateLastValidLibraryCachePeriod()).toString()
+        val selectionArgs = arrayOf(LibraryOpeningTimes.formatDay(day), lastValidMs)
+
+
+        val cursor = writableDatabase.query(
+            CACHED_LIBRARY_TIMES_TABLE_NAME, libraryTimesColumns, selection, selectionArgs
+        )
+        if (cursor.moveToFirst()) {
+            listener.onCachedOpeningTimesFound(buildLibraryOpeningTimesFromCursor(cursor))
+        } else {
+            listener.onNoCachedOpeningTimes()
+        }
+
+        cursor.close()
+    }
+
+    private fun buildLibraryOpeningTimesFromCursor(cursor: Cursor): LibraryOpeningTimes {
+        val times = LibraryOpeningTimes()
+        times.day             = cursor.getString(cursor.getColumnIndex(CLIBT_DAY))
+        times.timesBuc        = cursor.getString(cursor.getColumnIndex(CLIBT_BUC))
+        times.timesCial       = cursor.getString(cursor.getColumnIndex(CLIBT_CIAL))
+        times.timesMesiano    = cursor.getString(cursor.getColumnIndex(CLIBT_MESIANO))
+        times.timesPovo       = cursor.getString(cursor.getColumnIndex(CLIBT_POVO))
+        times.timesPsicologia = cursor.getString(cursor.getColumnIndex(CLIBT_PSICOLOGIA))
+        return times
+    }
+
+    fun cacheLibraryOpeningTimes(times: LibraryOpeningTimes){
+        runJobInBackground {
+            val values = ContentValues()
+            values.put(CLIBT_DAY,          times.day)
+            values.put(CLIBT_BUC,          times.timesBuc)
+            values.put(CLIBT_CIAL,         times.timesCial)
+            values.put(CLIBT_MESIANO,      times.timesMesiano)
+            values.put(CLIBT_POVO,         times.timesPovo)
+            values.put(CLIBT_PSICOLOGIA,   times.timesPsicologia)
+            values.put(CLIBT_CACHED_IN_MS, CalendarUtils.debuggableMillis)
+
+            writableDatabase.replace(CACHED_LIBRARY_TIMES_TABLE_NAME, null, values)
+        }
+    }
+
+
+
 }
+
 
 //Cache Jobs
-abstract class CacheJob: Job(Params(Cacher.PRIORITY_NORMAL)) {
+abstract class CacheJob: Job(Params(1)) {
 
     override fun onAdded() = Unit
 
@@ -347,3 +401,28 @@ internal val SQL_CREATE_LESSON_TYPES =
   )"""
 
 
+
+//Library opening times
+val CACHED_LIBRARY_TIMES_TABLE_NAME = "cached_library_times"
+
+val CLIBT_DAY          = "day"
+val CLIBT_BUC          = "buc"
+val CLIBT_CIAL         = "cial"
+val CLIBT_MESIANO      = "mesiano"
+val CLIBT_POVO         = "povo"
+val CLIBT_PSICOLOGIA   = "psicologia"
+val CLIBT_CACHED_IN_MS = "cached_in_ms"
+
+val libraryTimesColumns = arrayOf(
+    CLIBT_DAY, CLIBT_BUC, CLIBT_CIAL, CLIBT_MESIANO, CLIBT_POVO, CLIBT_PSICOLOGIA, CLIBT_CACHED_IN_MS
+)
+
+internal val SQL_CREATE_CACHED_LIBRARY_TIMES =
+        """CREATE TABLE $CACHED_LIBRARY_TIMES_TABLE_NAME (
+        $CLIBT_DAY          CHAR(10) NOT NULL PRIMARY KEY,
+        $CLIBT_BUC          VARCHAR(10) NOT NULL,
+        $CLIBT_CIAL         VARCHAR(10) NOT NULL,
+        $CLIBT_MESIANO      VARCHAR(10) NOT NULL,
+        $CLIBT_POVO         VARCHAR(10) NOT NULL,
+        $CLIBT_PSICOLOGIA   VARCHAR(10) NOT NULL,
+        $CLIBT_CACHED_IN_MS INT NOT NULL )"""

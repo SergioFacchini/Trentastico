@@ -35,9 +35,8 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
     /**
      * Loads from the website all the study courses and returns them through the listener
      */
-    fun loadStudyCourses(listener: CoursesLoadingListener) {
-        sender.processRequest(LoadStudyCoursesRequest(listener))
-    }
+    fun loadStudyCourses(listener: CoursesLoadingListener) =
+            sender.processRequest(LoadStudyCoursesRequest(listener))
 
     fun loadStandardLessons(listener: LessonsLoadingListener, studyCourse: StudyCourse) {
         val operation = CacheLessonsLoadingMessage()
@@ -58,17 +57,14 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
     /**
      * Loads standard and extra lessons that are held today
      */
-    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) {
-        cacher.loadTodaysLessons(todaysLessonsListener)
-    }
+    fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
+            cacher.loadTodaysLessons(todaysLessonsListener)
 
-    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
-        cacher.fetchLessonTypes(callback)
-    }
+    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) =
+            cacher.fetchLessonTypes(callback)
 
-    fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) {
-        sender.processRequest(LessonTypesOfStudyCourseRequest(studyCourse, listener))
-    }
+    fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) =
+            sender.processRequest(LessonTypesOfStudyCourseRequest(studyCourse, listener))
 
     fun loadExtraCourseLessons(listener: LessonsLoadingListener, extraCourse: ExtraCourse) {
         val operation = CacheLessonsLoadingMessage()
@@ -155,7 +151,7 @@ internal abstract class BasicRequest : IRequest {
  */
 internal class LoadStudyCoursesRequest(
         val listener: CoursesLoadingListener,
-        val removeAllCoursesOption: Boolean = true) : IRequest {
+        private val removeAllCoursesOption: Boolean = true) : IRequest {
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
         listener.onLoadingError()

@@ -12,8 +12,6 @@ object Config {
     //Debug
     val PRE_LOADING_WAITING_TIME_MS = 0
 
-    var SHOW_DEBUG_MESSAGES = true
-
     val DEBUG_FORCE_ANOTHER_DATE = false
     var DATE_TO_FORCE = 1491814432000L //Mon Apr 10 10:55:32 2017 GMT
 
@@ -37,7 +35,6 @@ object Config {
     //Lessons update service
     val LESSONS_REFRESH_WAITING_REGULAR = 4
     val LESSONS_REFRESH_WAITING_AFTER_ERROR = 2
-    val LESSONS_REFRESH_POSTICIPATION_MINUTES = 5
 
     /**
      * During diff of the cached times and the fresh ones, what is the last valid time to consider
@@ -46,10 +43,6 @@ object Config {
      * more than a month later changes).
      */
     val LESSONS_CHANGED_ANTICIPATION_MS = TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)
-
-    val QUICK_LESSON_CHECKS = false
-    val DEBUG_LESSONS_REFRESH_WAITING_RATE_SECONDS = 30
-    val DEBUG_LESSONS_REFRESH_POSTICIPATION_SECONDS = 8
 
     //Next lessons notification service
     val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15

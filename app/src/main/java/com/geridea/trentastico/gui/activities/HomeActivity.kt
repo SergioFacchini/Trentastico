@@ -44,7 +44,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer.setDrawerListener(toggle)
+        drawer.addDrawerListener(toggle)
         toggle.syncState()
 
         navigationView.setNavigationItemSelectedListener(this)
@@ -56,17 +56,15 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //Removing debug stuff from menu
         if (!IS_IN_DEBUG_MODE) {
             val menu = navigationView.menu
-            for (i in 0..menu.size() - 1) {
-                val item = menu.getItem(i)
-
-                //If we're not in debug mode, we don't need the debug options
-                if (item.itemId == R.id.debug_menu_about ||
-                        item.itemId == R.id.debug_update_courses ||
-                        item.itemId == R.id.debug_start_next_lesson_service) {
-
-                    item.isVisible = false
-                }
-            }
+            (0 until menu.size())
+                    .map { menu.getItem(it) }
+                    .filter {
+                        //If we're not in debug mode, we don't need the debug options
+                        it.itemId == R.id.debug_menu_about ||
+                        it.itemId == R.id.debug_update_courses ||
+                        it.itemId == R.id.debug_start_next_lesson_service
+                    }
+                    .forEach { it.isVisible = false }
         }
 
         //Setting calendar fragment as the first fragment
@@ -94,13 +92,13 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun hideAllMenuItems(menu: Menu) {
-        for (i in 0..menu.size() - 1) {
+        for (i in 0 until menu.size()) {
             menu.getItem(i).isVisible = false
         }
     }
 
-    override fun onBackPressed() = if (drawer!!.isDrawerOpen(GravityCompat.START)) {
-        drawer!!.closeDrawer(GravityCompat.START)
+    override fun onBackPressed() = if (drawer.isDrawerOpen(GravityCompat.START)) {
+        drawer.closeDrawer(GravityCompat.START)
     } else {
         if (currentFragment is CalendarFragment) {
             super.onBackPressed()
@@ -112,30 +110,27 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
 
-        if (id == R.id.menu_timetables) {
-            switchToCalendarFragment()
-        } else if (id == R.id.menu_settings) {
-            setCurrentFragment(SettingsFragment())
-        } else if (id == R.id.menu_extra_times) {
-            setCurrentFragment(ExtraLessonsFragment())
-        } else if (id == R.id.menu_libraries) {
-            setCurrentFragment(LibrariesFragment())
-        } else if (id == R.id.menu_feedback) {
-            setCurrentFragment(SubmitFeedbackFragment())
-        } else if (id == R.id.menu_changelog) {
-            setCurrentFragment(AboutFragment())
-        } else if (IS_IN_DEBUG_MODE) {
+        when {
+            id == R.id.menu_timetables  -> switchToCalendarFragment()
+            id == R.id.menu_settings    -> setCurrentFragment(SettingsFragment())
+            id == R.id.menu_extra_times -> setCurrentFragment(ExtraLessonsFragment())
+            id == R.id.menu_libraries   -> setCurrentFragment(LibrariesFragment())
+            id == R.id.menu_feedback    -> setCurrentFragment(SubmitFeedbackFragment())
+            id == R.id.menu_changelog   -> setCurrentFragment(AboutFragment())
+            IS_IN_DEBUG_MODE            -> //Managing debug stuff here
+                when (id) {
+                    R.id.debug_menu_about -> {
+                        Networker.obliterateCache()
+                        Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show()
+                        switchToCalendarFragment()
+                    }
+                    R.id.debug_update_courses            ->
+                        startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER))
 
-            //Managing debug stuff here
-            if (id == R.id.debug_menu_about) {
-                Networker.obliterateCache()
-                Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show()
-                switchToCalendarFragment()
-            } else if (id == R.id.debug_update_courses) {
-                startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER))
-            } else if (id == R.id.debug_start_next_lesson_service) {
-                startService(NextLessonNotificationService.createIntent(this, NLNStarter.DEBUG))
-            }
+                    R.id.debug_start_next_lesson_service ->
+                        startService(NextLessonNotificationService.createIntent(this, NLNStarter.DEBUG))
+
+                }
         }
 
         drawer.closeDrawer(GravityCompat.START)

@@ -136,11 +136,10 @@ class CalendarFragment : FragmentWithMenuItems() {
             }
         }
 
-        private fun calculateLessonTypesToHide(): ArrayList<String> {
-            return lessonTypes
-                    .filterNot { it.isVisible }
-                    .mapTo(ArrayList()) { it.id }
-        }
+        private fun calculateLessonTypesToHide(): ArrayList<String> =
+            lessonTypes
+                .filterNot { it.isVisible }
+                .mapTo(ArrayList()) { it.id }
 
         @OnClick(R.id.dismiss_button)
         fun onDoFilterButtonClicked() = dismiss()

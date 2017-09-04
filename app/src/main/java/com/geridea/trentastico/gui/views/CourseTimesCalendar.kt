@@ -39,7 +39,10 @@ class CourseTimesCalendar : CustomWeekView {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(
+            context: Context,
+            attrs: AttributeSet,
+            defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
         prepareLoader()
@@ -47,66 +50,49 @@ class CourseTimesCalendar : CustomWeekView {
     }
 
     private fun getDateInterpreterForNumberOfDays(numberOfVisibleDays: Int): DateTimeInterpreter =
-            if (numberOfVisibleDays <= 2) {
-                object : DateTimeInterpreter {
-                    override fun interpretDate(date: Calendar): String {
-                        val today = CalendarUtils.debuggableToday
-                        if (isSameDay(today, date)) {
-                            return "Oggi (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                        }
+        when {
+            numberOfVisibleDays <= 2 -> object : DateTimeInterpreter {
+                override fun interpretDate(date: Calendar): String {
+                    val formattedDay = FORMAT_ONLY_DAY.format(date.time)
 
-                        today.add(Calendar.DAY_OF_MONTH, +1)
-                        if (isSameDay(today, date)) {
-                            return "Domani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                        }
+                    val day = CalendarUtils.debuggableToday
+                    if (isSameDay(day, date)) return "Oggi ($formattedDay)"
 
-                        today.add(Calendar.DAY_OF_MONTH, +1)
-                        if (isSameDay(today, date)) {
-                            return "Dopodomani (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                        }
+                    day.add(Calendar.DAY_OF_MONTH, +1)
+                    if (isSameDay(day, date)) return "Domani ($formattedDay)"
 
-                        today.add(Calendar.DAY_OF_MONTH, -3)
-                        return if (isSameDay(today, date)) {
-                            "Ieri (" + FORMAT_ONLY_DAY.format(date.time) + ")"
-                        } else (if (IS_IN_DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
+                    day.add(Calendar.DAY_OF_MONTH, +1)
+                    if (isSameDay(day, date)) return "Dopodomani ($formattedDay)"
 
-                    }
-
-                    override fun interpretTime(hour: Int): String = interpretHours(hour)
+                    day.add(Calendar.DAY_OF_MONTH, -3)
+                    return if (isSameDay(day, date)) "Ieri ($formattedDay)"
+                    else (if (IS_IN_DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
                 }
-            } else if (numberOfVisibleDays <= 5) {
-                object : DateTimeInterpreter {
-                    override fun interpretDate(date: Calendar): String {
-                        val today = CalendarUtils.debuggableToday
-                        if (isSameDay(today, date)) {
-                            return "Oggi"
-                        }
 
-                        today.add(Calendar.DAY_OF_MONTH, +1)
-                        if (isSameDay(today, date)) {
-                            return "Domani"
-                        }
+                override fun interpretTime(hour: Int): String = interpretHours(hour)
+            }
 
-                        today.add(Calendar.DAY_OF_MONTH, +1)
-                        if (isSameDay(today, date)) {
-                            return "Dopodomani"
-                        }
+            numberOfVisibleDays <= 5 -> object : DateTimeInterpreter {
+                override fun interpretDate(date: Calendar): String {
+                    val day = CalendarUtils.debuggableToday
+                    if (isSameDay(day, date)) return "Oggi"
 
-                        today.add(Calendar.DAY_OF_MONTH, -3)
-                        if (isSameDay(today, date)) {
-                            return "Ieri"
-                        }
+                    day.add(Calendar.DAY_OF_MONTH, +1)
+                    if (isSameDay(day, date)) return "Domani"
 
-                        return if (IS_IN_DEBUG_MODE)
-                            DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
-                        else
-                            DATE_FORMAT_MEDIUM.format(date.time)
-                    }
+                    day.add(Calendar.DAY_OF_MONTH, +1)
+                    if (isSameDay(day, date)) return "Dopodomani"
 
-                    override fun interpretTime(hour: Int): String = interpretHours(hour)
+                    day.add(Calendar.DAY_OF_MONTH, -3)
+                    if (isSameDay(day, date)) return "Ieri"
+
+                    return if (IS_IN_DEBUG_MODE) DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
+                    else DATE_FORMAT_MEDIUM.format(date.time)
                 }
-            } else {
-                // > 6
+
+                override fun interpretTime(hour: Int): String = interpretHours(hour)
+            }
+            else -> // > 6
                 object : DateTimeInterpreter {
                     override fun interpretDate(date: Calendar): String {
                         val firstDay = CalendarUtils.calculateFirstDayOfWeek()
@@ -114,21 +100,18 @@ class CourseTimesCalendar : CustomWeekView {
                         lastDay.add(Calendar.WEEK_OF_MONTH, +1)
 
                         return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
-                            if (IS_IN_DEBUG_MODE)
-                                DATE_FORMAT_SHORT_DEBUG.format(date.time)
-                            else
-                                DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
+                            if (IS_IN_DEBUG_MODE) DATE_FORMAT_SHORT_DEBUG.format(date.time)
+                            else DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
                         } else {
-                            if (IS_IN_DEBUG_MODE)
-                                DATE_FORMAT_SHORT_DEBUG.format(date.time)
-                            else
-                                DATE_FORMAT_SHORT.format(date.time)
+                            if (IS_IN_DEBUG_MODE) DATE_FORMAT_SHORT_DEBUG.format(date.time)
+                            else DATE_FORMAT_SHORT.format(date.time)
                         }
                     }
 
                     override fun interpretTime(hour: Int): String = interpretHours(hour)
                 }
-            }
+        }
+
 
     private fun interpretHours(hour: Int): String = hour.toString()
 

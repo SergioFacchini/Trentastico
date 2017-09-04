@@ -30,12 +30,6 @@ class LessonsDiffResult : Serializable {
         changedLessons.add(LessonChange(original, changed))
     }
 
-    fun addFrom(anotherDiff: LessonsDiffResult) {
-        addedLessons.addAll(anotherDiff.addedLessons)
-        removedLessons.addAll(anotherDiff.removedLessons)
-        changedLessons.addAll(anotherDiff.changedLessons)
-    }
-
     val isEmpty: Boolean
         get() = addedLessons.isEmpty() && removedLessons.isEmpty() && changedLessons.isEmpty()
 

@@ -89,14 +89,14 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
     }
 
     private fun showState(state: State) = UIUtils.runOnMainThread {
-        spinner!!.visibility = View.GONE
-        timetables!!.visibility = View.GONE
-        errorPanel!!.visibility = View.GONE
+        spinner.visibility = View.GONE
+        timetables.visibility = View.GONE
+        errorPanel.visibility = View.GONE
 
         when (state) {
-            LibrariesFragment.State.SHOWING -> timetables!!.visibility = View.VISIBLE
-            LibrariesFragment.State.ERROR -> errorPanel!!.visibility = View.VISIBLE
-            LibrariesFragment.State.LOADING -> spinner!!.visibility = View.VISIBLE
+            LibrariesFragment.State.SHOWING -> timetables.visibility = View.VISIBLE
+            LibrariesFragment.State.ERROR -> errorPanel.visibility = View.VISIBLE
+            LibrariesFragment.State.LOADING -> spinner.visibility = View.VISIBLE
         }
     }
 

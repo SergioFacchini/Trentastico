@@ -81,7 +81,7 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
 
         coursesSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
 
-            override fun onNothingSelected(parent: AdapterView<*>?) { ; }
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedCourse = coursesSpinner.selectedItem as Course
@@ -98,14 +98,10 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
     }
 
     @OnItemSelected(R.id.yearSpinner)
-    internal fun onYearSelected(selectedPosition: Int) {
-        onCourseChanged.dispatch(buildStudyCourse())
-    }
+    internal fun onYearSelected(selectedPosition: Int) = onCourseChanged.dispatch(buildStudyCourse())
 
     @OnClick(R.id.retryButton)
-    internal fun onRetryButtonClick() {
-        loadCourses()
-    }
+    internal fun onRetryButtonClick() = loadCourses()
 
     fun loadCourses() {
         Networker.loadStudyCourses(object : CoursesLoadingListener {
@@ -165,12 +161,10 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
         }
     }
 
-    private fun showErrorMessage(errorMessage: String) {
-        runOnMainThread {
-            errorText.text = errorMessage
+    private fun showErrorMessage(errorMessage: String) = runOnMainThread {
+        errorText.text = errorMessage
 
-            lepView.currentView = LEPState.ERROR
-        }
+        lepView.currentView = LEPState.ERROR
     }
 
 }

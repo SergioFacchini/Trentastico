@@ -34,8 +34,6 @@ object UIUtils {
         }
     }
 
-    fun convertDpToPixels(dp: Float, context: Context): Int = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
-
     fun convertSpToPixels(sp: Float, context: Context): Int {
         val displayMetrics = context.resources.displayMetrics
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics).toInt()

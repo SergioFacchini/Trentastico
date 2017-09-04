@@ -10,9 +10,6 @@ import java.util.*
 
 class ExtraCoursesList : ArrayList<ExtraCourse>() {
 
-    fun isAnExtraLesson(lesson: LessonSchedule): Boolean =
-            this.any { it.lessonTypeId == lesson.lessonTypeId }
-
     fun toJSON(): JSONArray {
         val jsonArray = JSONArray()
 

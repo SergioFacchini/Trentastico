@@ -1,71 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/backgroundMain"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="4dp">
 
+    <ImageView
+        android:id="@+id/color"
+        style="@style/CourseColor"
+        android:layout_gravity="center"
+        android:contentDescription="Colore corso" />
+
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/color"
-            android:layout_gravity="center"
-            android:contentDescription="Colore corso"
-            style="@style/CourseColor" />
-
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/lesson_type"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_gravity="center"
+            android:gravity="center_vertical|left"
+            android:text="text" />
 
-            <TextView
-                android:id="@+id/lesson_type"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|left"
-                android:text="text"
-                style="@style/TextForegroundMedium" />
+        <TextView
+            android:id="@+id/teachers_names"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|left"
+            android:text="text"
+            android:textStyle="italic" />
 
-            <TextView
-                android:id="@+id/teachers_names"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|left"
-                android:text="text"
-                android:textStyle="italic"
-                style="@style/TextForegroundMedium" />
+        <TextView
+            android:id="@+id/partitioning_name"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|left"
+            android:text="text"
+            android:textColor="@color/colorAccentLight" />
 
-            <TextView
-                android:id="@+id/partitioning_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|left"
-                android:text="text"
-                android:textColor="@color/colorAccentLight"
-                style="@style/TextForegroundMedium" />
-
-            <TextView
-                android:id="@+id/course_already_selected"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_toLeftOf="@+id/color"
-                android:gravity="center_vertical|left"
-                android:text="Stai già seguendo questo corso!"
-                android:textColor="@color/colorAccent"
-                android:textSize="16sp" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/course_already_selected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|left"
+            android:text="Stai già seguendo questo corso!"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp" />
 
     </LinearLayout>
 </LinearLayout>

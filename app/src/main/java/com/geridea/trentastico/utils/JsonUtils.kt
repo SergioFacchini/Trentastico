@@ -7,8 +7,7 @@ package com.geridea.trentastico.utils
 
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
-import java.util.HashSet
+import java.util.*
 
 object JsonUtils {
     /**
@@ -23,11 +22,6 @@ object JsonUtils {
     }
 
     @Throws(JSONException::class)
-    fun getLongHashSet(jsonArray: JSONArray): HashSet<Long> {
-        val longs = HashSet<Long>()
-        for (i in 0..jsonArray.length() - 1) {
-            longs.add(jsonArray.getLong(i))
-        }
-        return longs
-    }
+    fun getLongHashSet(jsonArray: JSONArray): HashSet<Long> =
+            (0 until jsonArray.length()).mapTo(HashSet()) { jsonArray.getLong(it) }
 }

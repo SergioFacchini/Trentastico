@@ -4,36 +4,31 @@ package com.geridea.trentastico.network
  * Created with ♥ by Slava on 11/03/2017.
  */
 
-import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.model.StudyCourse
-import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LessonsControllerNew
 import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController
 import com.geridea.trentastico.network.controllers.SendFeedbackController
 import com.geridea.trentastico.network.controllers.listener.*
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.utils.AppPreferences
-import com.geridea.trentastico.utils.time.WeekInterval
 import java.util.*
 
 object Networker {
 
     //Executors
-    private lateinit var lessonsController: LessonsController
     private lateinit var lessonsControllerNew: LessonsControllerNew
     private lateinit var sendFeedbackController: SendFeedbackController
     private lateinit var libraryOpeningTimes: LibraryOpeningTimesController
 
-    fun init( cacher: Cacher, cacherNew: CacherNew) {
+    fun init(cacherNew: CacherNew) {
         val requestSender = RequestSender()
 
-        sendFeedbackController = SendFeedbackController(requestSender, cacher)
-        libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacher)
-        lessonsController      = LessonsController(requestSender, cacher)
+        sendFeedbackController = SendFeedbackController(requestSender)
+        libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacherNew)
         lessonsControllerNew   = LessonsControllerNew(requestSender, cacherNew)
 
     }
@@ -80,17 +75,12 @@ object Networker {
         lessonsControllerNew.loadCachedLessonTypes(callback)
     }
 
-    fun diffLessonsInCache(
-            intervalToCheck: WeekInterval,
-            listener: LessonsDifferenceListener) = lessonsController.diffLessonsInCache(intervalToCheck, listener)
-
     fun loadLessonTypesOfStudyCourse(
             studyCourse: StudyCourse,
             listener: ListLessonsListener) = lessonsControllerNew.loadLessonTypesOfStudyCourse(studyCourse, listener)
 
-    fun loadTodaysLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsControllerNew.loadTodaysLessons(todaysLessonsListener)
-
-    fun getTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) = lessonsController.getTodaysCachedLessons(todaysLessonsListener)
+    fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
+            lessonsControllerNew.loadTodaysCachedLessons(todaysLessonsListener)
 
     /**
      * Removes all the cached extra lessons of the lesson type having the given id

@@ -1,8 +1,8 @@
 package com.geridea.trentastico.gui.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.os.Build
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.ViewCompat
 import android.support.v4.view.animation.FastOutLinearInInterpolator
@@ -46,8 +46,6 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     private val mPastDayBackgroundColor = 0xFFD5D5D5.toInt()
 
     private val enabledIntervals = ArrayList<WeekInterval>()
-
-    private val disabledDayVisibleResult = DisabledDayVisibleResult()
 
     protected fun addEvents(weekViewEvents: List<WeekViewEvent>) {
         sortAndCacheEvents(weekViewEvents)
@@ -145,7 +143,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     private var mHeaderColumnBackgroundColor = Color.WHITE
     private var mIsFirstDraw = true
     private var mAreDimensionsInvalid = true
-    @Deprecated("") private var mDayNameLength = LENGTH_LONG
+    private var mDayNameLength = LENGTH_LONG
     private var mOverlappingEventGap = 0
     private var mEventMarginVertical = 0
     private var mXScrollingSpeed = 1f
@@ -165,7 +163,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     var emptyViewClickListener: CustomWeekView.EmptyViewClickListener? = null
     var emptyViewLongPressListener: CustomWeekView.EmptyViewLongPressListener? = null
     private var mDateTimeInterpreter: DateTimeInterpreter? = null
-    var scrollListener: CustomWeekView.ScrollListener? = null
+    private var scrollListener: CustomWeekView.ScrollListener? = null
 
     private val mGestureListener = object : GestureDetector.SimpleOnGestureListener() {
 
@@ -204,6 +202,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
                         mCurrentScrollDirection = CustomWeekView.Direction.LEFT
                     }
                 }
+                else -> Unit
             }
 
             // Calculate the new origin after scroll.
@@ -216,6 +215,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
                     mCurrentOrigin.y -= distanceY
                     ViewCompat.postInvalidateOnAnimation(this@CustomWeekView)
                 }
+                else -> Unit
             }
             return true
         }
@@ -236,6 +236,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
             when (mCurrentFlingDirection) {
                 CustomWeekView.Direction.LEFT, CustomWeekView.Direction.RIGHT -> mScroller!!.fling(mCurrentOrigin.x.toInt(), mCurrentOrigin.y.toInt(), (velocityX * mXScrollingSpeed).toInt(), 0, Integer.MIN_VALUE, Integer.MAX_VALUE, (-((mHourHeight * mNumHoursToDisplay).toFloat() + mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2 - height)).toInt(), 0)
                 CustomWeekView.Direction.VERTICAL -> mScroller!!.fling(mCurrentOrigin.x.toInt(), mCurrentOrigin.y.toInt(), 0, velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, (-((mHourHeight * mNumHoursToDisplay).toFloat() + mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2 - height)).toInt(), 0)
+                else -> Unit
             }
 
             ViewCompat.postInvalidateOnAnimation(this@CustomWeekView)
@@ -505,7 +506,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         // Calculate the available width for each day.
         mHeaderColumnWidth = mTimeTextWidth + mHeaderColumnPadding * 2
         mWidthPerDay = width.toFloat() - mHeaderColumnWidth - (mColumnGap * (mNumberOfVisibleDays - 1)).toFloat()
-        mWidthPerDay = mWidthPerDay / mNumberOfVisibleDays
+        mWidthPerDay /= mNumberOfVisibleDays
 
         val today = today()
 
@@ -568,7 +569,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
         // Prepare to iterate for each hour to draw the hour lines.
         var lineCount = ((height.toFloat() - mHeaderTextHeight - (mHeaderRowPadding * 2).toFloat() - mHeaderMarginBottom) / mHourHeight).toInt() + 1
-        lineCount = lineCount * (mNumberOfVisibleDays + 1)
+        lineCount *= (mNumberOfVisibleDays + 1)
         val hourLines = FloatArray(lineCount * 4)
 
         // Clear the cache for event rectangles.
@@ -618,12 +619,11 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
                         else              -> canvas.drawRect(start, startY, startPixel + mWidthPerDay, height.toFloat(), futurePaint!!)
                     }
                 } else {
-                    val paintToUseForThisDay: Paint?
-                    when {
-                        isADisabledDay(day) -> paintToUseForThisDay = mDisabledBackgroundPaint
-                        day.before(today)   -> paintToUseForThisDay = mPastDayBackgroundPaint
-                        isToday             -> paintToUseForThisDay = mTodayBackgroundPaint
-                        else                -> paintToUseForThisDay = mDayBackgroundPaint
+                    val paintToUseForThisDay: Paint? = when {
+                        isADisabledDay(day) -> mDisabledBackgroundPaint
+                        day.before(today)   -> mPastDayBackgroundPaint
+                        isToday             -> mTodayBackgroundPaint
+                        else                -> mDayBackgroundPaint
                     }
 
                     canvas.drawRect(start, mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mTimeTextHeight / 2 + mHeaderMarginBottom, startPixel + mWidthPerDay, height.toFloat(), paintToUseForThisDay!!)
@@ -683,35 +683,8 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         }
     }
 
-    fun isADisabledDay(day: Calendar): Boolean =
-            enabledIntervals.none { it.contains(WeekTime(day)) }
-
-    protected fun getDisabledDaysVisibleFromDay(newFirstVisibleDay: Calendar): DisabledDayVisibleResult {
-        val firstVisibleWeek = WeekTime(newFirstVisibleDay)
-
-        val lastVisibleDate = CalendarUtils.getCalendarInitializedAs(newFirstVisibleDay)
-        lastVisibleDate.add(Calendar.DAY_OF_MONTH, mNumberOfVisibleDays)
-
-        val lastVisibleWeek = WeekTime(lastVisibleDate)
-
-        var firstEnabled = false
-        var lastEnabled = false
-        for (enabledInterval in enabledIntervals) {
-            if (!firstEnabled && enabledInterval.contains(firstVisibleWeek)) {
-                firstEnabled = true
-            }
-
-            if (!lastEnabled && enabledInterval.contains(lastVisibleWeek)) {
-                lastEnabled = true
-            }
-
-            if (firstEnabled && lastEnabled) {
-                break
-            }
-        }
-
-        return disabledDayVisibleResult.reinit(firstEnabled, lastEnabled, firstVisibleWeek, lastVisibleWeek)
-    }
+    private fun isADisabledDay(day: Calendar): Boolean =
+            enabledIntervals.none { WeekTime(day) in it }
 
     /**
      * Get the time and date where the user clicked on.
@@ -1057,11 +1030,8 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
         // Calculate left and right position for all the events.
         // Get the maxRowCount by looking in all columns.
-        var maxRowCount = 0
-        for (column in columns) {
-            maxRowCount = Math.max(maxRowCount, column.size)
-        }
-        for (i in 0..maxRowCount - 1) {
+        val maxRowCount = columns.map { it.size }.max() ?: 0
+        for (i in 0 until maxRowCount) {
             // Set the left and right values of the event.
             var j = 0f
             for (column in columns) {
@@ -1094,15 +1064,6 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     }
 
 
-    /**
-     * Checks if time1 occurs after (or at the same time) time2.
-     * @param time1 The time to check.
-     * @param time2 The time to check against.
-     * @return true if time1 and time2 are equal or if time1 is after time2. Otherwise false.
-     */
-    private fun isTimeAfterOrEquals(time1: Calendar?, time2: Calendar?): Boolean =
-            !(time1 == null || time2 == null) && time1.timeInMillis >= time2.timeInMillis
-
     override fun invalidate() {
         super.invalidate()
         mAreDimensionsInvalid = true
@@ -1114,17 +1075,8 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     //
     /////////////////////////////////////////////////////////////////
 
-    fun setOnEventClickListener(listener: CustomWeekView.EventClickListener) {
-        this.eventClickListener = listener
-    }
-
     /**
-     * Get the interpreter which provides the text to show in the header column and the header row.
-     * @return The date, time interpreter.
-     */
-    /**
-     * Set the interpreter which provides the text to show in the header column and the header row.
-     * @param dateTimeInterpreter The date, time interpreter.
+     * The interpreter which provides the text to show in the header column and the header row
      */
     // Refresh time column width.
     var dateTimeInterpreter: DateTimeInterpreter
@@ -1166,8 +1118,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         }
 
     /**
-     * Set the number of visible days in a week.
-     * @param numberOfVisibleDays The number of visible days in a week.
+     * The number of visible days in a week.
      */
     open var numberOfVisibleDays: Int
         get() = mNumberOfVisibleDays
@@ -1185,6 +1136,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     //
     /////////////////////////////////////////////////////////////////
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         mScaleDetector!!.onTouchEvent(event)
         val `val` = mGestureDetector!!.onTouchEvent(event)
@@ -1253,12 +1205,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * @return true if scrolling should be stopped before reaching the end of animation.
      */
     private fun forceFinishScroll(): Boolean =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                // current velocity only available since api 14
-                mScroller!!.currVelocity <= mMinimumFlingVelocity
-            } else {
-                false
-            }
+            mScroller!!.currVelocity <= mMinimumFlingVelocity
 
 
     /////////////////////////////////////////////////////////////////
@@ -1303,13 +1250,13 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     /**
      * Refreshes the view and loads the events again.
      */
-    fun notifyDatasetChanged() = postInvalidate()
+    private fun notifyDatasetChanged() = postInvalidate()
 
     /**
      * Vertically scroll to a specific hour in the week view.
      * @param hour The hour to scroll to in 24-hour format. Supported values are 0-24.
      */
-    fun goToHour(hour: Double) {
+    private fun goToHour(hour: Double) {
         if (mAreDimensionsInvalid) {
             mScrollToHour = hour
             return
@@ -1327,13 +1274,6 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         mCurrentOrigin.y = (-verticalOffset).toFloat()
         invalidate()
     }
-
-    /**
-     * Get the first hour that is visible on the screen.
-     * @return The first hour that is visible.
-     */
-    val firstVisibleHour: Double
-        get() = (-mCurrentOrigin.y / mHourHeight).toDouble()
 
 
     /////////////////////////////////////////////////////////////////
@@ -1407,33 +1347,11 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         return today
     }
 
-    inner class DisabledDayVisibleResult {
-        var isFirstDayDisabled: Boolean = false
-            private set
-        var isLastDayDisabled: Boolean = false
-            private set
-        var firstVisibleWeek: WeekTime? = null
-            private set
-        var lastVisibleWeek: WeekTime? = null
-            private set
-
-        fun reinit(firstContained: Boolean, lastContained: Boolean, firstVisibleWeek: WeekTime, lastVisibleWeek: WeekTime): DisabledDayVisibleResult {
-            this.isFirstDayDisabled = !firstContained
-            this.isLastDayDisabled  = !lastContained
-            this.firstVisibleWeek   = firstVisibleWeek
-            this.lastVisibleWeek    = lastVisibleWeek
-
-            return this
-        }
-    }
-
     companion object {
 
         val DEFAULT_EVENT_FONT_SIZE = 10
 
-        @Deprecated("")
         val LENGTH_SHORT = 1
-        @Deprecated("")
         val LENGTH_LONG = 2
     }
 }

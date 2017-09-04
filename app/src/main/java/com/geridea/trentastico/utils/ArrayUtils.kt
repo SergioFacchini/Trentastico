@@ -7,29 +7,8 @@ package com.geridea.trentastico.utils
 
 object ArrayUtils {
 
-    fun isOneOf(needle: Int, vararg haystack: Int): Boolean {
-        for (element in haystack) {
-            if (element == needle) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    fun <T : Enum<T>> isOneOf(needle: Enum<T>, vararg haystack: Enum<T>): Boolean {
-        for (elem in haystack) {
-            if (needle === elem) {
-                return true
-            }
-        }
-
-        return false
-    }
+    fun <T : Enum<T>> isOneOf(needle: Enum<T>, vararg haystack: Enum<T>): Boolean =
+            haystack.any { needle === it }
 
 }
 
-/**
- * @return an element of the array, chosen randomly
- */
-fun <T> Array<T>.random(): T = get((size * Math.random()).toInt())

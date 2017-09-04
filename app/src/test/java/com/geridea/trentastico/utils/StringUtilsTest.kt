@@ -91,7 +91,8 @@ class StringUtilsTest {
         assertPositionFormat("Let's count: 3 2 1", "Let's count: {2} {1} {0}", 1, 2, 3)
     }
 
-    private fun assertPositionFormat(expected: String, format: String, vararg items: Any) = assertEquals(expected, StringUtils.positionFormat(format, *items))
+    private fun assertPositionFormat(expected: String, format: String, vararg items: Any) =
+            assertEquals(expected, StringUtils.positionFormat(format, *items))
 
 
 }
