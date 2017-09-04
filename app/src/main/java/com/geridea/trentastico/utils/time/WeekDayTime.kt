@@ -15,6 +15,7 @@ class WeekDayTime(var year: Int, var weekNumber: Int, private val weekDay: Int) 
             calendar.get(Calendar.DAY_OF_WEEK)
     )
 
+
     fun before(anotherDay: WeekDayTime): Boolean {
         if (this.year < anotherDay.year) {
             return true
@@ -34,6 +35,26 @@ class WeekDayTime(var year: Int, var weekNumber: Int, private val weekDay: Int) 
             else                              -> false
         }
 
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WeekDayTime
+
+        if (year       != other.year)       return false
+        if (weekNumber != other.weekNumber) return false
+        if (weekDay    != other.weekDay)    return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = year
+        result = 31 * result + weekNumber
+        result = 31 * result + weekDay
+        return result
     }
 
 }
