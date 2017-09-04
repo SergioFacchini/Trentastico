@@ -6,9 +6,11 @@ import android.graphics.*
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.ViewCompat
 import android.support.v4.view.animation.FastOutLinearInInterpolator
-import android.text.*
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.text.TextUtils
 import android.text.format.DateFormat
-import android.text.style.StyleSpan
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.*
@@ -774,23 +776,12 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         if (rect.bottom - rect.top - (mEventPadding * 2).toFloat() < 0) return
 
         // Prepare the name of the event.
-        val bob = SpannableStringBuilder()
-        if (event.name != null) {
-            bob.append(event.name)
-            bob.setSpan(StyleSpan(Typeface.NORMAL), 0, bob.length, 0)
-            bob.append(' ')
-        }
-
-        // Prepare the location of the event.
-        if (event.location != null) {
-            bob.append(event.location)
-        }
-
         val availableHeight = (rect.bottom - originalTop - (mEventPadding * 2).toFloat()).toInt()
         val availableWidth = (rect.right - originalLeft - (mEventPadding * 2).toFloat()).toInt()
 
         // Get text dimensions.
-        var textLayout = StaticLayout(bob, mEventTextPaint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
+        val eventName: CharSequence = event.name ?: ""
+        var textLayout = StaticLayout(eventName, mEventTextPaint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
 
         val lineHeight = textLayout.height / textLayout.lineCount
 
@@ -799,7 +790,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
             var availableLineCount = availableHeight / lineHeight
             do {
                 // Ellipsize text to fit into event rect.
-                textLayout = StaticLayout(TextUtils.ellipsize(bob, mEventTextPaint, (availableLineCount * availableWidth).toFloat(), TextUtils.TruncateAt.END), mEventTextPaint, (rect.right - originalLeft - (mEventPadding * 2).toFloat()).toInt(), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
+                textLayout = StaticLayout(TextUtils.ellipsize(eventName, mEventTextPaint, (availableLineCount * availableWidth).toFloat(), TextUtils.TruncateAt.END), mEventTextPaint, (rect.right - originalLeft - (mEventPadding * 2).toFloat()).toInt(), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false)
 
                 // Reduce line count.
                 availableLineCount--
