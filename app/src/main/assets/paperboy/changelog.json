@@ -1,5 +1,19 @@
 [
   {
+    "name": "Novità in 0.9.5",
+    "items": [
+      {
+        "type": "2",
+        "title": "Nel filtro delle lezioni, le lezioni extra ora si distinguono con un asterisco dalle lezioni standard del corso"
+      }, {
+        "type": "3",
+        "title": "L'app non viene più rallentata quando si cambiano i filtri delle lezioni"
+      }, {
+        "type": "3",
+        "title": "L'intera app funziona ora più velocemente"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.0",
     "items": [
       {
