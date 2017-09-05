@@ -172,6 +172,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             ButterKnife.bind(this, view)
 
             cannotSelectCurrentStudyCourse.visibility = GONE
+            searchForLessonsButton.visibility = View.GONE
 
             courseSelector.loadCourses()
             courseSelector.onCourseChanged.connect { newStudyCourse ->
