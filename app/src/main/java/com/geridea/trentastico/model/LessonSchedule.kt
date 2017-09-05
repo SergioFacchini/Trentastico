@@ -14,7 +14,10 @@ data class LessonSchedule(
          * @return the unique identifier of the lesson
          */
         val id: String,
-        val room: String,
+        /**
+         * @return the room, in format "ROOM NAME \[Department name\]"
+         */
+        val roomComplete: String,
         val teachersNames: String,
         val subject: String,
         /**
@@ -27,13 +30,33 @@ data class LessonSchedule(
         val lessonTypeId: String) : Serializable {
 
     /**
-     * Returns true if both the lessons probably refer to the exactly same lesson
+     * The room where the lesson is held
+     * @see roomComplete
+     */
+    private val roomName: String?
+      get() = when {
+                roomComplete.isBlank()     -> null
+                roomComplete.contains('[') -> roomComplete.takeWhile { it != '[' }.trim()
+                else                       -> roomComplete
+              }
+
+
+      /**
+       * The department in which the lesson is held (retrieved from the room's name)
+       * @see roomComplete
+       */
+      val departmentName: String?
+      get() = if(roomComplete.contains('[')) roomComplete.dropLast(1).takeLastWhile { it != '[' }.trim()
+              else null
+
+    /**
+     * Returns true if both the lessons contain the same information
      */
     fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean =
                id               == that.id
             && startsAt         == that.startsAt
             && endsAt           == that.endsAt
-            && room             == that.room
+            && roomComplete     == that.roomComplete
             && partitioningName == that.partitioningName
             && teachersNames    == that.teachersNames
             && subject          == that.subject
@@ -54,7 +77,7 @@ data class LessonSchedule(
 
     val synopsis: String
         get() {
-            val room = room
+            val room = roomComplete
 
             val hhmm = SimpleDateFormat("HH:mm")
             val startTime = hhmm.format(startCal.time)
@@ -72,7 +95,7 @@ data class LessonSchedule(
             return "${subject.toUpperCase()}\n" +
                     "$teachersNames\n" +
                     (if(partitioningName != null) "$partitioningName\n" else "") +
-                    room
+                    (roomName?:"(aula non specificata)")
         }
 
     val durationInMinutes: Int
@@ -89,7 +112,7 @@ data class LessonSchedule(
                 && endsAt == that.endsAt
                 && color == that.color
                 && lessonTypeId == that.lessonTypeId
-                && room == that.room
+                && roomComplete == that.roomComplete
                 && subject == that.subject
     }
 
@@ -101,7 +124,7 @@ data class LessonSchedule(
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + room.hashCode()
+        result = 31 * result + roomComplete.hashCode()
         result = 31 * result + teachersNames.hashCode()
         result = 31 * result + subject.hashCode()
         result = 31 * result + startsAt.hashCode()

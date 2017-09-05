@@ -6,14 +6,17 @@ package com.geridea.trentastico.model
  */
 
 import com.geridea.trentastico.logger.BugLogger
+import com.geridea.trentastico.utils.mapObjects
+import com.geridea.trentastico.utils.toJsonArray
 import org.json.JSONException
 import org.json.JSONObject
 
 class ExtraCourse(
         val lessonTypeId: String,
         val lessonName: String,
-        val teachersNames: String,
+        val teachers: List<Teacher>,
         val partitioningName: String?,
+        val kindOfLesson: String,
         val studyCourse: StudyCourse,
         val color: Int) {
 
@@ -26,13 +29,13 @@ class ExtraCourse(
     fun toJSON(): JSONObject {
         try {
             val jsonObject = JSONObject()
-            jsonObject.put("lessonTypeId", lessonTypeId)
-            jsonObject.put("lessonName", lessonName)
-            jsonObject.put("teachersNames", teachersNames)
+            jsonObject.put("lessonTypeId",     lessonTypeId)
+            jsonObject.put("lessonName",       lessonName)
+            jsonObject.put("teachers",         teachers.toJsonArray { it.toJson() })
             jsonObject.put("partitioningName", partitioningName)
-            jsonObject.put("studyCourse", studyCourse.toJson())
-            jsonObject.put("color", color)
-
+            jsonObject.put("kindOfLesson",     kindOfLesson)
+            jsonObject.put("studyCourse",      studyCourse.toJson())
+            jsonObject.put("color",            color)
             return jsonObject
         } catch (e: JSONException) {
             BugLogger.logBug("Converting extra course to JSON", e)
@@ -53,9 +56,10 @@ class ExtraCourse(
                  return ExtraCourse(
                     lessonTypeId     = json.getString("lessonTypeId"),
                     lessonName       = json.getString("lessonName"),
-                    teachersNames    = json.getString("teachersNames"),
+                    teachers         = json.getJSONArray("teachers").mapObjects { Teacher(it) },
                     partitioningName = json.optString("partitioningName", null),
-                    studyCourse      = StudyCourse.fromStringJson(json.getString("studyCourse")),
+                    kindOfLesson     = json.getString("kindOfLesson"),
+                    studyCourse      = StudyCourse(json.getJSONObject("studyCourse")),
                     color            = json.getInt("color")
                 )
             } catch (e: JSONException) {

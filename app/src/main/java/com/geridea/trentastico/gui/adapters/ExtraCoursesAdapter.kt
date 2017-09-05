@@ -31,7 +31,7 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
     override fun bindView(item: ExtraCourse, pos: Int, convertView: View) {
         Views.find<TextView>(convertView, R.id.course_name).text = item.lessonName
         Views.find<TextView>(convertView, R.id.study_course_name).text = item.fullName
-        Views.find<TextView>(convertView, R.id.teacher_name).text = item.teachersNames
+        Views.find<TextView>(convertView, R.id.teacher_name).text = item.teachers.joinToString { it.name }
 
         if (item.partitioningName != null) {
             Views.find<TextView>(convertView, R.id.partitioning_name).text = item.partitioningName

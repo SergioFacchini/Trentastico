@@ -7,7 +7,7 @@ package com.geridea.trentastico.services
 
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.utils.ArrayUtils
+import com.geridea.trentastico.utils.CollectionUtils
 import com.geridea.trentastico.utils.JsonUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -47,7 +47,7 @@ class ShownNotificationsTracker {
      */
     fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean =
         if (!shownNotificationsIds.contains(lesson.id.hashCode().toLong())) true
-        else ArrayUtils.isOneOf(starter,
+        else CollectionUtils.isOneOf(starter,
                                 NLNStarter.PHONE_BOOT,
                                 NLNStarter.STUDY_COURSE_CHANGE,
                                 NLNStarter.NOTIFICATIONS_SWITCHED_ON)

@@ -9,6 +9,8 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 
 object UIUtils {
@@ -39,4 +41,16 @@ object UIUtils {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics).toInt()
     }
 
+}
+
+/**
+ * Sets the text if the given parameter is not null and not empty, otherwise the [TextView] is
+ * hidden.
+ */
+fun TextView.setTextOrHideIfEmpty(text: String?) {
+    if (text.isNullOrBlank()) {
+        visibility = View.GONE
+    } else {
+        this.text = text
+    }
 }

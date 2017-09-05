@@ -3,6 +3,9 @@
     "name": "Novità in 0.9.5",
     "items": [
       {
+        "type": "1",
+        "title": "È ora possibile premere sulle lezioni per avere maggiori dettagli"
+      }, {
         "type": "2",
         "title": "Nel filtro delle lezioni, le lezioni extra ora si distinguono con un asterisco dalle lezioni standard del corso"
       }, {

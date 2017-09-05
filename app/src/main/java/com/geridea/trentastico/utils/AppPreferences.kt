@@ -11,6 +11,7 @@ import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.services.ShownNotificationsTracker
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 
 object AppPreferences {
@@ -42,7 +43,7 @@ object AppPreferences {
         get() {
             val studyCourseJson = getStudyCourseJSON()
             if (studyCourseJson != null) {
-                return StudyCourse.fromStringJson(studyCourseJson)
+                return StudyCourse(studyCourseJson)
             } else {
                 throw RuntimeException("Cannot ask for study course until it's initialized!")
             }
@@ -148,7 +149,10 @@ object AppPreferences {
     val isStudyCourseSet: Boolean
         get() = getStudyCourseJSON() != null
 
-    private fun getStudyCourseJSON():String? = sharedPreferences.getString("STUDY_COURSE", null)
+    private fun getStudyCourseJSON():JSONObject? {
+        val jsonString:String? = sharedPreferences.getString("STUDY_COURSE", null)
+        return if(jsonString == null) null else JSONObject(jsonString)
+    }
 
     private fun putLong(key: String, time: Long) {
         val editor = sharedPreferences.edit()

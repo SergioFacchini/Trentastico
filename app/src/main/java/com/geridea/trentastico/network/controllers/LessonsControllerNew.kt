@@ -366,12 +366,14 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     val teachingName = it.getString("nome_insegnamento")
                     val partitioningName = calculatePartitioningName(teachingName)
                     LessonTypeNew(
-                            id = lessonTypeId,
-                            name = calculateTeachingWithoutPartitioning(teachingName),
-                            teachersNames = it.getString("docente").orIfBlank("(insegnate non specificato)"),
-                            partitioningName = partitioningName,
-                            color = teachingsColors[colorProgressive++],
-                            isVisible = !AppPreferences.isLessonTypeToHide(lessonTypeId)
+                            id                    = lessonTypeId,
+                            name                  = calculateTeachingWithoutPartitioning(teachingName),
+                            teachersNamesUnparsed = it.getString("docente"),
+                            teachersCodesToParse  = it.getString("codice_docente"),
+                            partitioningName      = partitioningName,
+                            color                 = teachingsColors[colorProgressive++],
+                            kindOfLesson          = it.getString("tipo"),
+                            isVisible             = !AppPreferences.isLessonTypeToHide(lessonTypeId)
                     )
                 }
                 .sortedBy { it.name }
@@ -404,15 +406,15 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             val teachingName = lessonJson.getString("nome_insegnamento")
 
             LessonSchedule(
-                    id = id,
-                    lessonTypeId = lessonJson.getString("codice_insegnamento"),
-                    teachersNames = lessonJson.getString("docente"),
-                    roomComplete = lessonJson.getString("aula"),
-                    subject = calculateTeachingWithoutPartitioning(teachingName),
+                    id               = id,
+                    lessonTypeId     = lessonJson.getString("codice_insegnamento"),
+                    teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
+                    roomComplete     = lessonJson.getString("aula"),
+                    subject          = calculateTeachingWithoutPartitioning(teachingName),
                     partitioningName = calculatePartitioningName(teachingName),
-                    color = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
-                    startsAt = startTimestamp,
-                    endsAt = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
+                    color            = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
+                    startsAt         = startTimestamp,
+                    endsAt           = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
     }

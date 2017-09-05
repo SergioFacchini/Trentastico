@@ -18,15 +18,23 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
+import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.Teacher
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.orIfEmpty
+import com.geridea.trentastico.utils.setTextOrHideIfEmpty
 import com.geridea.trentastico.utils.time.CalendarUtils
+import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.dialog_calendar_event.view.*
+import kotlinx.android.synthetic.main.itm_teacher.view.*
 import java.util.*
 
 class CalendarFragment : FragmentWithMenuItems() {
@@ -47,6 +55,9 @@ class CalendarFragment : FragmentWithMenuItems() {
         calendar.setEventsTextSize(AppPreferences.calendarFontSize)
         calendar.goToDate(CalendarUtils.debuggableToday)
         calendar.onLoadingOperationNotify.connect { operation -> loaderView.processMessage(operation) }
+        calendar.onEventClicked.connect { clickedEvent, lessonType ->
+            showClickedEventPopup(clickedEvent, lessonType)
+        }
 
         calendar.loadEvents()
 
@@ -85,6 +96,12 @@ class CalendarFragment : FragmentWithMenuItems() {
             7    -> R.drawable.ic_calendar_show_7
             else -> R.drawable.ic_calendar_show_1
         }
+
+    private fun showClickedEventPopup( clickedEvent: LessonSchedule, lessonType: LessonTypeNew){
+        if (context != null) {
+            ShowEventDetailsDialog(context, clickedEvent, lessonType).show()
+        }
+    }
 
     internal inner class FilterCoursesDialog(context: Context) : AlertDialog(context) {
 
@@ -131,7 +148,7 @@ class CalendarFragment : FragmentWithMenuItems() {
             //Update calendar on visibility changes
             setOnDismissListener {
                 if (wasSomeVisibilityChanged) {
-                    calendar.notifyLessonTypeVisibilityChanged()
+                    calendar.notifyEventsChanged()
                 }
             }
         }
@@ -145,5 +162,47 @@ class CalendarFragment : FragmentWithMenuItems() {
         fun onDoFilterButtonClicked() = dismiss()
 
     }
+
+    internal inner class ShowEventDetailsDialog(
+            context: Context,
+            event: LessonSchedule,
+            lessonType: LessonTypeNew) : AlertDialog(context) {
+
+        init {
+            val view = Views.inflate<View>(context, R.layout.dialog_calendar_event)
+            setView(view)
+
+            view.lesson_title.text   = event.subject
+            view.room_name.text      = event.roomComplete
+            view.starting.text       = CalendarUtils.formatRangeComplete(event.startsAt, event.endsAt)
+            view.kind_of_lesson.text = "Tipologia: "+lessonType.kindOfLesson
+
+            view.partitioning_name.setTextOrHideIfEmpty(event.partitioningName)
+
+            val teachers = lessonType.teachers.orIfEmpty(Teacher.PLACEHOLDER_TEACHER_LIST)
+            view.teachers_names.adapter = TeachersAdapter(context, teachers)
+        }
+
+    }
+
+}
+
+class TeachersAdapter(context: Context, teachers: List<Teacher>) : ItemsAdapter<Teacher>(context) {
+
+    init {
+        itemsList = teachers
+    }
+
+    override fun bindView(item: Teacher, pos: Int, convertView: View) {
+        convertView.teacher_name.text = item.name
+
+        Picasso.with(context)
+                .load(item.teacherPhotoUrl)
+                .placeholder(R.drawable.teacher_no_photo)
+                .into(convertView.photo)
+    }
+
+    override fun createView(item: Teacher?, pos: Int, parent: ViewGroup?, inflater: LayoutInflater): View =
+            inflater.inflate(R.layout.itm_teacher, parent, false)
 
 }

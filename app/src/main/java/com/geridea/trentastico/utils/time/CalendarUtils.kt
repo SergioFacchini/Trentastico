@@ -10,9 +10,9 @@ import java.util.*
  */
 object CalendarUtils {
 
-    private val formatTimestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN)
+    private val formatTimestamp  = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ITALIAN)
     private val formatEEEEDDMMMM = SimpleDateFormat("EEEE dd MMMM", Locale.ITALIAN)
-    private val formatHHMM = SimpleDateFormat("HH:mm", Locale.ITALIAN)
+    private val formatHHMM       = SimpleDateFormat("HH:mm", Locale.ITALIAN)
 
     /**
      * @return the first day of the week containing the specified date, at 00:00:00.
@@ -102,7 +102,10 @@ object CalendarUtils {
 
         return Pair(start.timeInMillis, end.timeInMillis)
     }
+
+    /**
+     * @return the formatted date, in a format such "Giovedì 1 Gen 2017, dalle 00:00 alle 01:00"
+     */
+    fun formatRangeComplete(startsAt: Long, endsAt: Long): CharSequence? =
+            (formatEEEEDDMMMM(startsAt)+", dalle "+ formatHHMM(startsAt)+" alle "+ formatHHMM(endsAt)).capitalize()
 }
-/**
- * @return the first day of the current week, at 00:00:00.
- */

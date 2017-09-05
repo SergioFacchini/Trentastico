@@ -86,9 +86,9 @@ class LessonsDiffResult : Serializable {
                     )
                 }
 
-                if (original.room != changed.room) {
+                if (original.roomComplete != changed.roomComplete) {
                     differences.add(
-                            "La lezione si terrà in \"" + changed.room + "\" invece di \"" + original.room + "\""
+                            "La lezione si terrà in \"" + changed.roomComplete + "\" invece di \"" + original.roomComplete + "\""
                     )
                     descriptionDetailsChanged = true
                 }

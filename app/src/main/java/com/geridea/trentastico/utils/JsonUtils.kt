@@ -7,6 +7,7 @@ package com.geridea.trentastico.utils
 
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 
 object JsonUtils {
@@ -14,14 +15,23 @@ object JsonUtils {
      * @return a new [JSONArray] containing the elements of the collection.
      */
     fun <T> collectionToArray(collection: Collection<T>): JSONArray {
-        val shownNotificationsIdsArray = JSONArray()
-        for (shownNotificationsId in collection) {
-            shownNotificationsIdsArray.put(shownNotificationsId)
+        val jsonArray = JSONArray()
+        for (item in collection) {
+            jsonArray.put(item)
         }
-        return shownNotificationsIdsArray
+        return jsonArray
     }
 
     @Throws(JSONException::class)
     fun getLongHashSet(jsonArray: JSONArray): HashSet<Long> =
             (0 until jsonArray.length()).mapTo(HashSet()) { jsonArray.getLong(it) }
+}
+
+fun <T> JSONArray.mapObjects(mapper: (JSONObject) -> T): List<T> =
+        (0 until length()).map { mapper(getJSONObject(it)) }
+
+fun <T> List<T>.toJsonArray(converter: (T) -> JSONObject): JSONArray {
+    val jsonArray = JSONArray()
+    forEach { jsonArray.put(converter(it)) }
+    return jsonArray
 }

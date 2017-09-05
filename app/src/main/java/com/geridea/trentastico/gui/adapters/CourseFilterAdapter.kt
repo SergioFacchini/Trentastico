@@ -38,7 +38,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
 
         //Texts
         Views.find<TextView>(convertView, R.id.lesson_type).text    = item.name
-        Views.find<TextView>(convertView, R.id.teachers_names).text = item.teachersNames
+        Views.find<TextView>(convertView, R.id.teachers_names).text = item.buildTeachersNamesOrDefault()
 
         //Extra courses have a red * near course name
         if(AppPreferences.hasExtraCourseWithId(item.id)){

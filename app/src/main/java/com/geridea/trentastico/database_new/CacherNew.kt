@@ -15,9 +15,11 @@ import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.model.LibraryOpeningTimes
+import com.geridea.trentastico.model.Teacher
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.*
 import com.geridea.trentastico.utils.time.CalendarUtils
+import org.json.JSONArray
 import java.util.*
 
 
@@ -94,7 +96,7 @@ class CacherNew(context: Context) {
     private fun cacheScheduledLesson(lesson: LessonSchedule, isExtra: Boolean) {
         val values = ContentValues()
         values.put(SL_id,               lesson.id)
-        values.put(SL_room,             lesson.room)
+        values.put(SL_room,             lesson.roomComplete)
         values.put(SL_teachersNames,    lesson.teachersNames)
         values.put(SL_subject,          lesson.subject)
         values.put(SL_partitioningName, lesson.partitioningName)
@@ -135,7 +137,7 @@ class CacherNew(context: Context) {
         while (cursor.moveToNext()) {
             lessons.add(LessonSchedule(
                     id               = cursor.getString(SL_id),
-                    room             = cursor.getString(SL_room),
+                    roomComplete     = cursor.getString(SL_room),
                     teachersNames    = cursor.getString(SL_teachersNames),
                     subject          = cursor.getString(SL_subject),
                     partitioningName = cursor.getNullableString(SL_partitioningName),
@@ -185,7 +187,8 @@ class CacherNew(context: Context) {
             lessonTypes.add(LessonTypeNew(
                     id               = lessonTypeId,
                     name             = cursor.getString(LT_name),
-                    teachersNames    = cursor.getString(LT_teachersNames),
+                    teachers         = JSONArray(cursor.getString(LT_teachers)).mapObjects { Teacher(it) },
+                    kindOfLesson     = cursor.getString(LT_kindOfLesson),
                     partitioningName = cursor.getNullableString(LT_partitioningName),
                     color            = cursor.getInt(LT_color),
                     isVisible        = !AppPreferences.isLessonTypeToHide(lessonTypeId)
@@ -219,7 +222,8 @@ class CacherNew(context: Context) {
             val values = ContentValues()
             values.put(LT_id,               lessonTypeNew.id)
             values.put(LT_name,             lessonTypeNew.name)
-            values.put(LT_teachersNames,    lessonTypeNew.teachersNames)
+            values.put(LT_teachers,         lessonTypeNew.teachers.toJsonArray { it.toJson() }.toString())
+            values.put(LT_kindOfLesson,     lessonTypeNew.kindOfLesson)
             values.put(LT_partitioningName, lessonTypeNew.partitioningName)
             values.put(LT_color,            lessonTypeNew.color)
 
@@ -383,19 +387,21 @@ val LT_TABLE_NAME = "lesson_types"
 
 val LT_id               = "id"
 val LT_name             = "name"
-val LT_teachersNames    = "teachersNames"
+val LT_teachers         = "teachers"
+val LT_kindOfLesson     = "kindOfLesson"
 val LT_partitioningName = "partitioningName"
 val LT_color            = "color"
 
 val lessonTypesColumns = arrayOf(
-    LT_id, LT_name, LT_teachersNames, LT_partitioningName, LT_color
+    LT_id, LT_name, LT_teachers, LT_teachers, LT_kindOfLesson, LT_partitioningName, LT_color
 )
 
 internal val SQL_CREATE_LESSON_TYPES =
   """CREATE TABLE $LT_TABLE_NAME (
       $LT_id               VARCHAR(100) PRIMARY KEY,
       $LT_name             VARCHAR(150) NOT NULL,
-      $LT_teachersNames    VARCHAR(200) NOT NULL,
+      $LT_teachers         VARCHAR(500) NOT NULL,
+      $LT_kindOfLesson     VARCHAR(50)  NOT NULL,
       $LT_partitioningName VARCHAR(100),
       $LT_color            INT NOT NULL
   )"""

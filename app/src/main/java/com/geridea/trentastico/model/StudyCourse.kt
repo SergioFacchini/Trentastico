@@ -12,6 +12,13 @@ data class StudyCourse(
         var yearId: String,
         var yearName: String) {
 
+    constructor(json: JSONObject) : this(
+            courseId   = json.getString("courseId"),
+            courseName = json.getString("courseName"),
+            yearId     = json.getString("yearId"),
+            yearName   = json.getString("yearName")
+    )
+
     fun generateFullDescription(): String = "$courseName > $yearName"
 
     fun toJson(): JSONObject {
@@ -22,19 +29,6 @@ data class StudyCourse(
         json.put("yearName", yearName)
 
         return json
-    }
-
-    companion object {
-
-        private fun fromJson(string: JSONObject): StudyCourse = StudyCourse(
-            courseId   = string.getString("courseId"),
-            courseName = string.getString("courseName"),
-            yearId     = string.getString("yearId"),
-            yearName   = string.getString("yearName")
-        )
-
-        fun fromStringJson(string: String): StudyCourse = fromJson(JSONObject(string))
-
     }
 
 }

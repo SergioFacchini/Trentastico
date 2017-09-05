@@ -160,7 +160,6 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
     // Listeners.
     var eventClickListener: CustomWeekView.EventClickListener? = null
-        private set
     var eventLongPressListener: CustomWeekView.EventLongPressListener? = null
     var emptyViewClickListener: CustomWeekView.EmptyViewClickListener? = null
     var emptyViewLongPressListener: CustomWeekView.EmptyViewLongPressListener? = null
@@ -253,7 +252,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
                 Collections.reverse(reversedEventRects!!)
                 for (event in reversedEventRects) {
                     if (event.rectF != null && e.x > event.rectF!!.left && e.x < event.rectF!!.right && e.y > event.rectF!!.top && e.y < event.rectF!!.bottom) {
-                        eventClickListener!!.onEventClick(event.originalEvent, event.rectF)
+                        eventClickListener!!.onEventClick(event.originalEvent as CourseTimesCalendar.LessonToEventAdapter, event.rectF)
                         playSoundEffect(SoundEffectConstants.CLICK)
                         return super.onSingleTapConfirmed(e)
                     }
@@ -1275,11 +1274,11 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
 
     interface EventClickListener {
         /**
-         * Triggered when clicked on one existing event
-         * @param event: event clicked.
-         * @param eventRect: view containing the clicked event.
+         * Triggered when clicked on one existing clickedEvent
+         * @param clickedEvent: clickedEvent clicked.
+         * @param eventRect: view containing the clicked clickedEvent.
          */
-        fun onEventClick(event: WeekViewEvent, eventRect: RectF?)
+        fun onEventClick(clickedEvent: CourseTimesCalendar.LessonToEventAdapter, eventRect: RectF?)
     }
 
     interface EventLongPressListener {

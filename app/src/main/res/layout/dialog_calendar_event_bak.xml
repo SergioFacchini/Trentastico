@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundMain"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:id="@+id/lesson_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Scienza delle merendine"
+        android:textColor="@color/colorForeground"
+        android:textSize="24sp" />
+
+    <ListView
+        android:id="@+id/teachers_names"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:divider="@color/colorForeground"
+        android:paddingTop="10dp"
+        android:textColor="@color/colorForeground"
+        android:textSize="16sp"
+        android:layout_weight="1"
+        android:dividerHeight="1dp"
+        android:minHeight="20dp"/>
+
+    <TextView
+        android:id="@+id/starting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left|center_vertical"
+        android:paddingTop="10dp"
+        android:text="Giovedì 1 Gen 2017 dalle 00:00 alle 01:00"
+        android:textColor="@color/colorForeground"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/room_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left|center_vertical"
+        android:paddingTop="10dp"
+        android:text="Aula gialla"
+        android:textColor="@color/colorForeground"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/lesson_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left|center_vertical"
+        android:paddingTop="10dp"
+        android:text="Tipologia: merendine"
+        android:textColor="@color/colorForeground"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#FFFFFF"
+        android:gravity="left|top"
+        android:hint="Note..."
+        android:inputType="textMultiLine"
+        android:padding="10dp"
+        android:paddingTop="10dp"
+        android:textColor="@color/backgroundMain"
+        android:textSize="16sp"
+        android:lines="3"/>
+
+</LinearLayout>

@@ -122,7 +122,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
             courseName     .text = course.lessonName
             studyCourseName.text = course.fullName
-            teacherName    .text = course.teachersNames
+            teacherName    .text = course.teachers.joinToString { it.name }
 
             if (course.partitioningName != null) {
                 partitioningName.text = course.partitioningName
@@ -271,9 +271,9 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             if (canLessonTypeBeSelected(lesson)) {
                 AppPreferences.addExtraCourse(
                     ExtraCourse(
-                            lesson.id, lesson.name, lesson.teachersNames,
-                            lesson.partitioningName, studyCourse, lesson.color)
-                )
+                            lesson.id, lesson.name, lesson.teachers, lesson.partitioningName,
+                            lesson.kindOfLesson, studyCourse, lesson.color)
+                    )
 
                 dismiss()
                 onCourseSelectedAndAdded.dispatch()

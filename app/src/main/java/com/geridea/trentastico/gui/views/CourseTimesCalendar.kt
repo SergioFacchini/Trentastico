@@ -6,6 +6,7 @@ package com.geridea.trentastico.gui.views
  */
 
 import android.content.Context
+import android.graphics.RectF
 import android.util.AttributeSet
 import com.alamkanak.weekview.DateTimeInterpreter
 import com.alamkanak.weekview.WeekViewEvent
@@ -18,13 +19,19 @@ import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
 import com.threerings.signals.Signal1
+import com.threerings.signals.Signal2
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class CourseTimesCalendar : CustomWeekView {
+class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
 
     //Signals
+    /**
+     * Dispatched when the user clicks a specific event
+     */
+    val onEventClicked = Signal2<LessonSchedule, LessonTypeNew>()
+
     /**
      * Dispatched when something worth of note is happening in the calendar. For instance starting
      * or finishing fetching lessons from network.<br></br>
@@ -47,6 +54,7 @@ class CourseTimesCalendar : CustomWeekView {
     init {
         prepareLoader()
         dateTimeInterpreter = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
+        eventClickListener = this
     }
 
     private fun getDateInterpreterForNumberOfDays(numberOfVisibleDays: Int): DateTimeInterpreter =
@@ -164,7 +172,7 @@ class CourseTimesCalendar : CustomWeekView {
                 LessonToEventAdapter(it)
             }
 
-    fun notifyLessonTypeVisibilityChanged() {
+    fun notifyEventsChanged() {
         clear()
 
         loader.loadAndAddLessons()
@@ -202,6 +210,13 @@ class CourseTimesCalendar : CustomWeekView {
         /*2*/ else -> 3
         }
 
+    override fun onEventClick(clickedEvent: LessonToEventAdapter, eventRect: RectF?) {
+        onEventClicked.dispatch(clickedEvent.lesson, getLessonTypeOfEvent(clickedEvent))
+    }
+
+    private fun getLessonTypeOfEvent(event: LessonToEventAdapter) =
+            currentLessonTypes.first { it.id == event.lesson.lessonTypeId }
+
     class LessonToEventAdapter(val lesson: LessonSchedule) : WeekViewEvent(
             nextId, lesson.eventDescription, lesson.startCal, lesson.endCal
     ) {
@@ -212,8 +227,8 @@ class CourseTimesCalendar : CustomWeekView {
 
         companion object {
             var nextId = 1L
-              get() = field++
-              private set
+                get() = field++
+                private set
         }
 
     }

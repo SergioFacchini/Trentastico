@@ -21,7 +21,7 @@ import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
-import com.geridea.trentastico.utils.ArrayUtils
+import com.geridea.trentastico.utils.CollectionUtils
 import com.geridea.trentastico.utils.UIUtils.showToastIfInDebug
 import com.geridea.trentastico.utils.time.CalendarUtils
 import java.util.*
@@ -53,7 +53,7 @@ class NextLessonNotificationService : Service() {
             return Service.START_NOT_STICKY
         }
 
-        if (ArrayUtils.isOneOf(starter, NLNStarter.ALARM_MORNING, NLNStarter.STUDY_COURSE_CHANGE)) {
+        if (CollectionUtils.isOneOf(starter, NLNStarter.ALARM_MORNING, NLNStarter.STUDY_COURSE_CHANGE)) {
             //We're at the morning of the day. No notifications of the day shown so far. We can
             //clear the tracker.
             notificationsTracker.clear()

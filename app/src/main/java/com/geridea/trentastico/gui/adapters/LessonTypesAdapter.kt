@@ -33,7 +33,7 @@ class LessonTypesAdapter(
 
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
         Views.find<TextView> (convertView, R.id.lesson_type).text    = item.name
-        Views.find<TextView> (convertView, R.id.teachers_names).text = item.teachersNames
+        Views.find<TextView> (convertView, R.id.teachers_names).text = item.buildTeachersNamesOrDefault()
 
         if (item.partitioningName != null) {
             Views.find<TextView> (convertView, R.id.partitioning_name).text = item.partitioningName
