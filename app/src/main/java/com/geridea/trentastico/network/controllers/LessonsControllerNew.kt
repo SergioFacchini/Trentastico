@@ -407,29 +407,36 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     id = id,
                     lessonTypeId = lessonJson.getString("codice_insegnamento"),
                     teachersNames = lessonJson.getString("docente"),
-                    room = lessonJson.getString("aula"),
+                    roomComplete = lessonJson.getString("aula"),
                     subject = calculateTeachingWithoutPartitioning(teachingName),
                     partitioningName = calculatePartitioningName(teachingName),
                     color = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
                     startsAt = startTimestamp,
-                    endsAt = calculdateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
+                    endsAt = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
     }
 
     private fun calculateTeachingWithoutPartitioning(teachingName: String): String =
-            //The name of the partitioning is contained in the name of the course and is always
-            //preceded by a dash with spaces " - ".
-            teachingName.take(teachingName.lastIndexOf(" - "))
+            //The name of the partitioning is contained in the name of the course and is
+            //preceded by a dash with spaces " - ". Some courses names however are malformed and there
+            // are no dashes in their names. In this case we assume that there are no partitionings.
+            if(teachingName.contains("-")) teachingName.take(teachingName.lastIndexOf(" - "))
+            else teachingName
 
     private fun calculatePartitioningName(teachingName: String): String? {
-        //The name of the partitioning is contained in the name of the course and is always
-        //preceded by a dash with spaces " - ".
-        val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
-        return if (partitioningName == "nessun partizionamento") null else partitioningName
+        //The name of the partitioning is contained in the name of the course and is
+        //preceded by a dash with spaces " - ". Some courses names however are malformed and there
+        // are no dashes in their names. In this case we assume that there are no partitionings.
+        return if (teachingName.contains("-")) {
+            val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
+            if (partitioningName == "nessun partizionamento") null else partitioningName
+        } else {
+            null
+        }
     }
 
-    private fun calculdateEndTimeOfLesson(
+    private fun calculateEndTimeOfLesson(
             startTimestamp: Long,
             endingMins: Int,
             startingMins: Int): Long {
