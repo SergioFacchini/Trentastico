@@ -221,6 +221,7 @@ class NextLessonNotificationService : Service() {
         alarmManager.set(AlarmManager.RTC, ms, pendingIntent)
 
         showToastIfInDebug(this, "Scheduled alarm manager to " + CalendarUtils.formatTimestamp(ms))
+        stopSelf()
     }
 
     @Suppress("DEPRECATION")
