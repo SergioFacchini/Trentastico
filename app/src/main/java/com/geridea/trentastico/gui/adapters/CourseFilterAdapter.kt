@@ -58,10 +58,10 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
 
         //Preparing checkbox and reacting to the item click
         val check = Views.find<CheckBox>(convertView, R.id.checkBox)
-        check.setOnCheckedChangeListener {  _, isChecked: Boolean -> Unit }
+        check.setOnCheckedChangeListener {  _, _: Boolean -> Unit }
 
         check.isChecked = item.isVisible
-        check.setOnCheckedChangeListener { _, isChecked: Boolean ->
+        check.setOnCheckedChangeListener { _, _: Boolean ->
             item.isVisible = check.isChecked
             onLessonTypeVisibilityChanged.dispatch(item)
         }

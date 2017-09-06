@@ -35,14 +35,12 @@ class WelcomeActivity : AppCompatActivity() {
     @OnClick(R.id.start_button)
     fun onStartButtonPressed() {
         val selectedStudyCourse = courseSelector.buildStudyCourse()
-        if (selectedStudyCourse != null) {
-            AppPreferences.studyCourse = selectedStudyCourse
-            AppPreferences.isFirstRun = false
+        AppPreferences.studyCourse = selectedStudyCourse
+        AppPreferences.isFirstRun = false
 
-            startActivity(Intent(this, HomeActivity::class.java))
+        startActivity(Intent(this, HomeActivity::class.java))
 
-            finish()
-        }
+        finish()
     }
 
 }

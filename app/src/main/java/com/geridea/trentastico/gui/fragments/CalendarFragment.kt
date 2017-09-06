@@ -172,9 +172,9 @@ class CalendarFragment : FragmentWithMenuItems() {
             val view = Views.inflate<View>(context, R.layout.dialog_calendar_event)
             setView(view)
 
-            view.lesson_title.text   = event.subject
-            view.room_name.text      = event.roomComplete
-            view.starting.text       = CalendarUtils.formatRangeComplete(event.startsAt, event.endsAt)
+            view.lesson_title  .text = event.subject
+            view.room_name     .text = event.calculateCompleteRoomNames("\n")
+            view.starting      .text = CalendarUtils.formatRangeComplete(event.startsAt, event.endsAt)
             view.kind_of_lesson.text = "Tipologia: "+lessonType.kindOfLesson
 
             view.partitioning_name.setTextOrHideIfEmpty(event.partitioningName)

@@ -12,10 +12,7 @@ import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.database.CacheDbHelper
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonTypeNew
-import com.geridea.trentastico.model.LibraryOpeningTimes
-import com.geridea.trentastico.model.Teacher
+import com.geridea.trentastico.model.*
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.*
 import com.geridea.trentastico.utils.time.CalendarUtils
@@ -96,7 +93,7 @@ class CacherNew(context: Context) {
     private fun cacheScheduledLesson(lesson: LessonSchedule, isExtra: Boolean) {
         val values = ContentValues()
         values.put(SL_id,               lesson.id)
-        values.put(SL_room,             lesson.roomComplete)
+        values.put(SL_room,             lesson.rooms.toJsonArray{ it.toJson() }.toString())
         values.put(SL_teachersNames,    lesson.teachersNames)
         values.put(SL_subject,          lesson.subject)
         values.put(SL_partitioningName, lesson.partitioningName)
@@ -137,7 +134,7 @@ class CacherNew(context: Context) {
         while (cursor.moveToNext()) {
             lessons.add(LessonSchedule(
                     id               = cursor.getString(SL_id),
-                    roomComplete     = cursor.getString(SL_room),
+                    rooms            = JSONArray(cursor.getString(SL_room)).mapObjects { Room(it) },
                     teachersNames    = cursor.getString(SL_teachersNames),
                     subject          = cursor.getString(SL_subject),
                     partitioningName = cursor.getNullableString(SL_partitioningName),
@@ -369,7 +366,7 @@ val scheduledLessonsColumns = arrayOf(
 internal val SQL_CREATE_SCHEDULED_LESSONS =
   """CREATE TABLE $SL_TABLE_NAME (
       $SL_id               VARCHAR(100) PRIMARY KEY,
-      $SL_room             VARCHAR(150) NOT NULL,
+      $SL_room             VARCHAR(500) NOT NULL,
       $SL_teachersNames    VARCHAR(200) NOT NULL,
       $SL_subject          VARCHAR(100) NOT NULL,
       $SL_partitioningName VARCHAR(100),

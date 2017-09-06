@@ -86,9 +86,11 @@ class LessonsDiffResult : Serializable {
                     )
                 }
 
-                if (original.roomComplete != changed.roomComplete) {
+                val originalRoomNames = original.calculateCompleteRoomNames()
+                val changedRoomNames  = changed .calculateCompleteRoomNames()
+                if (originalRoomNames != changedRoomNames) {
                     differences.add(
-                            "La lezione si terrà in \"" + changed.roomComplete + "\" invece di \"" + original.roomComplete + "\""
+                            "La lezione si terrà in \"$changedRoomNames\" invece di \"$originalRoomNames\""
                     )
                     descriptionDetailsChanged = true
                 }

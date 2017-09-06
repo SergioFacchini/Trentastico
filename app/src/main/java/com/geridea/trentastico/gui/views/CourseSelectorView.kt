@@ -98,7 +98,7 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
     }
 
     @OnItemSelected(R.id.yearSpinner)
-    internal fun onYearSelected(selectedPosition: Int) = onCourseChanged.dispatch(buildStudyCourse())
+    internal fun onYearSelected() = onCourseChanged.dispatch(buildStudyCourse())
 
     @OnClick(R.id.retryButton)
     internal fun onRetryButtonClick() = loadCourses()

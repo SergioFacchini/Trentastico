@@ -2,6 +2,7 @@ package com.geridea.trentastico.model
 
 import com.geridea.trentastico.network.request.LessonsDiffResult
 import com.geridea.trentastico.utils.NumbersUtils
+import com.geridea.trentastico.utils.allSame
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -17,7 +18,7 @@ data class LessonSchedule(
         /**
          * @return the room, in format "ROOM NAME \[Department name\]"
          */
-        val roomComplete: String,
+        val rooms: List<Room>,
         val teachersNames: String,
         val subject: String,
         /**
@@ -30,36 +31,41 @@ data class LessonSchedule(
         val lessonTypeId: String) : Serializable {
 
     /**
-     * The room where the lesson is held
-     * @see roomComplete
+     * The room where the lesson is held, without the department specified
      */
-    private val roomName: String?
-      get() = when {
-                roomComplete.isBlank()     -> null
-                roomComplete.contains('[') -> roomComplete.takeWhile { it != '[' }.trim()
-                else                       -> roomComplete
-              }
+    val partialRoomNames: String
+        get() = when {
+            rooms.isEmpty() -> "(aula non specificata)"
+            rooms.size == 1 -> rooms[0].room
+            else            -> rooms.joinToString { it.room }
+        }
 
-
-      /**
-       * The department in which the lesson is held (retrieved from the room's name)
-       * @see roomComplete
-       */
-      val departmentName: String?
-      get() = if(roomComplete.contains('[')) roomComplete.dropLast(1).takeLastWhile { it != '[' }.trim()
-              else null
+    fun calculateCompleteRoomNames(separator: String = ", "): String = when {
+        rooms.isEmpty()               -> "(aula non specificata)"
+        areAllRoomsInSameDepartment() ->
+            rooms.joinToString(separator) { it.room } + "\n[${rooms.first().department}]"
+        else                          ->
+            rooms.joinToString(separator) { "${it.room} [${it.department}]" }
+    }
 
     /**
      * Returns true if both the lessons contain the same information
      */
+
+    private fun areAllRoomsInSameDepartment(): Boolean = when {
+        rooms.isEmpty() -> true
+        else            -> rooms.allSame { it.department }
+
+    }
+
     fun isMeaningfullyEqualTo(that: LessonSchedule): Boolean =
-               id               == that.id
-            && startsAt         == that.startsAt
-            && endsAt           == that.endsAt
-            && roomComplete     == that.roomComplete
-            && partitioningName == that.partitioningName
-            && teachersNames    == that.teachersNames
-            && subject          == that.subject
+            id == that.id
+                    && startsAt == that.startsAt
+                    && endsAt == that.endsAt
+                    && rooms == that.rooms
+                    && partitioningName == that.partitioningName
+                    && teachersNames == that.teachersNames
+                    && subject == that.subject
 
     val startCal: Calendar
         get() {
@@ -77,25 +83,20 @@ data class LessonSchedule(
 
     val synopsis: String
         get() {
-            val room = roomComplete
-
             val hhmm = SimpleDateFormat("HH:mm")
             val startTime = hhmm.format(startCal.time)
             val endTime = hhmm.format(endCal.time)
 
-            return if (room.isEmpty()) {
-                String.format("%s-%s", startTime, endTime)
-            } else {
-                String.format("%s-%s | %s", startTime, endTime, room)
-            }
+            return if (rooms.isEmpty()) "$startTime-$endTime"
+            else "$startTime-$endTime | $partialRoomNames"
         }
 
     val eventDescription: String
         get() {
             return "${subject.toUpperCase()}\n" +
                     "$teachersNames\n" +
-                    (if(partitioningName != null) "$partitioningName\n" else "") +
-                    (roomName?:"(aula non specificata)")
+                    (if (partitioningName != null) "$partitioningName\n" else "") +
+                    partialRoomNames
         }
 
     val durationInMinutes: Int
@@ -112,7 +113,7 @@ data class LessonSchedule(
                 && endsAt == that.endsAt
                 && color == that.color
                 && lessonTypeId == that.lessonTypeId
-                && roomComplete == that.roomComplete
+                && rooms == that.rooms
                 && subject == that.subject
     }
 
@@ -124,7 +125,7 @@ data class LessonSchedule(
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + roomComplete.hashCode()
+        result = 31 * result + rooms.hashCode()
         result = 31 * result + teachersNames.hashCode()
         result = 31 * result + subject.hashCode()
         result = 31 * result + startsAt.hashCode()

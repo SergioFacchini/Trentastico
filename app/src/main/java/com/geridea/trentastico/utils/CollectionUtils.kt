@@ -17,3 +17,15 @@ object CollectionUtils {
  */
 fun <E> List<E>.orIfEmpty(alternative: List<E>): List<E> =
         if (isEmpty()) alternative else this
+
+/**
+ * @return true if all elements of the array contain exactly the same elements
+ * (evaluated by [Any.equals]).
+ */
+fun <T, E> Collection<E>.allSame(mapper: (E) -> T): Boolean {
+    return if (isEmpty()) true
+           else {
+               val firstElement = mapper(first())
+               all { mapper(it) == (firstElement) }
+           }
+}

@@ -409,7 +409,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     id               = id,
                     lessonTypeId     = lessonJson.getString("codice_insegnamento"),
                     teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
-                    roomComplete     = lessonJson.getString("aula"),
+                    rooms            = calculateRooms(lessonJson.getString("aula")),
                     subject          = calculateTeachingWithoutPartitioning(teachingName),
                     partitioningName = calculatePartitioningName(teachingName),
                     color            = teachingsColors[lessonJson.getString("codice_insegnamento")]!!,
@@ -417,6 +417,20 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     endsAt           = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
+    }
+
+    private fun calculateRooms(string: String): List<Room> {
+        //The rooms are in format "Room name[Department Name],Room name2[Department Name 2]"
+        val pattern = Pattern.compile("^ ?(.+)\\[(.+)\\]")
+        return string.split(",").map {
+            val matcher = pattern.matcher(it)
+            if (matcher.find()) {
+                Room(room = matcher.group(1), department = matcher.group(2))
+            } else {
+                throw RuntimeException("The room does not matches the pattern!")
+            }
+        }
+
     }
 
     private fun calculateTeachingWithoutPartitioning(teachingName: String): String =
