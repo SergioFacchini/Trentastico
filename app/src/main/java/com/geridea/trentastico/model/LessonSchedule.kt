@@ -33,13 +33,16 @@ data class LessonSchedule(
     /**
      * The room where the lesson is held, without the department specified
      */
-    val partialRoomNames: String
+    private val partialRoomNames: String
         get() = when {
             rooms.isEmpty() -> "(aula non specificata)"
             rooms.size == 1 -> rooms[0].room
             else            -> rooms.joinToString { it.room }
         }
 
+    /**
+     * Calculates the names of the rooms, provided with the department name
+     */
     fun calculateCompleteRoomNames(separator: String = ", "): String = when {
         rooms.isEmpty()               -> "(aula non specificata)"
         areAllRoomsInSameDepartment() ->
