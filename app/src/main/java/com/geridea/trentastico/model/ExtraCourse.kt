@@ -69,4 +69,13 @@ class ExtraCourse(
 
     fun isPartOfCourse(studyCourse: StudyCourse): Boolean = (studyCourse == this.studyCourse)
 
+    /**
+     * Creates a list of teaches, separated by a comma. In case there isn't any teacher, then the
+     * default "no teacher" placeholder is returned.
+     */
+    fun buildTeachersNamesOrDefault(): String {
+        return if (teachers.isEmpty()) NO_TEACHER_ASSIGNED_DEFAULT_TEXT
+        else teachers.joinToString { it.name }
+    }
+
 }

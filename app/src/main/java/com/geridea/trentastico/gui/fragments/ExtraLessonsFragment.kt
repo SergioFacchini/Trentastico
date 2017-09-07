@@ -121,7 +121,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
             courseName     .text = course.lessonName
             studyCourseName.text = course.fullName
-            teacherName    .text = course.teachers.joinToString { it.name }
+            teacherName    .text = course.buildTeachersNamesOrDefault()
 
             if (course.partitioningName != null) {
                 partitioningName.text = course.partitioningName
