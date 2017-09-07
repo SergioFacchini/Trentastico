@@ -6,6 +6,7 @@ import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 
 /*
@@ -29,6 +30,7 @@ class TrentasticoApplication : Application() {
         Networker.init(CacherNew(this))
 
         AppPreferences.init(this)
+        ColorDispenser.init(this)
 
         BugLogger.init()
 

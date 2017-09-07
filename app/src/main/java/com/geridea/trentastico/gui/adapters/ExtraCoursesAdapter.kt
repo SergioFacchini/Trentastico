@@ -16,6 +16,7 @@ import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.ExtraCourse
+import com.geridea.trentastico.utils.ColorDispenser
 import java.util.*
 
 class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>) : ItemsAdapter<ExtraCourse>(context) {
@@ -40,7 +41,8 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
             Views.find<TextView>(convertView, R.id.partitioning_name).visibility = View.GONE
         }
 
-        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
+        val color = ColorDispenser.getColor(item.lessonTypeId)
+        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(color))
 
     }
 }

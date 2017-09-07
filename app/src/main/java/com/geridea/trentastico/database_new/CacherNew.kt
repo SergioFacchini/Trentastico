@@ -24,19 +24,6 @@ import java.util.*
  * Created with ♥ by Slava on 21/08/2017.
  */
 
-/**
- * The class that deals with the caching of lessons.<br></br>
- * There are 3 types o caches: <br></br>
- *
- *  * **Fresh cache: ** the cache that has just been fetched and didn't expire
- * yet.
- *  * **Old cache: ** the cache that has expired but still can be used if unable
- * to get the lesson from the network.
- *  * **Dead cache: ** the cache that we saved relatively to past period.
- * Technically this kind of cache will never get updated, and it will lie in our cache database
- * indefinitely.
- *
- */
 class CacherNew(context: Context) {
 
     private val writableDatabase: SQLiteDatabase = CacheDbHelper(context).writableDatabase
@@ -99,7 +86,6 @@ class CacherNew(context: Context) {
         values.put(SL_partitioningName, lesson.partitioningName)
         values.put(SL_startsAt,         lesson.startsAt)
         values.put(SL_endsAt,           lesson.endsAt)
-        values.put(SL_color,            lesson.color)
         values.put(SL_lessonTypeId,     lesson.lessonTypeId)
 
         values.put(SL_is_extra,         isExtra)
@@ -140,7 +126,6 @@ class CacherNew(context: Context) {
                     partitioningName = cursor.getNullableString(SL_partitioningName),
                     startsAt         = cursor.getLong(SL_startsAt),
                     endsAt           = cursor.getLong(SL_endsAt),
-                    color            = cursor.getInt(SL_color),
                     lessonTypeId     = cursor.getString(SL_lessonTypeId)
             ))
         }
@@ -187,7 +172,6 @@ class CacherNew(context: Context) {
                     teachers         = JSONArray(cursor.getString(LT_teachers)).mapObjects { Teacher(it) },
                     kindOfLesson     = cursor.getString(LT_kindOfLesson),
                     partitioningName = cursor.getNullableString(LT_partitioningName),
-                    color            = cursor.getInt(LT_color),
                     isVisible        = !AppPreferences.isLessonTypeToHide(lessonTypeId)
             ))
         }
@@ -222,7 +206,6 @@ class CacherNew(context: Context) {
             values.put(LT_teachers,         lessonTypeNew.teachers.toJsonArray { it.toJson() }.toString())
             values.put(LT_kindOfLesson,     lessonTypeNew.kindOfLesson)
             values.put(LT_partitioningName, lessonTypeNew.partitioningName)
-            values.put(LT_color,            lessonTypeNew.color)
 
             writableDatabase.insert(LT_TABLE_NAME, null, values)
     }
@@ -354,13 +337,12 @@ val SL_subject          = "subject"
 val SL_partitioningName = "partitioningName"
 val SL_startsAt         = "startsAt"
 val SL_endsAt           = "endsAt"
-val SL_color            = "color"
 val SL_lessonTypeId     = "lessonTypeId"
 val SL_is_extra         = "is_extra"
 
 val scheduledLessonsColumns = arrayOf(
         SL_id, SL_room, SL_teachersNames, SL_subject, SL_partitioningName,
-        SL_startsAt, SL_endsAt, SL_color, SL_lessonTypeId, SL_is_extra
+        SL_startsAt, SL_endsAt, SL_lessonTypeId, SL_is_extra
 )
 
 internal val SQL_CREATE_SCHEDULED_LESSONS =
@@ -372,7 +354,6 @@ internal val SQL_CREATE_SCHEDULED_LESSONS =
       $SL_partitioningName VARCHAR(100),
       $SL_startsAt         INT NOT NULL,
       $SL_endsAt           INT NOT NULL,
-      $SL_color            INT NOT NULL,
       $SL_lessonTypeId     VARCHAR(100) NOT NULL,
       $SL_is_extra         INT NOT NULL
   )"""
@@ -387,10 +368,9 @@ val LT_name             = "name"
 val LT_teachers         = "teachers"
 val LT_kindOfLesson     = "kindOfLesson"
 val LT_partitioningName = "partitioningName"
-val LT_color            = "color"
 
 val lessonTypesColumns = arrayOf(
-    LT_id, LT_name, LT_teachers, LT_teachers, LT_kindOfLesson, LT_partitioningName, LT_color
+    LT_id, LT_name, LT_teachers, LT_teachers, LT_kindOfLesson, LT_partitioningName
 )
 
 internal val SQL_CREATE_LESSON_TYPES =
@@ -399,8 +379,7 @@ internal val SQL_CREATE_LESSON_TYPES =
       $LT_name             VARCHAR(150) NOT NULL,
       $LT_teachers         VARCHAR(500) NOT NULL,
       $LT_kindOfLesson     VARCHAR(50)  NOT NULL,
-      $LT_partitioningName VARCHAR(100),
-      $LT_color            INT NOT NULL
+      $LT_partitioningName VARCHAR(100)
   )"""
 
 

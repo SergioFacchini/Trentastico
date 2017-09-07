@@ -6,13 +6,10 @@ package com.geridea.trentastico.gui.adapters
  */
 
 import android.content.Context
-import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
@@ -41,8 +38,6 @@ class LessonTypesAdapter(
         } else {
             Views.find<TextView> (convertView, R.id.partitioning_name).visibility = View.GONE
         }
-
-        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
         if (AppPreferences.hasExtraCourseWithId(item.id) || alreadyTakenLessons.any { it.id == item.id }) {
             Views.find<View>(convertView, R.id.course_already_selected).visibility = View.VISIBLE

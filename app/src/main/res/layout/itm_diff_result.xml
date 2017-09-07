@@ -17,63 +17,53 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/color"
-            style="@style/CourseColor" />
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/course_name"
+            style="@style/TextForegroundBig"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/course_name"
-                style="@style/TextForegroundBig"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|left"
-                android:text="Nome corso" />
+            android:gravity="center_vertical|left"
+            android:text="Nome corso" />
 
 
-            <TextView
-                android:id="@+id/scheduled_at_day"
-                style="@style/TextForegroundMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|left"
-                android:text="Pianificata per Venerdì 13 Gennaio" />
+        <TextView
+            android:id="@+id/scheduled_at_day"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:text="Pianificata per Venerdì 13 Gennaio" />
 
-            <TextView
-                android:id="@+id/scheduled_at_hours"
-                style="@style/TextForegroundMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|left"
-                android:text="Alle ore: " />
+        <TextView
+            android:id="@+id/scheduled_at_hours"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:text="Alle ore: " />
 
 
-            <TextView
-                android:id="@+id/lesson_duration"
-                style="@style/TextForegroundMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|left"
-                android:text="Durata: " />
+        <TextView
+            android:id="@+id/lesson_duration"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:text="Durata: " />
 
-            <TextView
-                android:id="@+id/modifications"
-                style="@style/TextForegroundMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|left"
-                android:text="Modifiche"
-                android:textStyle="bold"
-                android:visibility="visible" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/modifications"
+            style="@style/TextForegroundMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:text="Modifiche"
+            android:textStyle="bold"
+            android:visibility="visible" />
 
     </LinearLayout>
+
 
 </LinearLayout>

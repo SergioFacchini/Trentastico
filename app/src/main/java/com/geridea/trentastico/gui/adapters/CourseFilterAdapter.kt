@@ -13,6 +13,7 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal1
 import java.util.*
 
@@ -34,7 +35,8 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) 
 
     override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
         //Color on the left
-        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(item.color))
+        val color = ColorDispenser.getColor(item.id)
+        Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(color))
 
         //Texts
         Views.find<TextView>(convertView, R.id.lesson_type).text    = item.name

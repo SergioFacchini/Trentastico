@@ -33,6 +33,7 @@ import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal0
 
 class ExtraLessonsFragment : FragmentWithMenuItems() {
@@ -72,9 +73,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
             //Updating notifications
             NextLessonNotificationService.removeNotificationsOfExtraCourse(context, course)
-            NextLessonNotificationService.createIntent(
-                    activity, NLNStarter.EXTRA_COURSE_CHANGE
-            )
+            NextLessonNotificationService.createIntent(activity, NLNStarter.EXTRA_COURSE_CHANGE)
         }
         dialog.show()
 
@@ -130,7 +129,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
                 partitioningName.visibility = View.GONE
             }
 
-            color.setImageDrawable(ColorDrawable(course.color))
+            color.setImageDrawable(ColorDrawable(ColorDispenser.getColor(course.lessonTypeId)))
 
             setView(view)
         }
@@ -142,7 +141,8 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         @OnClick(R.id.delete_button)
         fun onDeleteButtonPressed() {
             AppPreferences.removeExtraCourse(course.lessonTypeId)
-            Networker.purgeExtraCourse(course.lessonTypeId)
+            Networker     .purgeExtraCourse (course.lessonTypeId)
+            ColorDispenser.dissociateColorFromType(course.lessonTypeId)
 
             onDeleteConfirm.dispatch()
             dismiss()
@@ -266,14 +266,14 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         @OnItemClick(R.id.lessons_list)
         fun onLessonSelected(position: Int) {
-            val lesson = lessonsList.getItemAtPosition(position) as LessonTypeNew
+            val lessonType = lessonsList.getItemAtPosition(position) as LessonTypeNew
 
-            if (canLessonTypeBeSelected(lesson)) {
-                AppPreferences.addExtraCourse(
-                    ExtraCourse(
-                            lesson.id, lesson.name, lesson.teachers, lesson.partitioningName,
-                            lesson.kindOfLesson, studyCourse, lesson.color)
-                    )
+            if (canLessonTypeBeSelected(lessonType)) {
+                ColorDispenser.associateColorToTypeIfNeeded(lessonType.id)
+                AppPreferences.addExtraCourse(ExtraCourse(
+                        lessonType.id, lessonType.name, lessonType.teachers, lessonType.partitioningName,
+                        lessonType.kindOfLesson, studyCourse
+                ))
 
                 dismiss()
                 onCourseSelectedAndAdded.dispatch()

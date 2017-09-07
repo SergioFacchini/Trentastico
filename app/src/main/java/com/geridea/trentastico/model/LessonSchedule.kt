@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
 data class LessonSchedule(
         /**
          * @return the unique identifier of the lesson
@@ -27,7 +26,6 @@ data class LessonSchedule(
         val partitioningName: String?,
         val startsAt: Long,
         val endsAt: Long,
-        val color: Int,
         val lessonTypeId: String) : Serializable {
 
     /**
@@ -114,7 +112,6 @@ data class LessonSchedule(
         return id == that!!.id
                 && startsAt == that.startsAt
                 && endsAt == that.endsAt
-                && color == that.color
                 && lessonTypeId == that.lessonTypeId
                 && rooms == that.rooms
                 && subject == that.subject
@@ -133,7 +130,6 @@ data class LessonSchedule(
         result = 31 * result + subject.hashCode()
         result = 31 * result + startsAt.hashCode()
         result = 31 * result + endsAt.hashCode()
-        result = 31 * result + color
         result = 31 * result + lessonTypeId.hashCode()
         return result
     }

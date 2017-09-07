@@ -14,6 +14,7 @@ import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.network.LessonsLoader
+import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
@@ -167,10 +168,11 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                     date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
                     date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
 
-    private fun makeEventsFromLessonsSet(lessons: List<LessonSchedule>): List<WeekViewEvent> =
-            lessons.mapTo(ArrayList()){
-                LessonToEventAdapter(it)
-            }
+    private fun makeEventsFromLessonsSet(lessons: List<LessonSchedule>): List<WeekViewEvent> {
+        return lessons.mapTo(ArrayList()) {
+            LessonToEventAdapter(it, ColorDispenser.getColor(it.lessonTypeId))
+        }
+    }
 
     fun notifyEventsChanged() {
         clear()
@@ -217,12 +219,12 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
     private fun getLessonTypeOfEvent(event: LessonToEventAdapter) =
             currentLessonTypes.first { it.id == event.lesson.lessonTypeId }
 
-    class LessonToEventAdapter(val lesson: LessonSchedule) : WeekViewEvent(
+    class LessonToEventAdapter(val lesson: LessonSchedule, color: Int) : WeekViewEvent(
             nextId, lesson.eventDescription, lesson.startCal, lesson.endCal
     ) {
 
         init {
-            this.color = lesson.color
+            this.color = color
         }
 
         companion object {

@@ -11,36 +11,31 @@ package com.geridea.trentastico.model
 data class LessonTypeNew(
         val id: String,
         val name: String,
-        /**
-         * The list of teachers, separated by a comma
-         */
         val teachers: List<Teacher>,
         val partitioningName: String?,
-        val color: Int,
         val kindOfLesson: String,
         var isVisible: Boolean = true) {
 
+    /**
+     * @param teachersCodesToParse a "," separated list of teachers' codes
+     * @param teachersNamesUnparsed a "," separated list of teachers' names
+     */
     constructor(
             id: String,
             name: String,
             teachersNamesUnparsed: String,
-            /**
-             * A "," separated list of teachers' codes
-             */
             teachersCodesToParse: String,
             partitioningName: String?,
-            color: Int,
             kindOfLesson: String,
             isVisible: Boolean
     ): this(id, name, createTeachers(teachersNamesUnparsed, teachersCodesToParse), partitioningName,
-            color, kindOfLesson, isVisible)
+            kindOfLesson, isVisible)
 
     constructor(extraCourse: ExtraCourse, isVisible: Boolean): this(
             extraCourse.lessonTypeId,
             extraCourse.lessonName,
             extraCourse.teachers,
             extraCourse.partitioningName,
-            extraCourse.color,
             extraCourse.kindOfLesson,
             isVisible
     )

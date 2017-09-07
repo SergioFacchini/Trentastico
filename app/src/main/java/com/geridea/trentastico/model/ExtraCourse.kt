@@ -17,8 +17,7 @@ class ExtraCourse(
         val teachers: List<Teacher>,
         val partitioningName: String?,
         val kindOfLesson: String,
-        val studyCourse: StudyCourse,
-        val color: Int) {
+        val studyCourse: StudyCourse) {
 
     /**
      * The complete name of the extra course (name of the course + lesson name)
@@ -35,7 +34,6 @@ class ExtraCourse(
             jsonObject.put("partitioningName", partitioningName)
             jsonObject.put("kindOfLesson",     kindOfLesson)
             jsonObject.put("studyCourse",      studyCourse.toJson())
-            jsonObject.put("color",            color)
             return jsonObject
         } catch (e: JSONException) {
             BugLogger.logBug("Converting extra course to JSON", e)
@@ -59,8 +57,7 @@ class ExtraCourse(
                     teachers         = json.getJSONArray("teachers").mapObjects { Teacher(it) },
                     partitioningName = json.optString("partitioningName", null),
                     kindOfLesson     = json.getString("kindOfLesson"),
-                    studyCourse      = StudyCourse(json.getJSONObject("studyCourse")),
-                    color            = json.getInt("color")
+                    studyCourse      = StudyCourse(json.getJSONObject("studyCourse"))
                 )
             } catch (e: JSONException) {
                 BugLogger.logBug("Parsing extra course", e)

@@ -24,9 +24,6 @@ abstract class DiffResultItem(private val lesson: LessonSchedule) {
     val duration: Int
         get() = lesson.durationInMinutes
 
-    val color: Int
-        get() = lesson.color
-
     abstract val diffDescription: String
 
     abstract val modifications: String?

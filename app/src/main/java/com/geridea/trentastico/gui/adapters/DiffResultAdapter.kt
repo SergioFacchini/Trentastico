@@ -6,16 +6,13 @@ package com.geridea.trentastico.gui.adapters
  */
 
 import android.content.Context
-import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
-import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.network.request.LessonsDiffResult
+import kotlinx.android.synthetic.main.itm_diff_result.view.*
 import java.util.*
 
 class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : ItemsAdapter<DiffResultItem>(context) {
@@ -31,24 +28,22 @@ class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : Items
         itemsList = items
     }
 
-    override fun createView(item: DiffResultItem, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View = inflater.inflate(R.layout.itm_diff_result, parent, false)
+    override fun createView(item: DiffResultItem, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View
+            = inflater.inflate(R.layout.itm_diff_result, parent, false)
 
     override fun bindView(item: DiffResultItem, pos: Int, view: View) {
-        Views.find<TextView>(view, R.id.diff_type).text = item.diffDescription
-        Views.find<TextView>(view, R.id.course_name).text = item.courseName
-        Views.find<TextView>(view, R.id.scheduled_at_day).text = "Pianificata per: " + item.scheduledDay
-        Views.find<TextView>(view, R.id.scheduled_at_hours).text = "Alle ore: " + item.scheduledHours
-        Views.find<TextView>(view, R.id.lesson_duration).text = "Durata: " + item.duration.toString() + "min"
+        view.diff_type         .text = item.diffDescription
+        view.course_name       .text = item.courseName
+        view.scheduled_at_day  .text = "Pianificata per: " + item.scheduledDay
+        view.scheduled_at_hours.text = "Alle ore: " + item.scheduledHours
+        view.lesson_duration   .text = "Durata: " + item.duration.toString() + "min"
 
-        val modificationsTV = Views.find<TextView>(view, R.id.modifications)
         if (item.modifications != null) {
-            modificationsTV.text = item.modifications
-            modificationsTV.visibility = View.VISIBLE
+            view.modifications.text       = item.modifications
+            view.modifications.visibility = View.VISIBLE
         } else {
-            modificationsTV.visibility = View.GONE
+            view.modifications.visibility = View.GONE
         }
-
-        Views.find<ImageView>(view, R.id.color).setImageDrawable(ColorDrawable(item.color))
 
     }
 

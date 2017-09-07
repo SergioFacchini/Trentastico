@@ -28,6 +28,7 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal1
 
 class SettingsFragment : FragmentWithMenuItems() {
@@ -177,8 +178,13 @@ class SettingsFragment : FragmentWithMenuItems() {
             ))
         }
 
-        private fun removeOverlappingExtraCourses(selectedCourse: StudyCourse)
-                = AppPreferences.removeExtraCoursesOfCourse(selectedCourse)
+        private fun removeOverlappingExtraCourses(course: StudyCourse) {
+            val overlappingExtraCourses = AppPreferences.getExtraCoursesOfCourse(course)
+            overlappingExtraCourses.forEach {
+                ColorDispenser.dissociateColorFromType(it.lessonTypeId)
+                AppPreferences.removeExtraCourse(it.lessonTypeId)
+            }
+        }
 
         private fun clearFilters() {
             AppPreferences.removeAllHiddenCourses() //No longer need them
