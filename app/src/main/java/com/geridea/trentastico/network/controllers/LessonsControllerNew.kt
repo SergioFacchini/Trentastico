@@ -17,6 +17,7 @@ import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.network.request.ServerResponseParsingException
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
+import com.geridea.trentastico.utils.allSame
 import com.geridea.trentastico.utils.orIfBlank
 import okhttp3.FormBody
 import org.json.JSONArray
@@ -333,11 +334,20 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         }
         */
         val json = JSONObject(responseToManage)
-        val teachings = parseTeachings(json)
+        val lessonTypes = parseLessonTypes(json)
         val lessons = parseLessons(json)
 
-        onTeachingsAndLessonsLoaded(teachings, lessons)
+        //Fixes #100: If all lessons have the same partitioning, then there is no partitioning
+        if(doAllLessonTypesHaveSamePartitioning(lessonTypes)) {
+            lessonTypes.forEach { it.partitioningName = null }
+            lessons    .forEach { it.partitioningName = null }
+        }
+
+        onTeachingsAndLessonsLoaded(lessonTypes, lessons)
     }
+
+    private fun doAllLessonTypesHaveSamePartitioning(lessonTypes: List<LessonTypeNew>): Boolean =
+            lessonTypes.allSame { it.partitioningName }
 
     /**
      * Hook function that notifies that the loading has been completed
@@ -346,7 +356,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             lessonTypes: List<LessonTypeNew>,
             loadedLessons: List<LessonSchedule>)
 
-    private fun parseTeachings(json: JSONObject): List<LessonTypeNew> {
+    private fun parseLessonTypes(json: JSONObject): List<LessonTypeNew> {
         //To get a list of teaching we might do the followings:
         // * Make another request to obtain a list
         // * Scan all the items in search of the teachings

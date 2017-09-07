@@ -23,7 +23,7 @@ data class LessonSchedule(
         /**
          * The name of the partitioning. Is null when there are no partitionings
          */
-        val partitioningName: String?,
+        var partitioningName: String?,
         val startsAt: Long,
         val endsAt: Long,
         val lessonTypeId: String) : Serializable {

@@ -12,7 +12,7 @@ data class LessonTypeNew(
         val id: String,
         val name: String,
         val teachers: List<Teacher>,
-        val partitioningName: String?,
+        var partitioningName: String?,
         val kindOfLesson: String,
         var isVisible: Boolean = true) {
 
