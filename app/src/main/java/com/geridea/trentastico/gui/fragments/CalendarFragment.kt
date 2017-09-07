@@ -99,7 +99,7 @@ class CalendarFragment : FragmentWithMenuItems() {
 
     private fun showClickedEventPopup( clickedEvent: LessonSchedule, lessonType: LessonTypeNew){
         if (context != null) {
-            ShowEventDetailsDialog(context, clickedEvent, lessonType).show()
+            ShowLessonDetailsDialog(context, clickedEvent, lessonType).show()
         }
     }
 
@@ -163,7 +163,7 @@ class CalendarFragment : FragmentWithMenuItems() {
 
     }
 
-    internal inner class ShowEventDetailsDialog(
+    internal inner class ShowLessonDetailsDialog(
             context: Context,
             event: LessonSchedule,
             lessonType: LessonTypeNew) : AlertDialog(context) {

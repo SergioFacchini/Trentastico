@@ -417,7 +417,8 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             if (matcher.find()) {
                 Room(room = matcher.group(1), department = matcher.group(2))
             } else {
-                throw RuntimeException("The room does not matches the pattern!")
+                //Not all the rooms have the department specified
+                Room(room = string, department = null)
             }
         }
 

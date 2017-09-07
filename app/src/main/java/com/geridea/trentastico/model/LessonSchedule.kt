@@ -42,11 +42,21 @@ data class LessonSchedule(
      * Calculates the names of the rooms, provided with the department name
      */
     fun calculateCompleteRoomNames(separator: String = ", "): String = when {
-        rooms.isEmpty()               -> "(aula non specificata)"
-        areAllRoomsInSameDepartment() ->
-            rooms.joinToString(separator) { it.room } + "\n[${rooms.first().department}]"
-        else                          ->
-            rooms.joinToString(separator) { "${it.room} [${it.department}]" }
+        rooms.isEmpty() -> "(aula non specificata)"
+        areAllRoomsInSameDepartment() -> {
+            var roomsNames = rooms.joinToString(separator) { it.room }
+
+            val departmentName = rooms.first().department
+            if (!departmentName.isNullOrBlank()) {
+                roomsNames += "\n[$departmentName]"
+            }
+
+            roomsNames
+        }
+        else -> rooms.joinToString(separator) {
+            if (it.department != null) "${it.room} [${it.department}]"
+            else                       it.room
+        }
     }
 
     /**
