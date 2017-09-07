@@ -15,6 +15,7 @@ import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -200,6 +201,14 @@ class TeachersAdapter(context: Context, teachers: List<Teacher>) : ItemsAdapter<
                 .load(item.teacherPhotoUrl)
                 .placeholder(R.drawable.teacher_no_photo)
                 .into(convertView.photo)
+
+        convertView.setOnClickListener {
+            when {
+                item.id == "181898" -> Toast.makeText(context, "Violette!", Toast.LENGTH_SHORT).show()
+                item.id == "004437" -> Toast.makeText(context, "Peanuts!",  Toast.LENGTH_SHORT).show()
+            }
+
+        }
     }
 
     override fun createView(item: Teacher?, pos: Int, parent: ViewGroup?, inflater: LayoutInflater): View =
