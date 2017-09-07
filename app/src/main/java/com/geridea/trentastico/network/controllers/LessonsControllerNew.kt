@@ -22,6 +22,7 @@ import com.geridea.trentastico.utils.orIfBlank
 import okhttp3.FormBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
@@ -503,10 +504,12 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
  */
 internal class LoadStandardLessonsRequest(
         studyCourse: StudyCourse,
-        val listener: LessonsLoadingListener,
+        listener: LessonsLoadingListener,
         private val cacher: CacherNew,
         private val assignColors: Boolean = true
 ) : BasicLessonRequest(studyCourse) {
+
+    private val weakListener: WeakReference<LessonsLoadingListener> = WeakReference(listener)
 
     override fun onTeachingsAndLessonsLoaded(
             lessonTypes: List<LessonTypeNew>,
@@ -519,23 +522,29 @@ internal class LoadStandardLessonsRequest(
         cacher.cacheStandardLessonTypes(lessonTypes)
         cacher.cacheStandardScheduledLessons(loadedLessons)
 
-        listener.onLessonsLoaded(loadedLessons, lessonTypes, operationId)
+        val listener = weakListener.get()
+        listener?.onLessonsLoaded(loadedLessons, lessonTypes, operationId)
     }
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
-        listener.onNetworkErrorHappened(error, operationId)
-
-        sender.processRequestAfterTimeout(this)
+        val listener = weakListener.get()
+        if (listener != null) {
+            listener.onNetworkErrorHappened(error, operationId)
+            sender.processRequestAfterTimeout(this)
+        }
     }
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
-        listener.onParsingErrorHappened(e, operationId)
-
-        sender.processRequestAfterTimeout(this)
+        val listener = weakListener.get()
+        if (listener != null) {
+            listener.onParsingErrorHappened(e, operationId)
+            sender.processRequestAfterTimeout(this)
+        }
     }
 
     override fun notifyOnBeforeSend() {
-        listener.onLoadingMessageDispatched(StandardLessonsLoadingMessage(operationId, isARetry = false))
+        val listener = weakListener.get()
+        listener?.onLoadingMessageDispatched(StandardLessonsLoadingMessage(operationId, isARetry = false))
     }
 
 }
@@ -583,24 +592,30 @@ internal abstract class BasicExtraLessonRequest(val extraCourse: ExtraCourse) : 
 
 internal class LessonsOfExtraCourseRequest(
         extraCourse: ExtraCourse,
-        private val listener: LessonsLoadingListener,
+        listener: LessonsLoadingListener,
         private val cacher: CacherNew
 ) : BasicExtraLessonRequest(extraCourse) {
 
-    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
-        listener.onParsingErrorHappened(e, operationId)
+    private val weakListener = WeakReference(listener)
 
-        sender.processRequestAfterTimeout(this)
+    override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
+        val listener = weakListener.get()
+        if (listener != null) {
+            listener.onParsingErrorHappened(e, operationId)
+            sender.processRequestAfterTimeout(this)
+        }
     }
 
     override fun notifyNetworkProblem(error: Exception, sender: RequestSender) {
-        listener.onNetworkErrorHappened(error, operationId)
-
-        sender.processRequestAfterTimeout(this)
+        val listener = weakListener.get()
+        if (listener != null) {
+            listener.onNetworkErrorHappened(error, operationId)
+            sender.processRequestAfterTimeout(this)
+        }
     }
 
     override fun notifyOnBeforeSend() {
-        listener.onLoadingMessageDispatched(ExtraLessonsLoadingMessage(extraCourse, operationId))
+        weakListener.get()?.onLoadingMessageDispatched(ExtraLessonsLoadingMessage(extraCourse, operationId))
     }
 
     override fun onExtraCourseLessonsLoaded(
@@ -608,7 +623,7 @@ internal class LessonsOfExtraCourseRequest(
             lessonType: LessonTypeNew) {
         cacher.cacheExtraScheduledLessons(loadedLessons)
 
-        listener.onLessonsLoaded(loadedLessons, listOf(lessonType), operationId)
+        weakListener.get()?.onLessonsLoaded(loadedLessons, listOf(lessonType), operationId)
     }
 
 }
