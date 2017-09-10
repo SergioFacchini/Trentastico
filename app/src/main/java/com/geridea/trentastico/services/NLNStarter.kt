@@ -20,5 +20,6 @@ enum class NLNStarter : Serializable {
     FILTERS_CHANGED,
     EXTRA_COURSE_CHANGE,
     ALARM_MORNING,
-    ALARM_LESSON
+    ALARM_LESSON,
+    UNKNOWN
 }

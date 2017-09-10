@@ -45,7 +45,7 @@ class NextLessonNotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val starter = intent.getSerializableExtra(EXTRA_STARTER) as NLNStarter
+        val starter = (intent.getSerializableExtra(EXTRA_STARTER) ?: NLNStarter.UNKNOWN) as NLNStarter
 
         if (!AppPreferences.areNextLessonNotificationsEnabled()) {
             //The notifications are disabled: nothing to do!
