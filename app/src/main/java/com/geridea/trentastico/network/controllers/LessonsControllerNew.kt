@@ -451,12 +451,21 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         //The name of the partitioning is contained in the name of the course and is
         //preceded by a dash with spaces " - ". Some courses names however are malformed and there
         // are no dashes in their names. In this case we assume that there are no partitionings.
-        return if (teachingName.contains("-")) {
-            val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
-            if (partitioningName == "nessun partizionamento") null else partitioningName
-        } else {
-            null
+        if (!teachingName.contains("-")){
+            return null
         }
+
+        val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
+        if (partitioningName == "nessun partizionamento") {
+            return null
+        }
+
+        //Fixes #104
+        if (partitioningName.toLowerCase() in arrayOf("lm", "n0")) {
+            return null
+        }
+
+        return partitioningName
     }
 
     private fun calculateEndTimeOfLesson(
