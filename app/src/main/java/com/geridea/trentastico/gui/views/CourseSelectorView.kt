@@ -86,7 +86,7 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedCourse = coursesSpinner.selectedItem as Course
 
-                val adapter = YearsAdapter(context, selectedCourse.studyYears)
+                val adapter = YearsAdapter(context, selectedCourse.studyYears.sortedBy { it.name })
                 yearSpinner.adapter = adapter
                 if(yearToSelect != null){
                     yearSpinner.setSelection(adapter.getPositionOfYearWithId(yearToSelect!!)?:0, false)
