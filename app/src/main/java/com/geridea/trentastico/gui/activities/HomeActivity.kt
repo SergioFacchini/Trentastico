@@ -21,6 +21,7 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 
@@ -62,7 +63,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         //If we're not in debug mode, we don't need the debug options
                         it.itemId == R.id.debug_menu_about ||
                         it.itemId == R.id.debug_update_courses ||
-                        it.itemId == R.id.debug_start_next_lesson_service
+                        it.itemId == R.id.debug_start_next_lesson_service ||
+                        it.itemId == R.id.debug_reset_notification_tracker
                     }
                     .forEach { it.isVisible = false }
         }
@@ -129,6 +131,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                     R.id.debug_start_next_lesson_service ->
                         startService(NextLessonNotificationService.createIntent(this, NLNStarter.DEBUG))
+
+                    R.id.debug_reset_notification_tracker -> {
+                        AppPreferences.notificationTracker.clear()
+                        Toast.makeText(this, "Notification tracker reset!", Toast.LENGTH_SHORT).show()
+                    }
 
                 }
         }

@@ -33,6 +33,11 @@
             android:title="Start serv. prossima lezione" />
 
         <item
+            android:id="@+id/debug_reset_notification_tracker"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Resetta notification tracker" />
+
+        <item
             android:id="@+id/debug_menu_about"
             android:icon="@drawable/ic_menu_manage"
             android:title="Pulisci cache" />

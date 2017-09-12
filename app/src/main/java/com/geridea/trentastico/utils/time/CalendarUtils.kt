@@ -93,12 +93,12 @@ object CalendarUtils {
         val start = debuggableToday
         start.set(Calendar.SECOND, 0)
         start.set(Calendar.MINUTE, 0)
-        start.set(Calendar.HOUR,   0)
+        start.set(Calendar.HOUR_OF_DAY, 0)
 
         val end = debuggableToday
         end.set(Calendar.SECOND, 59)
         end.set(Calendar.MINUTE, 59)
-        end.set(Calendar.HOUR,   23)
+        end.set(Calendar.HOUR_OF_DAY, 23)
 
         return Pair(start.timeInMillis, end.timeInMillis)
     }
