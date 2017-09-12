@@ -15,7 +15,6 @@ import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonTypeNew
 import com.geridea.trentastico.network.LessonsLoader
 import com.geridea.trentastico.utils.ColorDispenser
-import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.WeekInterval
@@ -74,8 +73,9 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                     if (isSameDay(day, date)) return "Dopodomani ($formattedDay)"
 
                     day.add(Calendar.DAY_OF_MONTH, -3)
-                    return if (isSameDay(day, date)) "Ieri ($formattedDay)"
-                    else (if (IS_IN_DEBUG_MODE) DATE_FORMAT_DEBUG else DATE_FORMAT).format(date.time)
+                    return if (isSameDay(day, date))
+                        "Ieri ($formattedDay)"
+                    else DATE_FORMAT.format(date.time)
                 }
 
                 override fun interpretTime(hour: Int): String = interpretHours(hour)
@@ -95,8 +95,7 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                     day.add(Calendar.DAY_OF_MONTH, -3)
                     if (isSameDay(day, date)) return "Ieri"
 
-                    return if (IS_IN_DEBUG_MODE) DATE_FORMAT_MEDIUM_DEBUG.format(date.time)
-                    else DATE_FORMAT_MEDIUM.format(date.time)
+                    return DATE_FORMAT_MEDIUM.format(date.time)
                 }
 
                 override fun interpretTime(hour: Int): String = interpretHours(hour)
@@ -109,11 +108,9 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                         lastDay.add(Calendar.WEEK_OF_MONTH, +1)
 
                         return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
-                            if (IS_IN_DEBUG_MODE) DATE_FORMAT_SHORT_DEBUG.format(date.time)
-                            else DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
+                            DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
                         } else {
-                            if (IS_IN_DEBUG_MODE) DATE_FORMAT_SHORT_DEBUG.format(date.time)
-                            else DATE_FORMAT_SHORT.format(date.time)
+                            DATE_FORMAT_SHORT.format(date.time)
                         }
                     }
 
@@ -237,18 +234,11 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
 
     companion object {
 
-        private val DATE_FORMAT = SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN)
-        private val DATE_FORMAT_DEBUG = SimpleDateFormat("(w) EEEE d MMMM", Locale.ITALIAN)
-
-        private val DATE_FORMAT_MEDIUM = SimpleDateFormat("EE dd/MM", Locale.ITALIAN)
-        private val DATE_FORMAT_MEDIUM_DEBUG = SimpleDateFormat("(w)EE dd/MM", Locale.ITALIAN)
-
-        private val DATE_FORMAT_SHORT = SimpleDateFormat("dd/MM", Locale.ITALIAN)
-        private val DATE_FORMAT_SHORT_DEBUG = SimpleDateFormat("(w)dd/MM", Locale.ITALIAN)
-
-        private val DATE_FORMAT_SHORT_ONLY_DAY = SimpleDateFormat("EE", Locale.ITALIAN)
-
-        private val FORMAT_ONLY_DAY = SimpleDateFormat("EEEE", Locale.ITALIAN)
+        private val DATE_FORMAT                = SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN)
+        private val DATE_FORMAT_MEDIUM         = SimpleDateFormat("EE dd/MM",    Locale.ITALIAN)
+        private val DATE_FORMAT_SHORT          = SimpleDateFormat("dd/MM",       Locale.ITALIAN)
+        private val DATE_FORMAT_SHORT_ONLY_DAY = SimpleDateFormat("EE",          Locale.ITALIAN)
+        private val FORMAT_ONLY_DAY            = SimpleDateFormat("EEEE",        Locale.ITALIAN)
     }
 
 }
