@@ -392,11 +392,6 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
 
         return (0 until numLessons).map {
             val lessonJson = json[it.toString()] as JSONObject
-
-            //The lesson schedules do not have any identifier. We introduce it by merging the lesson
-            //code with the lesson's timestamp
-            val id = lessonJson.getString("codice_insegnamento") + "@" + lessonJson.getLong("timestamp")
-
             //The timestamp in the json is already set to the hour of the start of the lesson, but
             //not in the Rome timezone, we need to adjust it by removing two hours from it.
             //In order to get the ending of the lesson, we need to sum to the timestamp the
@@ -408,7 +403,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             val teachingName = lessonJson.getString("nome_insegnamento")
 
             LessonSchedule(
-                    id               = id,
+                    id               = generateLessonScheduleId(lessonJson),
                     lessonTypeId     = lessonJson.getString("codice_insegnamento"),
                     teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
                     rooms            = calculateRooms(lessonJson.getString("aula")),
@@ -418,6 +413,16 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     endsAt           = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
             )
         }
+    }
+
+    private fun generateLessonScheduleId(lessonJson: JSONObject): String {
+        //The lesson schedules do not have any identifier. We introduce it by merging the lesson
+        //code with the lesson's timestamp and it's room
+        val teachingId = lessonJson.getString("codice_insegnamento")
+        val lessonTimestamp = lessonJson.getLong("timestamp")
+        val roomName = lessonJson.getString("aula")
+
+        return "$teachingId@$lessonTimestamp@$roomName"
     }
 
     private fun calculateRooms(string: String): List<Room> {
