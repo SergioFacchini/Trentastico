@@ -42,11 +42,12 @@
 
             <Button
                 android:id="@+id/previous_day"
-                android:layout_width="wrap_content"
+                android:layout_width="50sp"
                 android:layout_height="match_parent"
                 android:background="#3b1629"
                 android:text="&lt;"
-                android:textColor="@color/colorForeground" />
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp"/>
 
             <TextView
                 android:id="@+id/current_day_name"
@@ -61,11 +62,12 @@
 
             <Button
                 android:id="@+id/next_day"
-                android:layout_width="wrap_content"
+                android:layout_width="50sp"
                 android:layout_height="match_parent"
                 android:background="#3b1629"
                 android:text="&gt;"
-                android:textColor="@color/colorForeground" />
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp"/>
         </LinearLayout>
 
         <FrameLayout
