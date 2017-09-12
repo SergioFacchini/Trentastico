@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
@@ -21,37 +22,46 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="App realizzata da Slava Rublev"
         android:textColor="@color/colorForeground"
-        android:layout_marginTop="10dp"
         android:textSize="16sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:paddingTop="6dp"
         android:text="Un sentito ringraziamento a Davide Bulbarelli, Alessandro Cervellera e Lorenzo Braccaioli per aver sofferto con me al massacrante hackathon degli ITC days 2017, luogo in qui quest'app è stata concepita."
         android:textColor="@color/colorForeground"
-        android:paddingTop="6dp"
-        android:textStyle="italic"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textStyle="italic" />
 
     <TextView
-        android:id="@+id/version_text"
+        android:id="@+id/versionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingTop="5dp"
         android:text="Versione: "
         android:textColor="@color/colorForeground"
-        android:layout_marginTop="10dp"
-        android:textSize="16sp"
-        android:paddingTop="5dp"/>
+        android:textSize="16sp" />
 
     <FrameLayout
         android:id="@+id/paperboy_fragment_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/licencesBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#3b1629"
+        android:text="Licenze"
+        android:textColor="@color/colorForeground" />
 
 </LinearLayout>

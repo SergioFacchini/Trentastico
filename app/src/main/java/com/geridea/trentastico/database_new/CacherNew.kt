@@ -74,7 +74,6 @@ class CacherNew(context: Context) {
                 lessons.forEach { cacheScheduledLesson(it, true) }
             }
         }
-
     }
 
     private fun cacheScheduledLesson(lesson: LessonSchedule, isExtra: Boolean) {
