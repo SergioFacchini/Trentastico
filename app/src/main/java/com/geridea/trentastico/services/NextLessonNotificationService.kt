@@ -144,7 +144,7 @@ class NextLessonNotificationService : Service() {
 
     private fun hideNotificationsForPassedLessons(passedLessons: ArrayList<LessonSchedule>) {
         val manager = getNotificationManager(this@NextLessonNotificationService)
-        passedLessons.forEach { (id) -> manager.cancel(id.toInt()) }
+        passedLessons.forEach { (id) -> manager.cancel(id.hashCode()) }
     }
 
     private fun findPassedLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
