@@ -182,9 +182,19 @@ object AppPreferences {
         get() = sharedPreferences.getBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
         set(enabled) = putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled)
 
-    fun areNextLessonNotificationsEnabled(): Boolean = sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
+    fun areNextLessonNotificationsEnabled(): Boolean =
+            sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
 
-    fun areNextLessonNotificationsFixed(): Boolean = sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
+    fun setNextLessonNotificationsEnabled(enabled: Boolean) {
+        putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled)
+    }
+
+    fun areNextLessonNotificationsFixed(): Boolean =
+            sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
+
+    fun setNextLessonNotificationsFixed(fixed: Boolean) {
+        putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", fixed)
+    }
 
     val androidId: String
         get() {

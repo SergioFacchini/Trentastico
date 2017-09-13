@@ -18,6 +18,7 @@ import android.widget.Switch
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
+import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
@@ -112,6 +113,40 @@ class SettingsFragment : FragmentWithMenuItems() {
     ///////////////////////////
     ////NEXT LESSON NOTIFICATION
     ///////////////////////////
+    @OnCheckedChanged(R.id.show_next_lesson_notification)
+    internal fun onShowNextLessonNotificationSwitchChanged(checked: Boolean) {
+        if (isLoading) {
+            return
+        }
+
+        AppPreferences.setNextLessonNotificationsEnabled(checked)
+        makeNotificationFixedSwitch.isEnabled = checked
+
+        if (checked) {
+            startNextLessonNotificationService()
+        } else {
+            NextLessonNotificationService.clearNotifications(activity)
+        }
+    }
+
+    private fun startNextLessonNotificationService() {
+        activity.startService(NextLessonNotificationService.createIntent(
+                activity, NLNStarter.NOTIFICATIONS_SWITCHED_ON)
+        )
+    }
+
+    @OnCheckedChanged(R.id.make_notifications_fixed)
+    internal fun onMakeNotificationsFixedSwitchChanged(checked: Boolean) {
+        if (isLoading) {
+            return
+        }
+
+        AppPreferences.setNextLessonNotificationsFixed(checked)
+
+        //If we have any notification, we have to update them:
+        startNextLessonNotificationService()
+    }
+
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)

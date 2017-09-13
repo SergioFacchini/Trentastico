@@ -1,5 +1,16 @@
 [
   {
+    "name": "Novità in 0.9.6",
+    "items": [
+      {
+        "type": "2",
+        "title": "Risolto un bug che mostrava le notifiche delle lezioni anche se queste erano disabilitate"
+      }, {
+        "type": "2",
+        "title": "Risolto un bug che non rendeva le notifiche \"fisse\" anche se venivano impostate come tali nelle opzioni"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.5",
     "items": [
       {
@@ -32,7 +43,7 @@
     "items": [
       {
         "type": "1",
-        "title": "Apportato qualche miglioramento grafico"
+        "title": "Apportato qualche miglioramento grafico.<br><strong>Grazie a Miriam Punzi per il feedback!</strong>"
       }, {
         "type": "2",
         "title": "Corretto un errore che mostrava le notifiche per lezioni extra già rimosse<br><strong>Grazie a Simone Degiacomi per la segnalazione!</strong>"
