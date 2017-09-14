@@ -1,13 +1,21 @@
 [
   {
+    "name": "Novità in 0.9.7",
+    "items": [
+      {
+        "type": "3",
+        "title": "Risolto un errore che non permetteva la disattivazione dell'aggiornamento delle lezioni"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.6",
     "items": [
       {
         "type": "2",
-        "title": "Risolto un bug che mostrava le notifiche delle lezioni anche se queste erano disabilitate"
+        "title": "Risolto un errore mostrava le notifiche delle lezioni anche se queste erano disabilitate"
       }, {
         "type": "2",
-        "title": "Risolto un bug che non rendeva le notifiche \"fisse\" anche se venivano impostate come tali nelle opzioni"
+        "title": "Risolto un errore che non rendeva le notifiche \"fisse\" anche se venivano impostate come tali nelle opzioni"
       }
     ]
   },{

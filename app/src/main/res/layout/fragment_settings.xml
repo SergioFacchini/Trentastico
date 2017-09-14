@@ -123,7 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:text="Trentastico! riscarica periodicamente gli orari del corso di studi e corsi extra da te frequentati e può avvisarti mediante una notifica se, ad esempio, qualche lezione è stata annullata o spostata. La ricerca influisce leggermente sul traffico dati da te utilizzato."
+            android:text="Trentastico! riscarica periodicamente gli orari del corso di studi e corsi extra da te frequentati e può avvisarti mediante una notifica se, ad esempio, qualche lezione è stata annullata o spostata. La ricerca influisce leggermente sul traffico dati da te utilizzato (circa 1 MB al mese)."
             android:textColor="@color/colorForeground" />
 
         <Switch

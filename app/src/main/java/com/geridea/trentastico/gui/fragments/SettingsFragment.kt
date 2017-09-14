@@ -26,6 +26,7 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.views.CourseSelectorView
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.LessonsUpdaterService
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -85,7 +86,7 @@ class SettingsFragment : FragmentWithMenuItems() {
         currentStudyCourse.text = studyCourse.generateFullDescription()
 
         //Lesson changes
-        searchForLessonChanges.isChecked = AppPreferences.isSearchForLessonChangesEnabled
+        searchForLessonChanges.isChecked           = AppPreferences.isSearchForLessonChangesEnabled
         shownNotificationOnLessonChanges.isChecked = AppPreferences.isNotificationForLessonChangesEnabled
 
         //Next lesson notification
@@ -147,6 +148,37 @@ class SettingsFragment : FragmentWithMenuItems() {
         startNextLessonNotificationService()
     }
 
+
+    ////////////////////////////
+    // SEARCH FOR LESSON CHANGES
+    ////////////////////////////
+
+    @OnCheckedChanged(R.id.search_for_lesson_changes)
+    internal fun onSearchForLessonsSwitchChanged(enabled: Boolean) {
+        if (isLoading) {
+            return
+        }
+
+        AppPreferences.isSearchForLessonChangesEnabled = enabled
+        shownNotificationOnLessonChanges.isEnabled = enabled
+
+        if (enabled) {
+            activity.startService(
+                    LessonsUpdaterService.createIntent(activity, LessonsUpdaterService.STARTER_SETTING_CHANGED)
+            )
+        } else {
+            LessonsUpdaterService.cancelSchedules(activity, LessonsUpdaterService.STARTER_SETTING_CHANGED)
+        }
+    }
+
+    @OnCheckedChanged(R.id.lesson_change_show_notification)
+    internal fun onShowLessonChangeNotificationSwitchChanged(checked: Boolean) {
+        if (isLoading) {
+            return
+        }
+
+        AppPreferences.isNotificationForLessonChangesEnabled = checked
+    }
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)

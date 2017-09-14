@@ -246,6 +246,7 @@ class LessonsUpdaterService : Service() {
         val STARTER_BOOT_BROADCAST = 2
         val STARTER_APP_START = 3
         val STARTER_ALARM_MANAGER = 4
+        val STARTER_SETTING_CHANGED = 5
         val STARTER_DEBUGGER = 6
 
         val NOTIFICATION_LESSONS_CHANGED_ID = 1000
@@ -254,6 +255,17 @@ class LessonsUpdaterService : Service() {
             val intent = Intent(context, LessonsUpdaterService::class.java)
             intent.putExtra(EXTRA_STARTER, starter)
             return intent
+        }
+
+        fun cancelSchedules(context: Context, starter: Int) {
+            val serviceIntent = LessonsUpdaterService.createIntent(context, starter)
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            val pendingIntent = PendingIntent.getService(context,
+                    0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            pendingIntent.cancel()
+            alarmManager.cancel(pendingIntent)
         }
 
     }
