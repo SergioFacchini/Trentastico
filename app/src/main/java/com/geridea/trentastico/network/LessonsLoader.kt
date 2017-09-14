@@ -26,8 +26,22 @@ class LessonsLoader : LessonsLoadingListener {
      */
     val onLoadingMessageDispatched = Signal1<ILoadingMessage>()
 
+    /**
+     * The number of requests that are being loaded right now.
+     */
+    var numRequestsBeingLoaded = 0
+
+    /**
+     * @return true if there is a pending network request, false otherwise
+     */
+    val hasAnythingBeingLoaded: Boolean
+        get() = numRequestsBeingLoaded != 0
+
     fun loadAndAddLessons() {
+        numRequestsBeingLoaded++
         Networker.loadLessons(this)
+
+        numRequestsBeingLoaded += AppPreferences.extraCourses.size
         Networker.loadExtraCourses(this)
     }
 
@@ -35,6 +49,8 @@ class LessonsLoader : LessonsLoadingListener {
             = onLoadingMessageDispatched.dispatch(operation)
 
     override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int) {
+        numRequestsBeingLoaded--
+
         //Filtering lessons that should not be shown
         val visibleLessons =
                 lessons.filterNot { AppPreferences.lessonTypesToHideIds.contains(it.lessonTypeId) }
@@ -48,9 +64,4 @@ class LessonsLoader : LessonsLoadingListener {
     override fun onParsingErrorHappened(exception: Exception, operationId: Int) =
             onLoadingMessageDispatched.dispatch(ParsingErrorMessage(operationId))
 
-    override fun onNothingFoundInCache() = Unit
-
-
-    override fun onLoadingAborted(operationId: Int) = //Technically it should never happen here since each request retries infinite times
-            onLoadingMessageDispatched.dispatch(TerminalMessage(operationId))
 }

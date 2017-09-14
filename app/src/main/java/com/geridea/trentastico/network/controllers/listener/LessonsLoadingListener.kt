@@ -14,13 +14,5 @@ interface LessonsLoadingListener {
     fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int)
     fun onNetworkErrorHappened(error: Exception, operationId: Int)
     fun onParsingErrorHappened(exception: Exception, operationId: Int)
-    fun onNothingFoundInCache()
-
-    /**
-     * Called when the loading of the request has been aborted. Can happen when the request could
-     * not be fetched and it doesn't allow retrials.
-     */
-    fun onLoadingAborted(operationId: Int)
-
 
 }

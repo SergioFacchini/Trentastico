@@ -88,4 +88,13 @@ class WeekTime {
         result = 31 * result + weekNumber
         return result
     }
+
+    val millis: Long
+        get() {
+            val calendar = CalendarUtils.clearCalendar
+            calendar.set(Calendar.WEEK_OF_YEAR, weekNumber)
+            calendar.set(Calendar.YEAR, year)
+
+            return calendar.timeInMillis
+        }
 }

@@ -56,4 +56,7 @@ open class WeekInterval {
         return result
     }
 
+    val startMs: Long
+      get() = start.millis
+
 }

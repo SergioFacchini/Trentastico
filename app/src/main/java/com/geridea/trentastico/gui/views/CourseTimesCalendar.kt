@@ -132,13 +132,28 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                 if (scheduledLessons.isNotEmpty()) {
                     //If empty, the covered interval calculation will fail
                     addEnabledInterval(calculateCoveredInterval(scheduledLessons))
-                    addEventsFromLessonsSet(scheduledLessons)
+                    addLessons(scheduledLessons)
+
+                    if(!loader.hasAnythingBeingLoaded){
+                        goToFirstEnabledDayIfNeeded()
+                    }
                 }
 
                 currentLessonTypes.addAll(lessonTypes)
 
                 onLoadingOperationNotify.dispatch(message)
             }
+        }
+    }
+
+    private fun goToFirstEnabledDayIfNeeded() {
+        //We send the user to the first enabled day only in case the lessons of the user still
+        // didn't start
+        val enabledDayMillis = calculateFirstEnabledDayMillis()
+        if(CalendarUtils.debuggableToday.timeInMillis < enabledDayMillis){
+            val calendar = CalendarUtils.clearCalendar
+            calendar.timeInMillis = enabledDayMillis
+            goToDate(calendar)
         }
     }
 
@@ -157,15 +172,15 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
 
     fun loadEvents() = loader.loadAndAddLessons()
 
-    private fun addEventsFromLessonsSet(lessons: List<LessonSchedule>) =
-            addEvents(makeEventsFromLessonsSet(lessons))
+    private fun addLessons(lessons: List<LessonSchedule>) =
+            addEvents(makeEventsFromLessons(lessons))
 
     private fun isSameDay(date1: Calendar, date2: Calendar): Boolean =
             date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR) &&
                     date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH) &&
                     date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH)
 
-    private fun makeEventsFromLessonsSet(lessons: List<LessonSchedule>): List<WeekViewEvent> {
+    private fun makeEventsFromLessons(lessons: List<LessonSchedule>): List<WeekViewEvent> {
         return lessons.mapTo(ArrayList()) {
             LessonToEventAdapter(it, ColorDispenser.getColor(it.lessonTypeId))
         }

@@ -65,6 +65,11 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
         invalidate()
     }
 
+    /**
+     * @return the milliseconds of the first enabled day
+     */
+    protected fun calculateFirstEnabledDayMillis(): Long = enabledIntervals.minBy { it.startMs }!!.startMs
+
     protected fun addEnabledInterval(interval: WeekInterval) {
         enabledIntervals.add(interval)
         postInvalidate()
