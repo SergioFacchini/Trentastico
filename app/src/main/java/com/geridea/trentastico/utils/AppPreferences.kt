@@ -13,6 +13,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 object AppPreferences {
 
@@ -32,12 +34,23 @@ object AppPreferences {
         extraCourses = readExtraCourses()
     }
 
+
+    var nextLessonsUpdateTime: Long by LongPreferences("NEXT_LESSONS_UPDATE_TIME", 0)
+
     /**
-     * @return true if tis the first time the application is run
+     * @return true if it is the first time the application is run
      */
-    var isFirstRun: Boolean
-        get() = sharedPreferences.getBoolean("IS_FIRST_RUN", true)
-        set(isFirstRun) = putBoolean("IS_FIRST_RUN", isFirstRun)
+    var isFirstRun: Boolean                            by BooleanPreferences("IS_FIRST_RUN", true)
+    var wasAppInBetaMessageShown: Boolean              by BooleanPreferences("APP_IS_IN_BETA_MESSAGE_SHOWN", false)
+    var wasLastTimesCheckSuccessful: Boolean           by BooleanPreferences("WAS_LAST_TIMES_CHECK_SUCCESSFUL", true)
+    var isSearchForLessonChangesEnabled: Boolean       by BooleanPreferences("SEARCH_LESSON_CHANGES", true)
+    var isNotificationForLessonChangesEnabled: Boolean by BooleanPreferences("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
+    var nextLessonNotificationsEnabled: Boolean        by BooleanPreferences("NEXT_LESSON_NOTIFICATION_ENABLED", true)
+    var nextLessonNotificationsFixed: Boolean          by BooleanPreferences("NEXT_LESSON_NOTIFICATION_FIXED", true)
+
+    var calendarFontSize: Int        by IntPreferences("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE)
+    var calendarNumOfDaysToShow: Int by IntPreferences("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
+
 
     var studyCourse: StudyCourse
         get() {
@@ -87,16 +100,6 @@ object AppPreferences {
         lessonTypesToHideIds = ArrayList()
     }
 
-    private fun putInt(key: String, num: Int) {
-        val editor = sharedPreferences.edit()
-        editor.putInt(key, num)
-        editor.apply()
-    }
-
-    var calendarNumOfDaysToShow: Int
-        get() = sharedPreferences.getInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
-        set(numOfDays) = putInt("CALENDAR_NUM_OF_DAYS_TO_SHOW", numOfDays)
-
     private fun readExtraCourses(): ExtraCoursesList {
         val courses = ExtraCoursesList()
 
@@ -125,12 +128,6 @@ object AppPreferences {
         BugLogger.setExtraCourses(extraCourses)
     }
 
-    private fun putString(key: String, value: String?) {
-        val editor = sharedPreferences.edit()
-        editor.putString(key, value)
-        editor.apply()
-    }
-
     fun hasExtraCourseWithId(lessonTypeId: String): Boolean = extraCourses.hasCourseWithId(lessonTypeId)
 
     fun removeExtraCoursesOfCourse(studyCourse: StudyCourse) {
@@ -154,48 +151,6 @@ object AppPreferences {
         return if(jsonString == null) null else JSONObject(jsonString)
     }
 
-    private fun putLong(key: String, time: Long) {
-        val editor = sharedPreferences.edit()
-        editor.putLong(key, time)
-        editor.apply()
-    }
-
-    var nextLessonsUpdateTime: Long
-        get() = sharedPreferences.getLong("NEXT_LESSONS_UPDATE_TIME", 0)
-        set(time) = putLong("NEXT_LESSONS_UPDATE_TIME", time)
-
-    var wasLastTimesCheckSuccessful: Boolean
-      get() = sharedPreferences.getBoolean("WAS_LAST_TIMES_CHECK_SUCCESSFUL", true)
-      set(value) = putBoolean("WAS_LAST_TIMES_CHECK_SUCCESSFUL", value)
-
-    private fun putBoolean(key: String, bool: Boolean) {
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(key, bool)
-        editor.apply()
-    }
-
-    var isSearchForLessonChangesEnabled: Boolean
-        get() = sharedPreferences.getBoolean("SEARCH_LESSON_CHANGES", true)
-        set(enabled) = putBoolean("SEARCH_LESSON_CHANGES", enabled)
-
-    var isNotificationForLessonChangesEnabled: Boolean
-        get() = sharedPreferences.getBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
-        set(enabled) = putBoolean("SHOW_NOTIFICATION_ON_LESSON_CHANGES", enabled)
-
-    fun areNextLessonNotificationsEnabled(): Boolean =
-            sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", true)
-
-    fun setNextLessonNotificationsEnabled(enabled: Boolean) {
-        putBoolean("NEXT_LESSON_NOTIFICATION_ENABLED", enabled)
-    }
-
-    fun areNextLessonNotificationsFixed(): Boolean =
-            sharedPreferences.getBoolean("NEXT_LESSON_NOTIFICATION_FIXED", false)
-
-    fun setNextLessonNotificationsFixed(fixed: Boolean) {
-        putBoolean("NEXT_LESSON_NOTIFICATION_FIXED", fixed)
-    }
-
     val androidId: String
         get() {
             var androidId = sharedPreferences.getString("ANDROID_ID", "")
@@ -211,8 +166,69 @@ object AppPreferences {
         get() = ShownNotificationsTracker.fromJson(sharedPreferences.getString("NEXT_LESSON_NOTIFICATION_TRACKER", "{}"))
         set(tracker) = putString("NEXT_LESSON_NOTIFICATION_TRACKER", tracker.toJson().toString())
 
-    var calendarFontSize: Int
-        get() = sharedPreferences.getInt("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE)
-        set(sizeInSp) = putInt("CALENDAR_FONT_SIZE", sizeInSp)
+
+    /////////////
+    // UTILS
+    /////////////
+
+    private fun putBoolean(key: String, bool: Boolean) {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(key, bool)
+        editor.apply()
+    }
+
+    private fun putInt(key: String, num: Int) {
+        val editor = sharedPreferences.edit()
+        editor.putInt(key, num)
+        editor.apply()
+    }
+
+    private fun putString(key: String, value: String?) {
+        val editor = sharedPreferences.edit()
+        editor.putString(key, value)
+        editor.apply()
+    }
+
+    private fun putLong(key: String, time: Long) {
+        val editor = sharedPreferences.edit()
+        editor.putLong(key, time)
+        editor.apply()
+    }
+
+    //////////////
+    // PROPERTIES
+    //////////////
+
+    class BooleanPreferences(val key: String, val default: Boolean): ReadWriteProperty<AppPreferences, Boolean> {
+
+        override fun getValue(thisRef: AppPreferences, property: KProperty<*>): Boolean =
+                thisRef.sharedPreferences.getBoolean(key, default)
+
+        override fun setValue(thisRef: AppPreferences, property: KProperty<*>, value: Boolean) {
+            thisRef.putBoolean(key, value)
+        }
+    }
+
+    class IntPreferences(private val key: String, private val default: Int) : ReadWriteProperty<AppPreferences, Int> {
+        override fun getValue(thisRef: AppPreferences, property: KProperty<*>): Int =
+                thisRef.sharedPreferences.getInt(key, default)
+
+        override fun setValue(thisRef: AppPreferences, property: KProperty<*>, value: Int) {
+            thisRef.putInt(key, value)
+        }
+
+    }
+
+    class LongPreferences(private val key: String, private val default: Long) : ReadWriteProperty<AppPreferences, Long> {
+        override fun getValue(thisRef: AppPreferences, property: KProperty<*>): Long =
+                thisRef.sharedPreferences.getLong(key, default)
+
+        override fun setValue(thisRef: AppPreferences, property: KProperty<*>, value: Long) {
+            thisRef.putLong(key, value)
+        }
+
+    }
+
 
 }
+

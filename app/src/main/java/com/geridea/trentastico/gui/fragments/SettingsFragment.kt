@@ -89,8 +89,8 @@ class SettingsFragment : FragmentWithMenuItems() {
         shownNotificationOnLessonChanges.isChecked = AppPreferences.isNotificationForLessonChangesEnabled
 
         //Next lesson notification
-        showNextLessonNotification.isChecked = AppPreferences.areNextLessonNotificationsEnabled()
-        makeNotificationFixedSwitch.isChecked = AppPreferences.areNextLessonNotificationsFixed()
+        showNextLessonNotification.isChecked  = AppPreferences.nextLessonNotificationsEnabled
+        makeNotificationFixedSwitch.isChecked = AppPreferences.nextLessonNotificationsFixed
 
         isLoading = false
 
@@ -119,7 +119,7 @@ class SettingsFragment : FragmentWithMenuItems() {
             return
         }
 
-        AppPreferences.setNextLessonNotificationsEnabled(checked)
+        AppPreferences.nextLessonNotificationsEnabled = checked
         makeNotificationFixedSwitch.isEnabled = checked
 
         if (checked) {
@@ -141,7 +141,7 @@ class SettingsFragment : FragmentWithMenuItems() {
             return
         }
 
-        AppPreferences.setNextLessonNotificationsFixed(checked)
+        AppPreferences.nextLessonNotificationsFixed = checked
 
         //If we have any notification, we have to update them:
         startNextLessonNotificationService()

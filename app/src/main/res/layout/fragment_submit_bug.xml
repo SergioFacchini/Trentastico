@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:gravity="left"
             android:paddingTop="10dp"
-            android:text="Se vuoi che io ti ricontatti, puoi lasciare qua sotto il tuo nome ed indirizzo email: "
+            android:text="Nel caso volessi essere ricontattato, puoi lasciare qua sotto il tuo nome ed indirizzo email: "
             android:textColor="@color/colorForeground"
             android:textSize="14sp"
             android:textStyle="italic" />

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundMain">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Benvenuto in Trentastco!"
+            android:textColor="@color/colorForeground"
+            android:textSize="24sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:text="L'app definitiva degli orari di Università di Trento!"
+            android:textColor="@color/colorForeground"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:contentDescription="Logo"
+            android:padding="10dp"
+            android:src="@drawable/ic_launcher" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left|center_vertical"
+            android:paddingTop="10dp"
+            android:text="L'app che stai utilizzando è in beta testing. Questo significa che è già stata testata da un gruppo di hacker super smanettoni, ma può ancora presentare problemini o malfunzionamenti! Ti invito a segnalarmi qualsiasi cosa strana o non funzionante che trovi in modo che io possa porvi rimedio. Per farlo commenta la pagina del Play Store da cui hai scaricato l'app o usa l'apposito modulo nella sezione Feedback. Detto questo, ti auguro un happy uni!\n\n-- Slava Rublev"
+            android:textColor="@color/colorForeground"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+        <Button
+            android:id="@+id/okBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#3b1629"
+            android:screenOrientation="portrait"
+            android:text="va bene!"
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+</ScrollView>

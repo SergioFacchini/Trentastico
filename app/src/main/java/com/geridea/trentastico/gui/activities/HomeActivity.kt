@@ -1,15 +1,18 @@
 package com.geridea.trentastico.gui.activities
 
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import butterknife.BindView
@@ -24,6 +27,7 @@ import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
+import kotlinx.android.synthetic.main.dialog_trentastico_is_a_beta.view.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -33,6 +37,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var currentFragment: Fragment? = null
     private var currentMenuSettings: IMenuSettings = NoMenuSettings.instance
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +57,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //Showing the version
         val versionText = Views.find<TextView>(navigationView.getHeaderView(0), R.id.version_text)
-        versionText.text = "Versione: ${DebugUtils.computeVersionName()}"
+        versionText.text = "Versione: " + DebugUtils.computeVersionName()
 
         //Removing debug stuff from menu
         if (!IS_IN_DEBUG_MODE) {
@@ -71,6 +76,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //Setting calendar fragment as the first fragment
         switchToCalendarFragment()
+
+        //While the app is in beta we will show the user it's times
+        if(!AppPreferences.wasAppInBetaMessageShown) {
+            AppPreferences.wasAppInBetaMessageShown = true
+            TrentasticoIsABetaDialog(this).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -169,4 +180,16 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.content_frame, nextFragment)
                 .commit()
     }
+}
+
+
+internal class TrentasticoIsABetaDialog(context: Context) : AlertDialog(context) {
+
+    init {
+        val view = Views.inflate<View>(context, R.layout.dialog_trentastico_is_a_beta)
+        view.okBtn.setOnClickListener { dismiss() }
+
+        setView(view)
+    }
+
 }

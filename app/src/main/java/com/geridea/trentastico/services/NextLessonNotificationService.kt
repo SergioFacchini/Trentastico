@@ -47,7 +47,7 @@ class NextLessonNotificationService : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val starter = (intent.getSerializableExtra(EXTRA_STARTER) ?: NLNStarter.UNKNOWN) as NLNStarter
 
-        if (!AppPreferences.areNextLessonNotificationsEnabled()) {
+        if (!AppPreferences.nextLessonNotificationsEnabled) {
             //The notifications are disabled: nothing to do!
             stopSelf()
             return Service.START_NOT_STICKY
@@ -234,7 +234,7 @@ class NextLessonNotificationService : Service() {
                 .setColor(resources.getColor(R.color.colorNotification))
                 .setAutoCancel(true)
 
-        if (AppPreferences.areNextLessonNotificationsFixed()) {
+        if (AppPreferences.nextLessonNotificationsFixed) {
             notificationBuilder.setOngoing(true)
         }
 
