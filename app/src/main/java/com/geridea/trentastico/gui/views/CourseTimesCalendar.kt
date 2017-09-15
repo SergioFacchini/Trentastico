@@ -129,6 +129,8 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
             //We cannot use post() here since it's possible that the calendar is still not
             //attached to the fragment
             UIUtils.runOnMainThread {
+                currentLessonTypes.addAll(lessonTypes)
+
                 if (scheduledLessons.isNotEmpty()) {
                     //If empty, the covered interval calculation will fail
                     addEnabledInterval(calculateCoveredInterval(scheduledLessons))
@@ -138,8 +140,6 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                         goToFirstEnabledDayIfNeeded()
                     }
                 }
-
-                currentLessonTypes.addAll(lessonTypes)
 
                 onLoadingOperationNotify.dispatch(message)
             }
