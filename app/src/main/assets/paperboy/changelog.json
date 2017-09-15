@@ -3,6 +3,9 @@
     "name": "Novità in 0.9.7",
     "items": [
       {
+        "type": "2",
+        "title": "Corretti gli orari di alcune lezioni che erano erroneamente spostate in avanti.<br><strong>Grazie a Matteo Filippini e Alessandro Gerevini per le segnalazioni!</strong>"
+      }, {
         "type": "3",
         "title": "Risolto un errore che non permetteva la disattivazione dell'aggiornamento delle lezioni"
       }, {

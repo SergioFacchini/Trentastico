@@ -23,8 +23,8 @@ import okhttp3.FormBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.ref.WeakReference
+import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
@@ -271,7 +271,7 @@ internal class LoadStudyCoursesRequest(
                 ?: throw ServerResponseParsingException("Cannot find current year JSON!")
     }
 
-    override fun notifyOnBeforeSend() {; }
+    override fun notifyOnBeforeSend() { ; }
 
 }
 
@@ -388,22 +388,25 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
      * @param json the json to parse
      */
     private fun parseLessons(json: JSONObject): List<LessonSchedule> {
+        val lessonStartFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.ITALIAN)
+
         val numLessons = json.getInt("contains_data")
 
         return (0 until numLessons).map {
             val lessonJson = json[it.toString()] as JSONObject
-            //The timestamp in the json is already set to the hour of the start of the lesson, but
-            //not in the Rome timezone, we need to adjust it by removing two hours from it.
-            //In order to get the ending of the lesson, we need to sum to the timestamp the
-            //difference the starting and ending time
-            val startTimestamp = lessonJson.getLong("timestamp") * 1000 - TimeUnit.HOURS.toMillis(2)
+
+            //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
+            //We have to build the timing ourselves
+            val lessonDateString = lessonJson.getString("data")+" "+lessonJson.getString("ora_inizio")
+            val startTimestamp    = lessonStartFormat.parse(lessonDateString).time
+
             val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
-            val endingMins = convertToMinutes(lessonJson.getString("ora_fine"))
+            val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
 
             val teachingName = lessonJson.getString("nome_insegnamento")
 
             LessonSchedule(
-                    id               = generateLessonScheduleId(lessonJson),
+                    id               = generateLessonScheduleId(lessonJson, startTimestamp),
                     lessonTypeId     = lessonJson.getString("codice_insegnamento"),
                     teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
                     rooms            = calculateRooms(lessonJson.getString("aula")),
@@ -415,14 +418,13 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         }
     }
 
-    private fun generateLessonScheduleId(lessonJson: JSONObject): String {
+    private fun generateLessonScheduleId(lessonJson: JSONObject, startTimestamp: Long): String {
         //The lesson schedules do not have any identifier. We introduce it by merging the lesson
         //code with the lesson's timestamp and it's room
         val teachingId = lessonJson.getString("codice_insegnamento")
-        val lessonTimestamp = lessonJson.getLong("timestamp")
-        val roomName = lessonJson.getString("aula")
+        val roomName   = lessonJson.getString("aula")
 
-        return "$teachingId@$lessonTimestamp@$roomName"
+        return "$teachingId@$startTimestamp@$roomName"
     }
 
     private fun calculateRooms(string: String): List<Room> {

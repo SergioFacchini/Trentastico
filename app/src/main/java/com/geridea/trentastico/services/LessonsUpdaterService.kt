@@ -181,9 +181,15 @@ class LessonsUpdaterService : Service() {
             }
 
             override fun onLessonsDiffed(result: LessonsDiffResult) {
-                if (result.hasSomeDifferences && AppPreferences.isNotificationForLessonChangesEnabled) {
+                val shouldNotificationBeShown = result.hasSomeDifferences && AppPreferences.isNotificationForLessonChangesEnabled
+                val shouldNextNotificationBeSkipped = AppPreferences.debugSkipNextLessonChangedNotification
+
+                if (shouldNotificationBeShown && !shouldNextNotificationBeSkipped) {
                     showLessonsChangedNotification(result, courseNameToDisplay)
                 }
+
+                //We performed the check, now the next notifications should are enabled
+                AppPreferences.debugSkipNextLessonChangedNotification = false
 
                 rescheduleAndTerminateIfRequestsFinished(ScheduleType.CHECK_PERFORMED)
             }

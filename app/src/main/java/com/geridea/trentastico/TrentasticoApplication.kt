@@ -8,6 +8,7 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
+import com.geridea.trentastico.utils.VersionManager
 
 /*
  * Created with ♥ by Slava on 03/03/2017.
@@ -31,6 +32,8 @@ class TrentasticoApplication : Application() {
 
         AppPreferences.init(this)
         ColorDispenser.init(this)
+
+        VersionManager.checkForVersionChangeCode()
 
         BugLogger.init()
 
