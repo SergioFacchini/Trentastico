@@ -20,16 +20,6 @@
             android:text="Benvenuto in Trentastco!"
             android:textColor="@color/colorForeground"
             android:textSize="24sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="10dp"
-            android:text="L'app definitiva degli orari di Università di Trento!"
-            android:textColor="@color/colorForeground"
-            android:textSize="16sp" />
-
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
@@ -43,7 +33,7 @@
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
             android:paddingTop="10dp"
-            android:text="L'app che stai utilizzando è in beta testing. Questo significa che è già stata testata da un gruppo di hacker super smanettoni, ma può ancora presentare problemini o malfunzionamenti! Ti invito a segnalarmi qualsiasi cosa strana o non funzionante che trovi in modo che io possa porvi rimedio. Per farlo commenta la pagina del Play Store da cui hai scaricato l'app o usa l'apposito modulo nella sezione Feedback. Detto questo, ti auguro un buon inizio anno!\n\n-- Slava Rublev"
+            android:text="L'app che stai utilizzando è in beta testing. Questo significa che è già stata testata da una manciata di hacker smanettoni, ma può ancora presentare problemini o malfunzionamenti! Ti invito a segnalarmi qualsiasi cosa strana o non funzionante che trovi in modo che possa porvi rimedio. Per farlo commenta la pagina del Play Store da cui hai scaricato l'app o usa l'apposito modulo nella sezione Feedback. Detto questo, ti auguro un buon inizio anno e tanti 30 e lode.\n\n-- Slava Rublev"
             android:textColor="@color/colorForeground"
             android:textSize="14sp"
             android:textStyle="italic" />
