@@ -27,7 +27,7 @@ import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.Teacher
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.orIfEmpty
@@ -98,7 +98,7 @@ class CalendarFragment : FragmentWithMenuItems() {
             else -> R.drawable.ic_calendar_show_1
         }
 
-    private fun showClickedEventPopup( clickedEvent: LessonSchedule, lessonType: LessonTypeNew){
+    private fun showClickedEventPopup( clickedEvent: LessonSchedule, lessonType: LessonType){
         if (context != null) {
             ShowLessonDetailsDialog(context, clickedEvent, lessonType).show()
         }
@@ -118,7 +118,7 @@ class CalendarFragment : FragmentWithMenuItems() {
         @BindView(R.id.extra_course)
         lateinit var extraCourseDescription: View
 
-        private val lessonTypes: Collection<LessonTypeNew>
+        private val lessonTypes: Collection<LessonType>
 
         private var wasSomeVisibilityChanged = false
 
@@ -167,7 +167,7 @@ class CalendarFragment : FragmentWithMenuItems() {
     internal inner class ShowLessonDetailsDialog(
             context: Context,
             event: LessonSchedule,
-            lessonType: LessonTypeNew) : AlertDialog(context) {
+            lessonType: LessonType) : AlertDialog(context) {
 
         init {
             val view = Views.inflate<View>(context, R.layout.dialog_calendar_event)

@@ -9,9 +9,6 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.geridea.trentastico.Config
-import com.geridea.trentastico.database_new.SQL_CREATE_CACHED_LIBRARY_TIMES
-import com.geridea.trentastico.database_new.SQL_CREATE_LESSON_TYPES
-import com.geridea.trentastico.database_new.SQL_CREATE_SCHEDULED_LESSONS
 
 class CacheDbHelper(context: Context) : SQLiteOpenHelper(context, Config.DATABASE_NAME, null, Config.DATABASE_VERSION) {
 

@@ -1,4 +1,4 @@
-package com.geridea.trentastico.database_new
+package com.geridea.trentastico.database
 
 import android.content.ContentValues
 import android.content.Context
@@ -9,8 +9,6 @@ import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.Params
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
-import com.geridea.trentastico.database.CacheDbHelper
-import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.*
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
@@ -24,7 +22,7 @@ import java.util.*
  * Created with ♥ by Slava on 21/08/2017.
  */
 
-class CacherNew(context: Context) {
+class Cacher(context: Context) {
 
     private val writableDatabase: SQLiteDatabase = CacheDbHelper(context).writableDatabase
 
@@ -46,14 +44,14 @@ class CacherNew(context: Context) {
     //-------------------
     // Lesson schedules
     //-------------------
-    fun getStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonTypeNew>) -> Unit) {
+    fun getStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonType>) -> Unit) {
         runJobInBackground {
             callback(_fetchStandardScheduledLesson(), fetchStandardLessonTypes())
         }
     }
 
     private fun _fetchStandardScheduledLesson(): MutableList<LessonSchedule> {
-        val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns, "$SL_is_extra = 0")
+        val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns, "${SL_is_extra} = 0")
 
         return fetchScheduledLessonsFromCursor(cursor)
     }
@@ -93,11 +91,11 @@ class CacherNew(context: Context) {
     }
 
     private fun purgeStandardScheduledLessons() {
-        writableDatabase.delete(SL_TABLE_NAME, SL_is_extra+"= 0", arrayOf())
+        writableDatabase.delete(SL_TABLE_NAME, SL_is_extra +"= 0", arrayOf())
     }
 
     private fun purgeExtraScheduledLessons(lessonTypeId: String) {
-        writableDatabase.delete(SL_TABLE_NAME, SL_lessonTypeId+"= ? AND is_extra = 1", arrayOf(lessonTypeId))
+        writableDatabase.delete(SL_TABLE_NAME, SL_lessonTypeId +"= ? AND is_extra = 1", arrayOf(lessonTypeId))
     }
 
     fun fetchExtraScheduledLessons(lessonTypeId: String, callback: (lessons: List<LessonSchedule>) -> Unit) {
@@ -108,7 +106,7 @@ class CacherNew(context: Context) {
 
     private fun _fetchExtraScheduledLessons(lessonTypeId: String): List<LessonSchedule> {
         val cursor = writableDatabase.query(SL_TABLE_NAME, scheduledLessonsColumns,
-                "$SL_is_extra = 1 AND $SL_lessonTypeId = ? ", arrayOf(lessonTypeId)
+                "${SL_is_extra} = 1 AND ${SL_lessonTypeId} = ? ", arrayOf(lessonTypeId)
         )
 
         return fetchScheduledLessonsFromCursor(cursor)
@@ -159,13 +157,13 @@ class CacherNew(context: Context) {
     /**
      * Fetches standard lesson types, if any
      */
-    private fun fetchStandardLessonTypes(): List<LessonTypeNew> {
+    private fun fetchStandardLessonTypes(): List<LessonType> {
         val cursor = writableDatabase.query(LT_TABLE_NAME, lessonTypesColumns)
 
-        val lessonTypes = mutableListOf<LessonTypeNew>()
+        val lessonTypes = mutableListOf<LessonType>()
         while (cursor.moveToNext()) {
             val lessonTypeId = cursor.getString(LT_id)
-            lessonTypes.add(LessonTypeNew(
+            lessonTypes.add(LessonType(
                     id               = lessonTypeId,
                     name             = cursor.getString(LT_name),
                     teachers         = JSONArray(cursor.getString(LT_teachers)).mapObjects { Teacher(it) },
@@ -179,15 +177,15 @@ class CacherNew(context: Context) {
         return lessonTypes
     }
 
-    fun cacheStandardLessonTypes(lessonTypeNew: Collection<LessonTypeNew>){
+    fun cacheStandardLessonTypes(lessonType: Collection<LessonType>){
         runJobInBackground {
             purgeStandardLessonTypes()
 
-            lessonTypeNew.forEach { cacheLessonType(it) }
+            lessonType.forEach { cacheLessonType(it) }
         }
     }
 
-    fun fetchLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
+    fun fetchLessonTypes(callback: (List<LessonType>) -> Unit) {
         runJobInBackground {
             callback(fetchStandardLessonTypes())
         }
@@ -198,13 +196,13 @@ class CacherNew(context: Context) {
         writableDatabase.delete(LT_TABLE_NAME, null, null)
     }
 
-    private fun cacheLessonType(lessonTypeNew: LessonTypeNew) {
+    private fun cacheLessonType(lessonType: LessonType) {
             val values = ContentValues()
-            values.put(LT_id,               lessonTypeNew.id)
-            values.put(LT_name,             lessonTypeNew.name)
-            values.put(LT_teachers,         lessonTypeNew.teachers.toJsonArray { it.toJson() }.toString())
-            values.put(LT_kindOfLesson,     lessonTypeNew.kindOfLesson)
-            values.put(LT_partitioningName, lessonTypeNew.partitioningName)
+            values.put(LT_id,               lessonType.id)
+            values.put(LT_name,             lessonType.name)
+            values.put(LT_teachers,         lessonType.teachers.toJsonArray { it.toJson() }.toString())
+            values.put(LT_kindOfLesson,     lessonType.kindOfLesson)
+            values.put(LT_partitioningName, lessonType.partitioningName)
 
             writableDatabase.insert(LT_TABLE_NAME, null, values)
     }
@@ -257,14 +255,14 @@ class CacherNew(context: Context) {
 
     fun getCachedLibraryOpeningTimes(day: Calendar, fetchDeadCacheToo: Boolean, listener: CachedLibraryOpeningTimesListener){
         //Querying
-        val selection = "$CLIBT_DAY = ? AND $CLIBT_CACHED_IN_MS >= ?"
+        val selection = "${CLIBT_DAY} = ? AND ${CLIBT_CACHED_IN_MS} >= ?"
 
         val lastValidMs = (if (fetchDeadCacheToo) -1 else calculateLastValidLibraryCachePeriod()).toString()
         val selectionArgs = arrayOf(LibraryOpeningTimes.formatDay(day), lastValidMs)
 
 
         val cursor = writableDatabase.query(
-            CACHED_LIBRARY_TIMES_TABLE_NAME, libraryTimesColumns, selection, selectionArgs
+                CACHED_LIBRARY_TIMES_TABLE_NAME, libraryTimesColumns, selection, selectionArgs
         )
         if (cursor.moveToFirst()) {
             listener.onCachedOpeningTimesFound(buildLibraryOpeningTimesFromCursor(cursor))
@@ -345,16 +343,16 @@ val scheduledLessonsColumns = arrayOf(
 )
 
 internal val SQL_CREATE_SCHEDULED_LESSONS =
-  """CREATE TABLE $SL_TABLE_NAME (
-      $SL_id               VARCHAR(100) PRIMARY KEY,
-      $SL_room             VARCHAR(500) NOT NULL,
-      $SL_teachersNames    VARCHAR(200) NOT NULL,
-      $SL_subject          VARCHAR(100) NOT NULL,
-      $SL_partitioningName VARCHAR(100),
-      $SL_startsAt         INT NOT NULL,
-      $SL_endsAt           INT NOT NULL,
-      $SL_lessonTypeId     VARCHAR(100) NOT NULL,
-      $SL_is_extra         INT NOT NULL
+  """CREATE TABLE ${SL_TABLE_NAME} (
+      ${SL_id}               VARCHAR(100) PRIMARY KEY,
+      ${SL_room}             VARCHAR(500) NOT NULL,
+      ${SL_teachersNames}    VARCHAR(200) NOT NULL,
+      ${SL_subject}          VARCHAR(100) NOT NULL,
+      ${SL_partitioningName} VARCHAR(100),
+      ${SL_startsAt}         INT NOT NULL,
+      ${SL_endsAt}           INT NOT NULL,
+      ${SL_lessonTypeId}     VARCHAR(100) NOT NULL,
+      ${SL_is_extra}         INT NOT NULL
   )"""
 
 
@@ -369,16 +367,16 @@ val LT_kindOfLesson     = "kindOfLesson"
 val LT_partitioningName = "partitioningName"
 
 val lessonTypesColumns = arrayOf(
-    LT_id, LT_name, LT_teachers, LT_teachers, LT_kindOfLesson, LT_partitioningName
+        LT_id, LT_name, LT_teachers, LT_teachers, LT_kindOfLesson, LT_partitioningName
 )
 
 internal val SQL_CREATE_LESSON_TYPES =
-  """CREATE TABLE $LT_TABLE_NAME (
-      $LT_id               VARCHAR(100) PRIMARY KEY,
-      $LT_name             VARCHAR(150) NOT NULL,
-      $LT_teachers         VARCHAR(500) NOT NULL,
-      $LT_kindOfLesson     VARCHAR(50)  NOT NULL,
-      $LT_partitioningName VARCHAR(100)
+  """CREATE TABLE ${LT_TABLE_NAME} (
+      ${LT_id}               VARCHAR(100) PRIMARY KEY,
+      ${LT_name}             VARCHAR(150) NOT NULL,
+      ${LT_teachers}         VARCHAR(500) NOT NULL,
+      ${LT_kindOfLesson}     VARCHAR(50)  NOT NULL,
+      ${LT_partitioningName} VARCHAR(100)
   )"""
 
 
@@ -395,15 +393,15 @@ val CLIBT_PSICOLOGIA   = "psicologia"
 val CLIBT_CACHED_IN_MS = "cached_in_ms"
 
 val libraryTimesColumns = arrayOf(
-    CLIBT_DAY, CLIBT_BUC, CLIBT_CIAL, CLIBT_MESIANO, CLIBT_POVO, CLIBT_PSICOLOGIA, CLIBT_CACHED_IN_MS
+        CLIBT_DAY, CLIBT_BUC, CLIBT_CIAL, CLIBT_MESIANO, CLIBT_POVO, CLIBT_PSICOLOGIA, CLIBT_CACHED_IN_MS
 )
 
 internal val SQL_CREATE_CACHED_LIBRARY_TIMES =
-        """CREATE TABLE $CACHED_LIBRARY_TIMES_TABLE_NAME (
-        $CLIBT_DAY          CHAR(10) NOT NULL PRIMARY KEY,
-        $CLIBT_BUC          VARCHAR(10) NOT NULL,
-        $CLIBT_CIAL         VARCHAR(10) NOT NULL,
-        $CLIBT_MESIANO      VARCHAR(10) NOT NULL,
-        $CLIBT_POVO         VARCHAR(10) NOT NULL,
-        $CLIBT_PSICOLOGIA   VARCHAR(10) NOT NULL,
-        $CLIBT_CACHED_IN_MS INT NOT NULL )"""
+        """CREATE TABLE ${CACHED_LIBRARY_TIMES_TABLE_NAME} (
+        ${CLIBT_DAY}          CHAR(10) NOT NULL PRIMARY KEY,
+        ${CLIBT_BUC}          VARCHAR(10) NOT NULL,
+        ${CLIBT_CIAL}         VARCHAR(10) NOT NULL,
+        ${CLIBT_MESIANO}      VARCHAR(10) NOT NULL,
+        ${CLIBT_POVO}         VARCHAR(10) NOT NULL,
+        ${CLIBT_PSICOLOGIA}   VARCHAR(10) NOT NULL,
+        ${CLIBT_CACHED_IN_MS} INT NOT NULL )"""

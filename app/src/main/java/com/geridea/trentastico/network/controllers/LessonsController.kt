@@ -1,8 +1,8 @@
 package com.geridea.trentastico.network.controllers
 
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
-import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.gui.views.requestloader.CacheLessonsLoadingMessage
 import com.geridea.trentastico.gui.views.requestloader.CacheLoadingFinishedMessage
 import com.geridea.trentastico.gui.views.requestloader.ExtraLessonsLoadingMessage
@@ -33,7 +33,7 @@ import kotlin.collections.ArrayList
  * Created with ♥ by Slava on 18/08/2017.
  */
 
-class LessonsControllerNew(private val sender: RequestSender, private val cacher: CacherNew) {
+class LessonsController(private val sender: RequestSender, private val cacher: Cacher) {
 
     /**
      * Loads from the website all the study courses and returns them through the listener
@@ -63,7 +63,7 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
     fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
             cacher.loadTodaysLessons(todaysLessonsListener)
 
-    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) =
+    fun loadCachedLessonTypes(callback: (List<LessonType>) -> Unit) =
             cacher.fetchLessonTypes(callback)
 
     fun loadLessonTypesOfStudyCourse(studyCourse: StudyCourse, listener: ListLessonsListener) =
@@ -77,7 +77,7 @@ class LessonsControllerNew(private val sender: RequestSender, private val cacher
             listener.onLoadingMessageDispatched(CacheLoadingFinishedMessage(operation.messageId))
 
             if (cachedLessons.isNotEmpty()) {
-                val lessonType = LessonTypeNew(extraCourse, !AppPreferences.isLessonTypeToHide(extraCourse.lessonTypeId))
+                val lessonType = LessonType(extraCourse, !AppPreferences.isLessonTypeToHide(extraCourse.lessonTypeId))
                 listener.onLessonsLoaded(cachedLessons, arrayListOf(lessonType), -1)
             } else {
                 //No cache
@@ -347,17 +347,17 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         onTeachingsAndLessonsLoaded(lessonTypes, lessons)
     }
 
-    private fun doAllLessonTypesHaveSamePartitioning(lessonTypes: List<LessonTypeNew>): Boolean =
+    private fun doAllLessonTypesHaveSamePartitioning(lessonTypes: List<LessonType>): Boolean =
             lessonTypes.allSame { it.partitioningName }
 
     /**
      * Hook function that notifies that the loading has been completed
      */
     abstract fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
+            lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>)
 
-    private fun parseLessonTypes(json: JSONObject): List<LessonTypeNew> {
+    private fun parseLessonTypes(json: JSONObject): List<LessonType> {
         //To get a list of teaching we might do the followings:
         // * Make another request to obtain a list
         // * Scan all the items in search of the teachings
@@ -371,7 +371,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                     val lessonTypeId = it.getString("codice_insegnamento")
                     val teachingName = it.getString("nome_insegnamento")
                     val partitioningName = calculatePartitioningName(teachingName)
-                    LessonTypeNew(
+                    LessonType(
                             id                    = lessonTypeId,
                             name                  = calculateTeachingWithoutPartitioning(teachingName),
                             teachersNamesUnparsed = it.getString("docente"),
@@ -523,14 +523,14 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
 internal class LoadStandardLessonsRequest(
         studyCourse: StudyCourse,
         listener: LessonsLoadingListener,
-        private val cacher: CacherNew,
+        private val cacher: Cacher,
         private val assignColors: Boolean = true
 ) : BasicLessonRequest(studyCourse) {
 
     private val weakListener: WeakReference<LessonsLoadingListener> = WeakReference(listener)
 
     override fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
+            lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
 
         if (assignColors) {
@@ -582,7 +582,7 @@ internal class LessonTypesOfStudyCourseRequest(
     override fun notifyOnBeforeSend() {; }
 
     override fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
+            lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
         listener.onLessonTypesRetrieved(lessonTypes)
     }
@@ -593,7 +593,7 @@ internal class LessonTypesOfStudyCourseRequest(
 internal abstract class BasicExtraLessonRequest(val extraCourse: ExtraCourse) : BasicLessonRequest(extraCourse.studyCourse) {
 
     final override fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
+            lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
 
 
@@ -605,13 +605,13 @@ internal abstract class BasicExtraLessonRequest(val extraCourse: ExtraCourse) : 
 
     abstract fun onExtraCourseLessonsLoaded(
             loadedLessons: List<LessonSchedule>,
-            lessonType: LessonTypeNew)
+            lessonType: LessonType)
 }
 
 internal class LessonsOfExtraCourseRequest(
         extraCourse: ExtraCourse,
         listener: LessonsLoadingListener,
-        private val cacher: CacherNew
+        private val cacher: Cacher
 ) : BasicExtraLessonRequest(extraCourse) {
 
     private val weakListener = WeakReference(listener)
@@ -638,7 +638,7 @@ internal class LessonsOfExtraCourseRequest(
 
     override fun onExtraCourseLessonsLoaded(
             loadedLessons: List<LessonSchedule>,
-            lessonType: LessonTypeNew) {
+            lessonType: LessonType) {
         cacher.cacheExtraScheduledLessons(loadedLessons)
 
         weakListener.get()?.onLessonsLoaded(loadedLessons, listOf(lessonType), operationId)
@@ -656,7 +656,7 @@ internal class DiffStudyCourseRequest(
         course: StudyCourse,
         private val listener: DiffLessonsListener,
         private val cachedLessons: List<LessonSchedule>,
-        private val cacher: CacherNew,
+        private val cacher: Cacher,
         private val lastValidTimestamp: Long?) : BasicLessonRequest(course) {
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
@@ -670,7 +670,7 @@ internal class DiffStudyCourseRequest(
     }
 
     override fun onTeachingsAndLessonsLoaded(
-            lessonTypes: List<LessonTypeNew>,
+            lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
         //caching results
         cacher.cacheStandardLessonTypes(lessonTypes)
@@ -696,7 +696,7 @@ internal class DiffExtraCourseRequest(
         course: ExtraCourse,
         val listener: DiffLessonsListener,
         private val cachedLessons: List<LessonSchedule>,
-        private val cacher: CacherNew,
+        private val cacher: Cacher,
         private val lastValidTimestamp: Long?) : BasicExtraLessonRequest(course) {
 
     override fun notifyResponseProcessingFailure(e: Exception, sender: RequestSender) {
@@ -711,7 +711,7 @@ internal class DiffExtraCourseRequest(
 
     override fun onExtraCourseLessonsLoaded(
             loadedLessons: List<LessonSchedule>,
-            lessonType: LessonTypeNew) {
+            lessonType: LessonType) {
         //caching results
         cacher.cacheExtraScheduledLessons(loadedLessons)
 

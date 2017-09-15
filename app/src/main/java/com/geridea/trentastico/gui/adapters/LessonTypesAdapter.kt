@@ -13,22 +13,22 @@ import android.widget.TextView
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.utils.AppPreferences
 
 class LessonTypesAdapter(
         context: Context,
-        lessonTypes: Collection<LessonTypeNew>,
-        private val alreadyTakenLessons: List<LessonTypeNew>) : ItemsAdapter<LessonTypeNew>(context) {
+        lessonTypes: Collection<LessonType>,
+        private val alreadyTakenLessons: List<LessonType>) : ItemsAdapter<LessonType>(context) {
 
     init {
         itemsList = lessonTypes.sortedBy { it.name }
     }
 
-    override fun createView(item: LessonTypeNew, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View =
+    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View =
             inflater.inflate(R.layout.itm_lesson_type, parent, false)
 
-    override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
+    override fun bindView(item: LessonType, pos: Int, convertView: View) {
         Views.find<TextView> (convertView, R.id.lesson_type).text    = item.name
         Views.find<TextView> (convertView, R.id.teachers_names).text = item.buildTeachersNamesOrDefault()
 

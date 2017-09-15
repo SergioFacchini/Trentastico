@@ -8,7 +8,7 @@ package com.geridea.trentastico.model
 /**
  * @param kindOfLesson "Lezione", "Laboratorio", ecc...
  */
-data class LessonTypeNew(
+data class LessonType(
         val id: String,
         val name: String,
         val teachers: List<Teacher>,
@@ -44,7 +44,7 @@ data class LessonTypeNew(
             //There were some problems with original equals due to the fact that lesson types might
             //be set visible or not. This caused one visible and one hidden lesson type to be
             //considered different
-            if (other is LessonTypeNew) other.id == this.id else false
+            if (other is LessonType) other.id == this.id else false
 
     override fun hashCode(): Int {
         var result = id.hashCode()

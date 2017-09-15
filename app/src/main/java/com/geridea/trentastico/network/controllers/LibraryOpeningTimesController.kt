@@ -5,7 +5,7 @@ package com.geridea.trentastico.network.controllers
  * Created with ♥ by Slava on 30/04/2017.
  */
 
-import com.geridea.trentastico.database_new.CacherNew
+import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.model.LibraryOpeningTimes
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener
@@ -15,7 +15,7 @@ import okhttp3.FormBody
 import java.util.*
 import java.util.regex.Pattern
 
-class LibraryOpeningTimesController(val sender: RequestSender, val cacher: CacherNew) {
+class LibraryOpeningTimesController(val sender: RequestSender, val cacher: Cacher) {
 
     fun getLibraryOpeningTimes(day: Calendar, listener: LibraryOpeningTimesListener) =
             //Trying to retrieve all the data from the cache. If unavailable, get it from network or

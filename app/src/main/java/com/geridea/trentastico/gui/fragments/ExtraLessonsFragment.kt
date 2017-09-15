@@ -26,7 +26,7 @@ import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter
 import com.geridea.trentastico.gui.views.CourseSelectorView
 import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
@@ -233,7 +233,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
          * List of lessons of the actually selected standard course. The user should be not able to
          * add a lesson that he/she is already taking
          */
-        private var lessonTypesOfCourse: List<LessonTypeNew>? = null
+        private var lessonTypesOfCourse: List<LessonType>? = null
 
         /**
          * Dispatched when the user has selected a course and that course has been added to preferences.
@@ -266,7 +266,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         @OnItemClick(R.id.lessons_list)
         fun onLessonSelected(position: Int) {
-            val lessonType = lessonsList.getItemAtPosition(position) as LessonTypeNew
+            val lessonType = lessonsList.getItemAtPosition(position) as LessonType
 
             if (canLessonTypeBeSelected(lessonType)) {
                 ColorDispenser.associateColorToTypeIfNeeded(lessonType.id)
@@ -280,7 +280,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             }
         }
 
-        private fun canLessonTypeBeSelected(lesson: LessonTypeNew) =
+        private fun canLessonTypeBeSelected(lesson: LessonType) =
                 !AppPreferences.hasExtraCourseWithId(lesson.id) &&
                         lessonTypesOfCourse!!.none { it.id == lesson.id }
 
@@ -292,7 +292,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         override fun onParsingErrorHappened(e: Exception) = showErrorMessage()
 
-        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonTypeNew>) = activity.runOnUiThread {
+        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = activity.runOnUiThread {
             if (lessonTypes.isEmpty()) {
                 lessonsFoundText.text = "Non vi sono lezioni nel corso di studi selezionato; probabilmente le lezioni non sono ancora state pianificate dall'università. Se pensi che sia un errore, torna indietro e controlla di aver selezionato il corso corretto."
             } else {

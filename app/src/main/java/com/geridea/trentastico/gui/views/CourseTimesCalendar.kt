@@ -12,7 +12,7 @@ import com.alamkanak.weekview.DateTimeInterpreter
 import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.network.LessonsLoader
 import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.UIUtils
@@ -30,7 +30,7 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
     /**
      * Dispatched when the user clicks a specific event
      */
-    val onEventClicked = Signal2<LessonSchedule, LessonTypeNew>()
+    val onEventClicked = Signal2<LessonSchedule, LessonType>()
 
     /**
      * Dispatched when something worth of note is happening in the calendar. For instance starting
@@ -39,7 +39,7 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
      */
     val onLoadingOperationNotify = Signal1<ILoadingMessage>()
 
-    val currentLessonTypes: MutableSet<LessonTypeNew> = mutableSetOf()
+    val currentLessonTypes: MutableSet<LessonType> = mutableSetOf()
 
     //Data
     private lateinit var loader: LessonsLoader

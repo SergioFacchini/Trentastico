@@ -7,11 +7,11 @@ package com.geridea.trentastico.network.controllers.listener
 
 import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 
 interface LessonsLoadingListener {
     fun onLoadingMessageDispatched(operation: ILoadingMessage)
-    fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int)
+    fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonType>, operationId: Int)
     fun onNetworkErrorHappened(error: Exception, operationId: Int)
     fun onParsingErrorHappened(exception: Exception, operationId: Int)
 

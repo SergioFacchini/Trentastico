@@ -4,12 +4,12 @@ package com.geridea.trentastico.network
  * Created with ♥ by Slava on 11/03/2017.
  */
 
+import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
-import com.geridea.trentastico.database_new.CacherNew
 import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
-import com.geridea.trentastico.network.controllers.LessonsControllerNew
+import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController
 import com.geridea.trentastico.network.controllers.SendFeedbackController
 import com.geridea.trentastico.network.controllers.listener.*
@@ -20,16 +20,16 @@ import java.util.*
 object Networker {
 
     //Executors
-    private lateinit var lessonsControllerNew: LessonsControllerNew
+    private lateinit var lessonsController: LessonsController
     private lateinit var sendFeedbackController: SendFeedbackController
     private lateinit var libraryOpeningTimes: LibraryOpeningTimesController
 
-    fun init(cacherNew: CacherNew) {
+    fun init(cacher: Cacher) {
         val requestSender = RequestSender()
 
         sendFeedbackController = SendFeedbackController(requestSender)
-        libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacherNew)
-        lessonsControllerNew   = LessonsControllerNew(requestSender, cacherNew)
+        libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacher)
+        lessonsController = LessonsController(requestSender, cacher)
 
     }
 
@@ -37,18 +37,18 @@ object Networker {
     // Study courses
     //----------------------------
     fun loadStudyCourses(listener: CoursesLoadingListener) =
-            lessonsControllerNew.loadStudyCourses(listener)
+            lessonsController.loadStudyCourses(listener)
 
     //----------------------------
     // Lessons
     //----------------------------
 
     fun loadLessons(listener: LessonsLoadingListener) =
-            lessonsControllerNew.loadStandardLessons(listener, AppPreferences.studyCourse)
+            lessonsController.loadStandardLessons(listener, AppPreferences.studyCourse)
 
     fun loadExtraCourses(lessonsLoader: LessonsLoadingListener) {
         AppPreferences.extraCourses.forEach {
-            lessonsControllerNew.loadExtraCourseLessons(lessonsLoader, it)
+            lessonsController.loadExtraCourseLessons(lessonsLoader, it)
         }
     }
 
@@ -56,7 +56,7 @@ object Networker {
             lastValidTimestamp: Long,
             listener: DiffLessonsListener) {
 
-        lessonsControllerNew.diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp, listener)
+        lessonsController.diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp, listener)
     }
 
     fun diffExtraCourseLessonsWithCachedOnes(
@@ -64,38 +64,38 @@ object Networker {
             lastValidTimestamp: Long? = null,
             listener: DiffLessonsListener) {
 
-        lessonsControllerNew.diffExtraCourseLessonsWithCachedOnes(extraCourse, lastValidTimestamp, listener)
+        lessonsController.diffExtraCourseLessonsWithCachedOnes(extraCourse, lastValidTimestamp, listener)
     }
 
     /**
      * Loads lesson types that are currently cached. The list of the callback is empty if there are
      * no cached lesson types.
      */
-    fun loadCachedLessonTypes(callback: (List<LessonTypeNew>) -> Unit) {
-        lessonsControllerNew.loadCachedLessonTypes(callback)
+    fun loadCachedLessonTypes(callback: (List<LessonType>) -> Unit) {
+        lessonsController.loadCachedLessonTypes(callback)
     }
 
     fun loadLessonTypesOfStudyCourse(
             studyCourse: StudyCourse,
-            listener: ListLessonsListener) = lessonsControllerNew.loadLessonTypesOfStudyCourse(studyCourse, listener)
+            listener: ListLessonsListener) = lessonsController.loadLessonTypesOfStudyCourse(studyCourse, listener)
 
     fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
-            lessonsControllerNew.loadTodaysCachedLessons(todaysLessonsListener)
+            lessonsController.loadTodaysCachedLessons(todaysLessonsListener)
 
     /**
      * Removes all the cached extra lessons of the lesson type having the given id
      */
-    fun purgeExtraCourse(lessonTypeId: String) = lessonsControllerNew.removeExtraCoursesWithLessonType(lessonTypeId)
+    fun purgeExtraCourse(lessonTypeId: String) = lessonsController.removeExtraCoursesWithLessonType(lessonTypeId)
 
     /**
      * Deletes all the cache about lessons and lesson types.
      */
-    fun obliterateCache() = lessonsControllerNew.obliterateCache()
+    fun obliterateCache() = lessonsController.obliterateCache()
 
     /**
      * Deletes all the cache about the currently chosen study course
      */
-    fun purgeStudyCourseCache() = lessonsControllerNew.purgeStudyCourseCache()
+    fun purgeStudyCourseCache() = lessonsController.purgeStudyCourseCache()
 
     //----------------------------
     // Feedback

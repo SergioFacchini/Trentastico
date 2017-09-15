@@ -5,7 +5,7 @@ import com.geridea.trentastico.gui.views.requestloader.NetworkErrorMessage
 import com.geridea.trentastico.gui.views.requestloader.ParsingErrorMessage
 import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.network.controllers.listener.LessonsLoadingListener
 import com.geridea.trentastico.utils.AppPreferences
 import com.threerings.signals.Signal1
@@ -18,7 +18,7 @@ class LessonsLoader : LessonsLoadingListener {
      * Dispatched when the loading of events has been completed and the calendar can be made
      * visible.
      */
-    val onLoadingOperationSuccessful = Signal3<List<LessonSchedule>, List<LessonTypeNew>, ILoadingMessage>()
+    val onLoadingOperationSuccessful = Signal3<List<LessonSchedule>, List<LessonType>, ILoadingMessage>()
 
     /**
      * Dispatched when the calendar starts loading something from internet. The argument is that
@@ -48,7 +48,7 @@ class LessonsLoader : LessonsLoadingListener {
     override fun onLoadingMessageDispatched(operation: ILoadingMessage)
             = onLoadingMessageDispatched.dispatch(operation)
 
-    override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonTypeNew>, operationId: Int) {
+    override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonType>, operationId: Int) {
         numRequestsBeingLoaded--
 
         //Filtering lessons that should not be shown

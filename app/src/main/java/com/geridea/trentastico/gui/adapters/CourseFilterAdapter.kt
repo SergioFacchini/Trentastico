@@ -11,29 +11,29 @@ import android.widget.TextView
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
-import com.geridea.trentastico.model.LessonTypeNew
+import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal1
 import java.util.*
 
-class CourseFilterAdapter(context: Context, lessons: Collection<LessonTypeNew>) : ItemsAdapter<LessonTypeNew>(context) {
+class CourseFilterAdapter(context: Context, lessons: Collection<LessonType>) : ItemsAdapter<LessonType>(context) {
 
     /**
      * Dispatched when the user clicked on the visibility checkbox of a lesson type, that means that
      * it's visibility has been changed and this have to be reflected on the calendar. The dispatched
      * LessonType already has it's visibility changed.
      */
-    val onLessonTypeVisibilityChanged = Signal1<LessonTypeNew>()
+    val onLessonTypeVisibilityChanged = Signal1<LessonType>()
 
     init {
         itemsList = lessons.sortedWith(Comparator { a, b ->  a.name.compareTo(b.name)})
     }
 
-    override fun createView(item: LessonTypeNew, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View
+    override fun createView(item: LessonType, pos: Int, parent: ViewGroup, inflater: LayoutInflater): View
             = inflater.inflate(R.layout.itm_course, parent, false)
 
-    override fun bindView(item: LessonTypeNew, pos: Int, convertView: View) {
+    override fun bindView(item: LessonType, pos: Int, convertView: View) {
         //Color on the left
         val color = ColorDispenser.getColor(item.id)
         Views.find<ImageView>(convertView, R.id.color).setImageDrawable(ColorDrawable(color))
