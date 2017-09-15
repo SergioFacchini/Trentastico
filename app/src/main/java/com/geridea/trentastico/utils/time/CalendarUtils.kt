@@ -37,9 +37,7 @@ object CalendarUtils {
         }
 
     fun getCalendarWithMillis(millis: Long): Calendar {
-        val romeTimezone = TimeZone.getTimeZone("Europe/Rome")
-
-        val instance = Calendar.getInstance(romeTimezone)
+        val instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"))
         instance.clear()
         instance.firstDayOfWeek = Calendar.MONDAY
         instance.timeInMillis = millis

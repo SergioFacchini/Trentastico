@@ -21,7 +21,7 @@ object Config {
      */
     val WAITING_TIME_AFTER_A_REQUEST_FAILED = 5000
 
-    val LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER = true
+    val LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER = false
 
     val DEBUG_SERVER_URL = "http://ideagenesi.com/trentastico/lessons.json"
 

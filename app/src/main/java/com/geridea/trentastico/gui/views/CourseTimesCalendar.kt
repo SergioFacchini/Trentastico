@@ -17,7 +17,7 @@ import com.geridea.trentastico.network.LessonsLoader
 import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
-import com.geridea.trentastico.utils.time.WeekInterval
+import com.geridea.trentastico.utils.time.DayInterval
 import com.threerings.signals.Signal1
 import com.threerings.signals.Signal2
 import java.text.SimpleDateFormat
@@ -149,22 +149,22 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
     private fun goToFirstEnabledDayIfNeeded() {
         //We send the user to the first enabled day only in case the lessons of the user still
         // didn't start
-        val enabledDayMillis = calculateFirstEnabledDayMillis()
-        if(CalendarUtils.debuggableToday.timeInMillis < enabledDayMillis){
+        val firstEnabledDay = calculateFirstEnabledDayMillis()
+        if(CalendarUtils.debuggableToday.timeInMillis < firstEnabledDay.millis){
             val calendar = CalendarUtils.clearCalendar
-            calendar.timeInMillis = enabledDayMillis
+            calendar.timeInMillis = firstEnabledDay.millis
             goToDate(calendar)
         }
     }
 
     /**
-     * @return the [WeekInterval] that starts with the earliest lesson and ends with the latest one
+     * @return the [DayInterval] that starts with the earliest lesson and ends with the latest one
      */
-    private fun calculateCoveredInterval(scheduledLessons: List<LessonSchedule>): WeekInterval {
+    private fun calculateCoveredInterval(scheduledLessons: List<LessonSchedule>): DayInterval {
         val minTime = scheduledLessons.map { it.startsAt }.min()
         val maxTime = scheduledLessons.map { it.endsAt   }.max()
 
-        return WeekInterval(
+        return DayInterval(
             CalendarUtils.getCalendarWithMillis(minTime!!),
             CalendarUtils.getCalendarWithMillis(maxTime!!)
         )

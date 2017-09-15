@@ -20,9 +20,8 @@ import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
-import com.geridea.trentastico.utils.time.WeekDayTime
-import com.geridea.trentastico.utils.time.WeekInterval
-import com.geridea.trentastico.utils.time.WeekTime
+import com.geridea.trentastico.utils.time.DayInterval
+import com.geridea.trentastico.utils.time.DayOfYear
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -47,7 +46,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     private val mDisabledBackgroundColor = 0xFF888888.toInt()
     private val mPastDayBackgroundColor = 0xFFD5D5D5.toInt()
 
-    private val enabledIntervals = ArrayList<WeekInterval>()
+    private val enabledIntervals = ArrayList<DayInterval>()
 
     protected fun addEvents(weekViewEvents: List<WeekViewEvent>) {
         sortAndCacheEvents(weekViewEvents)
@@ -68,9 +67,9 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     /**
      * @return the milliseconds of the first enabled day
      */
-    protected fun calculateFirstEnabledDayMillis(): Long = enabledIntervals.minBy { it.startMs }!!.startMs
+    protected fun calculateFirstEnabledDayMillis(): DayOfYear = enabledIntervals.map { it.from }.min()!!
 
-    protected fun addEnabledInterval(interval: WeekInterval) {
+    protected fun addEnabledInterval(interval: DayInterval) {
         enabledIntervals.add(interval)
         postInvalidate()
     }
@@ -690,7 +689,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
     }
 
     private fun isADisabledDay(day: Calendar): Boolean =
-            enabledIntervals.none { WeekTime(day) in it }
+            enabledIntervals.none { interval -> day.timeInMillis in interval }
 
     /**
      * Get the time and date where the user clicked on.
@@ -727,11 +726,11 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
      * @param canvas The canvas to draw upon.
      */
     private fun drawEvents(date: Calendar, startFromPixel: Float, canvas: Canvas) {
-        val todayWDT = WeekDayTime(date)
+        val dayOfYear = DayOfYear(date)
 
         if (mEventRects != null && mEventRects!!.size > 0) {
             for (i in mEventRects!!.indices) {
-                if (mEventRects!![i].weekDayTime == todayWDT) {
+                if (mEventRects!![i].weekDayTime == dayOfYear) {
                     // Calculate top.
                     val top = mHourHeight.toFloat() * 24f * mEventRects!![i].top / 1440 + mCurrentOrigin.y + mHeaderTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2 + mEventMarginVertical.toFloat()
 
@@ -841,7 +840,7 @@ open class CustomWeekView @JvmOverloads constructor(private val mContext: Contex
          * This reference is hold here as a cache in order to prevent to make calculations on the
          * calendar, which is very slow.
          */
-        val weekDayTime: WeekDayTime = WeekDayTime(event.startTime)
+        val weekDayTime = DayOfYear(event.startTime)
 
     }
 
