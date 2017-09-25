@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 0.9.8",
+    "items": [
+      {
+        "type": "2",
+        "title": "Risolto un problema che non permetteva di caricarsi al corso di Mediazione Linguistica 1° anno (e forse anche altri corsi)<br><strong>Grazie a Sara Vincis per la segnalazione!</strong>"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.7",
     "items": [
       {
