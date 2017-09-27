@@ -20,15 +20,14 @@ object VersionManager {
             return
         }
 
-        when {
-            lastVersion <= 7 -> { //0.9.6
+        when (lastVersion) {
+            in 6..7 -> { //0.9.5 - 0.9.6
                 //I've fixed that "timestamp" inconsistency bug.
                 AppPreferences.debugSkipNextLessonChangedNotification = true
             }
         }
 
         AppPreferences.lastVersionExecuted = thisVersion
-
     }
 
 }
