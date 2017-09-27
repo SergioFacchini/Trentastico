@@ -46,7 +46,7 @@ object AppPreferences {
     var isSearchForLessonChangesEnabled: Boolean       by BooleanPreferences("SEARCH_LESSON_CHANGES", true)
     var isNotificationForLessonChangesEnabled: Boolean by BooleanPreferences("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
     var nextLessonNotificationsEnabled: Boolean        by BooleanPreferences("NEXT_LESSON_NOTIFICATION_ENABLED", true)
-    var nextLessonNotificationsFixed: Boolean          by BooleanPreferences("NEXT_LESSON_NOTIFICATION_FIXED", true)
+    var nextLessonNotificationsFixed: Boolean          by BooleanPreferences("NEXT_LESSON_NOTIFICATION_FIXED", false)
 
     /**
      * True whenever the user must not be notified of the next lessons update.
