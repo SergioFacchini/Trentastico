@@ -56,20 +56,22 @@ class Cacher(context: Context) {
         return fetchScheduledLessonsFromCursor(cursor)
     }
 
-    fun cacheStandardScheduledLessons(lessons: Collection<LessonSchedule>) {
-        runJobInBackground {
-            purgeStandardScheduledLessons()
-
-            lessons.forEach { cacheScheduledLesson(it, false) }
-        }
-    }
-
     fun cacheExtraScheduledLessons(lessons: Collection<LessonSchedule>) {
         runJobInBackground {
             if (lessons.isNotEmpty()) {
-                purgeExtraScheduledLessons(lessons.first().lessonTypeId)
+                try {
+                    //starting transaction
+                    writableDatabase.beginTransaction()
 
-                lessons.forEach { cacheScheduledLesson(it, true) }
+                    //caching lessons
+                    purgeExtraScheduledLessons(lessons.first().lessonTypeId)
+                    lessons.forEach { cacheScheduledLesson(it, true) }
+
+                    //setting transaction successful
+                    writableDatabase.setTransactionSuccessful()
+                } finally {
+                    writableDatabase.endTransaction()
+                }
             }
         }
     }
@@ -177,11 +179,26 @@ class Cacher(context: Context) {
         return lessonTypes
     }
 
-    fun cacheStandardLessonTypes(lessonType: Collection<LessonType>){
+    fun cacheStandardLessonTypesAndLessons(types: Collection<LessonType>, lessons: List<LessonSchedule>){
         runJobInBackground {
-            purgeStandardLessonTypes()
+            //Starting transaction
+            try {
+                writableDatabase.beginTransaction()
 
-            lessonType.forEach { cacheLessonType(it) }
+                //Caching lesson types
+                purgeStandardLessonTypes()
+                types.forEach { cacheLessonType(it) }
+
+                //Caching lessons
+                purgeStandardScheduledLessons()
+                lessons.forEach { cacheScheduledLesson(it, false) }
+
+                //Finishing transaction
+                writableDatabase.setTransactionSuccessful()
+            } finally {
+                //Finishing transaction
+                writableDatabase.endTransaction()
+            }
         }
     }
 

@@ -538,8 +538,7 @@ internal class LoadStandardLessonsRequest(
             lessonTypes.forEach { ColorDispenser.associateColorToTypeIfNeeded(it.id)  }
         }
 
-        cacher.cacheStandardLessonTypes(lessonTypes)
-        cacher.cacheStandardScheduledLessons(loadedLessons)
+        cacher.cacheStandardLessonTypesAndLessons(lessonTypes, loadedLessons)
 
         val listener = weakListener.get()
         listener?.onLessonsLoaded(loadedLessons, lessonTypes, operationId)
@@ -674,8 +673,7 @@ internal class DiffStudyCourseRequest(
             lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
         //caching results
-        cacher.cacheStandardLessonTypes(lessonTypes)
-        cacher.cacheStandardScheduledLessons(loadedLessons)
+        cacher.cacheStandardLessonTypesAndLessons(lessonTypes, loadedLessons)
 
         //performing the diff
         val loadedList = ArrayList<LessonSchedule>(loadedLessons)
