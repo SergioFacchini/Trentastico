@@ -48,6 +48,7 @@ class ShownNotificationsTracker {
     fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean =
         if (!shownNotificationsIds.contains(lesson.id.hashCode().toLong())) true
         else CollectionUtils.isOneOf(starter,
+                                NLNStarter.DEBUG,
                                 NLNStarter.PHONE_BOOT,
                                 NLNStarter.STUDY_COURSE_CHANGE,
                                 NLNStarter.NOTIFICATIONS_SWITCHED_ON)

@@ -232,7 +232,7 @@ class NextLessonNotificationService : Service() {
                 .setContentTitle(lesson.subject)
                 .setContentText(lesson.synopsis)
                 .setColor(resources.getColor(R.color.colorNotification))
-                .setAutoCancel(true)
+
 
         if (AppPreferences.nextLessonNotificationsFixed) {
             notificationBuilder.setOngoing(true)

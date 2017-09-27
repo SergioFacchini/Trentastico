@@ -8,6 +8,9 @@
       }, {
         "type": "2",
         "title": "Risolto un problema che non permetteva di caricarsi al corso di Mediazione Linguistica 1° anno (e forse anche altri corsi)<br><strong>Grazie a Sara Vincis per la segnalazione!</strong>"
+      }, {
+        "type": "3",
+        "title": "La notifica della prossima lezione non sparisce più quando si pigia sopra (può ancora essere eliminata con uno swipe)"
       }
     ]
   },{
