@@ -21,8 +21,8 @@
             android:textColor="@color/colorForeground"
             android:textSize="24sp" />
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:contentDescription="Logo"
             android:padding="10dp"

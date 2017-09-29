@@ -61,21 +61,14 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
         when {
             numberOfVisibleDays <= 2 -> object : DateTimeInterpreter {
                 override fun interpretDate(date: Calendar): String {
-                    val formattedDay = FORMAT_ONLY_DAY.format(date.time)
+                    val formattedDay = FORMAT_ONLY_DAY.format(date.time).toUpperCase()
 
                     val day = CalendarUtils.debuggableToday
-                    if (isSameDay(day, date)) return "Oggi ($formattedDay)"
+                    if (isSameDay(day, date)) return "$formattedDay\nOggi"
 
                     day.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(day, date)) return "Domani ($formattedDay)"
-
-                    day.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(day, date)) return "Dopodomani ($formattedDay)"
-
-                    day.add(Calendar.DAY_OF_MONTH, -3)
-                    return if (isSameDay(day, date))
-                        "Ieri ($formattedDay)"
-                    else DATE_FORMAT.format(date.time)
+                    return if (isSameDay(day, date)) "$formattedDay\nDomani"
+                    else formattedDay+"\n"+ DAY_AND_MONTH_FORMAT.format(date.time)
                 }
 
                 override fun interpretTime(hour: Int): String = interpretHours(hour)
@@ -83,19 +76,15 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
 
             numberOfVisibleDays <= 5 -> object : DateTimeInterpreter {
                 override fun interpretDate(date: Calendar): String {
+                    val dayName = FORMAT_ONLY_DAY.format(date.time).toUpperCase()
+
                     val day = CalendarUtils.debuggableToday
-                    if (isSameDay(day, date)) return "Oggi"
+                    if (isSameDay(day, date)) return "$dayName\nOggi"
 
                     day.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(day, date)) return "Domani"
+                    if (isSameDay(day, date)) return "$dayName\nDomani"
 
-                    day.add(Calendar.DAY_OF_MONTH, +1)
-                    if (isSameDay(day, date)) return "Dopodomani"
-
-                    day.add(Calendar.DAY_OF_MONTH, -3)
-                    if (isSameDay(day, date)) return "Ieri"
-
-                    return DATE_FORMAT_MEDIUM.format(date.time)
+                    return dayName+"\n"+DAY_AND_MONTH_FORMAT.format(date.time)
                 }
 
                 override fun interpretTime(hour: Int): String = interpretHours(hour)
@@ -103,15 +92,10 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
             else -> // > 6
                 object : DateTimeInterpreter {
                     override fun interpretDate(date: Calendar): String {
-                        val firstDay = CalendarUtils.calculateFirstDayOfWeek()
-                        val lastDay = firstDay.clone() as Calendar
-                        lastDay.add(Calendar.WEEK_OF_MONTH, +1)
+                        val dayName     = DATE_FORMAT_SHORT_ONLY_DAY.format(date.time).toUpperCase()
+                        val dayAndMonth = DAY_AND_MONTH_SHORT_FORMAT.format(date.time)
 
-                        return if (date == firstDay || date.after(firstDay) && date.before(lastDay)) {
-                            DATE_FORMAT_SHORT_ONLY_DAY.format(date.time)
-                        } else {
-                            DATE_FORMAT_SHORT.format(date.time)
-                        }
+                        return dayName+"\n"+dayAndMonth
                     }
 
                     override fun interpretTime(hour: Int): String = interpretHours(hour)
@@ -248,12 +232,10 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
     }
 
     companion object {
-
-        private val DATE_FORMAT                = SimpleDateFormat("EEEE d MMMM", Locale.ITALIAN)
-        private val DATE_FORMAT_MEDIUM         = SimpleDateFormat("EE dd/MM",    Locale.ITALIAN)
-        private val DATE_FORMAT_SHORT          = SimpleDateFormat("dd/MM",       Locale.ITALIAN)
-        private val DATE_FORMAT_SHORT_ONLY_DAY = SimpleDateFormat("EE",          Locale.ITALIAN)
-        private val FORMAT_ONLY_DAY            = SimpleDateFormat("EEEE",        Locale.ITALIAN)
+        private val DAY_AND_MONTH_FORMAT       = SimpleDateFormat("d MMMM", Locale.ITALIAN)
+        private val DAY_AND_MONTH_SHORT_FORMAT = SimpleDateFormat("d MMM",  Locale.ITALIAN)
+        private val DATE_FORMAT_SHORT_ONLY_DAY = SimpleDateFormat("EE",     Locale.ITALIAN)
+        private val FORMAT_ONLY_DAY            = SimpleDateFormat("EEEE",   Locale.ITALIAN)
     }
 
 }

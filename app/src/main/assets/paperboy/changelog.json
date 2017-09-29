@@ -3,6 +3,9 @@
     "name": "Novità in 0.9.8",
     "items": [
       {
+        "type": "1",
+        "title": "Ora nel calendario è sempre visibile il giorno della settimana!"
+      }, {
         "type": "2",
         "title": "Risolto un problema con qualche dispositivo in cui sparivano le lezioni durante gli aggiornamenti."
       }, {
