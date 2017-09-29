@@ -26,6 +26,7 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
+import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.Teacher
@@ -55,9 +56,22 @@ class CalendarFragment : FragmentWithMenuItems() {
         calendar.prepareForNumberOfVisibleDays(AppPreferences.calendarNumOfDaysToShow)
         calendar.setEventsTextSize(AppPreferences.calendarFontSize)
         calendar.goToDate(CalendarUtils.debuggableToday)
-        calendar.onLoadingOperationNotify.connect { operation -> loaderView.processMessage(operation) }
         calendar.onEventClicked.connect { clickedEvent, lessonType ->
             showClickedEventPopup(clickedEvent, lessonType)
+        }
+
+        var goneToTodayDay = false
+        calendar.onLoadingOperationNotify.connect { operation ->
+
+            if (!goneToTodayDay && operation is TerminalMessage) {
+                calendar.postDelayed({
+                    calendar.goToDate(CalendarUtils.debuggableToday)
+                }, 100)
+                goneToTodayDay = true
+            }
+
+
+            loaderView.processMessage(operation)
         }
 
         calendar.loadEvents()
@@ -78,7 +92,6 @@ class CalendarFragment : FragmentWithMenuItems() {
             //Note we cannot call here calendar.getNumberOfVisibleDays() because this might have
             //been called before onCreate
             item.setIcon(getChangeViewMenuIcon(AppPreferences.calendarNumOfDaysToShow))
-
             item.setOnMenuItemClickListener { i ->
                 val numOfDays = calendar.rotateNumOfDaysShown()
                 i.setIcon(getChangeViewMenuIcon(numOfDays))

@@ -7,6 +7,9 @@
         "title": "Ora nel calendario è sempre visibile il giorno della settimana!"
       }, {
         "type": "2",
+        "title": "Caricando il calendario nella visualizzazione a 7 giorni ora viene aperto il giorno corrente invece di un altro (me l'avete segnalato in tantissimiii!)"
+      }, {
+        "type": "2",
         "title": "Risolto un problema con qualche dispositivo in cui sparivano le lezioni durante gli aggiornamenti."
       }, {
         "type": "2",
