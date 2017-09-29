@@ -53,6 +53,8 @@ object AppPreferences {
      */
     var debugSkipNextLessonChangedNotification: Boolean by BooleanPreferences("SKIP_NEXT_LESSON_CHANGED_NOTIFICATION", false)
 
+    var debugIsInDebugMode: Boolean by BooleanPreferences("IS_DEBUG_MODE", false)
+
     var calendarFontSize: Int        by IntPreferences("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE)
     var calendarNumOfDaysToShow: Int by IntPreferences("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
 

@@ -20,6 +20,7 @@
         android:textSize="24sp" />
 
     <TextView
+        android:id="@+id/slava"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
