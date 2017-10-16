@@ -672,6 +672,10 @@ internal class DiffStudyCourseRequest(
     override fun onTeachingsAndLessonsLoaded(
             lessonTypes: List<LessonType>,
             loadedLessons: List<LessonSchedule>) {
+
+        //We might have gotten new lesson types during update //Fixes #148
+        lessonTypes.forEach { ColorDispenser.associateColorToTypeIfNeeded(it.id)  }
+
         //caching results
         cacher.cacheStandardLessonTypesAndLessons(lessonTypes, loadedLessons)
 

@@ -29,7 +29,7 @@ object ColorDispenser {
 
     }
 
-    fun associateColorToTypeIfNeeded(lessonTypeId: String) {
+    fun associateColorToTypeIfNeeded(lessonTypeId: String): Int {
         if(!typeColorAssociations.containsKey(lessonTypeId)){
             currentColorIndex = (currentColorIndex + 1) % teachingsColors.size
             typeColorAssociations.put(lessonTypeId, teachingsColors[currentColorIndex])
@@ -37,6 +37,7 @@ object ColorDispenser {
             save()
         }
 
+        return teachingsColors[currentColorIndex]
     }
 
     private fun save() {
@@ -47,8 +48,7 @@ object ColorDispenser {
     }
 
     fun getColor(lessonTypeId: String): Int =
-            typeColorAssociations[lessonTypeId] ?:
-                    throw RuntimeException("A color that is not associated has been requested!")
+            typeColorAssociations[lessonTypeId] ?: associateColorToTypeIfNeeded(lessonTypeId) //Fixes #148
 
 
     fun dissociateColorFromType(lessonTypeId: String) {

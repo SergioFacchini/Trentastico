@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 0.9.8.5",
+    "items": [
+      {
+        "type": "2",
+        "title": "Risolto un problema che su qualche telefono faceva crashare l'app all'avvio.<br><strong>Grazie a Cesare Grigoletto la segnalazione!</strong>"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.8",
     "items": [
       {

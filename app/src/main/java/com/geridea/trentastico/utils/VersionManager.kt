@@ -1,6 +1,7 @@
 package com.geridea.trentastico.utils
 
 import com.geridea.trentastico.BuildConfig
+import com.geridea.trentastico.network.Networker
 
 
 /*
@@ -20,11 +21,16 @@ object VersionManager {
             return
         }
 
-        when (lastVersion) {
-            in 6..7 -> { //0.9.5 - 0.9.6
-                //I've fixed that "timestamp" inconsistency bug.
-                AppPreferences.debugSkipNextLessonChangedNotification = true
-            }
+
+        if(lastVersion in 6..7) { //0.9.5 - 0.9.6
+            //I've fixed that "timestamp" inconsistency bug.
+            AppPreferences.debugSkipNextLessonChangedNotification = true
+        }
+
+        if(lastVersion in 6..9) { //0.9.5 - 0.9.8
+            //Last fixes for the problem about the service that crashes while updating lesson
+            //(see #148)
+            Networker.obliterateCache()
         }
 
         AppPreferences.lastVersionExecuted = thisVersion
