@@ -21,6 +21,7 @@ object VersionManager {
             return
         }
 
+        //NOTE: version 10 does not exists because of a google problem
 
         if(lastVersion in 6..7) { //0.9.5 - 0.9.6
             //I've fixed that "timestamp" inconsistency bug.

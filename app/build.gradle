@@ -18,7 +18,7 @@ android {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 10
+        versionCode 11
         versionName "0.9.8.5 - Last beta"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
