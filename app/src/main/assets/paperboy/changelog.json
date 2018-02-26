@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 1.0.0",
+    "items": [
+      {
+        "type": "2",
+        "title": "Ora è possibile forzare la ricarica degli orari attraverso un apposito pulsante nella schermata del calendario"
+      }
+    ]
+  },{
     "name": "Novità in 0.9.8.5",
     "items": [
       {

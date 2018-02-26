@@ -30,6 +30,7 @@ import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.Teacher
+import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.orIfEmpty
 import com.geridea.trentastico.utils.setTextOrHideIfEmpty
@@ -80,24 +81,31 @@ class CalendarFragment : FragmentWithMenuItems() {
     }
 
     override val idsOfMenuItemsToMakeVisible: IntArray
-        get() = intArrayOf(R.id.menu_filter, R.id.menu_change_view)
+        get() = intArrayOf(R.id.menu_refresh, R.id.menu_filter, R.id.menu_change_view)
 
     override fun bindMenuItem(item: MenuItem) {
-        if (item.itemId == R.id.menu_filter) {
-            item.setOnMenuItemClickListener {
+        when {
+            item.itemId == R.id.menu_refresh     -> item.setOnMenuItemClickListener {
+                Networker.obliterateCache()
+                Toast.makeText(context, "Sto ricaricando i tuoi orari...", Toast.LENGTH_LONG).show()
+                goToCalendarFragment()
+                true
+            }
+            item.itemId == R.id.menu_filter      -> item.setOnMenuItemClickListener {
                 FilterCoursesDialog(activity).show()
                 true
             }
-        } else if (item.itemId == R.id.menu_change_view) {
-            //Note we cannot call here calendar.getNumberOfVisibleDays() because this might have
-            //been called before onCreate
-            item.setIcon(getChangeViewMenuIcon(AppPreferences.calendarNumOfDaysToShow))
-            item.setOnMenuItemClickListener { i ->
-                val numOfDays = calendar.rotateNumOfDaysShown()
-                i.setIcon(getChangeViewMenuIcon(numOfDays))
-                AppPreferences.calendarNumOfDaysToShow = numOfDays
+            item.itemId == R.id.menu_change_view -> {
+                //Note we cannot call here calendar.getNumberOfVisibleDays() because this might have
+                //been called before onCreate
+                item.setIcon(getChangeViewMenuIcon(AppPreferences.calendarNumOfDaysToShow))
+                item.setOnMenuItemClickListener { i ->
+                    val numOfDays = calendar.rotateNumOfDaysShown()
+                    i.setIcon(getChangeViewMenuIcon(numOfDays))
+                    AppPreferences.calendarNumOfDaysToShow = numOfDays
 
-                true
+                    true
+                }
             }
         }
     }
