@@ -11,24 +11,22 @@ package com.geridea.trentastico.model
 data class LessonType(
         val id: String,
         val name: String,
-        val teachers: List<Teacher>,
+        val teachers: List<String>,
         var partitioningName: String?,
         val kindOfLesson: String,
         var isVisible: Boolean = true) {
 
     /**
-     * @param teachersCodesToParse a "," separated list of teachers' codes
      * @param teachersNamesUnparsed a "," separated list of teachers' names
      */
     constructor(
             id: String,
             name: String,
             teachersNamesUnparsed: String,
-            teachersCodesToParse: String,
             partitioningName: String?,
             kindOfLesson: String,
             isVisible: Boolean
-    ): this(id, name, createTeachers(teachersNamesUnparsed, teachersCodesToParse), partitioningName,
+    ): this(id, name, createTeachers(teachersNamesUnparsed), partitioningName,
             kindOfLesson, isVisible)
 
     constructor(extraCourse: ExtraCourse, isVisible: Boolean): this(
@@ -55,14 +53,11 @@ data class LessonType(
 
     companion object {
 
-        private fun createTeachers(teachersNamesUnparsed: String, teachersCodesToParse: String): List<Teacher> {
+        private fun createTeachers(teachersNamesUnparsed: String): List<String> {
             return if (teachersNamesUnparsed.isBlank()) {
                 arrayListOf()
             } else {
-                val teacherNames = teachersNamesUnparsed.split(',').map { it.trim() }
-                val teacherCodes = teachersCodesToParse .split(',').map { it.trim() }
-
-                teacherCodes.mapIndexed { index, id -> Teacher(id, teacherNames[index])}
+                teachersNamesUnparsed.split(',')
             }
         }
 
@@ -74,7 +69,9 @@ data class LessonType(
      */
     fun buildTeachersNamesOrDefault(): String {
         return if (teachers.isEmpty()) NO_TEACHER_ASSIGNED_DEFAULT_TEXT
-        else teachers.joinToString { it.name }
+        else teachers.joinToString { it }
     }
 
 }
+
+val NO_TEACHER_ASSIGNED_DEFAULT_TEXT: String = "(nessun insegnante assegnato)"

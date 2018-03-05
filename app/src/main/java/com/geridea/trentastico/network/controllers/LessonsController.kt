@@ -375,7 +375,6 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                             id                    = lessonTypeId,
                             name                  = calculateTeachingWithoutPartitioning(teachingName),
                             teachersNamesUnparsed = it.getString("docente"),
-                            teachersCodesToParse  = it.getString("codice_docente"),
                             partitioningName      = partitioningName,
                             kindOfLesson          = it.getString("tipo"),
                             isVisible             = !AppPreferences.isLessonTypeToHide(lessonTypeId)

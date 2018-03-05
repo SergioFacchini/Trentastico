@@ -8,15 +8,6 @@
     android:paddingBottom="5dp"
     tools:ignore="UseCompoundDrawables">
 
-    <ImageView
-        android:id="@+id/photo"
-        android:layout_width="40dp"
-        android:layout_height="43dp"
-        android:layout_gravity="center"
-        android:contentDescription="Teacher photo"
-        android:src="@drawable/teacher_no_photo"
-        />
-
     <TextView
         android:id="@+id/teacher_name"
         android:layout_width="match_parent"

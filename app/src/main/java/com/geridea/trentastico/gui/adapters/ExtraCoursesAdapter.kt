@@ -22,7 +22,6 @@ import java.util.*
 class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>) : ItemsAdapter<ExtraCourse>(context) {
 
     init {
-
         itemsList = extraCourses
     }
 

@@ -30,8 +30,17 @@ object JsonUtils {
 fun <T> JSONArray.mapObjects(mapper: (JSONObject) -> T): List<T> =
         (0 until length()).map { mapper(getJSONObject(it)) }
 
-fun <T> List<T>.toJsonArray(converter: (T) -> JSONObject): JSONArray {
+fun JSONArray.toStringArray(): List<String> =
+        (0 until length()).map { getString(it) }
+
+fun <T> List<T>.toJsonStringArray(converter: (T) -> JSONObject): JSONArray {
     val jsonArray = JSONArray()
     forEach { jsonArray.put(converter(it)) }
+    return jsonArray
+}
+
+fun List<String>.toJsonStringArray(): JSONArray {
+    val jsonArray = JSONArray()
+    forEach { jsonArray.put(it) }
     return jsonArray
 }

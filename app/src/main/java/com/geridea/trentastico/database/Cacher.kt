@@ -10,7 +10,10 @@ import com.birbit.android.jobqueue.Params
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.config.Configuration
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.model.*
+import com.geridea.trentastico.model.LessonSchedule
+import com.geridea.trentastico.model.LessonType
+import com.geridea.trentastico.model.LibraryOpeningTimes
+import com.geridea.trentastico.model.Room
 import com.geridea.trentastico.network.controllers.listener.CachedLibraryOpeningTimesListener
 import com.geridea.trentastico.utils.*
 import com.geridea.trentastico.utils.time.CalendarUtils
@@ -79,7 +82,7 @@ class Cacher(context: Context) {
     private fun cacheScheduledLesson(lesson: LessonSchedule, isExtra: Boolean) {
         val values = ContentValues()
         values.put(SL_id,               lesson.id)
-        values.put(SL_room,             lesson.rooms.toJsonArray{ it.toJson() }.toString())
+        values.put(SL_room,             lesson.rooms.toJsonStringArray { it.toJson() }.toString())
         values.put(SL_teachersNames,    lesson.teachersNames)
         values.put(SL_subject,          lesson.subject)
         values.put(SL_partitioningName, lesson.partitioningName)
@@ -168,7 +171,7 @@ class Cacher(context: Context) {
             lessonTypes.add(LessonType(
                     id               = lessonTypeId,
                     name             = cursor.getString(LT_name),
-                    teachers         = JSONArray(cursor.getString(LT_teachers)).mapObjects { Teacher(it) },
+                    teachers         = JSONArray(cursor.getString(LT_teachers)).toStringArray(),
                     kindOfLesson     = cursor.getString(LT_kindOfLesson),
                     partitioningName = cursor.getNullableString(LT_partitioningName),
                     isVisible        = !AppPreferences.isLessonTypeToHide(lessonTypeId)
@@ -217,7 +220,7 @@ class Cacher(context: Context) {
             val values = ContentValues()
             values.put(LT_id,               lessonType.id)
             values.put(LT_name,             lessonType.name)
-            values.put(LT_teachers,         lessonType.teachers.toJsonArray { it.toJson() }.toString())
+            values.put(LT_teachers,         lessonType.teachers.toJsonStringArray().toString())
             values.put(LT_kindOfLesson,     lessonType.kindOfLesson)
             values.put(LT_partitioningName, lessonType.partitioningName)
 

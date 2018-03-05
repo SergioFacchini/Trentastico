@@ -6,15 +6,15 @@ package com.geridea.trentastico.model
  */
 
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.utils.mapObjects
-import com.geridea.trentastico.utils.toJsonArray
+import com.geridea.trentastico.utils.toJsonStringArray
+import com.geridea.trentastico.utils.toStringArray
 import org.json.JSONException
 import org.json.JSONObject
 
 class ExtraCourse(
         val lessonTypeId: String,
         val lessonName: String,
-        val teachers: List<Teacher>,
+        val teachers: List<String>,
         val partitioningName: String?,
         val kindOfLesson: String,
         val studyCourse: StudyCourse) {
@@ -30,7 +30,7 @@ class ExtraCourse(
             val jsonObject = JSONObject()
             jsonObject.put("lessonTypeId",     lessonTypeId)
             jsonObject.put("lessonName",       lessonName)
-            jsonObject.put("teachers",         teachers.toJsonArray { it.toJson() })
+            jsonObject.put("teachers",         teachers.toJsonStringArray())
             jsonObject.put("partitioningName", partitioningName)
             jsonObject.put("kindOfLesson",     kindOfLesson)
             jsonObject.put("studyCourse",      studyCourse.toJson())
@@ -54,7 +54,7 @@ class ExtraCourse(
                  return ExtraCourse(
                     lessonTypeId     = json.getString("lessonTypeId"),
                     lessonName       = json.getString("lessonName"),
-                    teachers         = json.getJSONArray("teachers").mapObjects { Teacher(it) },
+                    teachers         = json.getJSONArray("teachers").toStringArray(),
                     partitioningName = json.optString("partitioningName", null),
                     kindOfLesson     = json.getString("kindOfLesson"),
                     studyCourse      = StudyCourse(json.getJSONObject("studyCourse"))
@@ -75,7 +75,7 @@ class ExtraCourse(
      */
     fun buildTeachersNamesOrDefault(): String {
         return if (teachers.isEmpty()) NO_TEACHER_ASSIGNED_DEFAULT_TEXT
-        else teachers.joinToString { it.name }
+        else teachers.joinToString { it }
     }
 
 }

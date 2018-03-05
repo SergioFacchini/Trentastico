@@ -29,13 +29,12 @@ import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
 import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
-import com.geridea.trentastico.model.Teacher
+import com.geridea.trentastico.model.NO_TEACHER_ASSIGNED_DEFAULT_TEXT
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.orIfEmpty
 import com.geridea.trentastico.utils.setTextOrHideIfEmpty
 import com.geridea.trentastico.utils.time.CalendarUtils
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.dialog_calendar_event.view.*
 import kotlinx.android.synthetic.main.itm_teacher.view.*
 import java.util.*
@@ -201,7 +200,7 @@ class CalendarFragment : FragmentWithMenuItems() {
 
             view.partitioning_name.setTextOrHideIfEmpty(event.partitioningName)
 
-            val teachers = lessonType.teachers.orIfEmpty(Teacher.PLACEHOLDER_TEACHER_LIST)
+            val teachers = lessonType.teachers.orIfEmpty(listOf(NO_TEACHER_ASSIGNED_DEFAULT_TEXT))
             view.teachers_names.adapter = TeachersAdapter(context, teachers)
         }
 
@@ -209,30 +208,17 @@ class CalendarFragment : FragmentWithMenuItems() {
 
 }
 
-class TeachersAdapter(context: Context, teachers: List<Teacher>) : ItemsAdapter<Teacher>(context) {
+class TeachersAdapter(context: Context, teachers: List<String>) : ItemsAdapter<String>(context) {
 
     init {
         itemsList = teachers
     }
 
-    override fun bindView(item: Teacher, pos: Int, convertView: View) {
-        convertView.teacher_name.text = item.name
-
-        Picasso.with(context)
-                .load(item.teacherPhotoUrl)
-                .placeholder(R.drawable.teacher_no_photo)
-                .into(convertView.photo)
-
-        convertView.setOnClickListener {
-            when {
-                item.id == "181898" -> Toast.makeText(context, "Violette!", Toast.LENGTH_SHORT).show()
-                item.id == "004437" -> Toast.makeText(context, "Peanuts!",  Toast.LENGTH_SHORT).show()
-            }
-
-        }
+    override fun bindView(item: String, pos: Int, convertView: View) {
+        convertView.teacher_name.text = item
     }
 
-    override fun createView(item: Teacher?, pos: Int, parent: ViewGroup?, inflater: LayoutInflater): View =
-            inflater.inflate(R.layout.itm_teacher, parent, false)
+    override fun createView(item: String?, pos: Int, parent: ViewGroup?, inflater: LayoutInflater): View =
+        inflater.inflate(R.layout.itm_teacher, parent, false)
 
 }
