@@ -5,6 +5,9 @@
       {
         "type": "2",
         "title": "Ora è possibile forzare la ricarica degli orari attraverso un apposito pulsante nella schermata del calendario"
+      }, {
+        "type": "2",
+        "title": "Risolto un problema che non faceva mostrare una notifica quando qualche lezione veniva aggiornata"
       }
     ]
   },{
