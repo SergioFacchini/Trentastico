@@ -63,6 +63,10 @@ object AppPreferences {
      */
     var lastVersionExecuted:Int by IntPreferences("LAST_VERSION_EXECUTED", 0)
 
+    /**
+     * The last zoom level that the user has pinched
+     */
+    var lastZoom:Int by IntPreferences("CALENDAR_ZOOM", 0)
 
     var studyCourse: StudyCourse
         get() {

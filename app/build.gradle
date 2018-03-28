@@ -18,8 +18,8 @@ android {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 12
-        versionName "1.0.0 - Ananas"
+        versionCode 13
+        versionName "1.0.1 - Banana"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }

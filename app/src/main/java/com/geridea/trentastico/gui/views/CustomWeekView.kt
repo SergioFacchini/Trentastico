@@ -174,6 +174,13 @@ open class CustomWeekView @JvmOverloads constructor(
     private var mDateTimeInterpreter: DateTimeInterpreter? = null
     private var scrollListener: CustomWeekView.ScrollListener? = null
 
+    var zoom: Int
+      get() = mHourHeight
+      set(newZoom) {
+          mHourHeight = newZoom
+          postInvalidate()
+    }
+
     private val mGestureListener = object : GestureDetector.SimpleOnGestureListener() {
 
         override fun onDown(e: MotionEvent): Boolean {

@@ -51,6 +51,10 @@ class CalendarFragment : FragmentWithMenuItems() {
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
         ButterKnife.bind(this, view)
 
+        if (AppPreferences.lastZoom != 0) {
+            calendar.zoom = AppPreferences.lastZoom
+        }
+
         //Binding calendar
         calendar.prepareForNumberOfVisibleDays(AppPreferences.calendarNumOfDaysToShow, jumpToFirstVisibleDay = false)
         calendar.setEventsTextSize(AppPreferences.calendarFontSize)
@@ -189,6 +193,12 @@ class CalendarFragment : FragmentWithMenuItems() {
             view.teachers_names.adapter = TeachersAdapter(context, teachers)
         }
 
+    }
+
+    override fun onStop() {
+        AppPreferences.lastZoom = calendar.zoom
+
+        super.onStop()
     }
 
 }
