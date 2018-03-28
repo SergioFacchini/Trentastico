@@ -34,6 +34,13 @@ object VersionManager {
             Networker.obliterateCache()
         }
 
+        if(lastVersion in 1..11){
+            //There are no more 7-day views, these are now 5-days views. #152
+            if(AppPreferences.calendarNumOfDaysToShow == 7){
+                AppPreferences.calendarNumOfDaysToShow = 5
+            }
+        }
+
         AppPreferences.lastVersionExecuted = thisVersion
     }
 

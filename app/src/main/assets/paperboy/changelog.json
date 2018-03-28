@@ -4,6 +4,9 @@
     "items": [
       {
         "type": "2",
+        "title": "La vista a 7 giorni è ora cambiata in vista a 5 giorni."
+      }, {
+        "type": "2",
         "title": "Ora è possibile forzare la ricarica degli orari attraverso un apposito pulsante nella schermata del calendario"
       }, {
         "type": "2",
@@ -99,7 +102,7 @@
     "items": [
       {
         "type": "1",
-        "title": "Apportato qualche miglioramento grafico.<br><strong>Grazie a Miriam Punzi per il feedback!</strong>"
+        "title": "Apportati diversi miglioramenti grafici.<br><strong>Grazie a Miriam Punzi per il feedback!</strong>"
       }, {
         "type": "2",
         "title": "Corretto un errore che mostrava le notifiche per lezioni extra già rimosse<br><strong>Grazie a Simone Degiacomi per la segnalazione!</strong>"

@@ -26,7 +26,6 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
 import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
-import com.geridea.trentastico.gui.views.requestloader.TerminalMessage
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.NO_TEACHER_ASSIGNED_DEFAULT_TEXT
@@ -53,25 +52,11 @@ class CalendarFragment : FragmentWithMenuItems() {
         ButterKnife.bind(this, view)
 
         //Binding calendar
-        calendar.prepareForNumberOfVisibleDays(AppPreferences.calendarNumOfDaysToShow)
+        calendar.prepareForNumberOfVisibleDays(AppPreferences.calendarNumOfDaysToShow, jumpToFirstVisibleDay = false)
         calendar.setEventsTextSize(AppPreferences.calendarFontSize)
         calendar.goToDate(CalendarUtils.debuggableToday)
         calendar.onEventClicked.connect { clickedEvent, lessonType ->
             showClickedEventPopup(clickedEvent, lessonType)
-        }
-
-        var goneToTodayDay = false
-        calendar.onLoadingOperationNotify.connect { operation ->
-
-            if (!goneToTodayDay && operation is TerminalMessage) {
-                calendar.postDelayed({
-                    calendar.goToDate(CalendarUtils.debuggableToday)
-                }, 100)
-                goneToTodayDay = true
-            }
-
-
-            loaderView.processMessage(operation)
         }
 
         calendar.loadEvents()
@@ -114,7 +99,7 @@ class CalendarFragment : FragmentWithMenuItems() {
         when (numOfDays) {
             2    -> R.drawable.ic_calendar_show_2
             3    -> R.drawable.ic_calendar_show_3
-            7    -> R.drawable.ic_calendar_show_7
+            5    -> R.drawable.ic_calendar_show_7
             else -> R.drawable.ic_calendar_show_1
         }
 

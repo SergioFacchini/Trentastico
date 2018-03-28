@@ -183,10 +183,13 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
         return numOfDaysToShow
     }
 
-    fun prepareForNumberOfVisibleDays(numOfDaysToShow: Int) {
+    fun prepareForNumberOfVisibleDays(numOfDaysToShow: Int, jumpToFirstVisibleDay: Boolean = true) {
         numberOfVisibleDays = numOfDaysToShow
         dateTimeInterpreter = getDateInterpreterForNumberOfDays(numberOfVisibleDays)
-        goToDate(firstVisibleDay) //Fixes #47
+
+        if(jumpToFirstVisibleDay){
+            goToDate(firstVisibleDay) //Fixes #47
+        }
         invalidate()
     }
 
@@ -203,8 +206,8 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
     private fun getNextNumberOfDaysToShow(numberOfVisibleDays: Int): Int =
         when (numberOfVisibleDays) {
             1 -> 2
-            3 -> 7
-            7 -> 1
+            3 -> 5
+            5 -> 1
         /*2*/ else -> 3
         }
 
