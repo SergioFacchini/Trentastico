@@ -74,7 +74,7 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
                 override fun interpretTime(hour: Int): String = interpretHours(hour)
             }
 
-            numberOfVisibleDays <= 5 -> object : DateTimeInterpreter {
+            numberOfVisibleDays < 5 -> object : DateTimeInterpreter {
                 override fun interpretDate(date: Calendar): String {
                     val dayName = FORMAT_ONLY_DAY.format(date.time).toUpperCase()
 
