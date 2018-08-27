@@ -41,6 +41,11 @@ object AppPreferences {
      * @return true if it is the first time the application is run
      */
     var isFirstRun: Boolean                            by BooleanPreferences("IS_FIRST_RUN", true)
+
+    /**
+     * True if an academic year has ended and the user has to refresh his/her study course.
+     */
+    var hasToUpdateStudyCourse: Boolean                by BooleanPreferences("NEEDS_UPDATE_STUDY_COURSE", false)
     var wasAppInBetaMessageShown: Boolean              by BooleanPreferences("APP_IS_IN_BETA_MESSAGE_SHOWN", false)
     var wasLastTimesCheckSuccessful: Boolean           by BooleanPreferences("WAS_LAST_TIMES_CHECK_SUCCESSFUL", true)
     var isSearchForLessonChangesEnabled: Boolean       by BooleanPreferences("SEARCH_LESSON_CHANGES", true)
@@ -68,6 +73,11 @@ object AppPreferences {
      */
     var lastZoom:Int by IntPreferences("CALENDAR_ZOOM", 0)
 
+    /**
+     * The study year that the user is currently attending
+     */
+    var currentStudyYear:Int by IntPreferences("CURRENT_STUDY_YEAR", 0)
+
     var studyCourse: StudyCourse
         get() {
             val studyCourseJson = getStudyCourseJSON()
@@ -81,6 +91,8 @@ object AppPreferences {
             putString("STUDY_COURSE", course.toJson().toString())
             BugLogger.setStudyCourse(course)
         }
+
+
 
     var lessonTypesToHideIds: ArrayList<String>
         get() {
@@ -209,6 +221,22 @@ object AppPreferences {
         val editor = sharedPreferences.edit()
         editor.putLong(key, time)
         editor.apply()
+    }
+
+    /**
+     * Clears the list of all the lesson types that must not be shown on the calendar
+     */
+    fun clearLessonsToHide() {
+        lessonTypesToHideIds = arrayListOf()
+    }
+
+    fun removeAllExtraCourses() {
+        extraCourses = ExtraCoursesList()
+        saveExtraCourses()
+    }
+
+    fun removeStudyCourse() {
+        putString("STUDY_COURSE", null)
     }
 
     //////////////

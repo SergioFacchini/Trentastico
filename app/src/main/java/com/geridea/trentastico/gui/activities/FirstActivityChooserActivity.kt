@@ -25,10 +25,13 @@ class FirstActivityChooserActivity : AppCompatActivity() {
         startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_APP_START))
         startService(NextLessonNotificationService.createIntent(this, NLNStarter.APP_BOOT))
 
-        if (AppPreferences.isFirstRun) {
-            startActivity(Intent(this, WelcomeActivity::class.java))
-        } else {
-            startActivity(Intent(this, HomeActivity::class.java))
+        when {
+            AppPreferences.isFirstRun
+                -> startActivity(Intent(this, WelcomeActivity::class.java))
+            AppPreferences.hasToUpdateStudyCourse
+                -> startActivity(Intent(this, UpdateStudyCourseActivity::class.java))
+            else
+                -> startActivity(Intent(this, HomeActivity::class.java))
         }
 
         finish()

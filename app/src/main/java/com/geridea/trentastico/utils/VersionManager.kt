@@ -23,6 +23,15 @@ object VersionManager {
 
         //NOTE: version 10 does not exists because of a google problem
 
+        if(lastVersion in 1..12) {
+            //The academic year has changed and the user must choose another year
+            Networker.obliterateCache()
+            AppPreferences.clearLessonsToHide()
+            AppPreferences.removeAllExtraCourses()
+            AppPreferences.removeStudyCourse()
+            AppPreferences.hasToUpdateStudyCourse = true
+        }
+
         if(lastVersion in 6..7) { //0.9.5 - 0.9.6
             //I've fixed that "timestamp" inconsistency bug.
             AppPreferences.debugSkipNextLessonChangedNotification = true

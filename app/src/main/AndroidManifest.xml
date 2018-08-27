@@ -49,6 +49,10 @@
             android:noHistory="true" />
 
         <activity
+            android:name=".gui.activities.UpdateStudyCourseActivity"
+            android:noHistory="true" />
+
+        <activity
             android:name=".gui.activities.LessonsChangedActivity"
             android:noHistory="true" />
 
