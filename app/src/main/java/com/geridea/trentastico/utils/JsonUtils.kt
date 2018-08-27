@@ -9,6 +9,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
+import kotlin.collections.ArrayList
 
 object JsonUtils {
     /**
@@ -44,3 +45,21 @@ fun List<String>.toJsonStringArray(): JSONArray {
     forEach { jsonArray.put(it) }
     return jsonArray
 }
+
+/**
+ * @return an array of [JSONObject]s that contains all the object having a number as property. The
+ * function tries to collect the items with index 0, then 1, then 2 ecc.. when a property with a
+ * given index is not found, the function returns.
+ */
+fun JSONObject.extractNumberedObjects(): ArrayList<JSONObject> {
+    val objects = ArrayList<JSONObject>()
+
+    var currentIndex = 0
+    while(has(currentIndex.toString())){
+        objects.add(getJSONObject(currentIndex.toString()))
+        currentIndex++
+    }
+
+    return objects
+}
+

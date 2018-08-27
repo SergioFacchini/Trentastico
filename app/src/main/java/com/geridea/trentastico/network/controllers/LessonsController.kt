@@ -15,10 +15,7 @@ import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
 import com.geridea.trentastico.network.request.IRequest
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.network.request.ServerResponseParsingException
-import com.geridea.trentastico.utils.AppPreferences
-import com.geridea.trentastico.utils.ColorDispenser
-import com.geridea.trentastico.utils.allSame
-import com.geridea.trentastico.utils.orIfBlank
+import com.geridea.trentastico.utils.*
 import okhttp3.FormBody
 import org.json.JSONArray
 import org.json.JSONObject
@@ -362,10 +359,9 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         // * Make another request to obtain a list
         // * Scan all the items in search of the teachings
         //The second one looks easier to implement, so I'll follow that way
-        val numLessons = json.getInt("contains_data")
-
-        return (0 until numLessons)
-                .map { json[it.toString()] as JSONObject }
+        return json.extractNumberedObjects()
+                //I filter because the numLessons variable appears to be screwed up! It seems to
+                //contain a number that is bigger than the actual number of teachings
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     val lessonTypeId = it.getString("codice_insegnamento")
@@ -389,11 +385,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     private fun parseLessons(json: JSONObject): List<LessonSchedule> {
         val lessonStartFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.ITALIAN)
 
-        val numLessons = json.getInt("contains_data")
-
-        return (0 until numLessons).map {
-            val lessonJson = json[it.toString()] as JSONObject
-
+        return json.extractNumberedObjects().map { lessonJson ->
             //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
             //We have to build the timing ourselves
             val lessonDateString = lessonJson.getString("data")+" "+lessonJson.getString("ora_inizio")

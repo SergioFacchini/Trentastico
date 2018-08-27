@@ -5,6 +5,9 @@
       {
         "type": "2",
         "title": "Ora l'app memorizza lo zoom fatto sul calendario"
+      }, {
+        "type": "3",
+        "title": "Risolto un problema che non permetteva di vedere gli orari vecchi durante la sessione estiva"
       }
     ]
   },{
