@@ -21,8 +21,10 @@ import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
+import com.geridea.trentastico.utils.time.CalendarUtils.today
 import com.geridea.trentastico.utils.time.DayInterval
 import com.geridea.trentastico.utils.time.DayOfYear
+import com.threerings.signals.Signal1
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -51,6 +53,8 @@ open class CustomWeekView @JvmOverloads constructor(
     private val mPastDayBackgroundColor = 0xFFD5D5D5.toInt()
 
     private val enabledIntervals = ArrayList<DayInterval>()
+
+    val onFirstVisibleDayChanged = Signal1<Calendar>()
 
     protected fun addEvents(weekViewEvents: List<WeekViewEvent>) {
         sortAndCacheEvents(weekViewEvents)
@@ -613,10 +617,14 @@ open class CustomWeekView @JvmOverloads constructor(
         val oldMillis = firstVisibleDay.timeInMillis
         firstVisibleDay.timeInMillis = today.timeInMillis
         firstVisibleDay.add(Calendar.DATE, -Math.round(mCurrentOrigin.x / (mWidthPerDay + mColumnGap)))
-        if (firstVisibleDay.timeInMillis != oldMillis && scrollListener != null) {
-            val oldFirstVisibleDay = today.clone() as Calendar
-            oldFirstVisibleDay.timeInMillis = oldMillis
-            scrollListener!!.onFirstVisibleDayChanged(firstVisibleDay, oldFirstVisibleDay)
+        if (firstVisibleDay.timeInMillis != oldMillis) {
+            onFirstVisibleDayChanged.dispatch(firstVisibleDay)
+
+            if (scrollListener != null) {
+                val oldFirstVisibleDay = today.clone() as Calendar
+                oldFirstVisibleDay.timeInMillis = oldMillis
+                scrollListener!!.onFirstVisibleDayChanged(firstVisibleDay, oldFirstVisibleDay)
+            }
         }
 
         for (dayNumber in leftDaysWithGaps + 1..leftDaysWithGaps + mNumberOfVisibleDays + 1) {
@@ -1365,21 +1373,7 @@ open class CustomWeekView @JvmOverloads constructor(
     //
     /////////////////////////////////////////////////////////////////
 
-    /**
-     * Returns a calendar instance at the start of this day
-     * @return the calendar instance
-     */
-    private fun today(): Calendar {
-        val today = debuggableToday
-        today.set(Calendar.HOUR_OF_DAY, 0)
-        today.set(Calendar.MINUTE, 0)
-        today.set(Calendar.SECOND, 0)
-        today.set(Calendar.MILLISECOND, 0)
-        return today
-    }
-
     companion object {
-
         val DEFAULT_EVENT_FONT_SIZE = 10
 
         val LENGTH_SHORT = 1

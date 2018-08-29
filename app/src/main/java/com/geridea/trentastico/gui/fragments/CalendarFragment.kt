@@ -7,6 +7,7 @@ package com.geridea.trentastico.gui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.support.annotation.DrawableRes
+import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -42,6 +43,7 @@ class CalendarFragment : FragmentWithMenuItems() {
 
     @BindView(R.id.calendar)   lateinit internal var calendar: CourseTimesCalendar
     @BindView(R.id.loaderView) lateinit internal var loaderView: RequestLoaderView
+    @BindView(R.id.go_to_today_fab) lateinit internal var todayFab: FloatingActionButton
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -63,7 +65,19 @@ class CalendarFragment : FragmentWithMenuItems() {
             showClickedEventPopup(clickedEvent, lessonType)
         }
 
+        val today = CalendarUtils.today()
+        calendar.onFirstVisibleDayChanged.connect { newDay ->
+            val isCalendarOnToday = CalendarUtils.isSameDay(newDay, today)
+            if (isCalendarOnToday) {
+                todayFab.hide()
+            } else
+                todayFab.show()
+        }
+
         calendar.loadEvents()
+
+        //Binding other controls
+        todayFab.setOnClickListener { calendar.goToDate(Calendar.getInstance()) }
 
         return view
     }

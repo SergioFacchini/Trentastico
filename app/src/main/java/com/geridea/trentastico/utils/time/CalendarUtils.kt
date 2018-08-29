@@ -108,4 +108,18 @@ object CalendarUtils {
      */
     fun formatRangeComplete(startsAt: Long, endsAt: Long): CharSequence? =
             (formatEEEEDDMMMM(startsAt)+", dalle "+ formatHHMM(startsAt)+" alle "+ formatHHMM(endsAt)).capitalize()
+
+
+    /**
+     * Returns a calendar instance at the start of this day
+     * @return the calendar instance
+     */
+    fun today(): Calendar {
+        val today = debuggableToday
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        return today
+    }
 }
