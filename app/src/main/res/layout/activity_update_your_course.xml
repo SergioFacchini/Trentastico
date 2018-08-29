@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="È passato un anno universitario! Per favore, aggiorna il tuo attuale corso di studi."
+            android:text="È passato un anno universitario! Per favore, aggiorna il tuo corso di studi."
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
@@ -44,6 +44,16 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:text="Nota: L'università di Trento sta attualmente inserendo gli orari dei corsi. Se non trovi il tuo corso nella lista, probabilmente questo non è ancora stato caricato su EasyRoom."
+            android:textColor="@color/colorForeground"
+            android:textSize="14sp" />
+
 
         <Button
             android:id="@+id/start_button"
