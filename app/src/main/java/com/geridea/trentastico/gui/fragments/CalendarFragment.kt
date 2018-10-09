@@ -7,26 +7,19 @@ package com.geridea.trentastico.gui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.support.annotation.DrawableRes
-import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
-import android.widget.ListView
-import android.widget.TextView
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.alexvasilkov.android.commons.adapters.ItemsAdapter
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.CourseFilterAdapter
 import com.geridea.trentastico.gui.views.CourseTimesCalendar
-import com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
 import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.NO_TEACHER_ASSIGNED_DEFAULT_TEXT
@@ -36,28 +29,19 @@ import com.geridea.trentastico.utils.orIfEmpty
 import com.geridea.trentastico.utils.setTextOrHideIfEmpty
 import com.geridea.trentastico.utils.time.CalendarUtils
 import kotlinx.android.synthetic.main.dialog_calendar_event.view.*
+import kotlinx.android.synthetic.main.dialog_filter_courses.view.*
+import kotlinx.android.synthetic.main.fragment_calendar.*
 import kotlinx.android.synthetic.main.itm_teacher.view.*
 import java.util.*
 
 class CalendarFragment : FragmentWithMenuItems() {
 
-    @BindView(R.id.calendar)   lateinit internal var calendar: CourseTimesCalendar
-    @BindView(R.id.loaderView) lateinit internal var loaderView: RequestLoaderView
-    @BindView(R.id.go_to_today_fab) lateinit internal var todayFab: FloatingActionButton
-
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
-
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
-        ButterKnife.bind(this, view)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        //Binding calendar
         if (AppPreferences.lastZoom != 0) {
             calendar.zoom = AppPreferences.lastZoom
         }
 
-        //Binding calendar
         calendar.prepareForNumberOfVisibleDays(AppPreferences.calendarNumOfDaysToShow, jumpToFirstVisibleDay = false)
         calendar.setEventsTextSize(AppPreferences.calendarFontSize)
         calendar.goToDate(CalendarUtils.debuggableToday)
@@ -79,8 +63,11 @@ class CalendarFragment : FragmentWithMenuItems() {
         //Binding other controls
         todayFab.setOnClickListener { calendar.goToDate(Calendar.getInstance()) }
 
-        return view
+        super.onViewCreated(view, savedInstanceState)
     }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_calendar, container, false)
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = intArrayOf(R.id.menu_refresh, R.id.menu_filter, R.id.menu_change_view)
@@ -94,7 +81,7 @@ class CalendarFragment : FragmentWithMenuItems() {
                 true
             }
             item.itemId == R.id.menu_filter      -> item.setOnMenuItemClickListener {
-                FilterCoursesDialog(activity).show()
+                FilterCoursesDialog(requireContext(), calendar).show()
                 true
             }
             item.itemId == R.id.menu_change_view -> {
@@ -123,23 +110,11 @@ class CalendarFragment : FragmentWithMenuItems() {
 
     private fun showClickedEventPopup( clickedEvent: LessonSchedule, lessonType: LessonType){
         if (context != null) {
-            ShowLessonDetailsDialog(context, clickedEvent, lessonType).show()
+            ShowLessonDetailsDialog(requireContext(), clickedEvent, lessonType).show()
         }
     }
 
-    internal inner class FilterCoursesDialog(context: Context) : AlertDialog(context) {
-
-        @BindView(R.id.coursesListView)
-        lateinit var coursesListView: ListView
-
-        @BindView(R.id.noCoursesText)
-        lateinit var noCoursesText: TextView
-
-        @BindView(R.id.yesCoursesText)
-        lateinit var yesCoursesText: TextView
-
-        @BindView(R.id.extra_course)
-        lateinit var extraCourseDescription: View
+    internal inner class FilterCoursesDialog(context: Context, calendar: CourseTimesCalendar) : AlertDialog(context) {
 
         private val lessonTypes: Collection<LessonType>
 
@@ -150,23 +125,25 @@ class CalendarFragment : FragmentWithMenuItems() {
 
             //Inflating the view
             val view = Views.inflate<View>(context, R.layout.dialog_filter_courses)
-            ButterKnife.bind(this, view)
-            setView(view)
 
             //Setting up the view
-            (if (lessonTypes.isEmpty()) yesCoursesText else noCoursesText).visibility = GONE
+            (if (lessonTypes.isEmpty()) view.yesCoursesText else view.noCoursesText).visibility = GONE
 
             //Setting up adapter
             val courseAdapter = CourseFilterAdapter(context, lessonTypes)
-            courseAdapter.onLessonTypeVisibilityChanged.connect { lesson ->
+            courseAdapter.onLessonTypeVisibilityChanged.connect { _ ->
                 AppPreferences.lessonTypesToHideIds = calculateLessonTypesToHide()
                 wasSomeVisibilityChanged = true
             }
-            coursesListView.adapter = courseAdapter
+            view.coursesListView.adapter = courseAdapter
 
             //Show extra lessons description if there is any in the list
             if (lessonTypes.none { AppPreferences.extraCourses.hasCourseWithId(it.id) }) {
-                extraCourseDescription.visibility = View.GONE
+                view.extraCourseDescription.visibility = View.GONE
+            }
+
+            view.dismiss_button.setOnClickListener {
+                dismiss()
             }
 
             //Update calendar on visibility changes
@@ -175,15 +152,14 @@ class CalendarFragment : FragmentWithMenuItems() {
                     calendar.notifyEventsChanged()
                 }
             }
+
+            setView(view)
         }
 
         private fun calculateLessonTypesToHide(): ArrayList<String> =
             lessonTypes
                 .filterNot { it.isVisible }
                 .mapTo(ArrayList()) { it.id }
-
-        @OnClick(R.id.dismiss_button)
-        fun onDoFilterButtonClicked() = dismiss()
 
     }
 
@@ -201,7 +177,9 @@ class CalendarFragment : FragmentWithMenuItems() {
             view.starting      .text = CalendarUtils.formatRangeComplete(event.startsAt, event.endsAt)
             view.kind_of_lesson.text = "Tipologia: "+lessonType.kindOfLesson
 
-            view.partitioning_name.setTextOrHideIfEmpty(event.partitioningName)
+            view.partitioningName.setTextOrHideIfEmpty(event.partitioningName)
+
+            view.dismiss_button.setOnClickListener { dismiss() }
 
             val teachers = lessonType.teachers.orIfEmpty(listOf(NO_TEACHER_ASSIGNED_DEFAULT_TEXT))
             view.teachers_names.adapter = TeachersAdapter(context, teachers)
@@ -224,7 +202,7 @@ class TeachersAdapter(context: Context, teachers: List<String>) : ItemsAdapter<S
     }
 
     override fun bindView(item: String, pos: Int, convertView: View) {
-        convertView.teacher_name.text = item
+        convertView.teacherName.text = item
     }
 
     override fun createView(item: String?, pos: Int, parent: ViewGroup?, inflater: LayoutInflater): View =

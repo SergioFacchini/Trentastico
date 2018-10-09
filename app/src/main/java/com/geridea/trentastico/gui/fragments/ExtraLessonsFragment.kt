@@ -14,17 +14,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ListView
-import android.widget.TextView
-import butterknife.*
+import android.widget.AdapterView
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter
 import com.geridea.trentastico.gui.adapters.LessonTypesAdapter
-import com.geridea.trentastico.gui.views.CourseSelectorView
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
@@ -34,23 +29,43 @@ import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
+import com.geridea.trentastico.utils.UIUtils
 import com.threerings.signals.Signal0
+import kotlinx.android.synthetic.main.dialog_extra_course_add.*
+import kotlinx.android.synthetic.main.dialog_extra_course_delete.*
+import kotlinx.android.synthetic.main.dialog_extra_course_search.*
+import kotlinx.android.synthetic.main.fragment_extra_lessons.*
+import kotlinx.android.synthetic.main.itm_extra_course.*
 
 class ExtraLessonsFragment : FragmentWithMenuItems() {
-
-    @BindView(R.id.extra_lessons_list) lateinit var lessonsList: ListView
-    @BindView(R.id.no_extra_courses_label) lateinit var noExtraCoursesLabel: TextView
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_extra_lessons, container, false)
-        ButterKnife.bind(this, view)
+            savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_extra_lessons, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         initLessonsList()
 
-        return view
+        lessonsList.setOnItemLongClickListener { _, _, position, _ ->
+            val course = lessonsList.getItemAtPosition(position) as ExtraCourse
+
+            val dialog = ExtraCourseDeleteDialog(requireContext(), course)
+            dialog.onDeleteConfirm.connect {
+                initLessonsList()
+
+                //Updating notifications
+                NextLessonNotificationService.removeNotificationsOfExtraCourse(requireContext(), course)
+                NextLessonNotificationService.createIntent(requireContext(), NLNStarter.EXTRA_COURSE_CHANGE)
+            }
+            dialog.show()
+
+            return@setOnItemLongClickListener true
+        }
+
     }
 
     private fun initLessonsList() {
@@ -60,25 +75,9 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         } else {
             noExtraCoursesLabel.visibility = View.GONE
         }
-        lessonsList.adapter = ExtraCoursesAdapter(activity, extraCourses)
+        lessonsList.adapter = ExtraCoursesAdapter(requireContext(), extraCourses)
     }
 
-    @OnItemLongClick(R.id.extra_lessons_list)
-    internal fun onItemLongClick(position: Int): Boolean {
-        val course = lessonsList.getItemAtPosition(position) as ExtraCourse
-
-        val dialog = ExtraCourseDeleteDialog(activity, course)
-        dialog.onDeleteConfirm.connect {
-            initLessonsList()
-
-            //Updating notifications
-            NextLessonNotificationService.removeNotificationsOfExtraCourse(context, course)
-            NextLessonNotificationService.createIntent(activity, NLNStarter.EXTRA_COURSE_CHANGE)
-        }
-        dialog.show()
-
-        return true
-    }
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = intArrayOf(R.id.menu_add_extra_lessons)
@@ -86,13 +85,13 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
     override fun bindMenuItem(item: MenuItem) {
         if (item.itemId == R.id.menu_add_extra_lessons) {
             item.setOnMenuItemClickListener {
-                val dialog = ExtraCourseAddDialog(activity)
+                val dialog = ExtraCourseAddDialog(requireContext())
                 dialog.onNewCourseAdded.connect {
                     initLessonsList()
 
                     //Updating notifications
                     NextLessonNotificationService.createIntent(
-                            activity, NLNStarter.EXTRA_COURSE_CHANGE
+                            requireContext(), NLNStarter.EXTRA_COURSE_CHANGE
                     )
                 }
                 dialog.show()
@@ -103,13 +102,6 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
     internal inner class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse): AlertDialog(context) {
 
-        @BindView(R.id.course_name)       lateinit var courseName: TextView
-        @BindView(R.id.teacher_name)      lateinit var teacherName: TextView
-        @BindView(R.id.partitioning_name) lateinit var partitioningName: TextView
-        @BindView(R.id.study_course_name) lateinit var studyCourseName: TextView
-
-        @BindView(R.id.color) lateinit var color: ImageView
-
         /**
          * Dispatched when the user has selected and added a new study course.
          */
@@ -117,7 +109,6 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
 
         init {
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_delete)
-            ButterKnife.bind(this, view)
 
             courseName     .text = course.lessonName
             studyCourseName.text = course.fullName
@@ -134,32 +125,22 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             setView(view)
         }
 
+        override fun onAttachedToWindow() {
+            cancel_button.setOnClickListener { dismiss() }
 
-        @OnClick(R.id.cancel_button)
-        fun onCancelButtonPressed() = dismiss()
+            delete_button.setOnClickListener {
+                AppPreferences.removeExtraCourse(course.lessonTypeId)
+                Networker     .purgeExtraCourse (course.lessonTypeId)
+                ColorDispenser.dissociateColorFromType(course.lessonTypeId)
 
-        @OnClick(R.id.delete_button)
-        fun onDeleteButtonPressed() {
-            AppPreferences.removeExtraCourse(course.lessonTypeId)
-            Networker     .purgeExtraCourse (course.lessonTypeId)
-            ColorDispenser.dissociateColorFromType(course.lessonTypeId)
-
-            onDeleteConfirm.dispatch()
-            dismiss()
+                onDeleteConfirm.dispatch()
+                dismiss()
+            }
         }
 
     }
 
     internal inner class ExtraCourseAddDialog(context: Context) : AlertDialog(context) {
-
-        @BindView(R.id.cannot_select_current_study_course)
-        lateinit var cannotSelectCurrentStudyCourse: TextView
-
-        @BindView(R.id.course_selector)
-        lateinit var courseSelector: CourseSelectorView
-
-        @BindView(R.id.search_for_lessons)
-        lateinit var searchForLessonsButton: Button
 
         /**
          * Dispatched when the user has selected and added a new study course.
@@ -169,7 +150,6 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         init {
 
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_add)
-            ButterKnife.bind(this, view)
 
             cannotSelectCurrentStudyCourse.visibility = GONE
             searchForLessonsButton.visibility = View.GONE
@@ -188,46 +168,31 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             setView(view)
         }
 
-        @OnClick(R.id.search_for_lessons)
-        fun onSearchForLessonsButtonClicked() {
-            val selectedStudyCourse = courseSelector.buildStudyCourse()
-            if (selectedStudyCourse == AppPreferences.studyCourse) {
-                cannotSelectCurrentStudyCourse.visibility = View.VISIBLE
-                searchForLessonsButton.isEnabled = false
-                return
-            }
+        override fun onAttachedToWindow() {
+            searchForLessonsButton.setOnClickListener {
+                val selectedStudyCourse = courseSelector.buildStudyCourse()
+                if (selectedStudyCourse == AppPreferences.studyCourse) {
+                    cannotSelectCurrentStudyCourse.visibility = View.VISIBLE
+                    searchForLessonsButton.isEnabled = false
+                    return@setOnClickListener
+                }
 
-            val dialog = ExtraCourseSearchDialog(activity, selectedStudyCourse)
-            dialog.onCourseSelectedAndAdded.connect {
-                onNewCourseAdded.dispatch()
-                dismiss()
+                val dialog = ExtraCourseSearchDialog(requireContext(), selectedStudyCourse)
+                dialog.onCourseSelectedAndAdded.connect {
+                    onNewCourseAdded.dispatch()
+                    dismiss()
+                }
+                dialog.show()
+                dialog.searchForCourses()
             }
-            dialog.show()
-            dialog.searchForCourses()
         }
+
 
     }
 
     internal inner class ExtraCourseSearchDialog(
             context: Context,
             private val studyCourse: StudyCourse) : AlertDialog(context), ListLessonsListener {
-
-        @BindView(R.id.searching_lessons)
-        lateinit var searchingLessons: View
-        @BindView(R.id.lessons_found)
-        lateinit var lessonsFound: View
-
-        @BindView(R.id.selected_course)
-        lateinit var selectedCourseTextView: TextView
-
-        @BindView(R.id.error_while_searching)
-        lateinit var errorWhileSearching: TextView
-
-        @BindView(R.id.lessons_found_text)
-        lateinit var lessonsFoundText: TextView
-
-        @BindView(R.id.lessons_list)
-        lateinit var lessonsList: ListView
 
         /**
          * List of lessons of the actually selected standard course. The user should be not able to
@@ -243,14 +208,32 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
         init {
 
             val view = Views.inflate<View>(context, R.layout.dialog_extra_course_search)
-            ButterKnife.bind(this, view)
-
             selectedCourseTextView.text = "Sto cercando le lezioni del corso da te selezionato: " +
                     studyCourse.generateFullDescription()
 
             lessonsFound.visibility = GONE
 
             setView(view)
+        }
+
+        override fun onAttachedToWindow() {
+            cancel_search.setOnClickListener { dismiss() }
+
+            lessonsList.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
+                val lessonType = lessonsListCourseSearch.getItemAtPosition(position) as LessonType
+
+                if (canLessonTypeBeSelected(lessonType)) {
+                    ColorDispenser.associateColorToTypeIfNeeded(lessonType.id)
+                    AppPreferences.addExtraCourse(ExtraCourse(
+                            lessonType.id, lessonType.name, lessonType.teachers, lessonType.partitioningName,
+                            lessonType.kindOfLesson, studyCourse
+                    ))
+
+                    dismiss()
+                    onCourseSelectedAndAdded.dispatch()
+                }
+            }
+
         }
 
         fun searchForCourses() {
@@ -261,38 +244,19 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
             }
         }
 
-        @OnClick(R.id.cancel_search)
-        fun onCancelSearchButtonPressed() = dismiss()
-
-        @OnItemClick(R.id.lessons_list)
-        fun onLessonSelected(position: Int) {
-            val lessonType = lessonsList.getItemAtPosition(position) as LessonType
-
-            if (canLessonTypeBeSelected(lessonType)) {
-                ColorDispenser.associateColorToTypeIfNeeded(lessonType.id)
-                AppPreferences.addExtraCourse(ExtraCourse(
-                        lessonType.id, lessonType.name, lessonType.teachers, lessonType.partitioningName,
-                        lessonType.kindOfLesson, studyCourse
-                ))
-
-                dismiss()
-                onCourseSelectedAndAdded.dispatch()
-            }
-        }
-
         private fun canLessonTypeBeSelected(lesson: LessonType) =
                 !AppPreferences.hasExtraCourseWithId(lesson.id) &&
                         lessonTypesOfCourse!!.none { it.id == lesson.id }
 
         override fun onErrorHappened(error: Exception) = showErrorMessage()
 
-        private fun showErrorMessage() = activity.runOnUiThread {
+        private fun showErrorMessage() = UIUtils.runOnMainThread {
             errorWhileSearching.visibility = View.VISIBLE
         }
 
         override fun onParsingErrorHappened(e: Exception) = showErrorMessage()
 
-        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = activity.runOnUiThread {
+        override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = UIUtils.runOnMainThread {
             if (lessonTypes.isEmpty()) {
                 lessonsFoundText.text = "Non vi sono lezioni nel corso di studi selezionato; probabilmente le lezioni non sono ancora state pianificate dall'università. Se pensi che sia un errore, torna indietro e controlla di aver selezionato il corso corretto."
             } else {

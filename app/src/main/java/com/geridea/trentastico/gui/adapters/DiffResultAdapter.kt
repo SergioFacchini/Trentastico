@@ -33,7 +33,7 @@ class DiffResultAdapter(context: Context, diffResult: LessonsDiffResult) : Items
 
     override fun bindView(item: DiffResultItem, pos: Int, view: View) {
         view.diff_type         .text = item.diffDescription
-        view.course_name       .text = item.courseName
+        view.courseName       .text = item.courseName
         view.scheduled_at_day  .text = "Pianificata per: " + item.scheduledDay
         view.scheduled_at_hours.text = "Alle ore: " + item.scheduledHours
         view.lesson_duration   .text = "Durata: " + item.duration.toString() + "min"

@@ -9,7 +9,7 @@
     tools:ignore="UseCompoundDrawables">
 
     <TextView
-        android:id="@+id/teacher_name"
+        android:id="@+id/teacherName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/colorForeground"

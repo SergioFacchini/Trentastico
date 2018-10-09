@@ -67,7 +67,7 @@ class RequestSender {
         override fun onResponse(call: Call, response: Response) {
             if (response.isSuccessful) {
                 try {
-                    val responseBody = response.body()
+                    val responseBody = response.body()!!
                     val responseStr = responseBody.string()
                     responseBody.close()
 

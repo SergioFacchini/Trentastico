@@ -5,9 +5,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.FrameLayout
-import butterknife.ButterKnife
-import butterknife.OnClick
-import butterknife.OnItemSelected
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.adapters.CoursesAdapter
@@ -77,7 +74,6 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
 
     init {
         Views.inflateAndAttach<View>(this, R.layout.view_course_selector)
-        ButterKnife.bind(this, this)
 
         coursesSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
 
@@ -95,13 +91,17 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
                 onCourseChanged.dispatch(buildStudyCourse())
             }
         }
+
+        yearSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                onCourseChanged.dispatch(buildStudyCourse())
+            }
+        }
+
+        retryButton.retryButton.setOnClickListener { loadCourses() }
     }
-
-    @OnItemSelected(R.id.yearSpinner)
-    internal fun onYearSelected() = onCourseChanged.dispatch(buildStudyCourse())
-
-    @OnClick(R.id.retryButton)
-    internal fun onRetryButtonClick() = loadCourses()
 
     fun loadCourses() {
         Networker.loadStudyCourses(object : CoursesLoadingListener {

@@ -27,10 +27,10 @@ class AboutFragment : FragmentWithMenuItems() {
     var debugClickCounter = 0
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.fragment_about, container, false)
+        val view = inflater.inflate(R.layout.fragment_about, container, false)
 
         view.versionText.text = DebugUtils.computeVersionName()
 
@@ -40,10 +40,10 @@ class AboutFragment : FragmentWithMenuItems() {
         }
 
         view.licencesBtn.setOnClickListener {
-            LicencesDialog(context).show()
+            LicencesDialog(requireContext()).show()
         }
 
-        val paperboyFragment = PaperboyFragmentMaker.buildPaperboyFragment(context)
+        val paperboyFragment = PaperboyFragmentMaker.buildPaperboyFragment(requireContext())
         childFragmentManager
                 .beginTransaction()
                 .replace(R.id.paperboy_fragment_frame, paperboyFragment)

@@ -50,7 +50,7 @@ class CourseFilterAdapter(context: Context, lessons: Collection<LessonType>) : I
         }
 
         //Showing the partitioning if any
-        val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitioning_name)
+        val partitioningNameTV = Views.find<TextView>(convertView, R.id.partitioningName)
         if (item.partitioningName != null) {
             partitioningNameTV.text = item.partitioningName
             partitioningNameTV.visibility = View.VISIBLE

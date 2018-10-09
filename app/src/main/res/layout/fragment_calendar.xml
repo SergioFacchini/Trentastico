@@ -42,7 +42,7 @@
         app:todayHeaderTextColor="@color/colorAccentLight" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/go_to_today_fab"
+        android:id="@+id/todayFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"

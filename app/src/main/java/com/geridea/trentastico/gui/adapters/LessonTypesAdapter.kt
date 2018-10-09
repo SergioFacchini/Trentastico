@@ -33,10 +33,10 @@ class LessonTypesAdapter(
         Views.find<TextView> (convertView, R.id.teachers_names).text = item.buildTeachersNamesOrDefault()
 
         if (item.partitioningName != null) {
-            Views.find<TextView> (convertView, R.id.partitioning_name).text = item.partitioningName
-            Views.find<TextView> (convertView, R.id.partitioning_name).visibility = View.VISIBLE
+            Views.find<TextView> (convertView, R.id.partitioningName).text = item.partitioningName
+            Views.find<TextView> (convertView, R.id.partitioningName).visibility = View.VISIBLE
         } else {
-            Views.find<TextView> (convertView, R.id.partitioning_name).visibility = View.GONE
+            Views.find<TextView> (convertView, R.id.partitioningName).visibility = View.GONE
         }
 
         if (AppPreferences.hasExtraCourseWithId(item.id) || alreadyTakenLessons.any { it.id == item.id }) {

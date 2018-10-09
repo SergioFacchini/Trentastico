@@ -53,7 +53,7 @@
             android:textColor="@color/colorForeground" />
 
         <SeekBar
-            android:id="@+id/font_size_seek_bar"
+            android:id="@+id/fontSizeSeekBar"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
             android:layout_marginTop="8dp"/>
 
         <TextView
-            android:id="@+id/font_preview"
+            android:id="@+id/fontSizePreview"
             style="@style/TextForegroundMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
             android:textColor="@color/colorForeground" />
 
         <TextView
-            android:id="@+id/current_study_course"
+            android:id="@+id/currentStudyCourse"
             style="@style/TextForegroundMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
             android:textStyle="italic"/>
 
         <Button
-            android:id="@+id/change_study_course_button"
+            android:id="@+id/changeStudyCourseButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -127,7 +127,7 @@
             android:textColor="@color/colorForeground" />
 
         <Switch
-            android:id="@+id/search_for_lesson_changes"
+            android:id="@+id/searchForLessonChanges"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -135,7 +135,7 @@
             android:textColor="@color/colorForeground" />
 
         <Switch
-            android:id="@+id/lesson_change_show_notification"
+            android:id="@+id/shownNotificationOnLessonChanges"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -160,7 +160,7 @@
             android:textColor="@color/colorForeground" />
 
         <Switch
-            android:id="@+id/show_next_lesson_notification"
+            android:id="@+id/showNextLessonNotification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -177,7 +177,7 @@
             android:textColor="@color/colorForeground" />
 
         <Switch
-            android:id="@+id/make_notifications_fixed"
+            android:id="@+id/makeNotificationFixedSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"

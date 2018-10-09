@@ -41,7 +41,7 @@
             android:layout_marginBottom="10dp">
 
             <Button
-                android:id="@+id/previous_day"
+                android:id="@+id/previousDay"
                 android:layout_width="50sp"
                 android:layout_height="match_parent"
                 android:background="#3b1629"
@@ -50,7 +50,7 @@
                 android:textSize="14sp"/>
 
             <TextView
-                android:id="@+id/current_day_name"
+                android:id="@+id/currentDayName"
                 style="button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -75,7 +75,7 @@
             android:layout_height="match_parent">
 
             <ProgressBar
-                android:id="@+id/loader_spinner"
+                android:id="@+id/loaderSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="50dp"/>
@@ -98,7 +98,7 @@
                         />
 
                     <TextView
-                        android:id="@+id/buc_times"
+                        android:id="@+id/timesBuc"
                         android:layout_marginRight="10dp"
                         android:gravity="center"
                         android:paddingLeft="10dip"
@@ -116,7 +116,7 @@
                         />
 
                     <TextView
-                        android:id="@+id/cial_times"
+                        android:id="@+id/timesCial"
                         android:layout_marginRight="10dp"
                         android:gravity="center"
                         android:paddingLeft="10dip"
@@ -134,7 +134,7 @@
                         />
 
                     <TextView
-                        android:id="@+id/mesiano_times"
+                        android:id="@+id/timesMesiano"
                         android:layout_marginRight="10dp"
                         android:gravity="center"
                         android:paddingLeft="10dip"
@@ -152,7 +152,7 @@
                         />
 
                     <TextView
-                        android:id="@+id/povo_times"
+                        android:id="@+id/timesPovo"
                         android:layout_marginRight="10dp"
                         android:gravity="center"
                         android:paddingLeft="10dip"
@@ -170,7 +170,7 @@
                         />
 
                     <TextView
-                        android:id="@+id/psicologia_times"
+                        android:id="@+id/timesPsicologia"
                         android:layout_marginRight="10dp"
                         android:gravity="center"
                         android:paddingLeft="10dip"
@@ -182,7 +182,7 @@
             </TableLayout>
 
             <LinearLayout
-                android:id="@+id/error_panel"
+                android:id="@+id/errorPanel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

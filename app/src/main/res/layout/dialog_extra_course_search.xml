@@ -22,13 +22,13 @@
         android:textSize="24sp" />
 
     <LinearLayout
-        android:id="@+id/searching_lessons"
+        android:id="@+id/searchingLessons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/selected_course"
+            android:id="@+id/selectedCourseTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -43,7 +43,7 @@
             android:padding="15dp" />
 
         <TextView
-            android:id="@+id/error_while_searching"
+            android:id="@+id/errorWhileSearching"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -55,14 +55,14 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/lessons_found"
+        android:id="@+id/lessonsFound"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/lessons_found_text"
+            android:id="@+id/lessonsFoundText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -73,7 +73,7 @@
             android:textSize="14sp" />
 
         <ListView
-            android:id="@+id/lessons_list"
+            android:id="@+id/lessonsListCourseSearch"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="10dp"

@@ -29,15 +29,15 @@ class ExtraCoursesAdapter(context: Context, extraCourses: ArrayList<ExtraCourse>
             = inflater.inflate(R.layout.itm_extra_course, parent, false)
 
     override fun bindView(item: ExtraCourse, pos: Int, convertView: View) {
-        Views.find<TextView>(convertView, R.id.course_name).text = item.lessonName
-        Views.find<TextView>(convertView, R.id.study_course_name).text = item.fullName
-        Views.find<TextView>(convertView, R.id.teacher_name).text = item.buildTeachersNamesOrDefault()
+        Views.find<TextView>(convertView, R.id.courseName).text = item.lessonName
+        Views.find<TextView>(convertView, R.id.studyCourseName).text = item.fullName
+        Views.find<TextView>(convertView, R.id.teacherName).text = item.buildTeachersNamesOrDefault()
 
         if (item.partitioningName != null) {
-            Views.find<TextView>(convertView, R.id.partitioning_name).text = item.partitioningName
-            Views.find<TextView>(convertView, R.id.partitioning_name).visibility = View.VISIBLE
+            Views.find<TextView>(convertView, R.id.partitioningName).text = item.partitioningName
+            Views.find<TextView>(convertView, R.id.partitioningName).visibility = View.VISIBLE
         } else {
-            Views.find<TextView>(convertView, R.id.partitioning_name).visibility = View.GONE
+            Views.find<TextView>(convertView, R.id.partitioningName).visibility = View.GONE
         }
 
         val color = ColorDispenser.getColor(item.lessonTypeId)

@@ -10,17 +10,12 @@ import android.support.annotation.AttrRes
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
+import kotlinx.android.synthetic.main.view_request_loader.view.*
 import java.util.*
 
 class RequestLoaderView : FrameLayout {
-
-    @BindView(R.id.loading_text)  lateinit var loadingText: TextView
-    @BindView(R.id.loading_progress)  lateinit var loadingProgress: TextView
 
     private var maxMessagesSinceLastShow = 0
 
@@ -42,7 +37,6 @@ class RequestLoaderView : FrameLayout {
 
     private fun init() {
         view = Views.inflate(this, R.layout.view_request_loader)
-        ButterKnife.bind(this, view!!)
 
         addView(view)
 
@@ -107,7 +101,8 @@ class RequestLoaderView : FrameLayout {
         loadingText.text = message.text
     }
 
-    @Synchronized internal fun removeMessage(messageId: Int) {
+    @Synchronized
+    internal fun removeMessage(messageId: Int) {
         synchronized(currentMessages) {
             val messages = currentMessages.iterator()
             while (messages.hasNext()) {

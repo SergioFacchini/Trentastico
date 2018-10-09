@@ -10,12 +10,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TableLayout
-import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.logger.BugLogger
@@ -24,39 +18,47 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.LibraryOpeningTimesListener
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
+import kotlinx.android.synthetic.main.fragment_libraries.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
 
-    private enum class State {
-        LOADING, SHOWING, ERROR
-    }
-
-    @BindView(R.id.loader_spinner)    lateinit var spinner: ProgressBar
-    @BindView(R.id.timetables)        lateinit var timetables: TableLayout
-    @BindView(R.id.error_panel)       lateinit var errorPanel: View
-
-    @BindView(R.id.current_day_name)  lateinit var currentDayName: TextView
-
-    @BindView(R.id.buc_times)        internal lateinit var timesBuc: TextView
-    @BindView(R.id.cial_times)       internal lateinit var timesCial: TextView
-    @BindView(R.id.mesiano_times)    internal lateinit var timesMesiano: TextView
-    @BindView(R.id.povo_times)       internal lateinit var timesPovo: TextView
-    @BindView(R.id.psicologia_times) internal lateinit var timesPsicologia: TextView
+    private enum class State { LOADING, SHOWING, ERROR }
 
     private var currentDay: Calendar = CalendarUtils.debuggableToday
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.fragment_libraries, container, false)
-        ButterKnife.bind(this, view)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_libraries, container, false)
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         currentDay = CalendarUtils.debuggableToday
 
         showCurrentDay(currentDay)
         loadOpeningTimesForDate(currentDay)
 
-        return view
+
+
+        previousDay.setOnClickListener {
+            currentDay.add(Calendar.DAY_OF_MONTH, -1)
+
+            showCurrentDay(currentDay)
+            loadOpeningTimesForDate(currentDay)
+        }
+
+        next_day.setOnClickListener {
+            currentDay.add(Calendar.DAY_OF_MONTH, +1)
+
+            showCurrentDay(currentDay)
+            loadOpeningTimesForDate(currentDay)
+        }
+
+        retry_fetch_times.setOnClickListener {
+            loadOpeningTimesForDate(currentDay)
+        }
+
+
+        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun showCurrentDay(currentDay: Calendar) {
@@ -89,35 +91,16 @@ class LibrariesFragment : FragmentWithMenuItems(), LibraryOpeningTimesListener {
     }
 
     private fun showState(state: State) = UIUtils.runOnMainThread {
-        spinner.visibility = View.GONE
+        loaderSpinner.visibility = View.GONE
         timetables.visibility = View.GONE
         errorPanel.visibility = View.GONE
 
         when (state) {
             LibrariesFragment.State.SHOWING -> timetables.visibility = View.VISIBLE
-            LibrariesFragment.State.ERROR -> errorPanel.visibility = View.VISIBLE
-            LibrariesFragment.State.LOADING -> spinner.visibility = View.VISIBLE
+            LibrariesFragment.State.ERROR   -> errorPanel.visibility = View.VISIBLE
+            LibrariesFragment.State.LOADING -> loaderSpinner.visibility = View.VISIBLE
         }
     }
-
-    @OnClick(R.id.previous_day)
-    internal fun onPreviousDayButtonClicked() {
-        currentDay.add(Calendar.DAY_OF_MONTH, -1)
-
-        showCurrentDay(currentDay)
-        loadOpeningTimesForDate(currentDay)
-    }
-
-    @OnClick(R.id.next_day)
-    internal fun onNextDayButtonClicked() {
-        currentDay.add(Calendar.DAY_OF_MONTH, +1)
-
-        showCurrentDay(currentDay)
-        loadOpeningTimesForDate(currentDay)
-    }
-
-    @OnClick(R.id.retry_fetch_times)
-    internal fun onRetryFetchTimesButtonClicked() = loadOpeningTimesForDate(currentDay)
 
     override val idsOfMenuItemsToMakeVisible: IntArray
         get() = IntArray(0)

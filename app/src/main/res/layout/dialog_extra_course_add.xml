@@ -35,13 +35,13 @@
             android:textSize="14sp" />
 
         <com.geridea.trentastico.gui.views.CourseSelectorView
-            android:id="@+id/course_selector"
+            android:id="@+id/courseSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
         
         <TextView
-            android:id="@+id/cannot_select_current_study_course"
+            android:id="@+id/cannotSelectCurrentStudyCourse"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/colorForeground"
@@ -52,7 +52,7 @@
             />
 
         <Button
-            android:id="@+id/search_for_lessons"
+            android:id="@+id/searchForLessonsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
