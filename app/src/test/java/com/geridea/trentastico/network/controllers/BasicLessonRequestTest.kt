@@ -42,6 +42,11 @@ class BasicLessonRequestTest {
     }
 
     @Test
+    fun `partitioning name expection for "Interazione uomo-macchina`() {
+        assertPartitioningEquals(null, "Interazione uomo-macchina")
+    }
+
+    @Test
     fun `partitioning name _LEZ _ESE _LAB`() {
         //Matematica - 1° anno
         assertPartitioningEquals("LEZ", "Informatica_LEZ")

@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 1.0.2",
+    "items": [
+      {
+        "type": "3",
+        "title": "Risolto qualche problema con i nomi dei corsi, non correttamente interpretati."
+      }
+  }
+  {
     "name": "Novità in 1.0.1",
     "items": [
       {

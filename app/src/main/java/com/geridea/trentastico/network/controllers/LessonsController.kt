@@ -440,6 +440,8 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             when {
                 teachingName.endsWith("_LEZ") -> teachingName.substring(0, teachingName.length-4)
                 teachingName.endsWith("_LAB") -> teachingName.substring(0, teachingName.length-4)
+                teachingName.toLowerCase().endsWith("uomo - macchina") -> teachingName //Fixes #107
+                teachingName.toLowerCase().endsWith("uomo-macchina")   -> teachingName //Fixes #107
                 teachingName.contains(" - ")  -> teachingName.take(teachingName.lastIndexOf(" - "))
                 else                          -> teachingName
             }
@@ -449,7 +451,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             //preceded by a dash with spaces " - ". Some courses names however are malformed and there
             // are no dashes in their names. In this case we assume that there are no partitionings.
             when {
-                teachingName.endsWith("uomo - macchina") -> null //Fixes #107
+                teachingName.toLowerCase().endsWith("uomo - macchina") -> null //Fixes #107
                 teachingName.contains(" - ") -> {
                     val partitioningName = teachingName.takeLastWhile { it != '-' }.trim()
                     when {

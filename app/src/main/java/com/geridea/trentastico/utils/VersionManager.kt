@@ -22,8 +22,12 @@ object VersionManager {
         }
 
         //NOTE: version 10 does not exists because of a google problem
+        if(lastVersion in 1..13) {
+            //Some people has courses name "Interazione Uomo" without "- Macchina"
+            Networker.obliterateCache()
+        }
 
-        if(lastVersion in 1..12) {
+        if(lastVersion in 1..13) { //> 1.0.1
             //The academic year has changed and the user must choose another year
             Networker.obliterateCache()
             AppPreferences.clearLessonsToHide()
