@@ -23,7 +23,7 @@ import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal1
-import kotlinx.android.synthetic.main.dialog_change_study_course.*
+import kotlinx.android.synthetic.main.dialog_change_study_course.view.*
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment : FragmentWithMenuItems() {
@@ -154,13 +154,13 @@ class SettingsFragment : FragmentWithMenuItems() {
         val onChoiceMade = Signal1<StudyCourse>()
 
         init {
-            setView(Views.inflate(context, R.layout.dialog_change_study_course))
+            val view = Views.inflate<View>(context, R.layout.dialog_change_study_course)
 
-            courseSelector.selectStudyCourse(AppPreferences.studyCourse)
+            view.courseSelector.selectStudyCourse(AppPreferences.studyCourse)
 
-            changeButton.visibility = View.GONE
-            changeButton.setOnClickListener {
-                val selectedCourse = courseSelector.buildStudyCourse()
+            view.changeButton.visibility = View.GONE
+            view.changeButton.setOnClickListener {
+                val selectedCourse = view.courseSelector.buildStudyCourse()
                 if (AppPreferences.studyCourse == selectedCourse) {
                     //We just clicked ok without changing our course...
                     onChoiceMade.dispatch(selectedCourse)
@@ -180,11 +180,12 @@ class SettingsFragment : FragmentWithMenuItems() {
                 }
             }
 
-            courseSelector.onCoursesLoaded.connect {
-                changeButton.visibility = View.VISIBLE
+            view.courseSelector.onCoursesLoaded.connect {
+                view.changeButton.visibility = View.VISIBLE
             }
-            courseSelector.loadCourses()
+            view.courseSelector.loadCourses()
 
+            setView(view)
         }
 
         private fun dealWithNextLessonNotifications() {

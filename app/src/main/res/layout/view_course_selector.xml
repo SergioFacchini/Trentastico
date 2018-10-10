@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.geridea.trentastico.gui.views.utils.LEPView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.geridea.trentastico.gui.views.utils.LEPView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/lepView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,7 +19,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:paddingBottom="20dp"/>
+            android:paddingBottom="20dp" />
 
         <TextView
             android:layout_width="match_parent"
