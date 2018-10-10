@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="10dp"
-        android:text="Queste sono le licenze cei componenti utilizzati per costruire Trentastico!"
+        android:text="Queste sono le licenze dei componenti utilizzati per costruire Trentastico!"
         android:textColor="@color/colorForeground"
         android:textSize="14sp" />
 
