@@ -26,6 +26,10 @@ object JsonUtils {
     @Throws(JSONException::class)
     fun getLongHashSet(jsonArray: JSONArray): HashSet<Long> =
             (0 until jsonArray.length()).mapTo(HashSet()) { jsonArray.getLong(it) }
+
+    @Throws(JSONException::class)
+    fun getIntHashSet(jsonArray: JSONArray): HashSet<Int> =
+            (0 until jsonArray.length()).mapTo(HashSet()) { jsonArray.getInt(it) }
 }
 
 fun <T> JSONArray.mapObjects(mapper: (JSONObject) -> T): List<T> =

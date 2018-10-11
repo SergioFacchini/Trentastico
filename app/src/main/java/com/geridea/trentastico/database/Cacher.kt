@@ -150,6 +150,27 @@ class Cacher(context: Context) {
         return lessons
     }
 
+    fun syncLoadTodaysLessons(): List<LessonSchedule> {
+        var lessons = mutableListOf<LessonSchedule>()
+
+        runJobInForeground {
+            //Fetching standard and extra courses
+            lessons = _fetchStandardScheduledLesson()
+            lessons.addAll(
+                AppPreferences.extraCourses
+                    .map { _fetchExtraScheduledLessons(it.lessonTypeId) }
+                    .flatten()
+            )
+
+            //Removing lessons that are not held today
+            val (start, end) = CalendarUtils.getTodaysStartAndEndMs()
+            lessons.removeAll { it.startsBefore(start) || it.startsAfter(end) }
+            lessons.sortBy { it.startsAt }
+        }
+
+        return lessons
+    }
+
     fun loadTodaysLessons(listener: TodaysLessonsListener) {
         runJobInBackground {
             //Fetching standard and extra courses

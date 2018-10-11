@@ -33,6 +33,8 @@ object VersionManager {
 
             //Introduced the new scheduling system
             LessonsUpdaterJob.schedulePeriodicRun()
+
+            AppPreferences.notificationTracker.clear()
         }
 
         if(lastVersion in 1..12) { //> 1.0.1

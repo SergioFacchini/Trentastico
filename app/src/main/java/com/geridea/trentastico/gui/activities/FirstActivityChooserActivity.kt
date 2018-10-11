@@ -9,8 +9,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.geridea.trentastico.logger.BugLogger
-import com.geridea.trentastico.services.NLNStarter
-import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 
 /**
@@ -21,9 +19,7 @@ class FirstActivityChooserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        BugLogger.info("Application is launched")
-
-        startService(NextLessonNotificationService.createIntent(this, NLNStarter.APP_BOOT))
+        BugLogger.info("Application is launched", "APP")
 
         when {
             AppPreferences.isFirstRun

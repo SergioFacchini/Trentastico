@@ -82,6 +82,9 @@ object Networker {
     fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
             lessonsController.loadTodaysCachedLessons(todaysLessonsListener)
 
+    fun syncLoadTodaysCachedLessons() =
+            lessonsController.syncLoadTodaysCachedLessons()
+
     /**
      * Removes all the cached extra lessons of the lesson type having the given id
      */

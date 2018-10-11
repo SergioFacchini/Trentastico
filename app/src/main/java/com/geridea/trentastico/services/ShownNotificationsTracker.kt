@@ -7,7 +7,6 @@ package com.geridea.trentastico.services
 
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
-import com.geridea.trentastico.utils.CollectionUtils
 import com.geridea.trentastico.utils.JsonUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -19,9 +18,9 @@ import java.util.*
  */
 class ShownNotificationsTracker {
 
-    private val shownNotificationsIds: HashSet<Long>
+    private val shownNotificationsIds: HashSet<Int>
 
-    constructor(shownIds: HashSet<Long>) {
+    constructor(shownIds: HashSet<Int>) {
         shownNotificationsIds = shownIds
     }
 
@@ -29,35 +28,14 @@ class ShownNotificationsTracker {
         shownNotificationsIds = HashSet()
     }
 
-    /**
-     * Tells whenever a next lesson notification has to be shown for the specified lesson found
-     * because of a specified starter. A lesson notification has to be shown when:
-     *
-     *  * It's about a lesson that the user has not been notified about
-     *  * We changed a setting about notifications, so all the notifications have to be
-     * displayed all over again.
-     *
-     * A lesson notification won't be shown when:
-     *
-     *  * We've already shown that notification (and the user might have dismissed it)
-     *
-     * @param lesson the lesson to inquire about
-     * @param starter the starter of the service
-     * @return true if the notification should be shown, false otherwise
-     */
-    fun shouldNotificationBeShown(lesson: LessonSchedule, starter: NLNStarter): Boolean =
-        if (!shownNotificationsIds.contains(lesson.id.hashCode().toLong())) true
-        else CollectionUtils.isOneOf(starter,
-                                NLNStarter.DEBUG,
-                                NLNStarter.PHONE_BOOT,
-                                NLNStarter.STUDY_COURSE_CHANGE,
-                                NLNStarter.NOTIFICATIONS_SWITCHED_ON)
+    fun shouldNotificationBeShown(lesson: LessonSchedule): Boolean =
+        shownNotificationsIds.contains(lesson.id.hashCode())
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson
      * @param lessonId the id of the lesson fr which the notification has been shown
      */
-    fun notifyNotificationShown(lessonId: Long) {
+    fun notifyNotificationShown(lessonId: Int) {
         shownNotificationsIds.add(lessonId)
     }
 
@@ -85,25 +63,26 @@ class ShownNotificationsTracker {
 
     companion object {
 
-        fun fromJson(jsonString: String): ShownNotificationsTracker = if (jsonString == "{}") {
-            ShownNotificationsTracker()
-        } else {
-            try {
-                val jsonObject = JSONObject(jsonString)
+        fun fromJson(jsonString: String): ShownNotificationsTracker =
+                if (jsonString == "{}") {
+                    ShownNotificationsTracker()
+                } else {
+                    try {
+                        val jsonObject = JSONObject(jsonString)
 
-                val shownIds = JsonUtils.getLongHashSet(
-                        jsonObject.getJSONArray("shown-notifications")
-                )
+                        val shownIds = JsonUtils.getIntHashSet(
+                                jsonObject.getJSONArray("shown-notifications")
+                        )
 
-                ShownNotificationsTracker(shownIds)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-                BugLogger.logBug("Cannot convert notification json to notifications tracker", e)
+                        ShownNotificationsTracker(shownIds)
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                        BugLogger.logBug("Cannot convert notification json to notifications tracker", e)
 
-                throw RuntimeException(e)
-            }
+                        throw RuntimeException(e)
+                    }
 
-        }
+                }
     }
 
 }

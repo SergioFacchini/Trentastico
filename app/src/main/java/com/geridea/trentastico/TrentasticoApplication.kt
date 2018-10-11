@@ -8,6 +8,7 @@ import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
+import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.services.ServicesJobCreator
 import com.geridea.trentastico.utils.*
 
@@ -19,9 +20,6 @@ import com.geridea.trentastico.utils.*
 //TODO: reenable ACRA
 //@ReportsCrashes(formUri = "http://collector.tracepot.com/20579ea2", mode = ReportingInteractionMode.TOAST, resToastText = R.string.crash_toast_text)
 class TrentasticoApplication : Application() {
-
-    val NOTIFICATION_LESSONS_CHANGED_ID = 1000
-
 
     override fun onCreate() {
         super.onCreate()
@@ -51,11 +49,21 @@ class TrentasticoApplication : Application() {
 
         JobManager.create(this).addJobCreator(ServicesJobCreator())
 
-        //"Services"
+        //Lessons updated notifications
         LessonsUpdaterJob.onLessonsChanged.connect { diffResult, courseName ->
             LessonsUpdaterJob.showLessonsChangedNotification(applicationContext, diffResult, courseName)
         }
 
+        //Next lesson notification
+        NextLessonNotificationService.onLessonNotificationExpired.connect { id ->
+            NextLessonNotificationService.clearNotificationWithId(this, id)
+        }
+
+        NextLessonNotificationService.onLessonNotificationToShow.connect { lesson ->
+            NextLessonNotificationService.showNotificationForLessons(applicationContext, lesson)
+        }
+
+        NextLessonNotificationService.scheduleNow()
 
         //Leave this last since it might have some other dependencies of other singletons
         VersionManager.checkForVersionChangeCode()

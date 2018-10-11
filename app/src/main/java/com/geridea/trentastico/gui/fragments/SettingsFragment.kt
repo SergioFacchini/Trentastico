@@ -19,7 +19,6 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
@@ -110,7 +109,7 @@ class SettingsFragment : FragmentWithMenuItems() {
             makeNotificationFixedSwitch.isEnabled = checked
 
             if (checked) {
-                startNextLessonNotificationService()
+                NextLessonNotificationService.scheduleNow()
             } else {
                 NextLessonNotificationService.clearNotifications(requireContext())
             }
@@ -121,7 +120,7 @@ class SettingsFragment : FragmentWithMenuItems() {
                 AppPreferences.nextLessonNotificationsFixed = checked
 
                 //If we have any notification, we have to update them:
-                startNextLessonNotificationService()
+                NextLessonNotificationService.scheduleNow()
             }
         }
 
@@ -133,12 +132,6 @@ class SettingsFragment : FragmentWithMenuItems() {
     ///////////////////////////
     ////NEXT LESSON NOTIFICATION
     ///////////////////////////
-
-    private fun startNextLessonNotificationService() {
-        activity!!.startService(NextLessonNotificationService.createIntent(
-                activity!!, NLNStarter.NOTIFICATIONS_SWITCHED_ON)
-        )
-    }
 
     ////////////////////////////
     // SEARCH FOR LESSON CHANGES
@@ -177,7 +170,7 @@ class SettingsFragment : FragmentWithMenuItems() {
 
                     AppPreferences.studyCourse = selectedCourse
 
-                    dealWithNextLessonNotifications()
+                    updateNextLessonNotifications()
                     onChoiceMade.dispatch(selectedCourse)
 
                     dismiss()
@@ -192,13 +185,9 @@ class SettingsFragment : FragmentWithMenuItems() {
             setView(view)
         }
 
-        private fun dealWithNextLessonNotifications() {
+        private fun updateNextLessonNotifications() {
             NextLessonNotificationService.clearNotifications(context)
-
-            //We need to show the next lesson notification for the new course
-            activity!!.startService(NextLessonNotificationService.createIntent(
-                    context, NLNStarter.STUDY_COURSE_CHANGE
-            ))
+            NextLessonNotificationService.scheduleNow()
         }
 
         private fun removeOverlappingExtraCourses(course: StudyCourse) {

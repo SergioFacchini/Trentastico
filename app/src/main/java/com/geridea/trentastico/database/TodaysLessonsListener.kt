@@ -9,5 +9,4 @@ import com.geridea.trentastico.model.LessonSchedule
 
 interface TodaysLessonsListener {
     fun onLessonsAvailable(lessons: List<LessonSchedule>)
-    fun onLessonsCouldNotBeLoaded()
 }

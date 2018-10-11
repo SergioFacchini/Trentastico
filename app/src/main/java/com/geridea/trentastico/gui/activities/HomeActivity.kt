@@ -18,7 +18,6 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
@@ -135,8 +134,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         LessonsUpdaterJob.runNowAndSchedulePeriodic()
                     }
 
-                    R.id.debug_start_next_lesson_service ->
-                        startService(NextLessonNotificationService.createIntent(this, NLNStarter.DEBUG))
+                    R.id.debug_start_next_lesson_service -> {
+                        NextLessonNotificationService.scheduleNow()
+                    }
 
                     R.id.debug_reset_notification_tracker -> {
                         AppPreferences.notificationTracker.clear()

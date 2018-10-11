@@ -13,7 +13,8 @@ class ServicesJobCreator : JobCreator {
     override fun create(tag: String): Job? {
 
         return when (tag) {
-            LessonsUpdaterJob.TAG -> LessonsUpdaterJob()
+            LessonsUpdaterJob.TAG             -> LessonsUpdaterJob()
+            NextLessonNotificationService.TAG -> NextLessonNotificationService()
             else -> null
         }
     }

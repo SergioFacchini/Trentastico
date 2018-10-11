@@ -57,6 +57,11 @@ class LessonsController(private val sender: RequestSender, private val cacher: C
     /**
      * Loads standard and extra lessons that are held today
      */
+    fun syncLoadTodaysCachedLessons() = cacher.syncLoadTodaysLessons()
+
+    /**
+     * Loads standard and extra lessons that are held today
+     */
     fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
             cacher.loadTodaysLessons(todaysLessonsListener)
 
@@ -423,6 +428,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
 
     private fun calculateRooms(string: String): List<Room> {
         //The rooms are in format "Room name[Department Name],Room name2[Department Name 2]"
+        @Suppress("RegExpRedundantEscape")
         val pattern = Pattern.compile("^ ?(.+)\\[(.+)\\]")
         return string.split(",").map {
             val matcher = pattern.matcher(it)
