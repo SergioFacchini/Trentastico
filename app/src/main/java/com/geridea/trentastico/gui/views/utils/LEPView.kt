@@ -34,18 +34,22 @@ class LEPView : LinearLayout {
 
     }
 
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if (childCount != 3) {
-            throw IllegalStateException("The LEPView must have exactly three children!")
-        }
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
 
         getChildAt(LEPState.LOAD   .viewIndex).visibility = GONE
         getChildAt(LEPState.ERROR  .viewIndex).visibility = GONE
         getChildAt(LEPState.PRESENT.viewIndex).visibility = GONE
 
         getChildAt(currentView.viewIndex).visibility = View.VISIBLE
+    }
 
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
+
+        if (childCount != 3) {
+            throw IllegalStateException("The LEPView must have exactly three children!")
+        }
     }
 
 }

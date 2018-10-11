@@ -11,6 +11,9 @@
       }, {
         "type": "3",
         "title": "Risolto qualche problema con i nomi dei corsi, non correttamente interpretati."
+      }, {
+        "type": "3",
+        "title": "Corretto qualche problema grafico."
       }
     ]
   },

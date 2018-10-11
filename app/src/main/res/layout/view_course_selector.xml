@@ -3,7 +3,7 @@
 <com.geridea.trentastico.gui.views.utils.LEPView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/lepView"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -18,8 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="20dp" />
+            android:paddingTop="10dp" />
 
         <TextView
             android:layout_width="match_parent"
