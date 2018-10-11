@@ -1,37 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.geridea.trentastico">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".TrentasticoApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-        <service
-            android:name=".services.LessonsUpdaterService"
-            android:description="@string/lessons_update_checker_description"
-            android:exported="false" />
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_config"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <service
             android:name=".services.NextLessonNotificationService"
             android:description="@string/lessons_update_checker_description"
             android:exported="false" />
-
-        <receiver
-            android:name=".receivers.BootAndNetworkBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".gui.activities.FirstActivityChooserActivity"

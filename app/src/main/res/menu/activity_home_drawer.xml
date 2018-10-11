@@ -42,6 +42,11 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="Pulisci cache" />
 
+        <item
+            android:id="@+id/debug_show_logs"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Mostra log" />
+
     </group>
     <item android:title="Altro">
         <menu>

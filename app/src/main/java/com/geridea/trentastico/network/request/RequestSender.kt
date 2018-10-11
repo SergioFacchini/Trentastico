@@ -14,13 +14,53 @@ import java.util.*
 class RequestSender {
 
     private val client = OkHttpClient()
-    private val callsInProgress = Vector<Call>()
 
     private val timeoutWaiter = Timer()
 
     fun processRequest(requestToSend: IRequest) {
-        waitForDebuggingIfNeeded()
 
+        waitForDebuggingIfNeeded()
+        requestToSend.notifyOnBeforeSend()
+
+        val call = client.newCall(buildRequest(requestToSend))
+        call.enqueue(RequestCallback(requestToSend))
+    }
+
+    fun processAsyncRequest(requestToSend: IRequest){
+        waitForDebuggingIfNeeded()
+        requestToSend.notifyOnBeforeSend()
+
+        try {
+            val call = client.newCall(buildRequest(requestToSend))
+            call.execute().use { response ->
+                onProcessResponseWithRequest(response, requestToSend)
+            }
+        } catch (e: Exception) {
+            requestToSend.notifyNetworkProblem(e, this)
+        }
+    }
+
+    private fun onProcessResponseWithRequest(response: Response, request: IRequest) {
+        if (response.isSuccessful) {
+            try {
+                val responseStr = response.body()!!.use { it.string() }
+
+                request.manageResponse(responseStr, this@RequestSender)
+            } catch (e: Exception) {
+                if (IS_IN_DEBUG_MODE) {
+                    e.printStackTrace()
+                }
+                request.notifyResponseProcessingFailure(e, this@RequestSender)
+            }
+        } else {
+            request.notifyNetworkProblem(
+                    ResponseUnsuccessfulException(response.code()),
+                    this@RequestSender
+            )
+        }
+    }
+
+    private fun buildRequest(requestToSend: IRequest): Request {
         val builder = Request.Builder()
         builder.url(requestToSend.url)
 
@@ -30,15 +70,7 @@ class RequestSender {
             builder.post(formBodyToSend)
         }
 
-        val request = builder.build()
-
-        requestToSend.notifyOnBeforeSend()
-
-        val call = client.newCall(request)
-        call.enqueue(RequestCallback(requestToSend))
-
-
-        callsInProgress.add(call)
+        return builder.build()
     }
 
     private fun waitForDebuggingIfNeeded() {
@@ -59,30 +91,12 @@ class RequestSender {
     private inner class RequestCallback internal constructor(private val request: IRequest) : Callback {
 
         override fun onFailure(call: Call, e: IOException) {
-            callsInProgress.remove(call)
             request.notifyNetworkProblem(e, this@RequestSender)
         }
 
         @Throws(IOException::class)
         override fun onResponse(call: Call, response: Response) {
-            if (response.isSuccessful) {
-                try {
-                    val responseBody = response.body()!!
-                    val responseStr = responseBody.string()
-                    responseBody.close()
-
-                    request.manageResponse(responseStr, this@RequestSender)
-                } catch (e: Exception) {
-                    if (IS_IN_DEBUG_MODE) {
-                        e.printStackTrace()
-                    }
-                    request.notifyResponseProcessingFailure(e, this@RequestSender)
-                }
-
-            } else {
-                request.notifyNetworkProblem(ResponseUnsuccessfulException(response.code()), this@RequestSender)
-            }
-            callsInProgress.remove(call)
+            onProcessResponseWithRequest(response, request)
         }
     }
 

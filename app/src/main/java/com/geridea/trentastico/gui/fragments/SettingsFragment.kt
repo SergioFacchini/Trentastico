@@ -18,6 +18,7 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -81,10 +82,13 @@ class SettingsFragment : FragmentWithMenuItems() {
                 return@setOnCheckedChangeListener
             }
 
-            AppPreferences.nextLessonNotificationsFixed = checked
+            AppPreferences.isSearchForLessonChangesEnabled = checked
+            if (checked) {
+                LessonsUpdaterJob.runNowAndSchedulePeriodic()
+            } else {
+                LessonsUpdaterJob.cancelPeriodicRun()
+            }
 
-            //If we have any notification, we have to update them:
-            startNextLessonNotificationService()
         }
 
         shownNotificationOnLessonChanges.setOnCheckedChangeListener { _, checked ->
@@ -95,7 +99,7 @@ class SettingsFragment : FragmentWithMenuItems() {
 
         //Next lesson notification
         showNextLessonNotification .isChecked  = AppPreferences.nextLessonNotificationsEnabled
-        makeNotificationFixedSwitch.isChecked = AppPreferences.nextLessonNotificationsFixed
+        makeNotificationFixedSwitch.isChecked  = AppPreferences.nextLessonNotificationsFixed
 
         showNextLessonNotification.setOnCheckedChangeListener { _, checked ->
             if (isLoading) {

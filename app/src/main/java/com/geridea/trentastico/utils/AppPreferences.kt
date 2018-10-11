@@ -34,9 +34,6 @@ object AppPreferences {
         extraCourses = readExtraCourses()
     }
 
-
-    var nextLessonsUpdateTime: Long by LongPreferences("NEXT_LESSONS_UPDATE_TIME", 0)
-
     /**
      * @return true if it is the first time the application is run
      */
@@ -47,16 +44,10 @@ object AppPreferences {
      */
     var hasToUpdateStudyCourse: Boolean                by BooleanPreferences("NEEDS_UPDATE_STUDY_COURSE", false)
     var wasAppInBetaMessageShown: Boolean              by BooleanPreferences("APP_IS_IN_BETA_MESSAGE_SHOWN", false)
-    var wasLastTimesCheckSuccessful: Boolean           by BooleanPreferences("WAS_LAST_TIMES_CHECK_SUCCESSFUL", true)
     var isSearchForLessonChangesEnabled: Boolean       by BooleanPreferences("SEARCH_LESSON_CHANGES", true)
     var isNotificationForLessonChangesEnabled: Boolean by BooleanPreferences("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
     var nextLessonNotificationsEnabled: Boolean        by BooleanPreferences("NEXT_LESSON_NOTIFICATION_ENABLED", true)
     var nextLessonNotificationsFixed: Boolean          by BooleanPreferences("NEXT_LESSON_NOTIFICATION_FIXED", false)
-
-    /**
-     * True whenever the user must not be notified of the next lessons update.
-     */
-    var debugSkipNextLessonChangedNotification: Boolean by BooleanPreferences("SKIP_NEXT_LESSON_CHANGED_NOTIFICATION", false)
 
     var debugIsInDebugMode: Boolean by BooleanPreferences("IS_DEBUG_MODE", false)
 
@@ -102,7 +93,7 @@ object AppPreferences {
 
             try {
                 val json = JSONArray(filteredJSON)
-                (0 until json.length()).mapTo(lessonTypesIds, { json.getString(it) })
+                (0 until json.length()).mapTo(lessonTypesIds) { json.getString(it) }
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
@@ -237,6 +228,15 @@ object AppPreferences {
 
     fun removeStudyCourse() {
         putString("STUDY_COURSE", null)
+    }
+
+    /**
+     * WARNING: Should only be used internally!
+     */
+    fun _removePreferenceByName(key: String) {
+        val editor = sharedPreferences.edit()
+        editor.remove(key)
+        editor.apply()
     }
 
     //////////////

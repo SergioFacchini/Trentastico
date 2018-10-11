@@ -2,6 +2,7 @@ package com.geridea.trentastico.utils
 
 import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.LessonsUpdaterJob
 
 
 /*
@@ -21,24 +22,26 @@ object VersionManager {
             return
         }
 
-        //NOTE: version 10 does not exists because of a google problem
         if(lastVersion in 1..13) {
             //Some people has courses name "Interazione Uomo" without "- Macchina"
             Networker.obliterateCache()
+
+            //Removed some preferences that won't be used anymore
+            AppPreferences._removePreferenceByName("NEXT_LESSONS_UPDATE_TIME")
+            AppPreferences._removePreferenceByName("WAS_LAST_TIMES_CHECK_SUCCESSFUL")
+            AppPreferences._removePreferenceByName("SKIP_NEXT_LESSON_CHANGED_NOTIFICATION")
+
+            //Introduced the new scheduling system
+            LessonsUpdaterJob.schedulePeriodicRun()
         }
 
-        if(lastVersion in 1..13) { //> 1.0.1
+        if(lastVersion in 1..12) { //> 1.0.1
             //The academic year has changed and the user must choose another year
             Networker.obliterateCache()
             AppPreferences.clearLessonsToHide()
             AppPreferences.removeAllExtraCourses()
             AppPreferences.removeStudyCourse()
             AppPreferences.hasToUpdateStudyCourse = true
-        }
-
-        if(lastVersion in 6..7) { //0.9.5 - 0.9.6
-            //I've fixed that "timestamp" inconsistency bug.
-            AppPreferences.debugSkipNextLessonChangedNotification = true
         }
 
         if(lastVersion in 6..9) { //0.9.5 - 0.9.8

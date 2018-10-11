@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.geridea.trentastico.R
+import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.utils.AppPreferences
 import kotlinx.android.synthetic.main.activity_welcome.*
 
@@ -19,10 +20,15 @@ class WelcomeActivity : AppCompatActivity() {
 
         startButton.visibility = View.GONE
         startButton.setOnClickListener {
+            //Saving course
             val selectedStudyCourse = courseSelector.buildStudyCourse()
             AppPreferences.studyCourse = selectedStudyCourse
             AppPreferences.isFirstRun = false
 
+            //Enabling updates
+            LessonsUpdaterJob.schedulePeriodicRun()
+
+            //Starting the home activity
             startActivity(Intent(this, HomeActivity::class.java))
 
             finish()

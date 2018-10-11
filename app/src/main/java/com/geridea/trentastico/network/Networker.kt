@@ -52,11 +52,11 @@ object Networker {
         }
     }
 
-    fun diffStudyCourseLessonsWithCachedOnes(
+    fun syncDiffStudyCourseLessonsWithCachedOnes(
             lastValidTimestamp: Long,
             listener: DiffLessonsListener) {
 
-        lessonsController.diffStudyCourseLessonsWithCachedOnes(lastValidTimestamp, listener)
+        lessonsController.syncDiffStudyCourseLessonsWithCachedOnes(lastValidTimestamp, listener)
     }
 
     fun diffExtraCourseLessonsWithCachedOnes(

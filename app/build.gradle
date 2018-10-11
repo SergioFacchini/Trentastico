@@ -75,6 +75,10 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
+    implementation 'com.evernote:android-job:1.2.6'
+
+    implementation 'com.hypertrack:hyperlog:0.0.10'
+
     androidTestImplementation 'junit:junit:4.12'
 }
 

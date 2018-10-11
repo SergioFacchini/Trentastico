@@ -5,6 +5,7 @@ package com.geridea.trentastico.utils
  * Created with ♥ by Slava on 30/03/2017.
  */
 
+import android.content.ClipData
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -53,4 +54,10 @@ fun TextView.setTextOrHideIfEmpty(text: String?) {
     } else {
         this.text = text
     }
+}
+
+
+fun copyText(context: Context, text: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+    clipboard.primaryClip = ClipData.newPlainText("Copied Text", text)
 }

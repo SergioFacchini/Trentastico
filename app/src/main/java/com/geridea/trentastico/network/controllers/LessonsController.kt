@@ -84,20 +84,21 @@ class LessonsController(private val sender: RequestSender, private val cacher: C
         }
     }
 
-    fun diffStudyCourseLessonsWithCachedOnes(
+    fun syncDiffStudyCourseLessonsWithCachedOnes(
             lastValidTimestamp: Long? = null,
             listener: DiffLessonsListener) {
-        cacher.getStandardLessonsAndTypes({ cachedLessons, cachedTypes ->
+
+        cacher.syncGetStandardLessonsAndTypes { cachedLessons, cachedTypes ->
             //Is there any cached lesson?
             if (cachedLessons.isEmpty() || cachedTypes.isEmpty()) {
                 listener.onNoCachedLessons()
-                return@getStandardLessonsAndTypes
+                return@syncGetStandardLessonsAndTypes
             }
 
-            sender.processRequest(DiffStudyCourseRequest(
+            sender.processAsyncRequest(DiffStudyCourseRequest(
                     AppPreferences.studyCourse, listener, cachedLessons, cacher, lastValidTimestamp
             ))
-        })
+        }
     }
 
     fun diffExtraCourseLessonsWithCachedOnes(
@@ -236,7 +237,9 @@ internal class LoadStudyCoursesRequest(
                 val courseJson = currentYearCourses[it] as JSONObject
                 var studyYears = parseStudyYears(courseJson.getJSONArray("elenco_anni"))
 
-                if (removeAllCoursesOption) studyYears = studyYears.filterNot { it.name.contains("Tutti gli anni") }
+                if (removeAllCoursesOption) studyYears = studyYears.filterNot { studyYear ->
+                    studyYear.name.contains("Tutti gli anni")
+                }
 
                 Course(
                         id = courseJson.getString("valore"),

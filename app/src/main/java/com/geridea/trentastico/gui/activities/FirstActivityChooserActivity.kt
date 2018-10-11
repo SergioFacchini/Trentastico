@@ -8,8 +8,7 @@ package com.geridea.trentastico.gui.activities
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-
-import com.geridea.trentastico.services.LessonsUpdaterService
+import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -22,7 +21,8 @@ class FirstActivityChooserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_APP_START))
+        BugLogger.info("Application is launched")
+
         startService(NextLessonNotificationService.createIntent(this, NLNStarter.APP_BOOT))
 
         when {

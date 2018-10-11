@@ -17,12 +17,14 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.LessonsUpdaterService
+import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NLNStarter
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
+import com.geridea.trentastico.utils.copyText
+import com.hypertrack.hyperlog.HyperLog
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.dialog_trentastico_is_a_beta.view.*
 
@@ -60,7 +62,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         it.itemId == R.id.debug_menu_about ||
                         it.itemId == R.id.debug_update_courses ||
                         it.itemId == R.id.debug_start_next_lesson_service ||
-                        it.itemId == R.id.debug_reset_notification_tracker
+                        it.itemId == R.id.debug_reset_notification_tracker ||
+                        it.itemId == R.id.debug_show_logs
                     }
                     .forEach { it.isVisible = false }
         }
@@ -128,8 +131,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         Toast.makeText(this, "Cache obliterated! :)", Toast.LENGTH_SHORT).show()
                         switchToCalendarFragment()
                     }
-                    R.id.debug_update_courses            ->
-                        startService(LessonsUpdaterService.createIntent(this, LessonsUpdaterService.STARTER_DEBUGGER))
+                    R.id.debug_update_courses            -> {
+                        LessonsUpdaterJob.runNowAndSchedulePeriodic()
+                    }
 
                     R.id.debug_start_next_lesson_service ->
                         startService(NextLessonNotificationService.createIntent(this, NLNStarter.DEBUG))
@@ -137,6 +141,21 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     R.id.debug_reset_notification_tracker -> {
                         AppPreferences.notificationTracker.clear()
                         Toast.makeText(this, "Notification tracker reset!", Toast.LENGTH_SHORT).show()
+                    }
+
+                    R.id.debug_show_logs -> {
+                        val logsString = HyperLog
+                                .getDeviceLogs(false)
+                                .asReversed()
+                                .joinToString(separator = "\n") { it.deviceLog }
+
+                        val logDialog = AlertDialog.Builder(this)
+                        logDialog.setMessage(logsString)
+                        logDialog.setPositiveButton("Copia") { _, _ ->
+                            copyText(applicationContext, logsString)
+                        }
+                        logDialog.setCancelable(true)
+                        logDialog.show()
                     }
 
                 }

@@ -60,7 +60,7 @@ class AboutFragment : FragmentWithMenuItems() {
             view.slava.text = DebugDB.getAddressLog()
         }
 
-        if (debugClickCounter % 20 == 0) {
+        if (debugClickCounter % 12 == 0) {
             AppPreferences.debugIsInDebugMode = !AppPreferences.debugIsInDebugMode
 
             if (AppPreferences.debugIsInDebugMode) {

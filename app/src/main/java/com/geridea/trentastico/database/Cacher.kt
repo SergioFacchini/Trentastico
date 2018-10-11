@@ -44,9 +44,23 @@ class Cacher(context: Context) {
         })
     }
 
+    private fun runJobInForeground(jobToRun: () -> Unit){
+        jobQueue.addJob(object: CacheJob() {
+            override fun onRun() {
+                jobToRun()
+            }
+        })
+    }
+
     //-------------------
     // Lesson schedules
     //-------------------
+    fun syncGetStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonType>) -> Unit) {
+        runJobInForeground {
+            callback(_fetchStandardScheduledLesson(), fetchStandardLessonTypes())
+        }
+    }
+
     fun getStandardLessonsAndTypes(callback: (lessons: List<LessonSchedule>, lessonTypes: List<LessonType>) -> Unit) {
         runJobInBackground {
             callback(_fetchStandardScheduledLesson(), fetchStandardLessonTypes())
@@ -333,7 +347,7 @@ abstract class CacheJob: Job(Params(1)) {
 
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int, maxRunCount: Int): RetryConstraint {
         throwable.printStackTrace()
-        BugLogger.logBug("Throwable raised when running a job", throwable)
+        BugLogger.logBug("Throwable raised when running a cache job", Exception(throwable))
 
         return RetryConstraint.CANCEL
     }

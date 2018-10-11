@@ -3,10 +3,18 @@
     "name": "Novità in 1.0.2",
     "items": [
       {
+        "type": "1",
+        "title": "Ora Trentastico consuma meno batteria!"
+      }, {
+        "type": "2",
+        "title": "Risolti diversi problemi di notifiche ed aggiornamenti di lezioni per dispositivi con Android Oreo."
+      }, {
         "type": "3",
         "title": "Risolto qualche problema con i nomi dei corsi, non correttamente interpretati."
       }
-  }
+    ]
+  },
+
   {
     "name": "Novità in 1.0.1",
     "items": [
