@@ -18,6 +18,7 @@ import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.Config.LESSONS_REFRESH_WAITING_REGULAR
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.LessonsChangedActivity
 import com.geridea.trentastico.logger.BugLogger
@@ -36,7 +37,7 @@ class LessonsUpdaterJob : Job() {
     private var numRequestsFinished = 0
 
     override fun onRunJob(params: Params): Result {
-        BugLogger.info("Lesson updater job is running...")
+        BugLogger.info("Lesson updater job is running...", "LESSON_UPDATER")
 
         //Performing the diff
         numRequestsToSend = AppPreferences.extraCourses.size + 1
@@ -55,7 +56,7 @@ class LessonsUpdaterJob : Job() {
             )
         }
 
-        BugLogger.info("Lesson updater job has finished...")
+        BugLogger.info("Lesson updater job has finished...", "LESSON_UPDATER")
         if (!params.isPeriodic) {
             //This task is not periodic only if it has been run from debug or the user has changed
             //the settings about lesson updates. Running the task in not-periodic way, stops it
@@ -98,18 +99,18 @@ class LessonsUpdaterJob : Job() {
         fun schedulePeriodicRun() {
             if (AppPreferences.isSearchForLessonChangesEnabled && AppPreferences.isStudyCourseSet) {
                 buildJob(false).schedule()
-                BugLogger.info("Lesson updater scheduled...")
+                BugLogger.info("Lesson updater scheduled...", "LESSON_UPDATER")
             }
         }
 
         fun cancelPeriodicRun() {
             JobManager.instance().cancelAllForTag(TAG)
-            BugLogger.info("Lesson updater cancelled...")
+            BugLogger.info("Lesson updater cancelled...", "LESSON_UPDATER")
         }
 
         fun runNowAndSchedulePeriodic() {
             if (AppPreferences.isSearchForLessonChangesEnabled && AppPreferences.isStudyCourseSet) {
-                BugLogger.info("Lesson updater single run...")
+                BugLogger.info("Lesson updater single run...", "LESSON_UPDATER")
                 JobManager.instance().cancelAllForTag(TAG)
                 buildJob(true).schedule()
             }
@@ -124,7 +125,7 @@ class LessonsUpdaterJob : Job() {
                 )
             } else {
                 builder
-                    .setPeriodic(TimeUnit.HOURS.toMillis(4))
+                    .setPeriodic(TimeUnit.HOURS.toMillis(LESSONS_REFRESH_WAITING_REGULAR))
                     .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                     .setRequiresBatteryNotLow(true)
                     .setRequirementsEnforced(true)

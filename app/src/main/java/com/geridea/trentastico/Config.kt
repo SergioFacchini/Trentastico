@@ -30,11 +30,10 @@ object Config {
     val DATABASE_VERSION = 3
 
     //Calendar
-    val CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 3
+    const val CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW = 3
 
     //Lessons update service
-    val LESSONS_REFRESH_WAITING_REGULAR = 4
-    val LESSONS_REFRESH_WAITING_AFTER_ERROR = 2
+    const val LESSONS_REFRESH_WAITING_REGULAR = 4L  //hours
 
     /**
      * During diff of the cached times and the fresh ones, what is the last valid time to consider
@@ -45,9 +44,9 @@ object Config {
     val LESSONS_CHANGED_ANTICIPATION_MS = TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)
 
     //Next lessons notification service
-    val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
+    const val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
 
     //Current study year
-    val CURRENT_STUDY_YEAR = "2018"
+    const val CURRENT_STUDY_YEAR = "2018"
 
 }

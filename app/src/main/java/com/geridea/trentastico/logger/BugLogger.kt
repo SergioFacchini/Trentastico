@@ -26,12 +26,12 @@ object BugLogger {
         HyperLog.setLogLevel(Log.VERBOSE)
     }
 
-    fun logBug(reason: String, e: Exception) {
+    fun logBug(reason: String, e: Exception, tag: String = TAG) {
         if (IS_IN_DEBUG_MODE) {
             return
         }
 
-        HyperLog.e(TAG, reason, e)
+        HyperLog.e(tag, reason, e)
         onNewDebugMessageArrived.dispatch(e.message!!)
     }
 
@@ -44,18 +44,17 @@ object BugLogger {
         HyperLog.d(TAG, "Extra study courses changed: $courses")
     }
 
-    fun warn(message: String) {
-        HyperLog.w(TAG, message)
+    fun warn(message: String, tag: String = TAG) {
+        HyperLog.w(tag, message)
 
         onNewDebugMessageArrived.dispatch(message)
     }
 
-    fun info(message: String) {
-        HyperLog.i(TAG, message)
+    fun info(message: String, tag: String = TAG) {
+        HyperLog.i(tag, message)
 
         onNewDebugMessageArrived.dispatch(message)
     }
-
 
 }
 
@@ -65,6 +64,6 @@ internal class ReducedLogFormat(context: Context) : LogFormat(context) {
             logLevelName: String, tag:        String, message:   String,
             timeStamp:    String, senderName: String, osVersion: String,
             deviceUUID:   String
-    ): String = "$timeStamp : $logLevelName : $message"
+    ): String = "$timeStamp : $tag : $message"
 
 }
