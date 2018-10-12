@@ -45,22 +45,24 @@ class NextLessonNotificationService : Job() {
         //3) If you've just finished the last, show until the end of the lesson +15 min that
         //   there are no more lessons today.
         //4) Reschedule the service to start 15 min before the start of the next lesson
-        val lessons = Networker.syncLoadTodaysCachedLessons()
+        val loadResult = Networker.syncLoadTodaysLessons()
 
         //Finding passed lessons to hide the notifications of the past lessons
-        val passedLessons = findPassedLessons(lessons)
-        val ongoingLessons = findOngoingLessons(lessons)
+        val passedLessons  = findPassedLessons(loadResult.lessons)
+        val ongoingLessons = findOngoingLessons(loadResult.lessons)
 
         //Hiding the notification for passed lessons
         passedLessons.forEach { id -> onLessonNotificationExpired.dispatch(id.hashCode()) }
 
         //Calculating lessons that could possibly be shown
-        val validLessons = getShownLessons(lessons)
+        val validLessons = getShownLessons(loadResult.lessons)
         validLessons.removeAll(passedLessons)
 
         if (validLessons.isEmpty()) {
             //We have no (more) lessons today. We'll schedule for tomorrow
             BugLogger.info("No more lessons today", "NLN")
+            notificationsTracker.clear()
+
             scheduleNextStartAt(calculateNextDayMorning())
         } else {
             //Finding the lessons starting in less than N minutes:
@@ -148,7 +150,10 @@ class NextLessonNotificationService : Job() {
             }
             nextStart != null && ongoingEnd == null -> nextStart
             nextStart == null && ongoingEnd != null -> ongoingEnd
-            nextStart == null && ongoingEnd == null -> calculateNextDayMorning()
+            nextStart == null && ongoingEnd == null -> {
+                notificationsTracker.clear()
+                calculateNextDayMorning()
+            }
             else -> {
                 val runtimeException = RuntimeException("Should never happen")
                 BugLogger.logBug("Should never happen", runtimeException, "NLN")
@@ -267,12 +272,14 @@ class NextLessonNotificationService : Job() {
         }
 
         fun scheduleNow() {
-            BugLogger.info("Forced next lesson notification start", "NLN")
-            scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
+            if (AppPreferences.isStudyCourseSet) {
+                BugLogger.info("Forced next lesson notification start", "NLN")
+                scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
+            }
         }
 
         fun scheduleNextStartAt(ms: Long, delta: Long = TimeUnit.MINUTES.toMillis(2)) {
-            val windowStart = ms - System.currentTimeMillis() + 1
+            val windowStart = Math.max(ms - System.currentTimeMillis(), 0) + 1
             val windowEnd   = windowStart + delta
 
             JobRequest.Builder(TAG)

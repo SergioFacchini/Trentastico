@@ -9,7 +9,6 @@ import android.content.Context
 import android.util.Log
 import com.geridea.trentastico.model.ExtraCoursesList
 import com.geridea.trentastico.model.StudyCourse
-import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.hypertrack.hyperlog.HyperLog
 import com.hypertrack.hyperlog.LogFormat
 import com.threerings.signals.Signal1
@@ -27,10 +26,6 @@ object BugLogger {
     }
 
     fun logBug(reason: String, e: Exception, tag: String = TAG) {
-        if (IS_IN_DEBUG_MODE) {
-            return
-        }
-
         HyperLog.e(tag, reason, e)
         onNewDebugMessageArrived.dispatch(e.message!!)
     }

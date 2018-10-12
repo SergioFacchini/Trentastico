@@ -29,7 +29,7 @@ class ShownNotificationsTracker {
     }
 
     fun shouldNotificationBeShown(lesson: LessonSchedule): Boolean =
-        shownNotificationsIds.contains(lesson.id.hashCode())
+        !shownNotificationsIds.contains(lesson.id.hashCode())
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson

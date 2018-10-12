@@ -42,7 +42,7 @@ class TrentasticoApplication : Application() {
 
         BugLogger.init(this)
         BugLogger.onNewDebugMessageArrived.connect { message ->
-            if(IS_IN_DEBUG_MODE){
+            if (IS_IN_DEBUG_MODE) {
                 UIUtils.showToastIfInDebug(applicationContext, message)
             }
         }

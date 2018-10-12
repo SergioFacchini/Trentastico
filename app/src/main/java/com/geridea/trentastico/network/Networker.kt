@@ -6,7 +6,9 @@ package com.geridea.trentastico.network
 
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.database.TodaysLessonsListener
+import com.geridea.trentastico.gui.views.requestloader.ILoadingMessage
 import com.geridea.trentastico.model.ExtraCourse
+import com.geridea.trentastico.model.LessonSchedule
 import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
@@ -15,7 +17,9 @@ import com.geridea.trentastico.network.controllers.SendFeedbackController
 import com.geridea.trentastico.network.controllers.listener.*
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.utils.AppPreferences
+import com.geridea.trentastico.utils.time.CalendarUtils
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 
 object Networker {
 
@@ -82,8 +86,52 @@ object Networker {
     fun loadTodaysCachedLessons(todaysLessonsListener: TodaysLessonsListener) =
             lessonsController.loadTodaysCachedLessons(todaysLessonsListener)
 
-    fun syncLoadTodaysCachedLessons() =
-            lessonsController.syncLoadTodaysCachedLessons()
+    data class SyncLoadResult(val lessons: List<LessonSchedule>, val wereErrors: Boolean)
+
+    fun syncLoadTodaysLessons(): SyncLoadResult {
+        val listener = BlockingLessonsLoadingListener()
+        loadLessons(listener)
+        loadExtraCourses(listener)
+
+        val listOfLessons = mutableListOf<LessonSchedule>()
+        val numOfLessonsToTake = AppPreferences.extraCourses.count() + 1
+        var wereErrors = false
+
+        for (i in 0 until numOfLessonsToTake) {
+            val lessons = listener.getLessons()
+            if (lessons != null) {
+                listOfLessons.addAll(lessons)
+            } else {
+                wereErrors = true
+            }
+        }
+
+        val today = CalendarUtils.today()
+        val todayLessons = listOfLessons.filter { CalendarUtils.isSameDay(it.startCal, today) }
+
+        return SyncLoadResult(todayLessons, wereErrors)
+    }
+
+    class BlockingLessonsLoadingListener : LessonsLoadingListener {
+
+        private var lessonsQueue = ArrayBlockingQueue<List<LessonSchedule>?>(50)
+
+        override fun onLoadingMessageDispatched(operation: ILoadingMessage) {}
+
+        override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonType>, operationId: Int) {
+            lessonsQueue.add(lessons)
+        }
+
+        override fun onNetworkErrorHappened(error: Exception, operationId: Int) {
+            lessonsQueue.add(null)
+        }
+
+        override fun onParsingErrorHappened(exception: Exception, operationId: Int) {
+            lessonsQueue.add(null)
+        }
+
+        fun getLessons(): List<LessonSchedule>? = lessonsQueue.take()
+    }
 
     /**
      * Removes all the cached extra lessons of the lesson type having the given id

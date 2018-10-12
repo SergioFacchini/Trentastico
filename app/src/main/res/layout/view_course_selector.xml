@@ -18,7 +18,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:paddingTop="10dp" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
 
         <TextView
             android:layout_width="match_parent"

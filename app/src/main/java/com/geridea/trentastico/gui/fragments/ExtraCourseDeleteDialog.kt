@@ -8,6 +8,7 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal0
@@ -15,7 +16,7 @@ import kotlinx.android.synthetic.main.dialog_extra_course_delete.*
 import kotlinx.android.synthetic.main.itm_extra_course.view.*
 
 
-internal class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse): AlertDialog(context) {
+internal class ExtraCourseDeleteDialog(context: Context, private val course: ExtraCourse) : AlertDialog(context) {
 
     /**
      * Dispatched when the user has selected and added a new study course.
@@ -47,6 +48,10 @@ internal class ExtraCourseDeleteDialog(context: Context, private val course: Ext
             AppPreferences.removeExtraCourse(course.lessonTypeId)
             Networker.purgeExtraCourse(course.lessonTypeId)
             ColorDispenser.dissociateColorFromType(course.lessonTypeId)
+
+
+            NextLessonNotificationService.clearNotifications(context)
+            NextLessonNotificationService.scheduleNow()
 
             onDeleteConfirm.dispatch()
             dismiss()

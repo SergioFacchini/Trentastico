@@ -19,6 +19,7 @@ import com.geridea.trentastico.utils.*
 import com.geridea.trentastico.utils.time.CalendarUtils
 import org.json.JSONArray
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 
 
 /*
@@ -151,11 +152,11 @@ class Cacher(context: Context) {
     }
 
     fun syncLoadTodaysLessons(): List<LessonSchedule> {
-        var lessons = mutableListOf<LessonSchedule>()
+        val queue = ArrayBlockingQueue<List<LessonSchedule>>(1, true)
 
         runJobInForeground {
             //Fetching standard and extra courses
-            lessons = _fetchStandardScheduledLesson()
+            val lessons = _fetchStandardScheduledLesson()
             lessons.addAll(
                 AppPreferences.extraCourses
                     .map { _fetchExtraScheduledLessons(it.lessonTypeId) }
@@ -166,9 +167,11 @@ class Cacher(context: Context) {
             val (start, end) = CalendarUtils.getTodaysStartAndEndMs()
             lessons.removeAll { it.startsBefore(start) || it.startsAfter(end) }
             lessons.sortBy { it.startsAt }
+
+            queue.add(lessons)
         }
 
-        return lessons
+        return queue.take()
     }
 
     fun loadTodaysLessons(listener: TodaysLessonsListener) {

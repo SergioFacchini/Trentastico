@@ -179,8 +179,6 @@ class CalendarFragment : FragmentWithMenuItems() {
 
             view.partitioningName.setTextOrHideIfEmpty(event.partitioningName)
 
-            view.dismiss_button.setOnClickListener { dismiss() }
-
             val teachers = lessonType.teachers.orIfEmpty(listOf(NO_TEACHER_ASSIGNED_DEFAULT_TEXT))
             view.teachers_names.adapter = TeachersAdapter(context, teachers)
         }
