@@ -44,10 +44,9 @@
                 android:id="@+id/previousDay"
                 android:layout_width="50sp"
                 android:layout_height="match_parent"
-                android:background="#3b1629"
                 android:text="&lt;"
-                android:textColor="@color/colorForeground"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                style="@style/button_action" />
 
             <TextView
                 android:id="@+id/currentDayName"
@@ -64,10 +63,9 @@
                 android:id="@+id/next_day"
                 android:layout_width="50sp"
                 android:layout_height="match_parent"
-                android:background="#3b1629"
                 android:text="&gt;"
-                android:textColor="@color/colorForeground"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                style="@style/button_action" />
         </LinearLayout>
 
         <FrameLayout
@@ -200,9 +198,8 @@
                     android:id="@+id/retry_fetch_times"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#3b1629"
                     android:text="Riprova"
-                    android:textColor="@color/colorForeground" />
+                    style="@style/button_action" />
 
             </LinearLayout>
 

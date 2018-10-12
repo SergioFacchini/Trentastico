@@ -86,9 +86,7 @@
         android:id="@+id/cancel_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3b1629"
-        android:screenOrientation="portrait"
         android:text="Annulla"
-        android:textColor="@color/colorForeground" />
+        style="@style/button_action" />
 
 </LinearLayout>

@@ -104,9 +104,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="#3b1629"
             android:text="Cambia corso di studi!"
-            android:textColor="@color/colorForeground" />
+            style="@style/button_action" />
 
         <TextView
             style="@style/TextForegroundBig"

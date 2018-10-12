@@ -53,13 +53,11 @@
 
         <Button
             android:id="@+id/searchForLessonsButton"
+            style="@style/button_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:background="#3b1629"
-            android:screenOrientation="portrait"
-            android:text="Cerca lezioni!"
-            android:textColor="@color/colorForeground" />
+            android:layout_marginTop="10dp"
+            android:text="Cerca lezioni!" />
 
     </LinearLayout>
 </ScrollView>

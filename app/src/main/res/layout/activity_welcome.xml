@@ -56,13 +56,12 @@
 
         <Button
             android:id="@+id/startButton"
+            style="@style/button_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:background="#3b1629"
+            android:layout_marginTop="10dp"
             android:screenOrientation="portrait"
-            android:text="Cominciamo!"
-            android:textColor="@color/colorForeground" />
+            android:text="Cominciamo!" />
 
     </LinearLayout>
 </ScrollView>
