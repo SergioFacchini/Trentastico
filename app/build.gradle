@@ -73,10 +73,13 @@ dependencies {
     //Change logs
     implementation 'com.github.porokoro.paperboy:paperboy:3.0.0'
 
+    //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
+    //Scheduling
     implementation 'com.evernote:android-job:1.2.6'
 
+    //Logging
     implementation 'com.hypertrack:hyperlog:0.0.10'
 
     androidTestImplementation 'junit:junit:4.12'

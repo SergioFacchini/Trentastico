@@ -16,11 +16,6 @@
         android:fullBackupContent="@xml/backup_config"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <service
-            android:name=".services.NextLessonNotificationService"
-            android:description="@string/lessons_update_checker_description"
-            android:exported="false" />
-
         <activity
             android:name=".gui.activities.FirstActivityChooserActivity"
             android:noHistory="true"
