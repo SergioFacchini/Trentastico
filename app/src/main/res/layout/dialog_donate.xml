@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    style="@style/dialog_background"
+    android:orientation="vertical"
+    tools:context=".gui.activities.WelcomeActivity">
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:text="Ho realizzato Trentastico per hobby, durante il mio tempo libero.
+Sia io che altri studenti di Trento avevamo bisogno di uno strumento che semplificasse la nostra incasinata vita universitaria, e sapevo che la mia esperienza mi avrebbe permesso di creare questo strumento.
+
+Vuoi darmi una mano a far crescere Trentastico?
+
+Puoi offrirmi un caffè per sostenermi nei lunghi peroidi di sviluppo, o contribuire anche di più se ti va.
+Ti ringrazio per tutto l'aiuto che mi dai.
+Slava Rublev"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/colorForeground"
+        android:textSize="14sp"
+        android:textStyle="italic" />
+
+    <Spinner
+        android:id="@+id/what_to_offer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/button_offer"
+        style="@style/button_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Offri un caffé" />
+
+</LinearLayout>

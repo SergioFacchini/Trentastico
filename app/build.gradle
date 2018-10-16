@@ -82,6 +82,9 @@ dependencies {
     //Logging
     implementation 'com.hypertrack:hyperlog:0.0.10'
 
+    //Google billing
+    implementation 'com.android.billingclient:billing:1.1'
+
     androidTestImplementation 'junit:junit:4.12'
 }
 
