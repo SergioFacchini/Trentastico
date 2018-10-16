@@ -13,7 +13,7 @@ android {
         }
     }
     compileSdkVersion 27
-    buildToolsVersion '28.0.2'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
