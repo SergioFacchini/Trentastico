@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
+import com.geridea.trentastico.gui.activities.dialog.DonateDialog
 import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
@@ -62,7 +63,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         it.itemId == R.id.debug_update_courses ||
                         it.itemId == R.id.debug_start_next_lesson_service ||
                         it.itemId == R.id.debug_reset_notification_tracker ||
-                        it.itemId == R.id.debug_show_logs
+                        it.itemId == R.id.debug_show_logs ||
+                        it.itemId == R.id.debug_show_donations
                     }
                     .forEach { it.isVisible = false }
         }
@@ -156,6 +158,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         }
                         logDialog.setCancelable(true)
                         logDialog.show()
+                    }
+
+                    R.id.debug_show_donations -> {
+                        val donateDialog = DonateDialog(this)
+                        donateDialog.show()
                     }
 
                 }
