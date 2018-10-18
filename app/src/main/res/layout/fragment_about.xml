@@ -24,16 +24,6 @@
         android:textSize="16sp" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingTop="6dp"
-        android:text="Un sentito ringraziamento a Davide Bulbarelli, Alessandro Cervellera e Lorenzo Braccaioli per aver sofferto con me al massacrante hackathon degli ITC days 2017, luogo in qui quest'app è stata concepita."
-        android:textColor="@color/colorForeground"
-        android:textSize="14sp"
-        android:textStyle="italic" />
-
-    <TextView
         android:id="@+id/versionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Licenze"
+        android:text="Licenze e crediti"
         style="@style/button_action" />
 
 </LinearLayout>

@@ -47,6 +47,11 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="Mostra log" />
 
+        <item
+            android:id="@+id/debug_show_donations"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Mostra popup donazione" />
+
     </group>
     <item android:title="Altro">
         <menu>
