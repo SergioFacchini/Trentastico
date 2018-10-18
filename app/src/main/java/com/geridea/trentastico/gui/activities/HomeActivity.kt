@@ -145,7 +145,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                     R.id.debug_show_logs -> {
                         val logsString = HyperLog
-                                .getDeviceLogs(false)
+                                .getDeviceLogs(false).orEmpty()
                                 .asReversed()
                                 .joinToString(separator = "\n") { it.deviceLog }
 
@@ -153,6 +153,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         logDialog.setMessage(logsString)
                         logDialog.setPositiveButton("Copia") { _, _ ->
                             copyText(applicationContext, logsString)
+                        }
+                        logDialog.setNegativeButton("Cancella") { _, _ ->
+                            HyperLog.getDeviceLogs(true)
                         }
                         logDialog.setCancelable(true)
                         logDialog.show()
