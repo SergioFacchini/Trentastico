@@ -43,7 +43,6 @@ object AppPreferences {
      * True if an academic year has ended and the user has to refresh his/her study course.
      */
     var hasToUpdateStudyCourse: Boolean                by BooleanPreferences("NEEDS_UPDATE_STUDY_COURSE", false)
-    var wasAppInBetaMessageShown: Boolean              by BooleanPreferences("APP_IS_IN_BETA_MESSAGE_SHOWN", false)
     var isSearchForLessonChangesEnabled: Boolean       by BooleanPreferences("SEARCH_LESSON_CHANGES", true)
     var isNotificationForLessonChangesEnabled: Boolean by BooleanPreferences("SHOW_NOTIFICATION_ON_LESSON_CHANGES", true)
     var nextLessonNotificationsEnabled: Boolean        by BooleanPreferences("NEXT_LESSON_NOTIFICATION_ENABLED", true)

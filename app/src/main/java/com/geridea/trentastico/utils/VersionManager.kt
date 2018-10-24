@@ -30,6 +30,7 @@ object VersionManager {
             AppPreferences._removePreferenceByName("NEXT_LESSONS_UPDATE_TIME")
             AppPreferences._removePreferenceByName("WAS_LAST_TIMES_CHECK_SUCCESSFUL")
             AppPreferences._removePreferenceByName("SKIP_NEXT_LESSON_CHANGED_NOTIFICATION")
+            AppPreferences._removePreferenceByName("APP_IS_IN_BETA_MESSAGE_SHOWN")
 
             //Introduced the new scheduling system
             LessonsUpdaterJob.schedulePeriodicRun()

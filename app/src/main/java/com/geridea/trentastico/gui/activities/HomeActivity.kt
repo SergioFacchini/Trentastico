@@ -1,6 +1,5 @@
 package com.geridea.trentastico.gui.activities
 
-import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
@@ -10,7 +9,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -28,7 +26,6 @@ import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.copyText
 import com.hypertrack.hyperlog.HyperLog
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.dialog_trentastico_is_a_beta.view.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -63,12 +60,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         //Setting calendar fragment as the first fragment
         switchToCalendarFragment()
-
-        //While the app is in beta we will show the user it's times
-        if(!AppPreferences.wasAppInBetaMessageShown) {
-            AppPreferences.wasAppInBetaMessageShown = true
-            TrentasticoIsABetaDialog(this).show()
-        }
     }
 
     private fun setupMenuHeader() {
@@ -221,16 +212,4 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.content_frame, nextFragment)
                 .commit()
     }
-}
-
-
-internal class TrentasticoIsABetaDialog(context: Context) : AlertDialog(context) {
-
-    init {
-        val view = Views.inflate<View>(context, R.layout.dialog_trentastico_is_a_beta)
-        view.okBtn.setOnClickListener { dismiss() }
-
-        setView(view)
-    }
-
 }
