@@ -27,6 +27,7 @@ import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.time.CalendarUtils
 import com.threerings.signals.Signal1
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class NextLessonNotificationService : Job() {
 
@@ -273,15 +274,16 @@ class NextLessonNotificationService : Job() {
         fun scheduleNow() {
             if (AppPreferences.isStudyCourseSet) {
                 BugLogger.info("Forced next lesson notification start", "NLN")
-                scheduleNextStartAt(System.currentTimeMillis())
+                scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
             }
         }
 
-        fun scheduleNextStartAt(ms: Long) {
-            val exactTime = Math.max(ms - System.currentTimeMillis(), 1)
+        fun scheduleNextStartAt(ms: Long, delta: Long = TimeUnit.MINUTES.toMillis(2)) {
+            val windowStart = Math.max(ms - System.currentTimeMillis(), 0) + 1
+            val windowEnd   = windowStart + delta
 
             JobRequest.Builder(TAG)
-                    .setExact(exactTime)
+                    .setExecutionWindow(windowStart, windowEnd)
                     .setUpdateCurrent(true)
                     .build()
                     .schedule()
