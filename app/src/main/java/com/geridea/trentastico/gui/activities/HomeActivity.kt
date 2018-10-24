@@ -11,12 +11,14 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.dialog.DonateDialog
 import com.geridea.trentastico.gui.fragments.*
+import com.geridea.trentastico.model.DONATION_ITEMS
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationService
@@ -38,19 +40,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        toolbar.setTitle(R.string.app_name)
-        setSupportActionBar(toolbar)
-
-        val toggle = ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
-
-        //Showing the version
-        val versionText = Views.find<TextView>(nav_view.getHeaderView(0), R.id.version_text)
-        versionText.text = "Versione: " + DebugUtils.computeVersionName()
+        setupToolbar()
+        setupActionBarDrawer()
+        setupMenuHeader()
 
         //Removing debug stuff from menu
         if (!IS_IN_DEBUG_MODE) {
@@ -77,6 +69,35 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             AppPreferences.wasAppInBetaMessageShown = true
             TrentasticoIsABetaDialog(this).show()
         }
+    }
+
+    private fun setupMenuHeader() {
+        //Showing the version
+        val versionText = Views.find<TextView>(nav_view.getHeaderView(0), R.id.version_text)
+        versionText.text = "Versione: " + DebugUtils.computeVersionName()
+
+        //Showing the donation icon
+        val donationIconId = AppPreferences.donationIconId
+        if(donationIconId != null){
+            val drawableId = DONATION_ITEMS.first { it.internalId == donationIconId }.resourceHeader
+
+            val donationImage = Views.find<ImageView>(nav_view.getHeaderView(0), R.id.donationImage)
+            donationImage.setImageDrawable(resources.getDrawable(drawableId))
+        }
+    }
+
+    private fun setupActionBarDrawer() {
+        val toggle = ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
+    }
+
+    private fun setupToolbar() {
+        toolbar.setTitle(R.string.app_name)
+        setSupportActionBar(toolbar)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -54,6 +54,12 @@ object AppPreferences {
     var calendarFontSize: Int        by IntPreferences("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE)
     var calendarNumOfDaysToShow: Int by IntPreferences("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
 
+
+    ////////////////////
+    // DONATIONS
+    ////////////////////
+    var donationIconId: Int?         by NullableIntPreferences("DONATION_ITEM_ID")
+
     /**
      * The version that this app had when it was executed last time.
      */
@@ -253,6 +259,21 @@ object AppPreferences {
         }
     }
 
+
+    /**
+     * Just like [IntPreferences], but treates the number 0 as null
+     */
+    class NullableIntPreferences(private val key: String, private val default: Int? = null) : ReadWriteProperty<AppPreferences, Int?> {
+        override fun getValue(thisRef: AppPreferences, property: KProperty<*>): Int? {
+            val savedVal = thisRef.sharedPreferences.getInt(key, 0)
+            return if(savedVal == 0) null else savedVal
+        }
+
+        override fun setValue(thisRef: AppPreferences, property: KProperty<*>, value: Int?) {
+            thisRef.putInt(key, value?:0)
+        }
+    }
+
     class IntPreferences(private val key: String, private val default: Int) : ReadWriteProperty<AppPreferences, Int> {
         override fun getValue(thisRef: AppPreferences, property: KProperty<*>): Int =
                 thisRef.sharedPreferences.getInt(key, default)
@@ -260,7 +281,6 @@ object AppPreferences {
         override fun setValue(thisRef: AppPreferences, property: KProperty<*>, value: Int) {
             thisRef.putInt(key, value)
         }
-
     }
 
     class LongPreferences(private val key: String, private val default: Long) : ReadWriteProperty<AppPreferences, Long> {

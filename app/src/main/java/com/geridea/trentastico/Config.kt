@@ -43,6 +43,9 @@ object Config {
      */
     val LESSONS_CHANGED_ANTICIPATION_MS = TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)
 
+    //Billing
+    const val BILLING_LICENCE = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnY6sQ6eYT3HS+OZyIg3/GrC9nEIiGytYZgDzOu/mI4BW9s50+tnopEWXdJw1fGhB4mBoH/JKjji8wj27D70Imj6T2qrRcdcJsTybwpRo1x/OpBVagu2dMssTkjQzQElnlV2PI4yNljJNvbuICXqFADSTIvL4510E4ozrs3Mq5nR4ZoththflWMEyTf5NwCyNZzGcxMRwu9wbPD7lZfgZMr9e9FXhNF4SSPs6F26M8nwxcZI2ZMJrWjezPcEW0Hd680Qc+7b5AjZpXipyF0r1yeIpCVww/JwIiRfXTdqwnCQVMr99qbcEoxUCXncWjy5VTU6uIhx3Pt560yUCjmYcIwIDAQAB"
+
     //Next lessons notification service
     const val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
 
