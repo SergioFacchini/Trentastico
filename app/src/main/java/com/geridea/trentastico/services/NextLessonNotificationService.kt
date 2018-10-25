@@ -32,12 +32,8 @@ import java.util.concurrent.TimeUnit
 
 class NextLessonNotificationService : Job() {
 
-    private lateinit var notificationsTracker: ShownNotificationsTracker
-
     override fun onRunJob(params: Params): Result {
         BugLogger.info("Next lesson notification started...", "NLN")
-
-        notificationsTracker = AppPreferences.notificationTracker
 
         //How this should work:
         //1) Always show notifications of the next lessons
@@ -64,7 +60,7 @@ class NextLessonNotificationService : Job() {
             //No more lessons today!
             BugLogger.info("No more lessons today", "NLN")
 
-            notificationsTracker.clear()
+            AppPreferences.notificationTracker.clear()
             scheduleNextStartAt(calculateNextDayMorning())
         } else {
             //Finding the lessons that start next
@@ -93,14 +89,14 @@ class NextLessonNotificationService : Job() {
 
 
     private fun showNotificationsForLessonsIfNeeded(lessons: List<LessonSchedule>) =
-            lessons.filter { notificationsTracker.shouldNotificationBeShown(it) }
+            lessons.filter { AppPreferences.notificationTracker.shouldNotificationBeShown(it) }
                    .forEach { onLessonNotificationToShow.dispatch(it) }
 
     private fun findPassedLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val now = CalendarUtils.debuggableMillis
 
         val anticipationMs = TimeUnit.MINUTES.toMillis(NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN.toLong())
-        return lessons.filterTo(ArrayList()) { it.endsAt - anticipationMs <= now }
+        return lessons.filterTo(ArrayList()) { it.startsAt - anticipationMs <= now }
     }
 
     private fun calculateNextDayMorning(): Long {
