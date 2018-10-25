@@ -16,6 +16,7 @@ import android.support.v4.app.NotificationCompat
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobRequest
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN
 import com.geridea.trentastico.R
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity
@@ -47,46 +48,44 @@ class NextLessonNotificationService : Job() {
         //4) Reschedule the service to start 15 min before the start of the next lesson
         val loadResult = Networker.syncLoadTodaysLessons()
 
-        //Finding passed lessons to hide the notifications of the past lessons
-        val passedLessons  = findPassedLessons(loadResult.lessons)
-        val ongoingLessons = findOngoingLessons(loadResult.lessons)
+        //Considering only the shown lessons
+        val lessons = getShownLessons(loadResult.lessons)
 
-        //Hiding the notification for passed lessons
+        //Hiding the notifications for passed lessons
+        val passedLessons  = findPassedLessons(lessons)
         passedLessons.forEach { id -> onLessonNotificationExpired.dispatch(id.hashCode()) }
 
-        //Calculating lessons that could possibly be shown
-        val validLessons = getShownLessons(loadResult.lessons)
-        validLessons.removeAll(passedLessons)
+        //Finding the next starting lesson
+        lessons.removeAll(passedLessons)
+        lessons.sortBy { it.startsAt }
+        val nextLessonStart = lessons.firstOrNull()?.startsAt
 
-        if (validLessons.isEmpty()) {
-            //We have no (more) lessons today. We'll schedule for tomorrow
+        if(nextLessonStart == null){
+            //No more lessons today!
             BugLogger.info("No more lessons today", "NLN")
-            notificationsTracker.clear()
 
+            notificationsTracker.clear()
             scheduleNextStartAt(calculateNextDayMorning())
         } else {
-            //Finding the lessons starting in less than N minutes:
-            val lessonsStartingSoon = findLessonsStartingSoon(validLessons)
-            if (lessonsStartingSoon.isEmpty()) {
-                //There are no lessons starting soon, however we still have some lessons to
-                //show. We're going to show the notification for the lessons starting next
-                val nextLessons = findLessonsStartingNext(validLessons)
-                showNotificationsForLessonsIfNeeded(nextLessons)
+            //Finding the lessons that start next
+            val nextStartingLessons = lessons.takeWhile { it.startsAt == nextLessonStart }
+            showNotificationsForLessonsIfNeeded(nextStartingLessons)
 
-                //Since we've already shown notifications for these lessons, we won't
-                //consider them for the next scheduling:
-                validLessons.removeAll(nextLessons)
-                scheduleForTheNextLessonAndStop(validLessons, ongoingLessons)
-            } else {
-                //We have to show a notification for each lesson:
-                showNotificationsForLessonsIfNeeded(lessonsStartingSoon)
+            //Calculating all the remaining starting points. We have to look for the lessons
+            //that still have to end or the ones that have to start. This algorithm works well even
+            //in case of a lesson starting after the beginning of another lesson and finishing before
+            //it.
+            val startingPoints = mutableListOf<Long>()
+            nextStartingLessons.forEach { startingPoints.add(it.endsAt) }
 
-                //We have already shown notifications for the lessons starting soon. We don't
-                //consider these for the next start calculation
-                validLessons.removeAll(lessonsStartingSoon)
-                scheduleForTheNextLessonAndStop(validLessons, ongoingLessons)
+            lessons.forEach {
+                startingPoints.add(it.endsAt)
             }
+            startingPoints.sort()
+
+            scheduleNextStartWithAnticipationAt(startingPoints.first())
         }
+
 
         BugLogger.info("Next lesson notification ended...", "NLN")
         return Result.SUCCESS
@@ -97,71 +96,11 @@ class NextLessonNotificationService : Job() {
             lessons.filter { notificationsTracker.shouldNotificationBeShown(it) }
                    .forEach { onLessonNotificationToShow.dispatch(it) }
 
-    private fun findOngoingLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
-        val now = CalendarUtils.debuggableMillis
-        return lessons.filterTo(ArrayList()) { it.isHeldInMilliseconds(now) }
-    }
-
-    /**
-     * Finds all the next lessons starting at the same time
-     */
-    private fun findLessonsStartingNext(lessons: List<LessonSchedule>): List<LessonSchedule> {
-        //Here we suppose that the ordering of the lessons didn't change:
-        val nextTimeLessonStating = lessons[0].startsAt
-        return lessons.takeWhile { it.startsAt == nextTimeLessonStating }
-    }
-
     private fun findPassedLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val now = CalendarUtils.debuggableMillis
-        return lessons.filterTo(ArrayList()) { it.startsAt <= now }
-    }
 
-    private fun findLessonsStartingSoon(lessons: ArrayList<LessonSchedule>): ArrayList<LessonSchedule> {
-        val millisSoon = CalendarUtils.getMillisWithMinutesDelta(Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN)
-        return lessons.filterTo(ArrayList()) { it.startsBefore(millisSoon) }
-    }
-
-    private fun scheduleForTheNextLessonAndStop(
-            notNotifiedLessons: List<LessonSchedule>,
-            ongoingLessons: List<LessonSchedule>
-    ) {
-        //Note: If we're finishing a lesson and don't have the next lesson starting immediately at
-        //the end of it, then we must show a notification before the end of that lessons telling
-        //when the next lessons starts.
-
-        //Finding when the next lessons start
-        val nextStart  = notNotifiedLessons.minBy { it.startsAt }?.startsAt
-
-        //Finding the end of the current lesson
-        val ongoingEnd = ongoingLessons.minBy { it.endsAt }?.endsAt
-
-        //Deciding when to plan the next schedule. There can be 4 situations:
-        //* There is an ongoing lesson and another lesson after: min()-anticipation
-        //* There are no ongoing lessons, and there is a lesson after: after next lesson
-        //  (to hide the notification)
-        //* There is an ongoing lesson, and there are no lessons after: end of the lesson
-        //  (to hide the notification)
-        //* There are no ongoing lessons, and there no lessons after: next morning
-        val nextStartPlannedAt = when {
-            nextStart != null && ongoingEnd != null -> {
-                val next         = Math.min(nextStart, ongoingEnd)
-                val anticipation = -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN
-                CalendarUtils.addMinutes(next, anticipation)
-            }
-            nextStart != null && ongoingEnd == null -> nextStart
-            nextStart == null && ongoingEnd != null -> ongoingEnd
-            nextStart == null && ongoingEnd == null -> {
-                notificationsTracker.clear()
-                calculateNextDayMorning()
-            }
-            else -> {
-                val runtimeException = RuntimeException("Should never happen")
-                BugLogger.logBug("Should never happen", runtimeException, "NLN")
-                throw runtimeException
-            }
-        }
-
-        scheduleNextStartAt(nextStartPlannedAt)
+        val anticipationMs = TimeUnit.MINUTES.toMillis(NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN.toLong())
+        return lessons.filterTo(ArrayList()) { it.endsAt - anticipationMs <= now }
     }
 
     private fun calculateNextDayMorning(): Long {
@@ -278,7 +217,14 @@ class NextLessonNotificationService : Job() {
             }
         }
 
-        fun scheduleNextStartAt(ms: Long, delta: Long = TimeUnit.MINUTES.toMillis(2)) {
+        fun scheduleNextStartWithAnticipationAt(ms: Long) {
+            val anticipation = -Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN
+            val anticipatedMs = CalendarUtils.addMinutes(ms, anticipation)
+
+            scheduleNextStartAt(anticipatedMs)
+        }
+
+        fun scheduleNextStartAt(ms: Long, delta: Long = TimeUnit.MINUTES.toMillis(1)) {
             val windowStart = Math.max(ms - System.currentTimeMillis(), 0) + 1
             val windowEnd   = windowStart + delta
 
