@@ -19,7 +19,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 27
         versionCode 14
-        versionName "1.0.2 - Cherry"
+        versionName "1.0.3 - Dewberry"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
