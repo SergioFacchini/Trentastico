@@ -13,7 +13,7 @@ import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.controllers.LessonsController
 import com.geridea.trentastico.network.controllers.LibraryOpeningTimesController
-import com.geridea.trentastico.network.controllers.SendFeedbackController
+import com.geridea.trentastico.network.controllers.SendSlavaController
 import com.geridea.trentastico.network.controllers.listener.*
 import com.geridea.trentastico.network.request.RequestSender
 import com.geridea.trentastico.utils.AppPreferences
@@ -25,15 +25,15 @@ object Networker {
 
     //Executors
     private lateinit var lessonsController: LessonsController
-    private lateinit var sendFeedbackController: SendFeedbackController
+    private lateinit var sendSlavaController: SendSlavaController
     private lateinit var libraryOpeningTimes: LibraryOpeningTimesController
 
     fun init(cacher: Cacher) {
         val requestSender = RequestSender()
 
-        sendFeedbackController = SendFeedbackController(requestSender)
-        libraryOpeningTimes    = LibraryOpeningTimesController(requestSender, cacher)
-        lessonsController = LessonsController(requestSender, cacher)
+        sendSlavaController = SendSlavaController(requestSender)
+        libraryOpeningTimes = LibraryOpeningTimesController(requestSender, cacher)
+        lessonsController   = LessonsController(requestSender, cacher)
 
     }
 
@@ -155,7 +155,7 @@ object Networker {
             feedback: String,
             name: String,
             email: String,
-            listener: FeedbackSendListener) = sendFeedbackController.sendFeedback(feedback, name, email, listener)
+            listener: FeedbackSendListener) = sendSlavaController.sendFeedback(feedback, name, email, listener)
 
     //----------------------------
     // Library opening times
@@ -163,5 +163,10 @@ object Networker {
     fun getLibraryOpeningTimes(
             day: Calendar,
             listener: LibraryOpeningTimesListener) = libraryOpeningTimes.getLibraryOpeningTimes(day, listener)
+
+    fun sendDonationNotify(
+            itemName: String,
+            who: String) = sendSlavaController.sendDonation(itemName, who)
+
 
 }

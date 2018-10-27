@@ -23,3 +23,6 @@
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
+
+#billing
+-keep class com.android.vending.billing.**

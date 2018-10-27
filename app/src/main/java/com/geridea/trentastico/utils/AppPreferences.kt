@@ -48,7 +48,9 @@ object AppPreferences {
     var nextLessonNotificationsEnabled: Boolean        by BooleanPreferences("NEXT_LESSON_NOTIFICATION_ENABLED", true)
     var nextLessonNotificationsFixed: Boolean          by BooleanPreferences("NEXT_LESSON_NOTIFICATION_FIXED", false)
 
-    var debugIsInDebugMode: Boolean by BooleanPreferences("IS_DEBUG_MODE", false)
+    var debugIsInDebugMode: Boolean                    by BooleanPreferences("IS_DEBUG_MODE", false)
+
+    var showDonationPopups: Boolean                    by BooleanPreferences("DONATION_SHOW_POPUPS", true)
 
     var calendarFontSize: Int        by IntPreferences("CALENDAR_FONT_SIZE", CustomWeekView.DEFAULT_EVENT_FONT_SIZE)
     var calendarNumOfDaysToShow: Int by IntPreferences("CALENDAR_NUM_OF_DAYS_TO_SHOW", Config.CALENDAR_DEFAULT_NUM_OF_DAYS_TO_SHOW)
@@ -243,6 +245,8 @@ object AppPreferences {
         editor.remove(key)
         editor.apply()
     }
+
+    fun hasUserDonated(): Boolean = donationIconId != null
 
     //////////////
     // PROPERTIES

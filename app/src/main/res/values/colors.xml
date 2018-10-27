@@ -8,6 +8,8 @@
     <color name="colorAccentLight">#f7bfdd</color>
     <color name="colorNotification">#a13c71</color>
 
+    <color name="colorHeaderImage">#7a4561</color>
+
     <color name="changelog_new_feature">#f29fca</color>
     <color name="changelog_improvement">#ba5289</color>
     <color name="changelog_bug_fixed">#e676b0</color>

@@ -22,28 +22,35 @@ val DONATION_ITEMS = listOf(
                 "donation_bad_coffee",
                 "Un caffè delle macchinette",
                 R.drawable.ic_donation_bad_coffee,
-                R.drawable.ic_donation_bad_coffee_white
+                R.drawable.ic_donation_bad_coffee_header
         ),
         DonationItem(
                 11,
                 "donation_good_coffee",
                 "Un caffè serio",
                 R.drawable.ic_donation_good_coffee,
-                R.drawable.ic_donation_good_coffee_white
+                R.drawable.ic_donation_good_coffee_header
         ),
         DonationItem(
                 12,
                 "donation_spritz",
                 "Uno Spritz",
                 R.drawable.ic_donation_spritz,
-                R.drawable.ic_donation_spritz_white
+                R.drawable.ic_donation_spritz_header
         ),
         DonationItem(
                 13,
                 "donation_book",
                 "Un libro",
                 R.drawable.ic_donation_book,
-                R.drawable.ic_donation_book_white
+                R.drawable.ic_donation_book_header
         )
 )
+
+fun findDonationItemByInternalId(donationIconId: Int): DonationItem =
+        DONATION_ITEMS.first { it.internalId == donationIconId }
+
+
+fun findDonationItemByProductId(productId: String): DonationItem =
+        DONATION_ITEMS.first { it.sku == productId }
 

@@ -18,6 +18,7 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.DonationPopupReminderService
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -36,7 +37,7 @@ class SettingsFragment : FragmentWithMenuItems() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_settings, container, false)
+                inflater.inflate(R.layout.fragment_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -122,6 +123,19 @@ class SettingsFragment : FragmentWithMenuItems() {
                 //If we have any notification, we have to update them:
                 NextLessonNotificationService.scheduleNow()
             }
+        }
+
+        //Donation area
+        donationArea.visibility = (if(AppPreferences.hasUserDonated()) View.VISIBLE else View.GONE)
+
+        disableDonationDialogs.isChecked = AppPreferences.showDonationPopups
+        disableDonationDialogs.setOnCheckedChangeListener { _, checked ->
+            if(checked){
+                DonationPopupReminderService.enable()
+            } else {
+                DonationPopupReminderService.disable()
+            }
+            AppPreferences.showDonationPopups = checked
         }
 
         isLoading = false

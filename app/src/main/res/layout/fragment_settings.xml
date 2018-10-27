@@ -183,5 +183,40 @@
             android:text="Rendi fissa la notifica della prossima lezione"
             android:textColor="@color/colorForeground" />
 
+        <LinearLayout
+            android:id="@+id/donationArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextForegroundBig"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:paddingTop="20dp"
+                android:text="Popup donazioni"
+                android:textColor="@color/colorForeground" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="left"
+                android:text="Puoi scegliere se continuare a ricevere i messaggi che ti chiedono di contribuire a Trentastico!"
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/disableDonationDialogs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Mostra popup con richieste di donazione"
+                android:textColor="@color/colorForeground"
+                android:checked="true"/>
+        </LinearLayout>
+
+
     </LinearLayout>
 </ScrollView>

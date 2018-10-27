@@ -1,35 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
-    style="@style/dialog_background"
-    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".gui.activities.WelcomeActivity">
 
-    <TextView
-        android:id="@+id/description"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        style="@style/dialog_background"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="left"
-        android:text="Ho realizzato Trentastico per hobby, durante il mio tempo libero.\nSia io che altri studenti di Trento avevamo bisogno di uno strumento che semplificasse la nostra incasinata vita universitaria, e la mia esperienza in sviluppo di app Android mi ha permesso di creare questo strumento.\n\nVuoi darmi una mano a far crescere Trentastico?\n\nPuoi offrirmi un caffè per sostenermi nei lunghi peroidi di sviluppo, o contribuire anche di più se ti va.\n\nTi ringrazio per tutto l'aiuto che mi dai.\nSlava Rublev"
-        android:layout_marginBottom="10dp"
-        android:textColor="@color/colorForeground"
-        android:textSize="14sp"
-        android:textStyle="italic" />
+        android:layout_height="wrap_content">
 
-    <Spinner
-        android:id="@+id/offerSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFF"/>
+        <!-- First layout -->
+        <LinearLayout
+            android:id="@+id/donationPart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
 
-    <Button
-        android:id="@+id/confirmButton"
-        style="@style/button_action"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Offri un caffé"
-        android:layout_marginTop="10dp"/>
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="left"
+                android:text="Ho realizzato Trentastico per hobby, durante il mio tempo libero.\nSia io che altri studenti di Trento avevamo bisogno di uno strumento che semplificasse la nostra incasinata vita universitaria, e la mia esperienza in sviluppo di app Android mi ha permesso di creare questo strumento.\n\nVuoi darmi una mano a far crescere Trentastico?\n\nPuoi offrirmi un caffè per sostenermi nei lunghi peroidi di sviluppo, o contribuire anche di più se ti va.\n\nTi ringrazio per tutto l'aiuto che mi dai.\nSlava Rublev"
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp"
+                android:textStyle="italic" />
 
-</LinearLayout>
+            <Spinner
+                android:id="@+id/offerSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFF" />
+
+            <Button
+                android:id="@+id/confirmButton"
+                style="@style/button_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Offri un caffé" />
+        </LinearLayout>
+
+        <!-- Thank you layout -->
+        <LinearLayout
+            android:id="@+id/thankYouPart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="left"
+                android:text="Grazie!"
+                android:textAlignment="center"
+                android:textColor="@color/colorForeground"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="left"
+                android:text="Ti ringrazio immensamente per il tuo contributo. Hai aiutato a rendere Trentastico migliore per te e per centinaia di studenti che lo utilizzano, rendendo la vita universitaria di Trento più semplice!"
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="left"
+                android:text="Puoi scegliere se continuare a ricevere i messaggi che ti chiedono di contribuire a Trentastico! D'ora in poi potrai potrai cambiare quest'opzione anche nella sezione di configurazione."
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp" />
+
+            <Switch
+                android:id="@+id/disableDonationDialogs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Mostra popup con richieste di donazione"
+                android:textColor="@color/colorForeground"
+                android:checked="true"/>
+
+            <Button
+                android:id="@+id/dismissButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#3b1629"
+                android:screenOrientation="portrait"
+                android:text="Chiudi"
+                android:textColor="#FFF" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</ScrollView>
