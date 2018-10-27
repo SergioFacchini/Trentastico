@@ -28,9 +28,9 @@ object BugLogger {
         HyperLog.setLogLevel(Log.VERBOSE)
     }
 
-    fun logBug(reason: String, e: Exception, tag: String = TAG) {
+    fun logBug(reason: String, e: Exception?, tag: String = TAG) {
         HyperLog.e(tag, reason, e)
-        onNewDebugMessageArrived.dispatch(e.message!!)
+        onNewDebugMessageArrived.dispatch(e?.message!!)
     }
 
     fun setStudyCourse(course: StudyCourse) {
