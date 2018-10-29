@@ -78,6 +78,12 @@ object CalendarUtils {
         return cal.timeInMillis
     }
 
+    fun addDays(millis: Long, delta: Int): Long {
+        val cal = getCalendarWithMillis(millis)
+        cal.add(Calendar.DATE, delta)
+        return cal.timeInMillis
+    }
+
     /**
      * Checks if two times are on the same day.
      * @param dayOne The first day.

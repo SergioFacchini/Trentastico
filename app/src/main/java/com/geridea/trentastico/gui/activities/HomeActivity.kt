@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -23,8 +24,10 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.billing.BillingManager
 import com.geridea.trentastico.gui.activities.dialog.DonateDialog
 import com.geridea.trentastico.gui.fragments.*
+import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.findDonationItemByInternalId
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationService
 import com.geridea.trentastico.utils.AppPreferences
@@ -55,6 +58,19 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         switchToCalendarFragment()
 
         setBillingProcessor()
+        showDonatePopupIfNeeded()
+    }
+
+    private fun showDonatePopupIfNeeded() {
+        if (DonationPopupManager.shouldPopupBeShown(this)) {
+            BugLogger.info("Showing donation dialog", "DONATE")
+            ViewCompat.postOnAnimationDelayed(nav_view, {
+                showDonateDialog()
+                DonationPopupManager.rescheduleNotification()
+            }, 10*1000)
+        } else {
+            BugLogger.info("Too soon to show the donation dialog", "DONATE")
+        }
     }
 
     private fun setupMenuForNonDebugMode() {

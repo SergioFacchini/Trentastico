@@ -2,6 +2,7 @@ package com.geridea.trentastico.utils
 
 import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
+import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 
 
@@ -20,6 +21,10 @@ object VersionManager {
 
         if (lastVersion == thisVersion) {
             return
+        }
+
+        if(lastVersion in 1..14) {
+            DonationPopupManager.install()
         }
 
         if(lastVersion in 1..13) {

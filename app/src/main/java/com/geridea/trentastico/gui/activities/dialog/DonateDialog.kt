@@ -19,7 +19,6 @@ import com.geridea.trentastico.model.DONATION_ITEMS
 import com.geridea.trentastico.model.DonationItem
 import com.geridea.trentastico.model.findDonationItemByProductId
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.DonationPopupReminderService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.UIUtils
 import com.threerings.signals.Signal1
@@ -41,6 +40,9 @@ class DonateDialog(activity: Activity, private val billingManager: BillingManage
 
     init {
         val view = Views.inflate<View>(context, R.layout.dialog_donate)
+
+        //Prevents the user from unexpectedly close the window when using the app
+        setCanceledOnTouchOutside(false)
 
         setupDonationPart(view)
         setupThankYouPart(view)
@@ -112,11 +114,6 @@ class DonateDialog(activity: Activity, private val billingManager: BillingManage
 
     private fun setupThankYouPart(view: View) {
         view.disableDonationDialogs.setOnCheckedChangeListener { _, checked ->
-            if(checked){
-                DonationPopupReminderService.enable()
-            } else {
-                DonationPopupReminderService.disable()
-            }
             AppPreferences.showDonationPopups = checked
         }
 

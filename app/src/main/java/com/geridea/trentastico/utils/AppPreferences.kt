@@ -61,6 +61,12 @@ object AppPreferences {
     ////////////////////
     var donationIconId: Int?         by NullableIntPreferences("DONATION_ITEM_ID")
 
+
+    /**
+     * Tells what is the next moment when the popup asking for donation has to be shown.
+     */
+    var nextDonationNotificationDate: Long by LongPreferences("NEXT_DONATION_SCHEDULE", System.currentTimeMillis())
+
     /**
      * The version that this app had when it was executed last time.
      */
