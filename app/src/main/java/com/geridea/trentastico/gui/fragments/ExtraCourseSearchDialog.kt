@@ -12,6 +12,7 @@ import com.geridea.trentastico.model.LessonType
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.network.controllers.listener.ListLessonsListener
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.geridea.trentastico.utils.UIUtils
@@ -57,6 +58,9 @@ internal class ExtraCourseSearchDialog(
                         lessonType.id, lessonType.name, lessonType.teachers, lessonType.partitioningName,
                         lessonType.kindOfLesson, studyCourse
                 ))
+
+                NextLessonNotificationShowService.clearNotifications(context, false)
+                NextLessonNotificationShowService.scheduleNowIfEnabled()
 
                 dismiss()
                 onCourseSelectedAndAdded.dispatch()
