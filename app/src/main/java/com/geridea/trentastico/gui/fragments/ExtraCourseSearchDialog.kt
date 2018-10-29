@@ -59,7 +59,6 @@ internal class ExtraCourseSearchDialog(
                         lessonType.kindOfLesson, studyCourse
                 ))
 
-                NextLessonNotificationShowService.clearNotifications(context, false)
                 NextLessonNotificationShowService.scheduleNowIfEnabled()
 
                 dismiss()
