@@ -5,7 +5,7 @@ import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 
 
 /*
@@ -29,8 +29,8 @@ object VersionManager {
             DonationPopupManager.install()
 
             if(!AppPreferences.nextLessonNotificationsEnabled) {
-                NextLessonNotificationService.clearNotifications(context)
-                NextLessonNotificationService.cancelScheduling()
+                NextLessonNotificationShowService.clearNotifications(context)
+                NextLessonNotificationShowService.cancelScheduling()
             }
         }
 

@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.geridea.trentastico.R
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import kotlinx.android.synthetic.main.activity_welcome.*
 
@@ -30,7 +30,7 @@ class WelcomeActivity : AppCompatActivity() {
             LessonsUpdaterJob.schedulePeriodicRun()
 
             //Showing next lesson notification
-            NextLessonNotificationService.scheduleNowIfEnabled()
+            NextLessonNotificationShowService.scheduleNowIfEnabled()
 
             //Starting the home activity
             startActivity(Intent(this, HomeActivity::class.java))

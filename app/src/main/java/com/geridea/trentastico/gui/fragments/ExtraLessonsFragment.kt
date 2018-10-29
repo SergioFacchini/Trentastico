@@ -14,7 +14,7 @@ import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.gui.adapters.ExtraCoursesAdapter
 import com.geridea.trentastico.model.ExtraCourse
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import kotlinx.android.synthetic.main.fragment_extra_lessons.*
 
@@ -40,7 +40,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
                 initLessonsList()
 
                 //Updating notifications
-                NextLessonNotificationService.removeNotificationsOfExtraCourse(requireContext(), course)
+                NextLessonNotificationShowService.removeNotificationsOfExtraCourse(requireContext(), course)
             }
             dialog.show()
 
@@ -72,7 +72,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
                     initLessonsList()
 
                     //Updating notifications
-                    NextLessonNotificationService.scheduleNowIfEnabled()
+                    NextLessonNotificationShowService.scheduleNowIfEnabled()
                 }
                 dialog.show()
                 true

@@ -8,7 +8,7 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.model.ExtraCourse
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal0
@@ -50,8 +50,8 @@ internal class ExtraCourseDeleteDialog(context: Context, private val course: Ext
             ColorDispenser.dissociateColorFromType(course.lessonTypeId)
 
 
-            NextLessonNotificationService.clearNotifications(context)
-            NextLessonNotificationService.scheduleNowIfEnabled()
+            NextLessonNotificationShowService.clearNotifications(context)
+            NextLessonNotificationShowService.scheduleNowIfEnabled()
 
             onDeleteConfirm.dispatch()
             dismiss()

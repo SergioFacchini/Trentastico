@@ -7,6 +7,7 @@ package com.geridea.trentastico.services
 
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.LessonSchedule
+import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.JsonUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,17 +34,25 @@ class ShownNotificationsTracker {
 
     /**
      * Makes the tracker take note that a notification has been shown to a specific lesson
-     * @param lessonId the id of the lesson fr which the notification has been shown
+     * @param lesson the lesson for which the notification has been shown
      */
-    fun notifyNotificationShown(lessonId: Int) {
-        shownNotificationsIds.add(lessonId)
+    fun notifyNotificationShown(lesson: LessonSchedule) {
+        shownNotificationsIds.add(lesson.id.hashCode())
+        save()
+    }
+
+    private fun save() {
+        AppPreferences.notificationTracker = this
     }
 
     /**
      * Removes the tracking of all the already shown notifications. Must be called when the
      * currently shown notifications are no longer valid.
      */
-    fun clear() = shownNotificationsIds.clear()
+    fun clear() {
+        shownNotificationsIds.clear()
+        save()
+    }
 
     fun toJson(): JSONObject {
         return try {
@@ -60,6 +69,8 @@ class ShownNotificationsTracker {
         }
 
     }
+
+    fun getShownNotificationIds() = shownNotificationsIds.iterator().asSequence().toList()
 
     companion object {
 

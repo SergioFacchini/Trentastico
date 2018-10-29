@@ -18,7 +18,6 @@ import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import com.geridea.trentastico.Config
-import com.geridea.trentastico.Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN
 import com.geridea.trentastico.R
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity
@@ -31,75 +30,58 @@ import com.geridea.trentastico.utils.time.CalendarUtils
 import com.threerings.signals.Signal1
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
-class NextLessonNotificationService : Job() {
+class NextLessonNotificationShowService : Job() {
 
     override fun onRunJob(params: Params): Result {
-        BugLogger.info("Next lesson notification started...", "NLN")
-
-        //How this should work:
-        //1) Always show notifications of the next lessons
-        //2) Keep the notification shown until 15 minutes before the start of the next lesson. After
-        //   that period show the notification for the next lesson.
-        //3) If you've just finished the last, show until the end of the lesson +15 min that
-        //   there are no more lessons today.
-        //4) Reschedule the service to start 15 min before the start of the next lesson
+        BugLogger.info("Next lesson notification show started...", "NLNS")
+        //1) Find the next lessons
+        //2a) If there are lessons, show the notification for the lessons starting next
+        //2b) Schedule lesson notification hider at the end of the lesson
+        //2c) Schedule the next lesson notification at the min of the end of this lesson and the
+        //    start of the next one
+        //3) If there are no lessons, reschedule for the next day
         val loadResult = Networker.syncLoadTodaysLessons()
-
-        //Considering only the shown lessons
-        val lessons = getShownLessons(loadResult.lessons)
-
-        //Hiding the notifications for passed lessons
-        val passedLessons  = findPassedLessons(lessons)
-        passedLessons.forEach { id -> onLessonNotificationExpired.dispatch(id.hashCode()) }
-
-        //Finding the next starting lesson
-        lessons.removeAll(passedLessons)
+        val lessons = getFutureVisibleLessons(loadResult.lessons)
         lessons.sortBy { it.startsAt }
+
         val nextLessonStart = lessons.firstOrNull()?.startsAt
-
-        if(nextLessonStart == null){
-            //No more lessons today!
-            BugLogger.info("No more lessons today", "NLN")
-
-            AppPreferences.notificationTracker.clear()
-            scheduleNextStartAt(calculateNextDayMorning())
-        } else {
-            //Finding the lessons that start next
+        if(nextLessonStart != null){
+            //There could be more than one lesson starting at the same time. We have to show a
+            //notification for that one too.
             val nextStartingLessons = lessons.takeWhile { it.startsAt == nextLessonStart }
-            showNotificationsForLessonsIfNeeded(nextStartingLessons)
+            showNotificationAndScheduleRemoval(nextStartingLessons)
 
-            //Calculating all the remaining starting points. We have to look for the lessons
-            //that still have to end or the ones that have to start. This algorithm works well even
-            //in case of a lesson starting after the beginning of another lesson and finishing before
-            //it.
-            val startingPoints = mutableListOf<Long>()
-            nextStartingLessons.forEach { startingPoints.add(it.endsAt) }
+            val remainingLessons = lessons.filterNot { it in nextStartingLessons }
 
-            lessons.forEach {
-                startingPoints.add(it.endsAt)
-            }
-            startingPoints.sort()
+            val theLessonStartingFirst = remainingLessons.firstOrNull()?.startsAt ?: Long.MAX_VALUE
+            val theLessonEndingFirst = nextStartingLessons.minBy { it.endsAt }!!.endsAt
 
-            scheduleNextStartWithAnticipationAt(startingPoints.first())
+            val nextStart = Math.min(theLessonStartingFirst, theLessonEndingFirst)
+            scheduleNextStartWithAnticipationAt(nextStart)
+        } else {
+            BugLogger.info("No more lessons today", "NLNS")
+
+            //Not sure if we need this, but I think that sometimes the notification can hang on so
+            //it's worth keeping
+            clearNotifications(context)
+
+            scheduleNextStartAt(calculateNextDayMorning())
         }
 
-
-        BugLogger.info("Next lesson notification ended...", "NLN")
+        BugLogger.info("Next lesson notification ended...", "NLNS")
         return Result.SUCCESS
     }
 
 
-    private fun showNotificationsForLessonsIfNeeded(lessons: List<LessonSchedule>) =
+    private fun showNotificationAndScheduleRemoval(lessons: List<LessonSchedule>) =
             lessons.filter { AppPreferences.notificationTracker.shouldNotificationBeShown(it) }
-                   .forEach { onLessonNotificationToShow.dispatch(it) }
-
-    private fun findPassedLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
-        val now = CalendarUtils.debuggableMillis
-
-        val anticipationMs = TimeUnit.MINUTES.toMillis(NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN.toLong())
-        return lessons.filterTo(ArrayList()) { it.startsAt - anticipationMs <= now }
-    }
+                   .forEach {
+                       onLessonNotificationToShow.dispatch(it)
+                       AppPreferences.notificationTracker.notifyNotificationShown(it)
+                       NextLessonNotificationHideService.scheduleWithAnticipationAt(it.endsAt)
+                   }
 
     private fun calculateNextDayMorning(): Long {
         val calendar = Calendar.getInstance()
@@ -113,27 +95,21 @@ class NextLessonNotificationService : Job() {
     }
 
     /**
-     * @return lessons that are not hidden
+     * @return lessons that are not hidden and scheduled to start in the future
      */
-    private fun getShownLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
+    private fun getFutureVisibleLessons(lessons: List<LessonSchedule>): ArrayList<LessonSchedule> {
         val typesToHide = AppPreferences.lessonTypesToHideIds
 
-        return lessons.filterNotTo(ArrayList()) { //Is it filtered by the lesson type or the lessons already passed?
-            typesToHide.contains(it.lessonTypeId)
+        return lessons.filterTo(ArrayList()) { //Is it filtered by the lesson type or the lessons already passed?
+            !typesToHide.contains(it.lessonTypeId) && it.startsAt >= System.currentTimeMillis()
         }
     }
 
     companion object {
 
-        const val TAG = "Next_Lesson_Notification_Service"
+        const val TAG = "Next_Lesson_Notification_Show_Service"
 
         private const val NOTIFICATION_CHANNEL_ID = "Prossima lezione"
-
-        /**
-         * Dispatched the id of a notification of a lesson that is no longer pertinent and should
-         * be dismissed
-         */
-        val onLessonNotificationExpired: Signal1<Int> = Signal1()
 
         /**
          * Dispatched when a notification for a lesson has to be shown
@@ -141,9 +117,15 @@ class NextLessonNotificationService : Job() {
         val onLessonNotificationToShow: Signal1<LessonSchedule> = Signal1()
 
 
-        fun clearNotifications(context: Context) = //Technically this could cancel the "Your lessons has changed" notification. However, this
-                //would happen very infrequently since the changes to lesson are not performed very often
-                getNotificationManager(context).cancelAll()
+        fun clearNotifications(context: Context, clearAlreadyShownNofication: Boolean = true) {
+            //Technically this could cancel the "Your lessons has changed" notification. However, this
+            //would happen very infrequently since the changes to lesson are not performed very often
+            getNotificationManager(context).cancelAll()
+
+            if (clearAlreadyShownNofication) {
+                AppPreferences.notificationTracker.clear()
+            }
+        }
 
         fun clearNotificationWithId(context: Context, id: Int) =
                 getNotificationManager(context).cancel(id)
@@ -205,19 +187,21 @@ class NextLessonNotificationService : Job() {
 
             val manager = getNotificationManager(context)
             manager.notify(notificationId, notificationBuilder.build())
-
-            AppPreferences.notificationTracker.notifyNotificationShown(notificationId)
         }
 
         fun scheduleNowIfEnabled() {
             if (AppPreferences.isStudyCourseSet && AppPreferences.nextLessonNotificationsEnabled) {
-                BugLogger.info("Forced next lesson notification start", "NLN")
+                BugLogger.info("Forced next lesson notification start", "NLNS")
                 scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
             }
         }
 
         fun cancelScheduling() {
-            BugLogger.info("Canceled the next lesson notification scheduling", "NLN")
+            //This will make sure that the notification of the day are re-shown in case the user
+            //re-enables them
+            AppPreferences.notificationTracker.clear()
+
+            BugLogger.info("Canceled the next lesson notification scheduling", "NLNS")
             JobManager.instance().cancelAllForTag(TAG)
         }
 
@@ -234,12 +218,11 @@ class NextLessonNotificationService : Job() {
 
             JobRequest.Builder(TAG)
                     .setExecutionWindow(windowStart, windowEnd)
-                    .setUpdateCurrent(true)
                     .build()
                     .schedule()
 
             val message = "Next start scheduled to ${CalendarUtils.formatTimestamp(ms)}"
-            BugLogger.info(message, "NLN")
+            BugLogger.info(message, "NLNS")
         }
 
     }

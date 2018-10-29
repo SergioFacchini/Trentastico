@@ -8,7 +8,8 @@ import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationHideService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.services.ServicesJobCreator
 import com.geridea.trentastico.utils.*
 
@@ -55,16 +56,16 @@ class TrentasticoApplication : Application() {
         }
 
         //Next lesson notification
-        NextLessonNotificationService.onLessonNotificationExpired.connect { id ->
-            NextLessonNotificationService.clearNotificationWithId(this, id)
+        NextLessonNotificationHideService.onLessonNotificationExpired.connect { id ->
+            NextLessonNotificationShowService.clearNotificationWithId(this, id)
         }
 
-        NextLessonNotificationService.onLessonNotificationToShow.connect { lesson ->
-            NextLessonNotificationService.showNotificationForLessons(applicationContext, lesson)
+        NextLessonNotificationShowService.onLessonNotificationToShow.connect { lesson ->
+            NextLessonNotificationShowService.showNotificationForLessons(applicationContext, lesson)
         }
 
         if(AppPreferences.nextLessonNotificationsEnabled){
-            NextLessonNotificationService.scheduleNowIfEnabled()
+            NextLessonNotificationShowService.scheduleNowIfEnabled()
         }
 
         //Leave this last since it might have some other dependencies of other singletons

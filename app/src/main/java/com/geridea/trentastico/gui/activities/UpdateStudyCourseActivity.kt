@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.R
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import kotlinx.android.synthetic.main.activity_update_your_course.*
 
@@ -28,7 +28,7 @@ class UpdateStudyCourseActivity : AppCompatActivity() {
             AppPreferences.hasToUpdateStudyCourse = false
 
             //Showing next lesson notification
-            NextLessonNotificationService.scheduleNowIfEnabled()
+            NextLessonNotificationShowService.scheduleNowIfEnabled()
 
             startActivity(Intent(this, HomeActivity::class.java))
 

@@ -14,7 +14,8 @@ class ServicesJobCreator : JobCreator {
 
         return when (tag) {
             LessonsUpdaterJob.TAG             -> LessonsUpdaterJob()
-            NextLessonNotificationService.TAG -> NextLessonNotificationService()
+            NextLessonNotificationShowService.TAG -> NextLessonNotificationShowService()
+            NextLessonNotificationHideService.TAG -> NextLessonNotificationHideService()
             else -> null
         }
     }

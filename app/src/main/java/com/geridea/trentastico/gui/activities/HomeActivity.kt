@@ -29,7 +29,7 @@ import com.geridea.trentastico.model.findDonationItemByInternalId
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
@@ -201,7 +201,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
 
                     R.id.debug_start_next_lesson_service -> {
-                        NextLessonNotificationService.scheduleNowIfEnabled()
+                        NextLessonNotificationShowService.scheduleNowIfEnabled()
                     }
 
                     R.id.debug_reset_notification_tracker -> {

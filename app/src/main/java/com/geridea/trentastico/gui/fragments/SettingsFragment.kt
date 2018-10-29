@@ -19,7 +19,7 @@ import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.model.StudyCourse
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationService
+import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.ColorDispenser
 import com.threerings.signals.Signal1
@@ -109,10 +109,10 @@ class SettingsFragment : FragmentWithMenuItems() {
             makeNotificationFixedSwitch.isEnabled = checked
 
             if (checked) {
-                NextLessonNotificationService.scheduleNowIfEnabled()
+                NextLessonNotificationShowService.scheduleNowIfEnabled()
             } else {
-                NextLessonNotificationService.clearNotifications(requireContext())
-                NextLessonNotificationService.cancelScheduling()
+                NextLessonNotificationShowService.clearNotifications(requireContext())
+                NextLessonNotificationShowService.cancelScheduling()
             }
         }
 
@@ -122,7 +122,7 @@ class SettingsFragment : FragmentWithMenuItems() {
 
                 //If we have any notification, we have to update them:
                 if(AppPreferences.nextLessonNotificationsEnabled){
-                    NextLessonNotificationService.scheduleNowIfEnabled()
+                    NextLessonNotificationShowService.scheduleNowIfEnabled()
                 }
             }
         }
@@ -197,8 +197,8 @@ class SettingsFragment : FragmentWithMenuItems() {
         }
 
         private fun updateNextLessonNotifications() {
-            NextLessonNotificationService.clearNotifications(context)
-            NextLessonNotificationService.scheduleNowIfEnabled()
+            NextLessonNotificationShowService.clearNotifications(context)
+            NextLessonNotificationShowService.scheduleNowIfEnabled()
         }
 
         private fun removeOverlappingExtraCourses(course: StudyCourse) {
