@@ -30,7 +30,7 @@ class WelcomeActivity : AppCompatActivity() {
             LessonsUpdaterJob.schedulePeriodicRun()
 
             //Showing next lesson notification
-            NextLessonNotificationService.scheduleNow()
+            NextLessonNotificationService.scheduleNowIfEnabled()
 
             //Starting the home activity
             startActivity(Intent(this, HomeActivity::class.java))

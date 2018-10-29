@@ -109,9 +109,10 @@ class SettingsFragment : FragmentWithMenuItems() {
             makeNotificationFixedSwitch.isEnabled = checked
 
             if (checked) {
-                NextLessonNotificationService.scheduleNow()
+                NextLessonNotificationService.scheduleNowIfEnabled()
             } else {
                 NextLessonNotificationService.clearNotifications(requireContext())
+                NextLessonNotificationService.cancelScheduling()
             }
         }
 
@@ -120,7 +121,9 @@ class SettingsFragment : FragmentWithMenuItems() {
                 AppPreferences.nextLessonNotificationsFixed = checked
 
                 //If we have any notification, we have to update them:
-                NextLessonNotificationService.scheduleNow()
+                if(AppPreferences.nextLessonNotificationsEnabled){
+                    NextLessonNotificationService.scheduleNowIfEnabled()
+                }
             }
         }
 
@@ -195,7 +198,7 @@ class SettingsFragment : FragmentWithMenuItems() {
 
         private fun updateNextLessonNotifications() {
             NextLessonNotificationService.clearNotifications(context)
-            NextLessonNotificationService.scheduleNow()
+            NextLessonNotificationService.scheduleNowIfEnabled()
         }
 
         private fun removeOverlappingExtraCourses(course: StudyCourse) {

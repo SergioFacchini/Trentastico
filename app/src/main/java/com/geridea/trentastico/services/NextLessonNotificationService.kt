@@ -13,7 +13,9 @@ import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.res.ResourcesCompat
 import com.evernote.android.job.Job
+import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import com.geridea.trentastico.Config
 import com.geridea.trentastico.Config.NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN
@@ -185,7 +187,8 @@ class NextLessonNotificationService : Job() {
                     .setSmallIcon(R.drawable.ic_launcher)
                     .setContentTitle(lesson.subject)
                     .setContentText(lesson.synopsis)
-                    .setColor(context.resources.getColor(R.color.colorNotification))
+                    .setColor(ResourcesCompat.getColor(context.resources, R.color.colorNotification, null))
+
 
             if (AppPreferences.nextLessonNotificationsFixed) {
                 notificationBuilder.setOngoing(true)
@@ -206,11 +209,16 @@ class NextLessonNotificationService : Job() {
             AppPreferences.notificationTracker.notifyNotificationShown(notificationId)
         }
 
-        fun scheduleNow() {
-            if (AppPreferences.isStudyCourseSet) {
+        fun scheduleNowIfEnabled() {
+            if (AppPreferences.isStudyCourseSet && AppPreferences.nextLessonNotificationsEnabled) {
                 BugLogger.info("Forced next lesson notification start", "NLN")
                 scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
             }
+        }
+
+        fun cancelScheduling() {
+            BugLogger.info("Canceled the next lesson notification scheduling", "NLN")
+            JobManager.instance().cancelAllForTag(TAG)
         }
 
         fun scheduleNextStartWithAnticipationAt(ms: Long) {

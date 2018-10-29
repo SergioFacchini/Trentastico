@@ -1,9 +1,11 @@
 package com.geridea.trentastico.utils
 
+import android.content.Context
 import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
+import com.geridea.trentastico.services.NextLessonNotificationService
 
 
 /*
@@ -15,7 +17,7 @@ import com.geridea.trentastico.services.LessonsUpdaterJob
  */
 object VersionManager {
 
-    fun checkForVersionChangeCode() {
+    fun checkForVersionChangeCode(context: Context) {
         val lastVersion = AppPreferences.lastVersionExecuted
         val thisVersion = BuildConfig.VERSION_CODE
 
@@ -25,6 +27,11 @@ object VersionManager {
 
         if(lastVersion in 1..14) {
             DonationPopupManager.install()
+
+            if(!AppPreferences.nextLessonNotificationsEnabled) {
+                NextLessonNotificationService.clearNotifications(context)
+                NextLessonNotificationService.cancelScheduling()
+            }
         }
 
         if(lastVersion in 1..13) {

@@ -51,7 +51,7 @@ internal class ExtraCourseDeleteDialog(context: Context, private val course: Ext
 
 
             NextLessonNotificationService.clearNotifications(context)
-            NextLessonNotificationService.scheduleNow()
+            NextLessonNotificationService.scheduleNowIfEnabled()
 
             onDeleteConfirm.dispatch()
             dismiss()

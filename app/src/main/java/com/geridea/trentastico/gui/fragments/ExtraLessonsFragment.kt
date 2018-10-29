@@ -72,7 +72,7 @@ class ExtraLessonsFragment : FragmentWithMenuItems() {
                     initLessonsList()
 
                     //Updating notifications
-                    NextLessonNotificationService.scheduleNow()
+                    NextLessonNotificationService.scheduleNowIfEnabled()
                 }
                 dialog.show()
                 true

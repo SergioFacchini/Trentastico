@@ -28,7 +28,7 @@ class UpdateStudyCourseActivity : AppCompatActivity() {
             AppPreferences.hasToUpdateStudyCourse = false
 
             //Showing next lesson notification
-            NextLessonNotificationService.scheduleNow()
+            NextLessonNotificationService.scheduleNowIfEnabled()
 
             startActivity(Intent(this, HomeActivity::class.java))
 

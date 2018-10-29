@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 1.0.3",
+    "items": [
+      {
+        "type": "2",
+        "title": "Sistemato un problema che faceva mostrare le notifiche anche a chi le aveva disabilitate nella configurazione."
+      }
+    ]
+  },  {
     "name": "Novità in 1.0.2",
     "items": [
       {
