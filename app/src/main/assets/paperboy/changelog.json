@@ -3,6 +3,9 @@
     "name": "Novità in 1.0.3",
     "items": [
       {
+        "type": "1",
+        "title": "Gli utenti ora possono sostenere lo sviluppo di Trentastico!"
+      }, {
         "type": "2",
         "title": "Sistemato un problema che faceva mostrare le notifiche anche a chi le aveva disabilitate nella configurazione."
       }
