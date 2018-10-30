@@ -78,6 +78,12 @@ object CalendarUtils {
         return cal.timeInMillis
     }
 
+    fun addHours(millis: Long, delta: Int): Long {
+        val cal = getCalendarWithMillis(millis)
+        cal.add(Calendar.HOUR, delta)
+        return cal.timeInMillis
+    }
+
     fun addDays(millis: Long, delta: Int): Long {
         val cal = getCalendarWithMillis(millis)
         cal.add(Calendar.DATE, delta)

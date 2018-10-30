@@ -18,6 +18,7 @@ import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import com.geridea.trentastico.Config
+import com.geridea.trentastico.Config.NEXT_LESSON_LOADING_WAIT_BETWEEN_ERRORS
 import com.geridea.trentastico.R
 import com.geridea.trentastico.database.TodaysLessonsListener
 import com.geridea.trentastico.gui.activities.FirstActivityChooserActivity
@@ -43,6 +44,13 @@ class NextLessonNotificationShowService : Job() {
         //    start of the next one
         //3) If there are no lessons, reschedule for the next day
         val loadResult = Networker.syncLoadTodaysLessons()
+        if(loadResult.wereErrors){
+            BugLogger.info("Error while loading lessons...", "NLNS")
+            //There was an error in loading lessons. Continuing here is meaningless
+            scheduleNextStartAt(calculateNextRunInCaseOfError())
+            return Result.FAILURE
+        }
+
         val lessons = getFutureVisibleLessons(loadResult.lessons)
         lessons.sortBy { it.startsAt }
 
@@ -93,6 +101,9 @@ class NextLessonNotificationShowService : Job() {
 
         return calendar.timeInMillis
     }
+
+    private fun calculateNextRunInCaseOfError(): Long =
+            CalendarUtils.addHours(System.currentTimeMillis(), NEXT_LESSON_LOADING_WAIT_BETWEEN_ERRORS)
 
     /**
      * @return lessons that are not hidden and scheduled to start in the future

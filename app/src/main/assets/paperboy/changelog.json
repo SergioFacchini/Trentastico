@@ -8,6 +8,9 @@
       }, {
         "type": "2",
         "title": "Sistemato un problema che faceva mostrare le notifiche anche a chi le aveva disabilitate nella configurazione."
+      }, {
+        "type": "3",
+        "title": "Risolto un crash che capitava su qualche dispositivo all'avvio dell'applicazione."
       }
     ]
   },  {

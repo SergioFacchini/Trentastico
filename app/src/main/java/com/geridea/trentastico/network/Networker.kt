@@ -98,9 +98,9 @@ object Networker {
         var wereErrors = false
 
         for (i in 0 until numOfLessonsToTake) {
-            val lessons = listener.getLessons()
-            if (lessons != null) {
-                listOfLessons.addAll(lessons)
+            val loadingResult = listener.getLoadingResults()
+            if (!loadingResult.wereErrors) {
+                listOfLessons.addAll(loadingResult.lessons)
             } else {
                 wereErrors = true
             }
@@ -112,25 +112,27 @@ object Networker {
         return SyncLoadResult(todayLessons, wereErrors)
     }
 
+    data class BlockingLoadingResults(var lessons: List<LessonSchedule>, var wereErrors: Boolean)
+
     class BlockingLessonsLoadingListener : LessonsLoadingListener {
 
-        private var lessonsQueue = ArrayBlockingQueue<List<LessonSchedule>?>(50)
+        private var loadingResults = ArrayBlockingQueue<BlockingLoadingResults>(50)
 
         override fun onLoadingMessageDispatched(operation: ILoadingMessage) {}
 
         override fun onLessonsLoaded(lessons: List<LessonSchedule>, teachings: List<LessonType>, operationId: Int) {
-            lessonsQueue.add(lessons)
+            loadingResults.add(BlockingLoadingResults(lessons, false))
         }
 
         override fun onNetworkErrorHappened(error: Exception, operationId: Int) {
-            lessonsQueue.add(null)
+            loadingResults.add(BlockingLoadingResults(listOf(), true))
         }
 
         override fun onParsingErrorHappened(exception: Exception, operationId: Int) {
-            lessonsQueue.add(null)
+            loadingResults.add(BlockingLoadingResults(listOf(), true))
         }
 
-        fun getLessons(): List<LessonSchedule>? = lessonsQueue.take()
+        fun getLoadingResults(): BlockingLoadingResults = loadingResults.take()
     }
 
     /**

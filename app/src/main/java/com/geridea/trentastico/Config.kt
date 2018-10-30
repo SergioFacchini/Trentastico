@@ -35,6 +35,8 @@ object Config {
     //Lessons update service
     const val LESSONS_REFRESH_WAITING_REGULAR = 4L  //hours
 
+    const val NEXT_LESSON_LOADING_WAIT_BETWEEN_ERRORS = 1  //hours
+
     /**
      * During diff of the cached times and the fresh ones, what is the last valid time to consider
      * for a notification? The times that are changed after the current_ms + anticipation_ms will
