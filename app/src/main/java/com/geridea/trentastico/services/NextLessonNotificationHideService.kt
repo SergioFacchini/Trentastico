@@ -26,6 +26,8 @@ class NextLessonNotificationHideService : Job() {
             onLessonNotificationExpired.dispatch(it)
         }
 
+        BugLogger.info("Hidden ${idsToHide.size} notifications", "NLNH")
+
         return Result.SUCCESS
     }
 
