@@ -65,8 +65,10 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (DonationPopupManager.shouldPopupBeShown(this)) {
             BugLogger.info("Showing donation dialog", "DONATE")
             ViewCompat.postOnAnimationDelayed(nav_view, {
-                showDonateDialog()
-                DonationPopupManager.rescheduleNotification()
+                if(!isFinishing){
+                    showDonateDialog()
+                    DonationPopupManager.rescheduleNotification()
+                }
             }, 10*1000)
         } else {
             BugLogger.info("Too soon to show the donation dialog", "DONATE")
