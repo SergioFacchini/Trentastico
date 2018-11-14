@@ -1,5 +1,14 @@
 [
   {
+    "name": "Novità in 1.0.4",
+    "items": [
+      {
+        "type": "2",
+        "title": "Sistemato un problema che faceva chiudere l'app all'avvio su qualche dispositivo."
+      }
+    ]
+  },
+  {
     "name": "Novità in 1.0.3",
     "items": [
       {

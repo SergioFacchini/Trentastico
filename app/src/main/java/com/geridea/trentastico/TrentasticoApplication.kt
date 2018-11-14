@@ -64,12 +64,14 @@ class TrentasticoApplication : Application() {
             NextLessonNotificationShowService.showNotificationForLessons(applicationContext, lesson)
         }
 
+        //Leave this last since it might have some other dependencies of other singletons
+        VersionManager.checkForVersionChangeCode(this)
+
+        //This has to be below version manager in case there are bugs in the scheduling processes
         if(AppPreferences.nextLessonNotificationsEnabled){
             NextLessonNotificationShowService.scheduleNowIfEnabled()
         }
 
-        //Leave this last since it might have some other dependencies of other singletons
-        VersionManager.checkForVersionChangeCode(this)
     }
 
 }

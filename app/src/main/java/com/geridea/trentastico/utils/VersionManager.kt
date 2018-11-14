@@ -1,6 +1,7 @@
 package com.geridea.trentastico.utils
 
 import android.content.Context
+import com.evernote.android.job.JobManager
 import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
@@ -23,6 +24,12 @@ object VersionManager {
 
         if (lastVersion == thisVersion) {
             return
+        }
+
+        if(lastVersion in 14..16) {
+            //Fixing the bug "Apps may not schedule more than 100 distinct jobs" in the
+            //new scheduling system
+            JobManager.instance().cancelAllForTag(NextLessonNotificationShowService.TAG)
         }
 
         if(lastVersion in 1..14) {
