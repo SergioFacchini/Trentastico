@@ -75,7 +75,7 @@ class NextLessonNotificationShowService : Job() {
             //it's worth keeping
             clearNotifications(context)
 
-            scheduleNextStartAt(calculateNextDayMorning(), cancelPrevious=true)
+            scheduleNextStartAt(calculateNextDayMorning())
         }
 
         BugLogger.info("Next lesson notification ended...", "NLNS")
@@ -200,10 +200,10 @@ class NextLessonNotificationShowService : Job() {
             manager.notify(notificationId, notificationBuilder.build())
         }
 
-        fun scheduleNowIfEnabled(cancelPrevious: Boolean = false) {
+        fun scheduleNowIfEnabled() {
             if (AppPreferences.isStudyCourseSet && AppPreferences.nextLessonNotificationsEnabled) {
                 BugLogger.info("Forced next lesson notification start", "NLNS")
-                scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2), cancelPrevious = cancelPrevious)
+                scheduleNextStartAt(System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(2))
             }
         }
 
@@ -224,15 +224,14 @@ class NextLessonNotificationShowService : Job() {
         }
 
         fun scheduleNextStartAt(ms: Long,
-                                delta: Long = TimeUnit.MINUTES.toMillis(1),
-                                cancelPrevious: Boolean = false) {
+                                delta: Long = TimeUnit.MINUTES.toMillis(1)) {
 
             val windowStart = Math.max(ms - System.currentTimeMillis(), 0) + 1
             val windowEnd   = windowStart + delta
 
             JobRequest.Builder(TAG)
                     .setExecutionWindow(windowStart, windowEnd)
-                    .setUpdateCurrent(cancelPrevious)
+                    .setUpdateCurrent(true)
                     .build()
                     .schedule()
 

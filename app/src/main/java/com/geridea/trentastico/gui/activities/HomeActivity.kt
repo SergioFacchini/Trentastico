@@ -203,7 +203,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
 
                     R.id.debug_start_next_lesson_service -> {
-                        NextLessonNotificationShowService.scheduleNowIfEnabled(cancelPrevious = true)
+                        NextLessonNotificationShowService.scheduleNowIfEnabled()
                     }
 
                     R.id.debug_reset_notification_tracker -> {
