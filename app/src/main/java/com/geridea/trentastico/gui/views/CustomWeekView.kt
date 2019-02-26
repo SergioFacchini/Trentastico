@@ -20,6 +20,7 @@ import com.alamkanak.weekview.R
 import com.alamkanak.weekview.WeekViewEvent
 import com.geridea.trentastico.utils.UIUtils
 import com.geridea.trentastico.utils.time.CalendarUtils
+import com.geridea.trentastico.utils.time.CalendarUtils.createCalendarInCurrentTimezone
 import com.geridea.trentastico.utils.time.CalendarUtils.debuggableToday
 import com.geridea.trentastico.utils.time.CalendarUtils.today
 import com.geridea.trentastico.utils.time.DayInterval
@@ -546,7 +547,7 @@ open class CustomWeekView @JvmOverloads constructor(
 
             mAreDimensionsInvalid = false
             if (mScrollToDay != null)
-                goToDate(mScrollToDay)
+                goToDate(mScrollToDay!!)
 
             mAreDimensionsInvalid = false
             if (mScrollToHour >= 0)
@@ -687,7 +688,9 @@ open class CustomWeekView @JvmOverloads constructor(
             // Draw the line at the current time.
             if (mShowNowLine && isToday) {
                 val startY = mHeaderDaysTextHeight + (mHeaderRowPadding * 2).toFloat() + mTimeTextHeight / 2 + mHeaderMarginBottom + mCurrentOrigin.y
-                val now = debuggableToday
+
+                val now = createCalendarInCurrentTimezone()
+
                 val beforeNow = (now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE) / 60.0f - mStartingHour) * mHourHeight
                 canvas.drawLine(start, startY + beforeNow, startPixel + mWidthPerDay, startY + beforeNow, mNowLinePaint!!)
             }
@@ -1256,12 +1259,12 @@ open class CustomWeekView @JvmOverloads constructor(
      * Show a specific day on the week view.
      * @param date The date to show.
      */
-    fun goToDate(date: Calendar?) {
+    fun goToDate(date: Calendar) {
         mScroller!!.forceFinished(true)
         mCurrentFlingDirection = CustomWeekView.Direction.NONE
         mCurrentScrollDirection = mCurrentFlingDirection
 
-        date!!.set(Calendar.HOUR_OF_DAY, 0)
+        date.set(Calendar.HOUR_OF_DAY, 0)
         date.set(Calendar.MINUTE, 0)
         date.set(Calendar.SECOND, 0)
         date.set(Calendar.MILLISECOND, 0)

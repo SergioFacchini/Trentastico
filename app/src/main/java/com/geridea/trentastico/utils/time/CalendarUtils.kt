@@ -44,6 +44,12 @@ object CalendarUtils {
         return instance
     }
 
+    fun createCalendarInCurrentTimezone(): Calendar {
+        val now = debuggableToday
+        now.timeZone = TimeZone.getTimeZone("Europe/Rome")
+        return now
+    }
+
     /**
      * @return yyyy-MM-dd'T'HH:mm:ss.SSSZ
      */
@@ -62,6 +68,8 @@ object CalendarUtils {
 
             return aDay
         }
+
+
 
     val debuggableMillis: Long
         get() = if (IS_IN_DEBUG_MODE && Config.DEBUG_FORCE_ANOTHER_DATE) Config.DATE_TO_FORCE else System.currentTimeMillis()
