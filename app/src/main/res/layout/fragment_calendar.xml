@@ -5,14 +5,6 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
-        android:id="@+id/loaderView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true" />
-
     <com.geridea.trentastico.gui.views.CourseTimesCalendar
         android:id="@+id/calendar"
         android:layout_width="match_parent"
@@ -40,6 +32,15 @@
         app:textSize="12sp"
         app:todayBackgroundColor="#30fca7cd"
         app:todayHeaderTextColor="@color/colorAccentLight" />
+
+    <com.geridea.trentastico.gui.views.requestloader.RequestLoaderView
+        android:id="@+id/loaderView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/todayFab"
