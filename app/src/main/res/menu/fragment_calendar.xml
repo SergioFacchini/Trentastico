@@ -6,13 +6,13 @@
         android:id="@+id/menu_refresh"
         android:icon="@drawable/ic_refresh_white_24dp"
         android:title="Ricarica gli orari"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_filter"
         android:icon="@drawable/ic_filter_list_black_24dp"
         android:title="Filtra corsi"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_change_view"
