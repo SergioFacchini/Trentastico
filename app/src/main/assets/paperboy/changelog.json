@@ -1,5 +1,16 @@
 [
   {
+    "name": "Novità in 1.0.5",
+    "items": [
+      {
+        "type": "2",
+        "title": "Aggiornato Trentastico in modo che funzioni con la nuova versione di EasyRoom/EasyAccademy"
+      }, {
+        "type": "3",
+        "title": "Risolto un problema che mostrava gli orari nel fuso orario dell dispositivo invece di quello itaiano"
+      }
+    ]
+  },{
     "name": "Novità in 1.0.4",
     "items": [
       {
