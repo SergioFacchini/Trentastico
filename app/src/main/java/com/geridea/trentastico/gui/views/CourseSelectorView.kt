@@ -104,6 +104,8 @@ class CourseSelectorView(context: Context, attrs: AttributeSet) : FrameLayout(co
     }
 
     fun loadCourses() {
+        lepView.currentView = LEPState.LOAD
+
         Networker.loadStudyCourses(object : CoursesLoadingListener {
             override fun onCoursesFetched(courses: List<Course>) {
                 //Updating UI
