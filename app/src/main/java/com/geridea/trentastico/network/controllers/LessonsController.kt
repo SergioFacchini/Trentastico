@@ -42,7 +42,7 @@ class LessonsController(private val sender: RequestSender, private val cacher: C
         val operation = CacheLessonsLoadingMessage()
         listener.onLoadingMessageDispatched(operation)
 
-        cacher.getStandardLessonsAndTypes({ cachedLessons, cachedTypes ->
+        cacher.getStandardLessonsAndTypes { cachedLessons, cachedTypes ->
             listener.onLoadingMessageDispatched(CacheLoadingFinishedMessage(operation.messageId))
 
             if (cachedLessons.isNotEmpty() && cachedTypes.isNotEmpty()) {
@@ -51,13 +51,8 @@ class LessonsController(private val sender: RequestSender, private val cacher: C
                 //No cache available, we have to download the data
                 sender.processRequest(LoadStandardLessonsRequest(studyCourse, listener, cacher))
             }
-        })
+        }
     }
-
-    /**
-     * Loads standard and extra lessons that are held today
-     */
-    fun syncLoadTodaysCachedLessons() = cacher.syncLoadTodaysLessons()
 
     /**
      * Loads standard and extra lessons that are held today
@@ -166,7 +161,7 @@ internal class LoadStudyCoursesRequest(
     private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\svar")
 
     override val url: String
-        get() = "http://easyroom.unitn.it/Orario/combo_call.php"
+        get() = "http://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=2018&page=corsi"
 
     override val formToSend: FormBody?
         get() = null
@@ -504,7 +499,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     @Suppress("ConstantConditionIf")
     override val url: String
         get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
-        else "http://easyroom.unitn.it/Orario/list_call.php"
+        else "http://easyacademy.unitn.it/AgendaStudentiUnitn/list_call.php"
 
     override val formToSend: FormBody?
         get() = FormBody.Builder()
