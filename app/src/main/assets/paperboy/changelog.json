@@ -6,6 +6,9 @@
         "type": "2",
         "title": "Aggiornato Trentastico in modo che funzioni con la nuova versione di EasyRoom/EasyAccademy"
       }, {
+        "type": "2",
+        "title": "È stato riaggiunto l'indicatore del caricamento delle lezioni!"
+      }, {
         "type": "3",
         "title": "Risolto un problema che mostrava gli orari nel fuso orario dell dispositivo invece di quello itaiano"
       }
