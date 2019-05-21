@@ -31,6 +31,7 @@ import com.geridea.trentastico.utils.time.CalendarUtils
 import kotlinx.android.synthetic.main.dialog_calendar_event.view.*
 import kotlinx.android.synthetic.main.dialog_filter_courses.view.*
 import kotlinx.android.synthetic.main.fragment_calendar.*
+import kotlinx.android.synthetic.main.fragment_calendar.view.*
 import kotlinx.android.synthetic.main.itm_teacher.view.*
 import java.util.*
 
@@ -62,6 +63,9 @@ class CalendarFragment : FragmentWithMenuItems() {
 
         //Binding other controls
         todayFab.setOnClickListener { calendar.goToDate(Calendar.getInstance()) }
+
+        //Binding the loader
+        calendar.onLoadingOperationNotify.connect { message -> view.loaderView.processMessage(message) }
 
         super.onViewCreated(view, savedInstanceState)
     }
