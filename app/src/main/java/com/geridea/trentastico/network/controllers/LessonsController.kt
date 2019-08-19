@@ -161,7 +161,7 @@ internal class LoadStudyCoursesRequest(
     private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\svar")
 
     override val url: String
-        get() = "http://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=2018&page=corsi"
+        get() = "http://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
 
     override val formToSend: FormBody?
         get() = null
@@ -254,14 +254,14 @@ internal class LoadStudyCoursesRequest(
     }
 
     private fun parseStudyYears(yearsJson: JSONArray): List<StudyYear> {
-        return List(yearsJson.length(), {
+        return List(yearsJson.length()) {
             val yearJson = yearsJson[it] as JSONObject
 
             StudyYear(
                     id = yearJson.getString("valore"),
                     name = yearJson.getString("label")
             )
-        })
+        }
     }
 
     private fun findCurrentYearJson(yearsJsonArray: JSONArray): JSONObject {

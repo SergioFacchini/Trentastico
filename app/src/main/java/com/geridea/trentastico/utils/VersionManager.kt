@@ -79,6 +79,11 @@ object VersionManager {
             }
         }
 
+        if(lastVersion in 1..19){
+            //The academic year has changed: 2019 - 2020
+            AppPreferences.hasToUpdateStudyCourse = true
+        }
+
         AppPreferences.lastVersionExecuted = thisVersion
     }
 

@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Nota: L'università di Trento sta attualmente inserendo gli orari dei corsi. Se non trovi il tuo corso nella lista, probabilmente questo non è ancora stato caricato su EasyRoom."
+            android:text="Non trovi il tuo corso?\nL'università di Trento sta inserendo proprio in questo periodo gli orari dei corsi. Se non trovi il tuo corso nella lista, probabilmente questo non è ancora stato caricato su EasyRoom. In quel caso controlla periodicamente il sito e, appena il tuo corso sarà disponibile, selezionalo qui su Trentastico. "
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
