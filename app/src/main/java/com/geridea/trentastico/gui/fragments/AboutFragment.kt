@@ -56,7 +56,6 @@ class AboutFragment : FragmentWithMenuItems() {
         debugClickCounter++
 
         if (AppPreferences.debugIsInDebugMode) {
-            DebugDB.initialize(context)
             view.slava.text = DebugDB.getAddressLog()
         }
 
