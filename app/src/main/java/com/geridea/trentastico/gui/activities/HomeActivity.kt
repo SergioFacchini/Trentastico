@@ -190,6 +190,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             id == R.id.menu_libraries   -> setCurrentFragment(LibrariesFragment())
             id == R.id.menu_feedback    -> setCurrentFragment(SubmitFeedbackFragment())
             id == R.id.menu_donate      -> showDonateDialog()
+            id == R.id.menu_other_apps  -> setCurrentFragment(OtherAppsFragment())
             id == R.id.menu_changelog   -> setCurrentFragment(AboutFragment())
             IS_IN_DEBUG_MODE            -> //Managing debug stuff here
                 when (id) {

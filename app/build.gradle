@@ -6,10 +6,10 @@ apply plugin: 'kotlin-android-extensions'
 android {
     signingConfigs {
         release {
-            keyAlias 'trentastico'
-            keyPassword 'keykey'
-            storeFile file('C:/Users/Slava/Documents/Roba/Progetti/Trentastico/trentastico.jks')
-            storePassword 'keystore'
+//            keyAlias 'trentastico'
+//            keyPassword 'keykey'
+//            storeFile file('C:/Users/Slava/Documents/Roba/Progetti/Trentastico/trentastico.jks')
+//            storePassword 'keystore'
         }
     }
     compileSdkVersion 27

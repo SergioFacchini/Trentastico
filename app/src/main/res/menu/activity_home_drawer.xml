@@ -10,12 +10,12 @@
         <item
             android:id="@+id/menu_extra_times"
             android:icon="@drawable/ic_event_available_black_24dp"
-            android:title="Orari extra" />
+            android:title="Orari Extra" />
 
         <item
             android:id="@+id/menu_libraries"
             android:icon="@drawable/ic_local_library_black_24dp"
-            android:title="Orari biblioteche" />
+            android:title="Orari Biblioteche" />
 
         <item
             android:id="@+id/menu_settings"
@@ -50,15 +50,21 @@
     </group>
     <item android:title="Altro">
         <menu>
+
             <item
-                android:id="@+id/menu_donate"
-                android:icon="@drawable/ic_favorite_black_24dp"
-                android:title="Aiuta Trentastico!" />
+                android:id="@+id/menu_other_apps"
+                android:icon="@drawable/ic_phone_android_black_24dp"
+                android:title="Altre App per Studenti" />
 
             <item
                 android:id="@+id/menu_feedback"
                 android:icon="@drawable/ic_feedback_black_24dp"
                 android:title="Feedback" />
+
+            <item
+                android:id="@+id/menu_donate"
+                android:icon="@drawable/ic_favorite_black_24dp"
+                android:title="Aiuta Trentastico!" />
 
             <item
                 android:id="@+id/menu_changelog"

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Altre App per Studenti"
+            android:textColor="@color/colorForeground"
+            android:textSize="24sp" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="11dp"
+                android:text="Ho creato Trentastico perché odio il sito degli orari.\n\nÈ un fastidio usarlo, anche solo per vedere che lezioni ho oggi. Sapevo sviluppare app e volevo liberarmi da questo problema. Così, 200 ore dopo passate al PC... nacque Trentastico! Mi sentivo uno studente soddisfatto. Beh, almeno per un po'...\n\nRealizzai che gli orari non erano l'unico problema. Tutt'altro! L'intera vita da studente è una discarica di problemi.\n\nDopo aver fatto Trentastico, non voglio fermarmi qui. Sto creando nuove app per portare un altro po' di gioia nella vita da studente.  "
+                android:textColor="@color/colorForeground"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+        <ListView
+                android:id="@+id/list_other_apps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
