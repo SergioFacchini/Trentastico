@@ -30,6 +30,7 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationShowService
+import com.geridea.trentastico.services.ShowNewAppNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
@@ -46,8 +47,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var billingManager: BillingManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(bundle: Bundle?) {
+        super.onCreate(bundle)
         setContentView(R.layout.activity_home)
 
         setupToolbar()
@@ -55,7 +56,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setupMenuHeader()
         setupMenuForNonDebugMode()
 
-        switchToCalendarFragment()
+        switchToCorrectFragment()
 
         setBillingProcessor()
         showDonatePopupIfNeeded()
@@ -237,6 +238,15 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    private fun switchToCorrectFragment() {
+        val showOtherApps = intent?.extras?.getBoolean("BUNDLE_SHOW_OTHER_APPS") ?: false
+        if (showOtherApps) {
+            switchToOtherAppsFragment()
+        } else {
+            switchToCalendarFragment()
+        }
+    }
+
     private fun showDonateDialog() {
         DonateDialog(this, billingManager).apply {
             onCloseAfterDonation.connect { productId ->
@@ -280,6 +290,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setCheckedItem(R.id.menu_timetables)
 
         setCurrentFragment(CalendarFragment())
+    }
+
+    fun switchToOtherAppsFragment() {
+        nav_view.setCheckedItem(R.id.menu_other_apps)
+
+        setCurrentFragment(OtherAppsFragment())
     }
 
 

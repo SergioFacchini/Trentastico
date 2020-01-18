@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.geridea.trentastico.logger.BugLogger
+import com.geridea.trentastico.services.ShowNewAppNotificationService.Companion.BUNDLE_SHOW_OTHER_APPS
 import com.geridea.trentastico.utils.AppPreferences
 
 /**
@@ -16,8 +17,8 @@ import com.geridea.trentastico.utils.AppPreferences
  */
 class FirstActivityChooserActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(bundle: Bundle?) {
+        super.onCreate(bundle)
 
         BugLogger.info("Application is launched", "APP")
 
@@ -27,7 +28,13 @@ class FirstActivityChooserActivity : AppCompatActivity() {
             AppPreferences.hasToUpdateStudyCourse
                 -> startActivity(Intent(this, UpdateStudyCourseActivity::class.java))
             else
-                -> startActivity(Intent(this, HomeActivity::class.java))
+                -> {
+                val intent = Intent(this, HomeActivity::class.java)
+                if (bundle != null) {
+                    intent.putExtras(bundle)
+                }
+                startActivity(intent)
+            }
         }
 
         finish()

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark"
@@ -30,13 +29,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingTop="11dp"
-                android:text="Ho creato Trentastico perché non sopporto il sito degli orari; troppo lento ed inutilmente complicato.\nSapevo sviluppare app e volevo liberarmi da questo problema. Così, 200 ore dopo passate al PC, nacque Trentastico!\n\nMi sentivo uno studente soddisfatto. Beh, almeno per un po'...\n\nRealizzai che gli orari non erano l'unico problema. Tutt'altro! L'intera vita da studente è una marea di problemi.\n\nDopo aver fatto Trentastico, non voglio fermarmi qui. Sto creando nuove app per portare un altro po' di gioia nella vita degli studenti."
+                android:text="Ho creato Trentastico perché non sopporto il sito degli orari; troppo lento ed inutilmente complicato.\nSapevo sviluppare app e volevo liberarmi da questo problema. Così, 200 ore dopo passate al PC, nacque Trentastico! Mi sentivo uno studente soddisfatto. Beh, almeno per un po'...\n\nRealizzai che gli orari non erano l'unico problema. Tutt'altro! L'intera vita da studente è una marea di problemi.\n\nDopo aver fatto Trentastico, non voglio fermarmi qui. Sto creando nuove app. Voglio portare ancora un po' di gioia nella vita degli studenti."
                 android:textColor="@color/colorForeground"
                 android:textSize="14sp"
                 android:textStyle="italic" />
 
         <ListView
-
                 android:id="@+id/list_other_apps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -4,6 +4,8 @@ package com.geridea.trentastico.gui.fragments
  * Created with ♥ by Slava on 19/03/2017.
  */
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.DrawableRes
 import android.view.LayoutInflater
@@ -18,8 +20,6 @@ import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import kotlinx.android.synthetic.main.fragment_other_apps.*
-import android.content.Intent
-import android.net.Uri
 
 
 class OtherAppsFragment : FragmentWithMenuItems() {

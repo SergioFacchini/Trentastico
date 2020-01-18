@@ -7,10 +7,7 @@ import com.evernote.android.job.JobManager
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.LessonsUpdaterJob
-import com.geridea.trentastico.services.NextLessonNotificationHideService
-import com.geridea.trentastico.services.NextLessonNotificationShowService
-import com.geridea.trentastico.services.ServicesJobCreator
+import com.geridea.trentastico.services.*
 import com.geridea.trentastico.utils.*
 
 
@@ -63,6 +60,9 @@ class TrentasticoApplication : Application() {
         NextLessonNotificationShowService.onLessonNotificationToShow.connect { lesson ->
             NextLessonNotificationShowService.showNotificationForLessons(applicationContext, lesson)
         }
+
+        // Showing the new app notification in a specific day
+        ShowNewAppNotificationService.showNewAppNotificationIfNeeded()
 
         //Leave this last since it might have some other dependencies of other singletons
         VersionManager.checkForVersionChangeCode(this)
