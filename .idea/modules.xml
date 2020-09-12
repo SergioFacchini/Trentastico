@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Trentastico.iml" filepath="$PROJECT_DIR$/Trentastico.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/Trentastico-app.iml" filepath="$PROJECT_DIR$/app/Trentastico-app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/progetti-Trentastico.iml" filepath="$PROJECT_DIR$/progetti-Trentastico.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Trentastico.iml" filepath="$PROJECT_DIR$/.idea/modules/Trentastico.iml" group="Trentastico" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="Trentastico/app" />
     </modules>
   </component>
 </project>

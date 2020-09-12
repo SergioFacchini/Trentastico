@@ -195,7 +195,10 @@ object AppPreferences {
         }
 
     var notificationTracker: ShownNotificationsTracker
-        get() = ShownNotificationsTracker.fromJson(sharedPreferences.getString("NEXT_LESSON_NOTIFICATION_TRACKER", "{}"))
+        get() {
+            val json = sharedPreferences.getString("NEXT_LESSON_NOTIFICATION_TRACKER", "{}")
+            return ShownNotificationsTracker.fromJson(json!!)
+        }
         set(tracker) = putString("NEXT_LESSON_NOTIFICATION_TRACKER", tracker.toJson().toString())
 
 

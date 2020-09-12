@@ -59,5 +59,5 @@ fun TextView.setTextOrHideIfEmpty(text: String?) {
 
 fun copyText(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-    clipboard.primaryClip = ClipData.newPlainText("Copied Text", text)
+    clipboard.setPrimaryClip(ClipData.newPlainText("Copied Text", text))
 }

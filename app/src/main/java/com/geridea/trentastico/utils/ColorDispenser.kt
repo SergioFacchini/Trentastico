@@ -43,7 +43,7 @@ object ColorDispenser {
     private fun save() {
         preferences.edit().putInt(COLOR_INDEX_KEY, currentColorIndex).apply()
 
-        val colorAssociationsString = JSONObject(typeColorAssociations).toString()
+        val colorAssociationsString = JSONObject(typeColorAssociations as Map<*, *>).toString()
         preferences.edit().putString(ASSOCIATIONS_KEY, colorAssociationsString).apply()
     }
 

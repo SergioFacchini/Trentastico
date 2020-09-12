@@ -522,7 +522,7 @@ open class CustomWeekView @JvmOverloads constructor(
         canvas.drawRect(0f, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, height.toFloat(), mHeaderColumnBackgroundPaint!!)
 
         // Clip to paint in left column only.
-        canvas.clipRect(0f, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, height.toFloat(), Region.Op.REPLACE)
+        canvas.clipRect(0f, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, height.toFloat(), Region.Op.INTERSECT)
 
 
         for (i in mStartingHour..mEndingHour) {
@@ -612,7 +612,7 @@ open class CustomWeekView @JvmOverloads constructor(
         }
 
         // Clip to paint events only.
-        canvas.clipRect(mHeaderColumnWidth, mHeaderDaysTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2, width.toFloat(), height.toFloat(), Region.Op.REPLACE)
+        canvas.clipRect(mHeaderColumnWidth, mHeaderDaysTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2, width.toFloat(), height.toFloat(), Region.Op.INTERSECT)
 
         // Iterate through each day.
         val oldMillis = firstVisibleDay.timeInMillis
@@ -701,7 +701,7 @@ open class CustomWeekView @JvmOverloads constructor(
 
 
         // Clip to paint header row only.
-        canvas.clipRect(mHeaderColumnWidth, 0f, width.toFloat(), mHeaderDaysTextHeight + mHeaderRowPadding * 2, Region.Op.REPLACE)
+        canvas.clipRect(mHeaderColumnWidth, 0f, width.toFloat(), mHeaderDaysTextHeight + mHeaderRowPadding * 2, Region.Op.INTERSECT)
 
         // Draw the header background.
         canvas.drawRect(0f, 0f, width.toFloat(), mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderBackgroundPaint!!)

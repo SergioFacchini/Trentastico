@@ -23,7 +23,7 @@ object Config {
 
     val LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER = false
 
-    val DEBUG_SERVER_URL = "http://ideagenesi.com/trentastico/lessons.json"
+    val DEBUG_SERVER_URL = "https://ideagenesi.com/trentastico/lessons.json"
 
     //Database
     val DATABASE_NAME = "data.db"
@@ -53,6 +53,6 @@ object Config {
     const val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
 
     //Current study year
-    const val CURRENT_STUDY_YEAR = "2019"
+    const val CURRENT_STUDY_YEAR = "2020"
 
 }

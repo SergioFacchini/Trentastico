@@ -95,7 +95,7 @@ class LibraryOpeningTimesController(val sender: RequestSender, val cacher: Cache
         override val url: String
             get() {
                 val formattedDate = LibraryOpeningTimes.formatDay(date)
-                return "http://www.biblioteca.unitn.it/orarihp?data=$formattedDate&lingua=it"
+                return "https://www.biblioteca.unitn.it/orarihp?data=$formattedDate&lingua=it"
             }
 
         override val formToSend: FormBody?

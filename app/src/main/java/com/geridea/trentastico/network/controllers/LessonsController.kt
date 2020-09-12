@@ -161,7 +161,7 @@ internal class LoadStudyCoursesRequest(
     private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\svar")
 
     override val url: String
-        get() = "http://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
+        get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
 
     override val formToSend: FormBody?
         get() = null
@@ -499,7 +499,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     @Suppress("ConstantConditionIf")
     override val url: String
         get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
-        else "http://easyacademy.unitn.it/AgendaStudentiUnitn/list_call.php"
+        else "https://easyacademy.unitn.it/AgendaStudentiUnitn/list_call.php"
 
     override val formToSend: FormBody?
         get() = FormBody.Builder()

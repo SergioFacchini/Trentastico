@@ -12,14 +12,14 @@ android {
             storePassword 'keystore'
         }
     }
-    compileSdkVersion 27
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
-        targetSdkVersion 27
-        versionCode 21
-        versionName "1.0.7 - Honeydew"
+        targetSdkVersion 29
+        versionCode 22
+        versionName "1.0.8 - Jackberry"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
@@ -79,6 +79,8 @@ dependencies {
 
     //Scheduling
     implementation 'com.evernote:android-job:1.2.6'
+    implementation 'com.google.android.gms:play-services-gcm:16.1.0'
+
 
     //Logging
     implementation 'com.hypertrack:hyperlog:0.0.10'

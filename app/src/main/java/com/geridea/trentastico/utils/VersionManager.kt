@@ -84,6 +84,11 @@ object VersionManager {
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
+        if(lastVersion in 1..20){
+            //The academic year has changed: 2020 - 2021
+            AppPreferences.hasToUpdateStudyCourse = true
+        }
+
         AppPreferences.lastVersionExecuted = thisVersion
     }
 
