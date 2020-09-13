@@ -81,11 +81,21 @@ object VersionManager {
 
         if(lastVersion in 1..19){
             //The academic year has changed: 2019 - 2020
+            Networker.obliterateCache()
+            AppPreferences.clearLessonsToHide()
+            AppPreferences.removeAllExtraCourses()
+            AppPreferences.removeStudyCourse()
+
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
-        if(lastVersion in 1..20){
+        if(lastVersion in 1..21){
             //The academic year has changed: 2020 - 2021
+            Networker.obliterateCache()
+            AppPreferences.clearLessonsToHide()
+            AppPreferences.removeAllExtraCourses()
+            AppPreferences.removeStudyCourse()
+
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
