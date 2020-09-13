@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="App realizzata da Slava Rublev"
+        android:text="App realizzata da Sergio (Slava) Facchini"
         android:textColor="@color/colorForeground"
         android:textSize="16sp" />
 

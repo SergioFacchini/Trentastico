@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="left"
-                android:text="Controlliamo spesso gli orari delle lezioni, ma il sito dell'università è scomodissimo da far venire i nervi. Per questo motivo ho realizzato l'app che stai usando ora.\n \nTrentastico è un progetto nato per hobby e che tuttora mantengo senza alcun guadagno durante il mio tempo libero. Voglio continuare a farlo e vi sono ancora numerose idee che vorrei implementare, molte delle quali mi sono giunte da voi.\n\nVuoi darmi una mano a realizzarle? \n \nPuoi offrirmi un caffè per sostenermi nello sviluppo o contribuire anche di più se ti va. Con il tuo supporto rendi Trentastico migliore. \n \nTi ringrazio per tutto l'aiuto che dai. \nSlava Rublev"
+                android:text="Controlliamo spesso gli orari delle lezioni, ma il sito dell'università è scomodissimo da far venire i nervi. Per questo motivo ho realizzato l'app che stai usando ora.\n \nTrentastico è un progetto nato per hobby e che tuttora mantengo senza alcun guadagno durante il mio tempo libero. Voglio continuare a farlo e vi sono ancora numerose idee che vorrei implementare, molte delle quali mi sono giunte da voi.\n\nVuoi darmi una mano a realizzarle? \n \nPuoi offrirmi un caffè per sostenermi nello sviluppo o contribuire anche di più se ti va. Con il tuo supporto rendi Trentastico migliore. \n \nTi ringrazio per tutto l'aiuto che dai. \nSergio (Slava) Facchini"
                 android:textColor="@color/colorForeground"
                 android:textSize="14sp"
                 android:textStyle="italic"

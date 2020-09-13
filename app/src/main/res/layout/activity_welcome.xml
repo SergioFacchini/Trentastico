@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Trentastico! è l'app che rende il tuo mondo universitario più semplice!"
+            android:text="Trentastico è l'app che rende il tuo mondo universitario più semplice!"
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 

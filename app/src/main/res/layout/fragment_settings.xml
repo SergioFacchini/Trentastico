@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="Da qui puoi cambiare le impostazioni di Trentastico!"
+            android:text="Da qui puoi cambiare le impostazioni di Trentastico"
             android:textColor="@color/colorForeground"
             android:textSize="14sp" />
 
@@ -155,7 +155,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:text="Trentastico! può mostrarti una notifica con il nome e aula della tua prossima lezione. In questo modo non devi aprire l'app ad ogni fine lezione per sapere dove devi andare."
+            android:text="Trentastico può mostrarti una notifica con il nome e aula della tua prossima lezione. In questo modo non devi aprire l'app ad ogni fine lezione per sapere dove devi andare."
             android:textColor="@color/colorForeground" />
 
         <Switch

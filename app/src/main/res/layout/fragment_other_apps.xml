@@ -10,7 +10,6 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingBottom="@dimen/activity_vertical_margin">
 
-
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,9 +28,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingTop="11dp"
-                android:text="Ho creato Trentastico perché non sopporto il sito degli orari; troppo lento ed inutilmente complicato.\nSapevo sviluppare app e volevo liberarmi da questo problema. Così, 200 ore dopo passate al PC, nacque Trentastico! Mi sentivo uno studente soddisfatto. Beh, almeno per un po'...\n\nRealizzai che gli orari non erano l'unico problema. Tutt'altro! L'intera vita da studente è una marea di problemi.\n\nDopo aver fatto Trentastico, non voglio fermarmi qui. Sto creando nuove app. Voglio portare ancora un po' di gioia nella vita degli studenti."
+                android:text="Ho creato Trentastico perché non sopportavo il sito degli orari: troppo lento ed inutilmente complicato. Dato che avevo imparato a sviluppare app, decisi di liberarmi da questo problema. Così, dopo un'immisurabile quantità di ore passate al PC e qualche caffè di troppo, nacque Trentastico!\n\nMi sentivo uno studente soddisfatto. Finalmente potevo vedere i miei orari senza imprecare. Grande! Easy life... vero?\n\nRealizzai che gli orari non erano l'unico problema. Tutt'altro! C'erano tante cose che potevo fare per rendere la sofferenza universitaria un po' più piacevole...\n\nDopo Trentastico non voglio fermarmi qui. Sto creando nuove app che porteranno ancora un po' di gioia nella vita degli studenti."
                 android:textColor="@color/colorForeground"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="italic" />
 
         <ListView
