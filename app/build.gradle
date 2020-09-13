@@ -8,7 +8,7 @@ android {
         release {
             keyAlias 'trentastico'
             keyPassword 'keykey'
-            storeFile file('/home/slava/progetti/Trentastico/keystore/trentastico.jks')
+            storeFile file('/home/slava/StudioProjects/Trentastico/keystore/trentastico.jks')
             storePassword 'keystore'
         }
     }
@@ -18,7 +18,7 @@ android {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 22
+        versionCode 23
         versionName "1.0.8 - Jackberry"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
