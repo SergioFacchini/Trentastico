@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="left"
-                android:text="Ti ringrazio immensamente per il tuo contributo. Hai aiutato a rendere Trentastico migliore per te e per centinaia di studenti che lo utilizzano, rendendo la vita universitaria di Trento più semplice!"
+                android:text="Ti ringrazio immensamente per il tuo contributo. Hai aiutato a rendere Trentastico migliore per te e per centinaia di studenti che lo utilizzano!"
                 android:textColor="@color/colorForeground"
                 android:textSize="14sp"
                 android:textStyle="italic" />
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="left"
-                android:text="Puoi scegliere se continuare a ricevere i messaggi che ti chiedono di contribuire a Trentastico! D'ora in poi potrai potrai cambiare quest'opzione anche nella sezione di configurazione."
+                android:text="Puoi scegliere se continuare a ricevere i messaggi che ti chiedono di contribuire a Trentastico! D'ora in poi potrai cambiare quest'opzione anche nella sezione di configurazione."
                 android:textColor="@color/colorForeground"
                 android:textSize="14sp" />
 

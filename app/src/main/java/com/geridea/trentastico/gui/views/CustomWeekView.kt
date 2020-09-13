@@ -527,7 +527,9 @@ open class CustomWeekView @JvmOverloads constructor(
 
             // Draw the text if its y position is not outside of the visible area. The pivot point of the text is the point at the bottom-right corner.
             val time = dateTimeInterpreter.interpretTime(i) ?: throw IllegalStateException("A DateTimeInterpreter must not return null time")
-            if (top < height) canvas.drawText(time, mTimeTextWidth + mHeaderColumnPadding, top + mTimeTextHeight, mTimeTextPaint!!)
+            if (top < height) {
+                canvas.drawText(time, mTimeTextWidth + mHeaderColumnPadding, top + mTimeTextHeight, mTimeTextPaint!!)
+            }
         }
     }
 
