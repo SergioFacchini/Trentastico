@@ -507,22 +507,19 @@ open class CustomWeekView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Hide everything in the first cell (top left corner).
-        canvas.drawRect(0f, 0f, mTimeTextWidth + mHeaderColumnPadding * 2, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderBackgroundPaint!!)
-
         // Draw the header row.
         drawHeaderRowAndEvents(canvas)
 
         // Draw the time column and all the axes/separators.
         drawTimeColumnAndAxes(canvas)
+
+        // Hide everything in the first cell (top left corner).
+        canvas.drawRect(0f, 0f, mTimeTextWidth + mHeaderColumnPadding * 2, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderBackgroundPaint!!)
     }
 
     private fun drawTimeColumnAndAxes(canvas: Canvas) {
         // Draw the background color for the header column.
         canvas.drawRect(0f, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, height.toFloat(), mHeaderColumnBackgroundPaint!!)
-
-        // Clip to paint in left column only.
-        canvas.clipRect(0f, mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderColumnWidth, height.toFloat(), Region.Op.INTERSECT)
 
 
         for (i in mStartingHour..mEndingHour) {
@@ -611,8 +608,6 @@ open class CustomWeekView @JvmOverloads constructor(
             }
         }
 
-        // Clip to paint events only.
-        canvas.clipRect(mHeaderColumnWidth, mHeaderDaysTextHeight + (mHeaderRowPadding * 2).toFloat() + mHeaderMarginBottom + mTimeTextHeight / 2, width.toFloat(), height.toFloat(), Region.Op.INTERSECT)
 
         // Iterate through each day.
         val oldMillis = firstVisibleDay.timeInMillis
@@ -699,9 +694,6 @@ open class CustomWeekView @JvmOverloads constructor(
             startPixel += mWidthPerDay + mColumnGap
         }
 
-
-        // Clip to paint header row only.
-        canvas.clipRect(mHeaderColumnWidth, 0f, width.toFloat(), mHeaderDaysTextHeight + mHeaderRowPadding * 2, Region.Op.INTERSECT)
 
         // Draw the header background.
         canvas.drawRect(0f, 0f, width.toFloat(), mHeaderDaysTextHeight + mHeaderRowPadding * 2, mHeaderBackgroundPaint!!)
