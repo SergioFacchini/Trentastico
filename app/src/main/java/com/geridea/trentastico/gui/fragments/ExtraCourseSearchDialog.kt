@@ -90,7 +90,7 @@ internal class ExtraCourseSearchDialog(
 
     override fun onLessonTypesRetrieved(lessonTypes: Collection<LessonType>) = UIUtils.runOnMainThread {
         if (lessonTypes.isEmpty()) {
-            lessonsFoundText.text = "Non vi sono lezioni nel corso di studi selezionato; probabilmente le lezioni non sono ancora state pianificate dall'università. Se pensi che sia un errore, torna indietro e controlla di aver selezionato il corso corretto."
+            lessonsFoundText.text = "Non ci sono lezioni nel corso di studi selezionato; probabilmente le lezioni non sono ancora state pianificate dall'università. Se pensi che sia un errore, torna indietro e controlla di aver selezionato il corso corretto."
         } else {
             lessonsFoundText.text = "Ho trovato le seguenti lezioni. Premi sulla lezione che ti interessa seguire per aggiungerla al calendario."
 
