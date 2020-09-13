@@ -281,6 +281,24 @@ internal class LoadStudyCoursesRequest(
  */
 internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : BasicRequest() {
 
+    @Suppress("ConstantConditionIf")
+    override val url: String
+        get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
+        else "https://easyacademy.unitn.it/AgendaStudentiUnitn/list_call.php"
+
+    override val formToSend: FormBody?
+        get() {
+            val build = FormBody.Builder()
+                    .add("form-type", "corso")
+                    .add("anno", Config.CURRENT_STUDY_YEAR)
+                    .add("corso", studyCourse.courseId)
+                    .add("include", "corso")
+                    .add("anno2[]", studyCourse.yearId)
+                    .build();
+
+            return build
+        }
+    
     /**
      * The colors are assigned sequentially: that means that the first lesson type picks the first
      * color, the second picks the seconds.. and so on.
@@ -368,7 +386,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     val lessonTypeId = it.getString("codice_insegnamento")
-                    val teachingName = it.getString("nome_insegnamento")
+                    val teachingName = it.getString("link_insegnamento")
                     val partitioningName = calculatePartitioningName(teachingName)
                     LessonType(
                             id                    = lessonTypeId,
@@ -392,12 +410,12 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
             //We have to build the timing ourselves
             val lessonDateString = lessonJson.getString("data")+" "+lessonJson.getString("ora_inizio")
-            val startTimestamp    = lessonStartFormat.parse(lessonDateString).time
+            val startTimestamp   = lessonStartFormat.parse(lessonDateString).time
 
             val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
             val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
 
-            val teachingName = lessonJson.getString("nome_insegnamento")
+            val teachingName = lessonJson.getString("link_insegnamento")
 
             LessonSchedule(
                     id               = generateLessonScheduleId(lessonJson, startTimestamp),
@@ -495,20 +513,6 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
             throw IllegalArgumentException("The minutes to convert must be in \"hh:mm\" format!")
         }
     }
-
-    @Suppress("ConstantConditionIf")
-    override val url: String
-        get() = if (Config.LAUNCH_LESSONS_REQUESTS_TO_DEBUG_SERVER) Config.DEBUG_SERVER_URL
-        else "https://easyacademy.unitn.it/AgendaStudentiUnitn/list_call.php"
-
-    override val formToSend: FormBody?
-        get() = FormBody.Builder()
-                .add("form-type", "corso")
-                .add("aa", Config.CURRENT_STUDY_YEAR)
-                .add("anno", Config.CURRENT_STUDY_YEAR)
-                .add("corso", studyCourse.courseId)
-                .add("anno2", studyCourse.yearId)
-                .build()
 
     override fun notifyOnBeforeSend() {; }
 }

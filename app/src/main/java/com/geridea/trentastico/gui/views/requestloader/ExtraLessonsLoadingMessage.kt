@@ -10,8 +10,8 @@ class ExtraLessonsLoadingMessage(
 
     override val text: String
         get() = if (isARetry)
-            "Sto riprovando gli orari di \"${extraCourse.lessonName}\"..."
+            "Sto riprovando a scaricare gli orari di \"${extraCourse.lessonName}\"..."
         else
-            "Sto scaricando a scaricare gli orari di \"${extraCourse.lessonName}\"..."
+            "Sto scaricando gli orari di \"${extraCourse.lessonName}\"..."
 
 }
