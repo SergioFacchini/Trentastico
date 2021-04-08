@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:text="Trentastico è un'app realizzata da me, un omino di nome Sergio (Slava) Facchini. Sono un esemplare della specie studentus-de-informaticum e in quanto tale trovo accoglienza nell'habitat di Povo. Quest'app esiste per far fronte allo stess che suscita l'attuale sito degli orari, troppo scomodo ed inutilizzabile dal telefono. \n\nSapere che Trentastico è apprezzata da chi la utilizza è una grandissima soddisfazione per me! Per questo motivo mi farebbe molto piacere sentire un tuo parere sulla mia creatura. Puoi utilizzare il campo qua sotto anche per contattarmi oppure segnalarmi problemi che hai incontrato nell'uso di Trentastico così cerco di risolverli.\n\n Ti ringrazio!\n - Slava Rublev"
+            android:text="Trentastico è un'app realizzata da un omino di nome Sergio Facchini, anche conosciuto come Slava. Sono un esemplare della specie studentus-de-informaticum e in quanto tale trovo accoglienza nell'habitat di Povo. Quest'app esiste per far fronte allo stess che suscita l'attuale sito degli orari, troppo scomodo ed inutilizzabile dal telefono. \n\nSapere che Trentastico è apprezzata da chi la utilizza è una grandissima soddisfazione per me! Per questo motivo mi farebbe molto piacere sentire un tuo parere sulla mia creatura. Puoi utilizzare il campo qua sotto anche per contattarmi oppure segnalarmi problemi che hai incontrato nell'uso di Trentastico così cerco di risolverli.\n\n Ti ringrazio!\n - Sergio (Slava) Facchini"
             android:paddingTop="10dp"
             android:textColor="@color/colorForeground"
             android:textSize="14sp"

@@ -38,7 +38,7 @@ class SendSlavaController(private val sender: RequestSender) {
                 Unit
 
         override val url: String
-            get() = "https://ideagenesi.com/trentastico/submit_idea.php"
+            get() = "https://roomtick.com/trentastico/submit_idea.php"
 
         override val formToSend: FormBody?
             get() = FormBody.Builder()
