@@ -383,6 +383,8 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
         return json.extractNumberedObjects()
                 //I filter because the numLessons variable appears to be screwed up! It seems to
                 //contain a number that is bigger than the actual number of teachings
+                .filter { it.has("codice_insegnamento") }
+                // Holidays do not have a codice_insegnamento
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     val lessonTypeId = it.getString("codice_insegnamento")
@@ -406,27 +408,30 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
     private fun parseLessons(json: JSONObject): List<LessonSchedule> {
         val lessonStartFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.ITALIAN)
 
-        return json.extractNumberedObjects().map { lessonJson ->
-            //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
-            //We have to build the timing ourselves
-            val lessonDateString = lessonJson.getString("data")+" "+lessonJson.getString("ora_inizio")
-            val startTimestamp   = lessonStartFormat.parse(lessonDateString).time
+        return json.extractNumberedObjects()
+            // Holidays do not have a link_insegnamento
+            .filter { it.has("link_insegnamento") }
+            .map { lessonJson ->
+                //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
+                //We have to build the timing ourselves
+                val lessonDateString = lessonJson.getString("data")+" "+lessonJson.getString("ora_inizio")
+                val startTimestamp   = lessonStartFormat.parse(lessonDateString).time
 
-            val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
-            val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
+                val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
+                val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
 
-            val teachingName = lessonJson.getString("link_insegnamento")
+                val teachingName = lessonJson.getString("link_insegnamento")
 
-            LessonSchedule(
-                    id               = generateLessonScheduleId(lessonJson, startTimestamp),
-                    lessonTypeId     = lessonJson.getString("codice_insegnamento"),
-                    teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
-                    rooms            = calculateRooms(lessonJson.getString("aula")),
-                    subject          = calculateTeachingWithoutPartitioning(teachingName),
-                    partitioningName = calculatePartitioningName(teachingName),
-                    startsAt         = startTimestamp,
-                    endsAt           = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
-            )
+                LessonSchedule(
+                        id               = generateLessonScheduleId(lessonJson, startTimestamp),
+                        lessonTypeId     = lessonJson.getString("codice_insegnamento"),
+                        teachersNames    = lessonJson.getString("docente").orIfBlank(NO_TEACHER_ASSIGNED_DEFAULT_TEXT),
+                        rooms            = calculateRooms(lessonJson.getString("aula")),
+                        subject          = calculateTeachingWithoutPartitioning(teachingName),
+                        partitioningName = calculatePartitioningName(teachingName),
+                        startsAt         = startTimestamp,
+                        endsAt           = calculateEndTimeOfLesson(startTimestamp, endingMins, startingMins)
+                )
         }
     }
 
