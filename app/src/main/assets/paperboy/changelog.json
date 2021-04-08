@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 1.0.9",
+    "items": [
+      {
+        "type": "2",
+        "title": "Risolto un bug che non faceva caricare le lezioni in Trentastico"
+      }
+    ]
+  },{
     "name": "Novità in 1.0.8",
     "items": [
       {
