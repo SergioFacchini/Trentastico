@@ -158,10 +158,10 @@ internal class LoadStudyCoursesRequest(
         listener.onLoadingError()
     }
 
-    private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\svar")
+    private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\s+var")
 
     override val url: String
-        get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
+        get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call_new.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
 
     override val formToSend: FormBody?
         get() = null
@@ -227,8 +227,9 @@ internal class LoadStudyCoursesRequest(
              }
            ]
            */
-            val currentYearJson = findCurrentYearJson(JSONArray(foundJson))
-            val currentYearCourses = currentYearJson.getJSONArray("elenco")
+//            val currentYearJson = findCurrentYearJson(JSONArray(foundJson))
+//            val currentYearCourses = currentYearJson.getJSONArray("elenco")
+            val currentYearCourses = JSONArray(foundJson)
 
             //The currentYearJson contains the information about the courses of the current year
             //we have to parse it
@@ -264,12 +265,12 @@ internal class LoadStudyCoursesRequest(
         }
     }
 
-    private fun findCurrentYearJson(yearsJsonArray: JSONArray): JSONObject {
-        return (0 until yearsJsonArray.length())
-                .map { yearsJsonArray[it] as JSONObject }
-                .firstOrNull { it.getString("valore") == Config.CURRENT_STUDY_YEAR }
-                ?: throw ServerResponseParsingException("Cannot find current year JSON!")
-    }
+//    private fun findCurrentYearJson(yearsJsonArray: JSONArray): JSONObject {
+//        val objects = (0 until yearsJsonArray.length()).map { yearsJsonArray[it] as JSONObject }
+//        return objects
+//                .firstOrNull { it.getString("valore") == Config.CURRENT_STUDY_YEAR }
+//                ?: throw ServerResponseParsingException("Cannot find current year JSON!")
+//    }
 
     override fun notifyOnBeforeSend() { ; }
 

@@ -18,8 +18,8 @@ android {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 25
-        versionName "1.0.9 - Kiwi"
+        versionCode 26
+        versionName "1.0.10 - Lemon"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
@@ -86,7 +86,7 @@ dependencies {
     implementation 'com.hypertrack:hyperlog:0.0.10'
 
     //Easy billing
-    implementation 'com.anjlab.android.iab.v3:library:1.0.44'
+    implementation 'com.anjlab.android.iab.v3:library:1.1.0'
 
 
     androidTestImplementation 'junit:junit:4.12'
