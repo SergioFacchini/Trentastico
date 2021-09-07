@@ -32,7 +32,7 @@ class DonationPopupManager {
         }
 
         fun rescheduleNotification() {
-            val nextSchedule = CalendarUtils.addDays(System.currentTimeMillis(), 5)
+            val nextSchedule = CalendarUtils.addDays(System.currentTimeMillis(), 25)
             AppPreferences.nextDonationNotificationDate = nextSchedule
         }
 
