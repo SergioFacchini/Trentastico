@@ -413,7 +413,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
 
         return json.extractNumberedObjects()
             // Holidays do not have a link_insegnamento
-            .filter { it.has("link_insegnamento") }
+            .filter { it.has("nome_insegnamento") }
             .map { lessonJson ->
                 //WARNING: The "timestamp" field in the json is SCREWED for some lessons. Yeeee!
                 //We have to build the timing ourselves
@@ -423,7 +423,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                 val startingMins = convertToMinutes(lessonJson.getString("ora_inizio"))
                 val endingMins   = convertToMinutes(lessonJson.getString("ora_fine"))
 
-                val teachingName = lessonJson.getString("link_insegnamento")
+                val teachingName = lessonJson.getString("nome_insegnamento")
 
                 LessonSchedule(
                         id               = generateLessonScheduleId(lessonJson, startTimestamp),
