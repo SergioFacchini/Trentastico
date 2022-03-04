@@ -18,7 +18,7 @@ android {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
         targetSdkVersion 30
-        versionCode 27
+        versionCode 28
         versionName "1.0.11 - Melon"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release

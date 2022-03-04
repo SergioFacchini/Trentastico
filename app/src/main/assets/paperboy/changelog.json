@@ -1,5 +1,21 @@
 [
   {
+    "name": "Novità in 1.0.11",
+    "items": [
+      {
+        "type": "2",
+        "title": "Corretto un problema che non faceva funzionare Trentastico per via di un aggiornamento a Easyroom"
+      },
+      {
+        "type": "3",
+        "title": "Rimosse le donazioni da Trentastico. Mi accontento della gloria eterna."
+      },
+      {
+        "type": "3",
+        "title": "Immagino che quasi nessuno legga i changelog in questa schermata. Ad ogni modo... se sei stato cosi curioso da finire qui, e sei pure un programmatore, sappi che sto cercando dei maintainer per Trentastico. Se sei interessato/a, contattami attraverso il modulo del feedback."
+      }
+    ]
+  },{
     "name": "Novità in 1.0.10",
     "items": [
       {
