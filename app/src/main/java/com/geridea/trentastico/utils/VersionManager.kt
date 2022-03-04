@@ -4,7 +4,6 @@ import android.content.Context
 import com.evernote.android.job.JobManager
 import com.geridea.trentastico.BuildConfig
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationShowService
 
@@ -33,8 +32,6 @@ object VersionManager {
         }
 
         if(lastVersion in 1..14) {
-            DonationPopupManager.install()
-
             if(!AppPreferences.nextLessonNotificationsEnabled) {
                 NextLessonNotificationShowService.clearNotifications(context)
                 NextLessonNotificationShowService.cancelScheduling()

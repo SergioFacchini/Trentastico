@@ -2,7 +2,6 @@ package com.geridea.trentastico.gui.activities
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.DrawableRes
 import android.support.design.widget.NavigationView
@@ -10,7 +9,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -21,12 +19,9 @@ import android.widget.TextView
 import android.widget.Toast
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
-import com.geridea.trentastico.billing.BillingManager
 import com.geridea.trentastico.gui.fragments.*
-import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.findDonationItemByInternalId
 import com.geridea.trentastico.network.Networker
-import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationShowService
 import com.geridea.trentastico.utils.AppPreferences
@@ -43,7 +38,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var currentFragment: Fragment? = null
     private var currentMenuSettings: IMenuSettings = NoMenuSettings.instance
 
-    private lateinit var billingManager: BillingManager
 
     override fun onCreate(bundle: Bundle?) {
         super.onCreate(bundle)
@@ -55,23 +49,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setupMenuForNonDebugMode()
 
         switchToCorrectFragment()
-
-        setBillingProcessor()
-        showDonatePopupIfNeeded()
-    }
-
-    private fun showDonatePopupIfNeeded() {
-        if (DonationPopupManager.shouldPopupBeShown(this)) {
-            BugLogger.info("Showing donation dialog", "DONATE")
-            ViewCompat.postOnAnimationDelayed(nav_view, {
-                if(!isFinishing){
-                    showDonateDialog()
-                    DonationPopupManager.rescheduleNotification()
-                }
-            }, 10*1000)
-        } else {
-            BugLogger.info("Too soon to show the donation dialog", "DONATE")
-        }
     }
 
     private fun setupMenuForNonDebugMode() {
@@ -92,13 +69,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun setBillingProcessor() {
-        billingManager = BillingManager(this)
-        billingManager.init()
-    }
-
     override fun onDestroy() {
-        billingManager.release()
         super.onDestroy()
     }
 
@@ -170,12 +141,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             super.onBackPressed()
         } else {
             switchToCalendarFragment()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (!billingManager.notifyActivityResult(requestCode, resultCode, data)) {
-            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 

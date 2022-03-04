@@ -8,7 +8,7 @@ android {
         release {
             keyAlias 'trentastico'
             keyPassword 'keykey'
-            storeFile file('/home/slava/StudioProjects/Trentastico/keystore/trentastico.jks')
+            storeFile file('keystore/trentastico.jks')
             storePassword 'keystore'
         }
     }
@@ -84,10 +84,6 @@ dependencies {
 
     //Logging
     implementation 'com.hypertrack:hyperlog:0.0.10'
-
-    //Easy billing
-    implementation 'com.anjlab.android.iab.v3:library:1.1.0'
-
 
     androidTestImplementation 'junit:junit:4.12'
 }
