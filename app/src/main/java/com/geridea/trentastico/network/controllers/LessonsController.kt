@@ -161,7 +161,7 @@ internal class LoadStudyCoursesRequest(
     private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\s+var")
 
     override val url: String
-        get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo_call_new.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
+        get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
 
     override val formToSend: FormBody?
         get() = null
@@ -310,6 +310,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
           "0": {
             "display": [ "nome_insegnamento", "docente", "aula", "orario", "tipo"],
             "codice_insegnamento": "EC0119H_121393_121393\/2_Nessun partizionamento_ERZEG",
+            "link_insegnamento": "",
             "nome_insegnamento": "International accounting and finance - nessun partizionamento",
             "codice_docente": "076763, 004407",
             "docente": "Corvo Stefano, Erzegovesi Luca",
@@ -328,6 +329,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
           "1": {
             "display": ["nome_insegnamento", "docente", "aula", "orario", "tipo"],
             "codice_insegnamento": "EC0119H_121393_121393\/2_Nessun partizionamento_ERZEG",
+            "link_insegnamento": "",
             "nome_insegnamento": "International accounting and finance - nessun partizionamento",
             "codice_docente": "076763, 004407",
             "docente": "Corvo Stefano, Erzegovesi Luca",
@@ -389,7 +391,7 @@ internal abstract class BasicLessonRequest(val studyCourse: StudyCourse) : Basic
                 .distinctBy { it.getString("codice_insegnamento") }
                 .map {
                     val lessonTypeId = it.getString("codice_insegnamento")
-                    val teachingName = it.getString("link_insegnamento")
+                    val teachingName = it.getString("nome_insegnamento")
                     val partitioningName = calculatePartitioningName(teachingName)
                     LessonType(
                             id                    = lessonTypeId,

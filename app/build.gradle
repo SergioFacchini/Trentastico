@@ -12,14 +12,14 @@ android {
             storePassword 'keystore'
         }
     }
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 27
-        versionName "1.0.10 - Lemon"
+        versionName "1.0.11 - Melon"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
