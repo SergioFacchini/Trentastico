@@ -22,7 +22,6 @@ import android.widget.Toast
 import com.alexvasilkov.android.commons.utils.Views
 import com.geridea.trentastico.R
 import com.geridea.trentastico.billing.BillingManager
-import com.geridea.trentastico.gui.activities.dialog.DonateDialog
 import com.geridea.trentastico.gui.fragments.*
 import com.geridea.trentastico.logger.BugLogger
 import com.geridea.trentastico.model.findDonationItemByInternalId
@@ -30,7 +29,6 @@ import com.geridea.trentastico.network.Networker
 import com.geridea.trentastico.services.DonationPopupManager
 import com.geridea.trentastico.services.LessonsUpdaterJob
 import com.geridea.trentastico.services.NextLessonNotificationShowService
-import com.geridea.trentastico.services.ShowNewAppNotificationService
 import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
@@ -190,7 +188,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             id == R.id.menu_extra_times -> setCurrentFragment(ExtraLessonsFragment())
             id == R.id.menu_libraries   -> setCurrentFragment(LibrariesFragment())
             id == R.id.menu_feedback    -> setCurrentFragment(SubmitFeedbackFragment())
-            id == R.id.menu_donate      -> showDonateDialog()
+//            id == R.id.menu_donate      -> showDonateDialog()
             id == R.id.menu_other_apps  -> setCurrentFragment(OtherAppsFragment())
             id == R.id.menu_changelog   -> setCurrentFragment(AboutFragment())
             IS_IN_DEBUG_MODE            -> //Managing debug stuff here
@@ -248,13 +246,14 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showDonateDialog() {
-        DonateDialog(this, billingManager).apply {
-            onCloseAfterDonation.connect { productId ->
-                val resourceHeader = findDonationItemByInternalId(productId).resourceHeader
-                showAfterDonationAnimation(resourceHeader)
-            }
-            show()
-        }
+        // Removing the donation dialog
+//        DonateDialog(this, billingManager).apply {
+//            onCloseAfterDonation.connect { productId ->
+//                val resourceHeader = findDonationItemByInternalId(productId).resourceHeader
+//                showAfterDonationAnimation(resourceHeader)
+//            }
+//            show()
+//        }
     }
 
     private fun showAfterDonationAnimation(@DrawableRes drawableId: Int) {
