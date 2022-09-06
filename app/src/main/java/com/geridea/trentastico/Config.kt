@@ -53,6 +53,6 @@ object Config {
     const val NEXT_LESSON_NOTIFICATION_ANTICIPATION_MIN = 15
 
     //Current study year
-    const val CURRENT_STUDY_YEAR = "2021"
+    const val CURRENT_STUDY_YEAR = "2022"
 
 }
