@@ -1,5 +1,13 @@
 [
   {
+    "name": "Novità in 1.0.12",
+    "items": [
+      {
+        "type": "2",
+        "title": "Corretto un problema che non faceva mostrare i nomi delle lezioni"
+      }
+    ]
+  },{
     "name": "Novità in 1.0.11",
     "items": [
       {

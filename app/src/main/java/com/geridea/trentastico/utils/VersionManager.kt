@@ -106,6 +106,11 @@ object VersionManager {
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
+        //Update of EasyAccademy
+        if(lastVersion in 1..30){
+            Networker.obliterateCache()
+        }
+
         AppPreferences.lastVersionExecuted = thisVersion
     }
 
