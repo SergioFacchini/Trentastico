@@ -17,6 +17,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity
+                android:exported="true"
                 android:name=".gui.activities.FirstActivityChooserActivity"
                 android:noHistory="true"
                 android:screenOrientation="portrait">

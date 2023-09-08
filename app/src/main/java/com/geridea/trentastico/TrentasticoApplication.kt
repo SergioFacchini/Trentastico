@@ -29,9 +29,6 @@ class TrentasticoApplication : Application() {
             DebugDB.shutDown()
         }
 
-        //TODO: reenable ACRA
-        //ACRA.init(this)
-
         AppContext.init(this)
 
         Networker.init(Cacher(this))

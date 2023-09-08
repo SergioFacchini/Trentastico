@@ -1,5 +1,17 @@
 [
   {
+    "name": "Novità in 1.0.14",
+    "items": [
+      {
+        "type": "2",
+        "title": "Aggiornato Trentastico per l'anno accademico 2023/2024!"
+      },
+      {
+        "type": "1",
+        "title": "Rimosso il modulo del feedback perché Play Store mi chiede di creare un sito e scriverci un pipiro riguardante la privacy."
+      }
+    ]
+  },{
     "name": "Novità in 1.0.13",
     "items": [
       {
