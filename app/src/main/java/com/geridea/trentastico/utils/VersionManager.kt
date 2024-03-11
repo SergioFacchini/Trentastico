@@ -122,6 +122,16 @@ object VersionManager {
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
+        if (lastVersion in 1..34) {
+            //The academic year has changed: 2023 - 2024
+            Networker.obliterateCache()
+            AppPreferences.clearLessonsToHide()
+            AppPreferences.removeAllExtraCourses()
+            AppPreferences.removeStudyCourse()
+
+            AppPreferences.hasToUpdateStudyCourse = true
+        }
+
         AppPreferences.lastVersionExecuted = thisVersion
     }
 
