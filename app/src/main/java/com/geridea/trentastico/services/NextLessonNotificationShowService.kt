@@ -193,7 +193,7 @@ class NextLessonNotificationShowService : Job() {
             val pending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
             } else {
-                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             }
             notificationBuilder.setContentIntent(pending)
 
