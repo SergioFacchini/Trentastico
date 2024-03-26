@@ -146,19 +146,22 @@ class LessonsUpdaterJob : Job() {
             val intent = Intent(context, LessonsChangedActivity::class.java)
             intent.putExtra(LessonsChangedActivity.EXTRA_DIFF_RESULT, diffResult)
 
+            val pending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+            } else {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+            }
             NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle(when (diffResult.numTotalDifferences) {
-                    1    -> "È cambiato l'orario di una lezione!"
-                    else -> "Sono cambiati gli orari di ${diffResult.numTotalDifferences} lezioni!"
-                })
-                .setContentText(courseName)
-                .setColor(context.resources.getColor(R.color.colorNotification))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getActivity(
-                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-                ))
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setContentTitle(when (diffResult.numTotalDifferences) {
+                        1 -> "È cambiato l'orario di una lezione!"
+                        else -> "Sono cambiati gli orari di ${diffResult.numTotalDifferences} lezioni!"
+                    })
+                    .setContentText(courseName)
+                    .setColor(context.resources.getColor(R.color.colorNotification))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .setContentIntent(pending)
 
             notificationManager.notify(NOTIFICATION_LESSONS_CHANGED_ID, NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID).build())
         }
