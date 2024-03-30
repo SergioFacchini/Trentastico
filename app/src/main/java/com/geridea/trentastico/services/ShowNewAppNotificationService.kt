@@ -65,7 +65,12 @@ class ShowNewAppNotificationService: Job() {
             intent.putExtras(bundle)
 
             //Appending an intent to the notification
-            val pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            } else {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+
 
             val color = ResourcesCompat.getColor(context.resources, R.color.colorNotification, null)
             val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
