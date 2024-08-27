@@ -132,7 +132,7 @@ object VersionManager {
             AppPreferences.hasToUpdateStudyCourse = true
         }
 
-        if (lastVersion in 1..35) {
+        if (lastVersion in 1..36) {
             //The academic year has changed: 2024 - 2025
             Networker.obliterateCache()
             AppPreferences.clearLessonsToHide()

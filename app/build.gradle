@@ -19,7 +19,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 33
         versionCode 36
-        versionName "1.0.15 - Bergamot"
+        versionName "1.0.15 - Quenepa"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
