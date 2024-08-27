@@ -189,9 +189,13 @@ class NextLessonNotificationShowService : Job() {
 
             //Appending an intent to the notification
             val intent = Intent(context, FirstActivityChooserActivity::class.java)
-            notificationBuilder.setContentIntent(
-                    PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            )
+
+            val pending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+            } else {
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+            notificationBuilder.setContentIntent(pending)
 
             //Launching the notification
             val notificationId = lesson.id.hashCode()
