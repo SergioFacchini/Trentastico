@@ -28,7 +28,6 @@ import com.geridea.trentastico.utils.AppPreferences
 import com.geridea.trentastico.utils.DebugUtils
 import com.geridea.trentastico.utils.IS_IN_DEBUG_MODE
 import com.geridea.trentastico.utils.copyText
-import com.hypertrack.hyperlog.HyperLog
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.nav_header_home.view.*
 
@@ -155,7 +154,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             id == R.id.menu_feedback    -> setCurrentFragment(SubmitFeedbackFragment())
 //            id == R.id.menu_donate      -> showDonateDialog()
             id == R.id.menu_other_apps  -> setCurrentFragment(OtherAppsFragment())
-            id == R.id.menu_changelog   -> setCurrentFragment(AboutFragment())
+//            id == R.id.menu_changelog   -> setCurrentFragment(AboutFragment())
             IS_IN_DEBUG_MODE            -> //Managing debug stuff here
                 when (id) {
                     R.id.debug_menu_about -> {
@@ -174,24 +173,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     R.id.debug_reset_notification_tracker -> {
                         AppPreferences.notificationTracker.clear()
                         Toast.makeText(this, "Notification tracker reset!", Toast.LENGTH_SHORT).show()
-                    }
-
-                    R.id.debug_show_logs -> {
-                        val logsString = HyperLog
-                                .getDeviceLogs(false).orEmpty()
-                                .asReversed()
-                                .joinToString(separator = "\n") { it.deviceLog }
-
-                        val logDialog = AlertDialog.Builder(this)
-                        logDialog.setMessage(logsString)
-                        logDialog.setPositiveButton("Copia") { _, _ ->
-                            copyText(applicationContext, logsString)
-                        }
-                        logDialog.setNegativeButton("Cancella") { _, _ ->
-                            HyperLog.getDeviceLogs(true)
-                        }
-                        logDialog.setCancelable(true)
-                        logDialog.show()
                     }
 
                 }

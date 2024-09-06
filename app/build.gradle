@@ -12,12 +12,11 @@ android {
             storePassword 'keystore'
         }
     }
-    compileSdkVersion 33
-    buildToolsVersion '29.0.2'
+    compileSdkVersion 34
     defaultConfig {
         applicationId "trentastico.geridea.com.trentastico"
         minSdkVersion 15
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 36
         versionName "1.0.15 - Quenepa"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -65,14 +64,8 @@ dependencies {
     //Job queue
     implementation 'com.birbit:android-priority-jobqueue:2.0.1'
 
-    //DB browser
-    implementation 'com.amitshekhar.android:debug-db:1.0.6'
-
     //Bug reporter
 //    compile 'ch.acra:acra:4.9.0'
-
-    //Change logs
-    implementation 'com.github.porokoro.paperboy:paperboy:3.0.0'
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -80,15 +73,11 @@ dependencies {
     //Scheduling
     implementation 'com.evernote:android-job:1.2.6'
 
-
-    //Logging
-    implementation 'com.hypertrack:hyperlog:0.0.10'
-
     androidTestImplementation 'junit:junit:4.12'
 }
 
 buildscript {
-    ext.kotlin_version = '1.3.41'
+    ext.kotlin_version = '1.6.21'
 
     repositories {
         mavenCentral()

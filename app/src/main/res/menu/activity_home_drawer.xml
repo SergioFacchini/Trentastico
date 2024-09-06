@@ -66,10 +66,10 @@
 <!--                android:icon="@drawable/ic_favorite_black_24dp"-->
 <!--                android:title="Aiuta Trentastico!" />-->
 
-            <item
-                android:id="@+id/menu_changelog"
-                android:icon="@drawable/ic_local_offer_black_24dp"
-                android:title="Informazioni su..." />
+<!--            <item-->
+<!--                android:id="@+id/menu_changelog"-->
+<!--                android:icon="@drawable/ic_local_offer_black_24dp"-->
+<!--                android:title="Informazioni su..." />-->
         </menu>
 
     </item>

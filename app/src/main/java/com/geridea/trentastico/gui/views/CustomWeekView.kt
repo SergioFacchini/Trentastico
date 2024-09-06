@@ -76,7 +76,7 @@ open class CustomWeekView @JvmOverloads constructor(
     /**
      * @return the milliseconds of the first enabled day
      */
-    protected fun calculateFirstEnabledDayMillis(): DayOfYear = enabledIntervals.map { it.from }.min()!!
+    protected fun calculateFirstEnabledDayMillis(): DayOfYear = enabledIntervals.minOf { it.from }
 
     protected fun addEnabledInterval(interval: DayInterval) {
         enabledIntervals.add(interval)
@@ -194,7 +194,7 @@ open class CustomWeekView @JvmOverloads constructor(
         }
 
         override fun onScroll(
-                e1: MotionEvent,
+                e1: MotionEvent?,
                 e2: MotionEvent,
                 distanceX: Float,
                 distanceY: Float): Boolean {
@@ -246,7 +246,7 @@ open class CustomWeekView @JvmOverloads constructor(
         }
 
         override fun onFling(
-                e1: MotionEvent,
+                e1: MotionEvent?,
                 e2: MotionEvent,
                 velocityX: Float,
                 velocityY: Float): Boolean {
@@ -1066,7 +1066,7 @@ open class CustomWeekView @JvmOverloads constructor(
 
         // Calculate left and right position for all the events.
         // Get the maxRowCount by looking in all columns.
-        val maxRowCount = columns.map { it.size }.max() ?: 0
+        val maxRowCount = columns.maxOfOrNull { it.size } ?: 0
         for (i in 0 until maxRowCount) {
             // Set the left and right values of the event.
             var j = 0f

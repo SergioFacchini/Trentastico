@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.alexvasilkov.android.commons.utils.Views
-import com.amitshekhar.DebugDB
 import com.geridea.trentastico.R
 import com.geridea.trentastico.gui.activities.FragmentWithMenuItems
 import com.geridea.trentastico.utils.AppPreferences
@@ -34,40 +33,11 @@ class AboutFragment : FragmentWithMenuItems() {
 
         view.versionText.text = DebugUtils.computeVersionName()
 
-        //DEBUG MODE
-        view.slava.setOnClickListener {
-            countDebugClick(view)
-        }
-
         view.licencesBtn.setOnClickListener {
             LicencesDialog(requireContext()).show()
         }
 
-        val paperboyFragment = PaperboyFragmentMaker.buildPaperboyFragment(requireContext())
-        childFragmentManager
-                .beginTransaction()
-                .replace(R.id.paperboy_fragment_frame, paperboyFragment)
-                .commit()
-
         return view
-    }
-
-    private fun countDebugClick(view: View) {
-        debugClickCounter++
-
-        if (AppPreferences.debugIsInDebugMode) {
-            view.slava.text = DebugDB.getAddressLog()
-        }
-
-        if (debugClickCounter % 12 == 0) {
-            AppPreferences.debugIsInDebugMode = !AppPreferences.debugIsInDebugMode
-
-            if (AppPreferences.debugIsInDebugMode) {
-                Toast.makeText(context, "Ora sei uno sviluppatore! :o", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Ora sei un essere umano qualunque! :o", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     override val idsOfMenuItemsToMakeVisible: IntArray

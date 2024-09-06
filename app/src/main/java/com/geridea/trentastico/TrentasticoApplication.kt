@@ -2,7 +2,6 @@ package com.geridea.trentastico
 
 import android.app.Application
 import com.alexvasilkov.android.commons.utils.AppContext
-import com.amitshekhar.DebugDB
 import com.evernote.android.job.JobManager
 import com.geridea.trentastico.database.Cacher
 import com.geridea.trentastico.logger.BugLogger
@@ -23,11 +22,6 @@ class TrentasticoApplication : Application() {
         super.onCreate()
 
         AppPreferences.init(this)
-
-        //Disabling db debug page if in debug mode
-        if (!IS_IN_DEBUG_MODE) {
-            DebugDB.shutDown()
-        }
 
         AppContext.init(this)
 

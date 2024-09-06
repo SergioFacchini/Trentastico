@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Trentastico.iml" filepath="$PROJECT_DIR$/.idea/modules/Trentastico.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Trentastico.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Trentastico.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Trentastico.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Trentastico.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Trentastico.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Trentastico.app.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Trentastico.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Trentastico.app.unitTest.iml" />
     </modules>

@@ -64,7 +64,7 @@ class NextLessonNotificationShowService : Job() {
             val remainingLessons = lessons.filterNot { it in nextStartingLessons }
 
             val theLessonStartingFirst = remainingLessons.firstOrNull()?.startsAt ?: Long.MAX_VALUE
-            val theLessonEndingFirst = nextStartingLessons.minBy { it.endsAt }!!.endsAt
+            val theLessonEndingFirst = nextStartingLessons.minByOrNull { it.endsAt }!!.endsAt
 
             val nextStart = Math.min(theLessonStartingFirst, theLessonEndingFirst)
             scheduleNextStartWithAnticipationAt(nextStart)

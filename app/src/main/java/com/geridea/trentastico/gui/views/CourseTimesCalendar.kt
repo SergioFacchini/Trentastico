@@ -145,8 +145,8 @@ class CourseTimesCalendar : CustomWeekView, CustomWeekView.EventClickListener {
      * @return the [DayInterval] that starts with the earliest lesson and ends with the latest one
      */
     private fun calculateCoveredInterval(scheduledLessons: List<LessonSchedule>): DayInterval {
-        val minTime = scheduledLessons.map { it.startsAt }.min()
-        val maxTime = scheduledLessons.map { it.endsAt   }.max()
+        val minTime = scheduledLessons.minOfOrNull { it.startsAt }
+        val maxTime = scheduledLessons.maxOfOrNull { it.endsAt }
 
         return DayInterval(
             CalendarUtils.getCalendarWithMillis(minTime!!),
