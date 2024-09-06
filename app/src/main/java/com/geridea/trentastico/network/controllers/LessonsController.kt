@@ -158,7 +158,7 @@ internal class LoadStudyCoursesRequest(
         listener.onLoadingError()
     }
 
-    private val jsonRegex = Pattern.compile("var elenco_corsi = ([^;]+?);\\s+var")
+    private val jsonRegex = Pattern.compile("var elenco_corsi = (.+);\\s+var elenco_cdl")
 
     override val url: String
         get() = "https://easyacademy.unitn.it/AgendaStudentiUnitn/combo.php?sw=ec_&aa=${Config.CURRENT_STUDY_YEAR}&page=corsi"
